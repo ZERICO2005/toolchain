@@ -19,12 +19,11 @@ include $(CURDIR)/../common.mk
 BUILD_SRC := $(patsubst %,build/%.src,$(wildcard *.c *.cpp))
 
 EZCFLAGS := -S -ffreestanding -Wall -Wextra -Oz
-EZCFLAGS += -D_EZ80 -isystem ../libc/include -isystem ../ce/include -isystem ../fileioc -mllvm -profile-guided-section-prefix=false
+EZCFLAGS += -D_EZ80 -isystem ../libc/include -isystem ../ce/include -isystem ../graphx -mllvm -profile-guided-section-prefix=false
 EZCXXFLAGS := $(EZCFLAGS) -fno-exceptions -fno-rtti
-EZCXXFLAGS += -isystem ../libcxx/include
 
 WILDCARD_SRC = $(wildcard *.src) $(BUILD_SRC)
-WILDCARD_H := $(wildcard *.h)
+WILDCARD_H := $(wildcard include/*.h)
 
 all: $(BUILD_SRC)
 
@@ -41,8 +40,8 @@ clean:
 
 install: all
 	$(Q)$(call MKDIR,$(INSTALL_H))
-	$(Q)$(call MKDIR,$(INSTALL_LIBC))
-	$(Q)$(call COPY,$(call NATIVEPATH,$(WILDCARD_SRC)),$(INSTALL_LIBC))
+	$(Q)$(call MKDIR,$(INSTALL_GRAPHY))
+	$(Q)$(call COPY,$(call NATIVEPATH,$(WILDCARD_SRC)),$(INSTALL_GRAPHY))
 	$(Q)$(call COPY,$(foreach file,$(call NATIVEPATH,$(WILDCARD_H)),$(call QUOTE_ARG,$(file))),$(INSTALL_H))
 
 .PHONY: all clean
