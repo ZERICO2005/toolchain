@@ -112,13 +112,11 @@ extern "C"
  * Labels:
  * Wrap     > Wraps a graphx function
  * Bad Wrap > Wraps a graphx function, but sets global variables outside of graphx.asm
- * Bad      > Doesn't updates values in graphx.asm
  * Verified > Function works and has been tested
  * Testing  > Function needs to be tested/verified
  * Partial  > Partial functionality
  * Minimal  > Function ignores parameters or safety checks
  * Broken   > Function does not work
- * Dummy    > Function does nothing or is incomplete
  * None     > Unimplemented
  * 
  * ------------
@@ -137,10 +135,12 @@ extern "C"
  * Wrap     gfx_SwapDraw
  * Testing  gfx_Blit
  * Testing  gfx_BlitLines
+ * Testing  gfx_BlitColumns (New Function)
  * Testing  gfx_BlitRectangle
  * Partial  gfx_PrintChar
  * Testing  gfx_PrintInt
  * Testing  gfx_PrintUInt
+ * Testing  gfx_PrintHex (New Function)
  * Testing  gfx_PrintString
  * Testing  gfx_PrintStringXY
  * Bad Wrap gfx_SetTextXY
@@ -167,12 +167,12 @@ extern "C"
  *          gfx_FillCircle_NoClip
  * Minimal  gfx_Rectangle_NoClip
  * Partial  gfx_FillRectangle_NoClip
- *          gfx_SetClipRegion
- *          gfx_GetClipRegion
- *          gfx_ShiftDown
- *          gfx_ShiftUp
- *          gfx_ShiftLeft
- *          gfx_ShiftRight
+ * Bad Wrap gfx_SetClipRegion
+ * Wrap     gfx_GetClipRegion
+ * Testing  gfx_ShiftDown
+ * Testing  gfx_ShiftUp
+ * Testing  gfx_ShiftLeft
+ * Testing  gfx_ShiftRight
  *          gfx_Tilemap
  *          gfx_Tilemap_NoClip
  *          gfx_TransparentTilemap
@@ -257,6 +257,35 @@ extern "C"
  *          gfx_Ellipse_NoClip
  *          gfx_FillEllipse
  *          gfx_FillEllipse_NoClip
+*/
+
+/**
+ * @brief examples/library_examples/graphx status
+ * 
+ * background           > 
+ * hello_world          > 
+ * sprites              > 
+ * sprites_rotate_flip  > 
+ * text_flipped         > 
+ * background_appvar    > 
+ * lighten_darken       > 
+ * sprites_appvar       > 
+ * sprites_rotate_scale > 
+ * tilemap              > 
+ * blitting             > Passed
+ * scaled_text          > Okay - Text transperency unimplemented
+ * sprites_compress     > 
+ * sprites_scaled       > 
+ * tilemap_appvar       > 
+ * buffered_cube        > Passed - Line algorithm is slow
+ * screen_shift         > Passed
+ * sprites_moving       > 
+ * text_clipped         > Okay - Text clipping is too extreme - Text transperency unimplemented
+ * tilemap_compressed   > 
+ * floodfill            > 
+ * shapes               > 
+ * sprites_rlet         > 
+ * text_custom          > 
 */
 
 // TEMP DATA //
@@ -406,8 +435,18 @@ const uint8_t gfy_DefaultTextData[] = {
 };
 // TEMP DATA //
 
+// MACROS //
+#define lcd_Control              (*(volatile uint24_t*)0xE30018)
+#define lcd_VideoMode            (*(volatile uint16_t*)0xE30018)
+#define lcd_UpBase               (*(volatile uint24_t*)0xE30010)
+#define lcd_LpBase               (*(volatile uint24_t*)0xE30014)
+#define lcd_BGR8bit 0x927
+#define lcd_BGR16bit 0x92D
+
+// MACROS //
+
 // TEMP GLOBALS //
-static uint24_t gfy_CurrentBuffer = (uint24_t)gfy_vram;
+#define gfy_CurrentBuffer lcd_LpBase
 
 static uint8_t gfy_Color = 0;
 static uint8_t gfy_Transparent_Color = 0;
@@ -427,19 +466,62 @@ static uint8_t gfy_TextHeightScale = 1;
 
 static uint8_t gfy_PrintChar_Clip = gfy_text_noclip;
 
+static int gfy_ClipXMin = 0;
+static int gfy_ClipYMin = 0;
+static int gfy_ClipXMax = GFY_LCD_WIDTH;
+static int gfy_ClipYMax = GFY_LCD_HEIGHT;
+
 // TEMP GLOBALS //
 
 // REPLACEMENT FUNCTIONS //
 #define wait_quick()
 // REPLACEMENT FUNCTIONS //
 
-// MACROS //
-#define lcd_Control              (*(volatile uint24_t*)0xE30018)
-#define lcd_VideoMode            (*(volatile uint16_t*)0xE30018)
-#define lcd_UpBase               (*(volatile uint24_t*)0xE30010)
-#define lcd_BGR8bit 0x927
-#define lcd_BGR16bit 0x92D
-// MACROS //
+// Debugging Code
+    static const uint16_t num3x5[16] = {
+        0x7B6F, 0x749A, 0x73E7, 0x79A7, 0x49ED, 0x79CF, 0x7BCF, 0x24A7, 0x7AAF, 0x79EF,
+        0x5BEF, 0x7BC9, 0x724F, 0x7BE4, 0x72CF, 0x12CF
+    };
+    __attribute__((unused)) void printUInt(int24_t in, uint8_t len, uint8_t base, uint24_t xC, uint24_t yC) {
+        uint8_t* off = ((uint8_t*)gfy_CurrentBuffer) + ((xC * GFY_LCD_HEIGHT) + yC);
+        uint8_t* v = off + 1;
+        len *= 4;
+        const uint24_t x2 = 1 + len;
+        for (uint8_t dY = 1; dY < 6; dY++) { // Draws a black outline for each character
+            for (uint24_t dX = 0; dX < x2; dX += 4) {
+                *v = 0;
+                v += (4 * GFY_LCD_HEIGHT);
+            }
+            v += 1 - ((x2 + 3) * GFY_LCD_HEIGHT);
+        }
+        v = off;
+        for (uint24_t dX = 0; dX < x2; dX++) { // Top Line
+            *v = 0;
+            v += GFY_LCD_HEIGHT;
+        }
+        v = off + 6;
+        for (uint24_t dX = 0; dX < x2; dX++) { // Bottom Line
+            *v = 0;
+            v += GFY_LCD_HEIGHT;
+        }
+        uint24_t powN = 1;
+        uint8_t* fill = off + (1 + ((len - 3) * GFY_LCD_HEIGHT));
+        for (uint24_t k = 0; k < len; k += 4) {
+            uint16_t bitImage = num3x5[(in / powN) % base];
+            for (uint8_t y = 0; y < 5; y++) {
+                for (uint8_t x = 0; x < 3; x++) {
+                    *fill = bitImage & 1 ? 7 : 0; //White if true
+                    bitImage >>= 1;
+                    fill += GFY_LCD_HEIGHT;
+                }
+                fill -= (3 * GFY_LCD_HEIGHT);
+                fill++;
+            }
+            fill -= (4 * GFY_LCD_HEIGHT);
+            fill -= 5;
+            powN *= base;
+        }
+    }
 
 //------------------------------------------------------------------------------
 // v1 functions
@@ -452,7 +534,6 @@ void gfy_Begin() {
     boot_InitializeHardware();
     SPI_COLUMN_MAJOR();
     lcd_VideoMode = lcd_BGR8bit;
-    gfy_CurrentBuffer = (uint24_t)gfy_vram;
     
     // Resetting temp globals
     gfy_Color = 0;
@@ -472,6 +553,11 @@ void gfy_Begin() {
     gfy_TextHeightScale = 1;
 
     gfy_PrintChar_Clip = gfy_text_noclip;
+
+    gfy_ClipXMin = 0;
+    gfy_ClipYMin = 0;
+    gfy_ClipXMax = GFY_LCD_WIDTH;
+    gfy_ClipYMax = GFY_LCD_HEIGHT;
 }
 
 /* gfy_End */
@@ -517,14 +603,14 @@ void gfy_FillScreen(uint8_t index) {
 
 void gfy_SetPixel(uint24_t x, uint8_t y) {
     if (x < GFY_LCD_WIDTH && y < GFY_LCD_HEIGHT) {
-        gfy_vram[(uint24_t)y + (x * GFY_LCD_HEIGHT)] = gfy_Color;
+        ((uint8_t*)gfy_CurrentBuffer)[(uint24_t)y + (x * GFY_LCD_HEIGHT)] = gfy_Color;
     }
 }
 
 /* gfy_GetPixel */
 
 uint8_t gfy_GetPixel(uint24_t x, uint8_t y) {
-    return gfy_vram[(uint24_t)y + (x * GFY_LCD_HEIGHT)];
+    return ((uint8_t*)gfy_CurrentBuffer)[(uint24_t)y + (x * GFY_LCD_HEIGHT)];
 }
 
 /* gfy_GetDraw */
@@ -578,11 +664,25 @@ void gfy_BlitLines(gfy_location_t src, uint8_t y_loc, uint8_t num_lines) {
     }
     src_buf += y_loc;
     dst_buf += y_loc;
-    for (uint24_t x_cord = 0; x_cord < GFY_LCD_HEIGHT; x_cord++) {
+    for (uint24_t x_cord = 0; x_cord < GFY_LCD_WIDTH; x_cord++) {
         memcpy(dst_buf, src_buf, num_lines);
         src_buf += GFY_LCD_HEIGHT;
         dst_buf += GFY_LCD_HEIGHT;
     }
+}
+
+/* gfy_BlitLines */
+
+void gfy_BlitColumns(gfy_location_t src, uint24_t x_loc, uint24_t num_columns) {
+    const uint8_t *src_buf = gfy_vram;
+    uint8_t *dst_buf = gfy_vram + (GFY_LCD_HEIGHT * GFY_LCD_WIDTH);
+    if (src) {
+        src_buf = gfy_vram + (GFY_LCD_HEIGHT * GFY_LCD_WIDTH);
+        dst_buf = gfy_vram;
+    }
+    src_buf += x_loc * GFY_LCD_HEIGHT;
+    dst_buf += x_loc * GFY_LCD_HEIGHT;
+    memcpy(dst_buf, src_buf, num_columns * GFY_LCD_HEIGHT);
 }
 
 /* gfy_BlitRectangle */
@@ -614,23 +714,23 @@ void gfy_BlitRectangle(
 static void gfy_internal_PrintCharXY(const char c, int posX, int posY) {
     if (gfy_PrintChar_Clip == gfy_text_clip) {
         if (
-            posX < 0 || posY < 0 ||
-            posX >= GFY_LCD_WIDTH || posY >= GFY_LCD_HEIGHT ||
-            posX + 8 * gfy_TextWidthScale > GFY_LCD_WIDTH ||
-            posY + 8 * gfy_TextHeightScale > GFY_LCD_HEIGHT
+            posX < gfy_ClipXMin || posY < gfy_ClipYMin ||
+            posX >= gfy_ClipXMax || posY >= gfy_ClipYMax ||
+            posX + 8 * gfy_TextWidthScale > gfy_ClipXMax ||
+            posY + 8 * gfy_TextHeightScale > gfy_ClipYMax
         ) {
             return;
         }
     }
     const uint8_t *bitImage = gfy_TextData + 8 * (uint24_t)((unsigned char)c);
     uint8_t *fillLinePtr = (uint8_t*)(gfy_CurrentBuffer + (posY + (posX * GFY_LCD_HEIGHT)));
-    uint8_t b = 0x1;
+    uint8_t b = 0x80;
     for (uint8_t y = 0; y < 8; y++) {
-        for (uint8_t v = 0; v < gfy_TextHeightScale; v++) {
+        for (uint8_t v = 0; v < gfy_TextWidthScale; v++) {
             uint8_t *fillPtr = fillLinePtr;
             for (uint8_t x = 0; x < 8; x++) {
                 const uint8_t fillColor = *bitImage & b ? gfy_Text_FG_Color : gfy_Text_BG_Color;
-                for (uint8_t u = 0; u < gfy_TextWidthScale; u++) {
+                for (uint8_t u = 0; u < gfy_TextHeightScale; u++) {
                     *fillPtr = fillColor;
                     fillPtr++;
                 }
@@ -639,7 +739,7 @@ static void gfy_internal_PrintCharXY(const char c, int posX, int posY) {
             fillLinePtr += GFY_LCD_HEIGHT;
             bitImage -= 8;
         }
-        b <<= 1;
+        b >>= 1;
     }
 }
 
@@ -895,7 +995,7 @@ static void drawLine0(int x0, int y0, int x1, int y1) {
     int dD = 2 * dY - dX;
     int y = y0;
     for (int x = x0; x < x1; x++) {
-        if (x >= 0 && x < GFY_LCD_WIDTH && y >= 0 && y < GFY_LCD_HEIGHT) {
+        if (x >= gfy_ClipXMin && x < gfy_ClipXMax && y >= gfy_ClipYMin && y < gfy_ClipYMax) {
             gfy_SetPixel(x, y);
         }
         if (dD > 0) {
@@ -920,7 +1020,7 @@ static void drawLine1(int x0, int y0, int x1, int y1) {
     int x = x0;
 
     for (int y = y0; y < y1; y++) {
-        if (x >= 0 && x < GFY_LCD_WIDTH && y >= 0 && y < GFY_LCD_HEIGHT) {
+        if (x >= gfy_ClipXMin && x < gfy_ClipXMax && y >= gfy_ClipYMin && y < gfy_ClipYMax) {
             gfy_SetPixel(x, y);
         }
         if (dD > 0) {
@@ -954,9 +1054,9 @@ void gfy_Line(int x0, int y0, int x1, int y1) {
 void gfy_HorizLine(int x, int y, int length) {
     // Unoptimized and incorrect routine
     if (
-        x >= 0 && x < GFY_LCD_WIDTH &&
-        y >= 0 && y < GFY_LCD_HEIGHT &&
-        x + length >= 0 && x + length <= GFY_LCD_WIDTH
+        x >= gfy_ClipXMin && x < gfy_ClipXMax &&
+        y >= gfy_ClipYMin && y < gfy_ClipYMax &&
+        x + length >= 0 && x + length <= gfy_ClipXMax
     ) {
         gfy_HorizLine_NoClip(x, y, length);
     }
@@ -967,9 +1067,9 @@ void gfy_HorizLine(int x, int y, int length) {
 void gfy_VertLine(int x, int y, int length) {
     // Unoptimized and incorrect routine
     if (
-        x >= 0 && x < GFY_LCD_WIDTH &&
-        y >= 0 && y < GFY_LCD_HEIGHT &&
-        y + length >= 0 && y + length <= GFY_LCD_HEIGHT
+        x >= gfy_ClipXMin && x < gfy_ClipXMax &&
+        y >= gfy_ClipYMin && y < gfy_ClipYMax &&
+        length >= 0 && y + length <= gfy_ClipYMax
     ) {
         gfy_VertLine_NoClip(x, y, length);
     }
@@ -988,14 +1088,13 @@ void gfy_VertLine(int x, int y, int length) {
 void gfy_Rectangle(int x, int y, int width, int height) {
     // Unoptimized and incorrect routine
     if (
-        x >= 0 && x < GFY_LCD_WIDTH &&
-        y >= 0 && y < GFY_LCD_HEIGHT &&
-        x + width >= 0 && x + width <= GFY_LCD_WIDTH &&
-        y + height >= 0 && y + height <= GFY_LCD_HEIGHT
+        x >= gfy_ClipXMin && x < gfy_ClipXMax &&
+        y >= gfy_ClipYMin && y < gfy_ClipYMax &&
+        width >= 0 && x + width <= gfy_ClipXMax &&
+        height >= 0 && y + height <= gfy_ClipYMax
     ) {
-        return;
-    }
-    gfy_Rectangle(x, y, width, height);
+        gfy_Rectangle_NoClip(x, y, width, height);
+    }   
 }
 
 /* gfy_FillRectangle */
@@ -1003,14 +1102,13 @@ void gfy_Rectangle(int x, int y, int width, int height) {
 void gfy_FillRectangle(int x, int y, int width, int height) {
     // Unoptimized and incorrect routine
     if (
-        x >= 0 && x < GFY_LCD_WIDTH &&
-        y >= 0 && y < GFY_LCD_HEIGHT &&
-        x + width >= 0 && x + width <= GFY_LCD_WIDTH &&
-        y + height >= 0 && y + height <= GFY_LCD_HEIGHT
+        x >= gfy_ClipXMin && x < gfy_ClipXMax &&
+        y >= gfy_ClipYMin && y < gfy_ClipYMax &&
+        width >= 0 && x + width <= gfy_ClipXMax &&
+        height >= 0 && y + height <= gfy_ClipYMax
     ) {
-        return;
+        gfy_FillRectangle_NoClip(x, y, width, height);
     }
-    gfy_FillRectangle(x, y, width, height);
 }
 
 /* gfy_Line_NoClip */
@@ -1024,7 +1122,7 @@ void gfy_Line_NoClip(uint24_t x0, uint8_t y0, uint24_t x1, uint8_t y1) {
 
 void gfy_HorizLine_NoClip(uint24_t x, uint8_t y, uint24_t length) { //x start, y postion, x length
     uint8_t *fill = (uint8_t*)(gfy_CurrentBuffer + (x * GFY_LCD_HEIGHT) + (uint24_t)y);
-    for (uint8_t y_cord = 0; y_cord < length; y_cord++) {
+    for (uint24_t x_cord = 0; x_cord < length; x_cord++) {
         *fill = gfy_Color;
         fill += GFY_LCD_HEIGHT;
     }
@@ -1065,27 +1163,87 @@ void gfy_FillRectangle_NoClip(uint24_t x, uint8_t y, uint24_t width, uint8_t hei
 
 /* gfy_SetClipRegion */
 
-
+void gfy_SetClipRegion(int xmin, int ymin, int xmax, int ymax) {
+    gfy_ClipXMin = xmin;
+    gfy_ClipYMin = ymin;
+    gfy_ClipXMax = xmax;
+    gfy_ClipYMax = ymax;
+    gfx_SetClipRegion(xmin, ymin, xmax, ymax);
+}
 
 /* gfy_GetClipRegion */
 
-
+bool gfy_GetClipRegion(gfy_region_t *region) {
+    return gfx_GetClipRegion((gfx_region_t*)region);
+}
 
 /* gfy_ShiftDown */
 
-
+void gfy_ShiftDown(uint8_t pixels) {
+    if (pixels == 0) { return; }
+    const uint8_t* src_buf = (uint8_t*)gfy_CurrentBuffer + gfy_ClipYMin + (gfy_ClipXMin * GFY_LCD_HEIGHT);
+    uint8_t* dst_buf = (uint8_t*)gfy_CurrentBuffer + (gfy_ClipYMin + pixels) + (gfy_ClipXMin * GFY_LCD_HEIGHT);
+    const uint24_t copySize = gfy_ClipYMax - gfy_ClipYMin - pixels;
+    int x0 = gfy_ClipXMin;
+    int x1 = gfy_ClipXMax;
+    for (int x = x0; x < x1; x++) {
+        memmove(dst_buf, src_buf, copySize); // UNDEFINED BEHAVIOUR
+        src_buf += GFY_LCD_HEIGHT;
+        dst_buf += GFY_LCD_HEIGHT;
+    }
+}
 
 /* gfy_ShiftUp */
 
-
+void gfy_ShiftUp(uint8_t pixels) {
+    if (pixels == 0) { return; }
+    const uint8_t* src_buf = (uint8_t*)gfy_CurrentBuffer + gfy_ClipYMin + (gfy_ClipXMin * GFY_LCD_HEIGHT);
+    uint8_t* dst_buf = (uint8_t*)gfy_CurrentBuffer + (gfy_ClipYMin - pixels) + (gfy_ClipXMin * GFY_LCD_HEIGHT);
+    const uint24_t copySize = gfy_ClipYMax - gfy_ClipYMin - pixels;
+    int x0 = gfy_ClipXMin;
+    int x1 = gfy_ClipXMax;
+    for (int x = x0; x < x1; x++) {
+        memmove(dst_buf, src_buf, copySize); // UNDEFINED BEHAVIOUR
+        src_buf += GFY_LCD_HEIGHT;
+        dst_buf += GFY_LCD_HEIGHT;
+    }
+}
 
 /* gfy_ShiftLeft */
 
-
+void gfy_ShiftLeft(uint24_t pixels) {
+    if (pixels == 0) { return; }
+    const uint8_t* src_buf = (uint8_t*)gfy_CurrentBuffer + gfy_ClipYMin + (gfy_ClipXMin * GFY_LCD_HEIGHT);
+    uint8_t* dst_buf = (uint8_t*)gfy_CurrentBuffer + gfy_ClipYMin + ((gfy_ClipXMin - pixels) * GFY_LCD_HEIGHT);
+    const uint24_t copySize = gfy_ClipYMax - gfy_ClipYMin;
+    int x0 = gfy_ClipXMin + pixels;
+    int x1 = gfy_ClipXMax;
+    src_buf += pixels * GFY_LCD_HEIGHT;
+    dst_buf += pixels * GFY_LCD_HEIGHT;
+    for (int x = x0; x < x1; x++) {
+        memcpy(dst_buf, src_buf, copySize);
+        src_buf += GFY_LCD_HEIGHT;
+        dst_buf += GFY_LCD_HEIGHT;
+    }
+}
 
 /* gfy_ShiftRight */
 
-
+void gfy_ShiftRight(uint24_t pixels) {
+    if (pixels == 0) { return; }
+    const uint8_t* src_buf = (uint8_t*)gfy_CurrentBuffer + gfy_ClipYMin + (gfy_ClipXMin * GFY_LCD_HEIGHT);
+    uint8_t* dst_buf = (uint8_t*)gfy_CurrentBuffer + gfy_ClipYMin + ((gfy_ClipXMin - pixels) * GFY_LCD_HEIGHT);
+    const uint24_t copySize = gfy_ClipYMax - gfy_ClipYMin;
+    int x0 = gfy_ClipXMin + pixels;
+    int x1 = gfy_ClipXMax;
+    src_buf += pixels * GFY_LCD_HEIGHT;
+    dst_buf += pixels * GFY_LCD_HEIGHT;
+    for (int x = x0; x < x1; x++) {
+        memcpy(dst_buf, src_buf, copySize);
+        src_buf += GFY_LCD_HEIGHT;
+        dst_buf += GFY_LCD_HEIGHT;
+    }
+}
 
 /* gfy_Tilemap */
 

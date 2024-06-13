@@ -106,17 +106,17 @@ extern "C" {
 //     int y; /**< y point. */
 // } gfy_point_t;
 
-// /**
-//  * Defines a rectangular graphics region.
-//  *
-//  * @see gfy_GetClipRegion
-//  */
-// typedef struct gfy_region_t {
-//     int xmin; /**< Minimum x coordinate. */
-//     int ymin; /**< Minimum y coordinate. */
-//     int xmax; /**< Maximum x coordinate. */
-//     int ymax; /**< Maximum y coordinate. */
-// } gfy_region_t;
+/**
+ * Defines a rectangular graphics region.
+ *
+ * @see gfy_GetClipRegion
+ */
+typedef struct gfy_region_t {
+    int xmin; /**< Minimum x coordinate. */
+    int ymin; /**< Minimum y coordinate. */
+    int xmax; /**< Maximum x coordinate. */
+    int ymax; /**< Maximum y coordinate. */
+} gfy_region_t;
 
 // /**
 //  * Defines tilemap structure
@@ -1086,7 +1086,7 @@ void gfy_Wait(void);
  */
 void gfy_Blit(gfy_location_t src);
 
-/**
+/**scr
  * Copies lines from the input buffer to the opposite buffer.
  *
  * No clipping is performed as it is a copy not a draw.
@@ -1098,6 +1098,19 @@ void gfy_Blit(gfy_location_t src);
 void gfy_BlitLines(gfy_location_t src,
                    uint8_t y_loc,
                    uint8_t num_lines);
+
+/**
+ * Copies columns from the input buffer to the opposite buffer.
+ *
+ * No clipping is performed as it is a copy not a draw.
+ * @param[in] src drawing location to copy from.
+ * @param[in] x_loc X Location to begin copying at.
+ * @param[in] num_columns Number of columns to copy.
+ * @see gfy_location_t.
+ */
+void gfy_BlitColumns(gfy_location_t src,
+                    uint24_t x_loc,
+                    uint24_t num_columns);
 
 /**
  * Transfers a rectangle from the source graphics buffer to the opposite
@@ -1579,54 +1592,54 @@ unsigned int gfy_GetStringWidth(const char *string);
  */
 unsigned int gfy_GetCharWidth(const char c);
 
-// /**
-//  * Sets the dimensions of the drawing window for all clipped routines.
-//  *
-//  * @param[in] xmin Minimum x coordinate, inclusive (default 0).
-//  * @param[in] ymin Minimum y coordinate, inclusive (default 0).
-//  * @param[in] xmax Maximum x coordinate, exclusive (default 320).
-//  * @param[in] ymax Maximum y coordinate, exclusive (default 240).
-//  */
-// void gfy_SetClipRegion(int xmin, int ymin, int xmax, int ymax);
+/**
+ * Sets the dimensions of the drawing window for all clipped routines.
+ *
+ * @param[in] xmin Minimum x coordinate, inclusive (default 0).
+ * @param[in] ymin Minimum y coordinate, inclusive (default 0).
+ * @param[in] xmax Maximum x coordinate, exclusive (default 320).
+ * @param[in] ymax Maximum y coordinate, exclusive (default 240).
+ */
+void gfy_SetClipRegion(int xmin, int ymin, int xmax, int ymax);
 
-// /**
-//  * Clips a region to fit within the drawing window using Cohen-Sutherland.
-//  *
-//  * @returns False if offscreen, true if onscreen.
-//  */
-// bool gfy_GetClipRegion(gfy_region_t *region);
+/**
+ * Clips a region to fit within the drawing window using Cohen-Sutherland.
+ *
+ * @returns False if offscreen, true if onscreen.
+ */
+bool gfy_GetClipRegion(gfy_region_t *region);
 
-// /**
-//  * Shifts/Slides the drawing window down.
-//  *
-//  * @param[in] pixels Number of pixels to shift.
-//  * @note Remnant data after a shift is undefined.
-//  */
-// void gfy_ShiftDown(uint8_t pixels);
+/**
+ * Shifts/Slides the drawing window down.
+ *
+ * @param[in] pixels Number of pixels to shift.
+ * @note Remnant data after a shift is undefined.
+ */
+void gfy_ShiftDown(uint8_t pixels);
 
-// /**
-//  * Shifts/Slides the drawing window up.
-//  *
-//  * @param[in] pixels Number of pixels to shift.
-//  * @note Remnant data after a shift is undefined.
-//  */
-// void gfy_ShiftUp(uint8_t pixels);
+/**
+ * Shifts/Slides the drawing window up.
+ *
+ * @param[in] pixels Number of pixels to shift.
+ * @note Remnant data after a shift is undefined.
+ */
+void gfy_ShiftUp(uint8_t pixels);
 
-// /**
-//  * Shifts/Slides the drawing window left.
-//  *
-//  * @param[in] pixels Number of pixels to shift.
-//  * @note Remnant data after a shift is undefined.
-//  */
-// void gfy_ShiftLeft(uint24_t pixels);
+/**
+ * Shifts/Slides the drawing window left.
+ *
+ * @param[in] pixels Number of pixels to shift.
+ * @note Remnant data after a shift is undefined.
+ */
+void gfy_ShiftLeft(uint24_t pixels);
 
-// /**
-//  * Shifts/Slides the drawing window right.
-//  *
-//  * @param[in] pixels Number of pixels to shift.
-//  * @note Remnant data after a shift is undefined.
-//  */
-// void gfy_ShiftRight(uint24_t pixels);
+/**
+ * Shifts/Slides the drawing window right.
+ *
+ * @param[in] pixels Number of pixels to shift.
+ * @note Remnant data after a shift is undefined.
+ */
+void gfy_ShiftRight(uint24_t pixels);
 
 /**
  * Lightens a given 1555 color; useful for palette color conversions.
