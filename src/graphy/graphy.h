@@ -49,33 +49,33 @@
 extern "C" {
 #endif
 
-// /**
-//  * Sprite (image) type.
-//  *
-//  * Whether or not a sprite includes transparency is not explicitly encoded, and
-//  * is determined only by usage. If used with transparency, transparent pixels
-//  * are those with a certain color index, which can be set with
-//  * gfy_SetTransparentColor().
-//  *
-//  * @note
-//  * Displaying a gfy_rletsprite_t (which includes transparency) is significantly
-//  * faster than displaying a gfy_sprite_t with transparency, and should be
-//  * preferred. However, gfy_rletsprite_t does not support transformations, such
-//  * as flipping and rotation. Such transformations can be applied to a
-//  * gfy_sprite_t, which can then be converted to a gfy_rletsprite_t for faster
-//  * display using gfy_ConvertToNewRLETSprite() or gfy_ConvertToRLETSprite().
-//  *
-//  * @remarks
-//  * Create at compile-time with a tool like
-//  * <a href="https://github.com/mateoconlechuga/convimg" target="_blank">convimg</a>.
-//  * Create at runtime (with uninitialized data) with gfy_MallocSprite(),
-//  * gfy_UninitedSprite(), or gfy_TempSprite().
-//  */
-// typedef struct gfy_sprite_t {
-//     uint8_t width;   /**< Width of the image.  */
-//     uint8_t height;  /**< Height of the image. */
-//     uint8_t data[]; /**< Image data array.    */
-// } gfy_sprite_t;
+/**
+ * Sprite (image) type.
+ *
+ * Whether or not a sprite includes transparency is not explicitly encoded, and
+ * is determined only by usage. If used with transparency, transparent pixels
+ * are those with a certain color index, which can be set with
+ * gfy_SetTransparentColor().
+ *
+ * @note
+ * Displaying a gfy_rletsprite_t (which includes transparency) is significantly
+ * faster than displaying a gfy_sprite_t with transparency, and should be
+ * preferred. However, gfy_rletsprite_t does not support transformations, such
+ * as flipping and rotation. Such transformations can be applied to a
+ * gfy_sprite_t, which can then be converted to a gfy_rletsprite_t for faster
+ * display using gfy_ConvertToNewRLETSprite() or gfy_ConvertToRLETSprite().
+ *
+ * @remarks
+ * Create at compile-time with a tool like
+ * <a href="https://github.com/mateoconlechuga/convimg" target="_blank">convimg</a>.
+ * Create at runtime (with uninitialized data) with gfy_MallocSprite(),
+ * gfy_UninitedSprite(), or gfy_TempSprite().
+ */
+typedef struct gfy_sprite_t {
+    uint8_t width;   /**< Width of the image.  */
+    uint8_t height;  /**< Height of the image. */
+    uint8_t data[]; /**< Image data array.    */
+} gfy_sprite_t;
 
 // /**
 //  * Sprite (image) type with RLE transparency.
@@ -238,47 +238,47 @@ gfy_Blit(gfy_screen)
 #define gfy_BlitBuffer() \
 gfy_Blit(gfy_buffer)
 
-// /**
-//  * Dynamically allocates memory for a sprite using \c malloc.
-//  *
-//  * \p width and \p height will be set in the sprite. Returns \c NULL upon
-//  * allocation failure.
-//  *
-//  * @note
-//  * If not used in a dynamic context and \p width and \p height are static,
-//  * consider statically allocating the sprite instead with gfy_UninitedSprite()
-//  * or gfy_TempSprite().
-//  *
-//  * @param[in] width Sprite width.
-//  * @param[in] height Sprite height.
-//  * @return A pointer to the allocated sprite, or NULL if the allocation failed.
-//  * @see gfy_AllocSprite
-//  */
-// #define gfy_MallocSprite(width, height) \
-// gfy_AllocSprite(width, height, malloc)
+/**
+ * Dynamically allocates memory for a sprite using \c malloc.
+ *
+ * \p width and \p height will be set in the sprite. Returns \c NULL upon
+ * allocation failure.
+ *
+ * @note
+ * If not used in a dynamic context and \p width and \p height are static,
+ * consider statically allocating the sprite instead with gfy_UninitedSprite()
+ * or gfy_TempSprite().
+ *
+ * @param[in] width Sprite width.
+ * @param[in] height Sprite height.
+ * @return A pointer to the allocated sprite, or NULL if the allocation failed.
+ * @see gfy_AllocSprite
+ */
+#define gfy_MallocSprite(width, height) \
+gfy_AllocSprite(width, height, malloc)
 
-// /**
-//  * Statically allocates uninitialized memory for a sprite.
-//  *
-//  * Declares a <tt>gfy_sprite_t *</tt> with the given \p name pointing to the
-//  * allocated memory. \p width and \p height will \b not be set in the sprite,
-//  * unlike gfy_TempSprite().
-//  *
-//  * @warning
-//  * If used outside of a function body, the memory will be allocated in the
-//  * global uninitialized data segment (BSS). If used inside a function body, the
-//  * memory will be allocated on the stack. If the sprite is sufficiently large,
-//  * usage inside a function body will overflow the stack, so it is recommended
-//  * that this normally be used outside of a function body.
-//  *
-//  * @param[in] name Name of declared <tt>gfy_sprite_t *</tt>.
-//  * @param[in] width Sprite width.
-//  * @param[in] height Sprite height.
-//  * @see gfy_MallocSprite()
-//  */
-// #define gfy_UninitedSprite(name, width, height) \
-// uint8_t name##_data[2 + (width) * (height)]; \
-// gfy_sprite_t *name = (gfy_sprite_t *)name##_data
+/**
+ * Statically allocates uninitialized memory for a sprite.
+ *
+ * Declares a <tt>gfy_sprite_t *</tt> with the given \p name pointing to the
+ * allocated memory. \p width and \p height will \b not be set in the sprite,
+ * unlike gfy_TempSprite().
+ *
+ * @warning
+ * If used outside of a function body, the memory will be allocated in the
+ * global uninitialized data segment (BSS). If used inside a function body, the
+ * memory will be allocated on the stack. If the sprite is sufficiently large,
+ * usage inside a function body will overflow the stack, so it is recommended
+ * that this normally be used outside of a function body.
+ *
+ * @param[in] name Name of declared <tt>gfy_sprite_t *</tt>.
+ * @param[in] width Sprite width.
+ * @param[in] height Sprite height.
+ * @see gfy_MallocSprite()
+ */
+#define gfy_UninitedSprite(name, width, height) \
+uint8_t name##_data[2 + (width) * (height)]; \
+gfy_sprite_t *name = (gfy_sprite_t *)name##_data
 
 // /**
 //  * Statically allocates memory for a sprite.
@@ -444,19 +444,19 @@ gfy_Blit(gfy_buffer)
 // #define gfy_Circle_NoClip(x, y, radius) \
 // gfy_Circle((x), (y), (radius))
 
-// /**
-//  * Grabs the background behind an unclipped sprite.
-//  *
-//  * This is useful for partial redraw.
-//  * @param[out] sprite_buffer Buffer used to store grabbed sprite.
-//  * @param[in] x X coordinate to grab sprite.
-//  * @param[in] y Y coordinate to grab sprite.
-//  * @returns A pointer to sprite_buffer.
-//  * @note \p sprite_buffer must be pointing to a large enough buffer to hold
-//  *       (width * height + 2) number of bytes.
-//  */
-// #define gfy_GetSprite_NoClip(sprite_buffer, x, y) \
-// gfy_GetSprite((sprite_buffer), (x), (y))
+/**
+ * Grabs the background behind an unclipped sprite.
+ *
+ * This is useful for partial redraw.
+ * @param[out] sprite_buffer Buffer used to store grabbed sprite.
+ * @param[in] x X coordinate to grab sprite.
+ * @param[in] y Y coordinate to grab sprite.
+ * @returns A pointer to sprite_buffer.
+ * @note \p sprite_buffer must be pointing to a large enough buffer to hold
+ *       (width * height + 2) number of bytes.
+ */
+#define gfy_GetSprite_NoClip(sprite_buffer, x, y) \
+gfy_GetSprite((sprite_buffer), (x), (y))
 
 // /**
 //  * Helper macro to only perform rotation using
@@ -482,20 +482,20 @@ gfy_Blit(gfy_buffer)
 //  * @see gfy_RotatedScaledTransparentSprite_NoClip.
 //  */
 // #define gfy_RotatedSprite_NoClip(sprite, x, y, angle) \
-// gfy_RotatedScaledSprite_NoClip(sprite, x, y, angle, 64)
+gfy_RotatedScaledSprite_NoClip(sprite, x, y, angle, 64)
 
-// /**
-//  * Helper macro to only perform rotation using gfy_RotateScaleSprite.
-//  *
-//  * @param[in] sprite_in Input sprite to rotate.
-//  * @param[out] sprite_out Pointer to where rotated sprite will be stored.
-//  * @param[in] angle 256 position angular integer.
-//  * @returns A pointer to \p sprite_out.
-//  * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
-//  * @see gfy_RotateScaleSprite.
-//  */
-// #define gfy_RotateSprite(sprite_in, sprite_out, angle) \
-// gfy_RotateScaleSprite(sprite_in, sprite_out, angle, 64)
+/**
+ * Helper macro to only perform rotation using gfy_RotateScaleSprite.
+ *
+ * @param[in] sprite_in Input sprite to rotate.
+ * @param[out] sprite_out Pointer to where rotated sprite will be stored.
+ * @param[in] angle 256 position angular integer.
+ * @returns A pointer to \p sprite_out.
+ * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
+ * @see gfy_RotateScaleSprite.
+ */
+#define gfy_RotateSprite(sprite_in, sprite_out, angle) \
+gfy_RotateScaleSprite(sprite_in, sprite_out, angle, 64)
 
 // /**
 //  * Converts a sprite with normal transparency to a sprite with RLE transparency,
@@ -599,29 +599,29 @@ void gfy_Begin();
  */
 void gfy_End(void);
 
-// /**
-//  * Dynamically allocates memory for a sprite.
-//  *
-//  * Allocates the memory with \p malloc_routine. \p width and \p height will be
-//  * set in the allocated sprite. Returns \c NULL upon allocation failure.
-//  *
-//  * @note
-//  * If not used in a dynamic context and \p width and \p height are static,
-//  * consider statically allocating the sprite instead with gfy_UninitedSprite()
-//  * or gfy_TempSprite().
-//  *
-//  * @remarks
-//  * If using \c malloc as the \p malloc_routine, gfy_MallocSprite() can be used
-//  * as a shortcut.
-//  *
-//  * @param[in] width Sprite width.
-//  * @param[in] height Sprite height.
-//  * @param[in] malloc_routine Malloc implementation to use.
-//  * @return A pointer to the allocated sprite.
-//  */
-// gfy_sprite_t *gfy_AllocSprite(uint8_t width,
-//                               uint8_t height,
-//                               void *(*malloc_routine)(size_t));
+/**
+ * Dynamically allocates memory for a sprite.
+ *
+ * Allocates the memory with \p malloc_routine. \p width and \p height will be
+ * set in the allocated sprite. Returns \c NULL upon allocation failure.
+ *
+ * @note
+ * If not used in a dynamic context and \p width and \p height are static,
+ * consider statically allocating the sprite instead with gfy_UninitedSprite()
+ * or gfy_TempSprite().
+ *
+ * @remarks
+ * If using \c malloc as the \p malloc_routine, gfy_MallocSprite() can be used
+ * as a shortcut.
+ *
+ * @param[in] width Sprite width.
+ * @param[in] height Sprite height.
+ * @param[in] malloc_routine Malloc implementation to use.
+ * @return A pointer to the allocated sprite.
+ */
+gfy_sprite_t *gfy_AllocSprite(uint8_t width,
+                              uint8_t height,
+                              void *(*malloc_routine)(size_t));
 
 // /**
 //  * Draws a tilemap.
@@ -1294,92 +1294,92 @@ uint8_t gfy_SetTextBGColor(uint8_t color);
  */
 uint8_t gfy_SetTextTransparentColor(uint8_t color);
 
-// /**
-//  * Draws a sprite.
-//  *
-//  * @param[in] sprite Pointer to an initialized sprite structure.
-//  * @param[in] x X coordinate.
-//  * @param[in] y Y coordinate.
-//  */
-// void gfy_Sprite(const gfy_sprite_t *sprite, int x, int y);
+/**
+ * Draws a sprite.
+ *
+ * @param[in] sprite Pointer to an initialized sprite structure.
+ * @param[in] x X coordinate.
+ * @param[in] y Y coordinate.
+ */
+void gfy_Sprite(const gfy_sprite_t *sprite, int x, int y);
 
-// /**
-//  * Draws an unclipped sprite.
-//  *
-//  * @param[in] sprite Pointer to an initialized sprite structure.
-//  * @param[in] x X coordinate.
-//  * @param[in] y Y coordinate.
-//  */
-// void gfy_Sprite_NoClip(const gfy_sprite_t *sprite, uint24_t x, uint8_t y);
+/**
+ * Draws an unclipped sprite.
+ *
+ * @param[in] sprite Pointer to an initialized sprite structure.
+ * @param[in] x X coordinate.
+ * @param[in] y Y coordinate.
+ */
+void gfy_Sprite_NoClip(const gfy_sprite_t *sprite, uint24_t x, uint8_t y);
 
-// /**
-//  * Draws a transparent sprite.
-//  *
-//  * @param[in] sprite Pointer to an initialized sprite structure.
-//  * @param[in] x X coordinate.
-//  * @param[in] y Y coordinate.
-//  */
-// void gfy_TransparentSprite(const gfy_sprite_t *sprite, int x, int y);
+/**
+ * Draws a transparent sprite.
+ *
+ * @param[in] sprite Pointer to an initialized sprite structure.
+ * @param[in] x X coordinate.
+ * @param[in] y Y coordinate.
+ */
+void gfy_TransparentSprite(const gfy_sprite_t *sprite, int x, int y);
 
-// /**
-//  * Draws an unclipped transparent sprite.
-//  *
-//  * @param[in] sprite Pointer to an initialized sprite structure.
-//  * @param[in] x X coordinate.
-//  * @param[in] y Y coordinate.
-//  */
-// void gfy_TransparentSprite_NoClip(const gfy_sprite_t *sprite, uint24_t x, uint8_t y);
+/**
+ * Draws an unclipped transparent sprite.
+ *
+ * @param[in] sprite Pointer to an initialized sprite structure.
+ * @param[in] x X coordinate.
+ * @param[in] y Y coordinate.
+ */
+void gfy_TransparentSprite_NoClip(const gfy_sprite_t *sprite, uint24_t x, uint8_t y);
 
-// /**
-//  * Grabs the background behind a sprite.
-//  *
-//  * This is useful for partial redraw.
-//  * @param[out] sprite_buffer Buffer used to store grabbed sprite.
-//  * @param[in] x X coordinate to grab sprite.
-//  * @param[in] y Y coordinate to grab sprite.
-//  * @returns A pointer to sprite_buffer.
-//  * @note \p sprite_buffer must be pointing to a large enough buffer to hold
-//  *       (width * height + 2) number of bytes.
-//  */
-// gfy_sprite_t *gfy_GetSprite(gfy_sprite_t *sprite_buffer, int x, int y);
+/**
+ * Grabs the background behind a sprite.
+ *
+ * This is useful for partial redraw.
+ * @param[out] sprite_buffer Buffer used to store grabbed sprite.
+ * @param[in] x X coordinate to grab sprite.
+ * @param[in] y Y coordinate to grab sprite.
+ * @returns A pointer to sprite_buffer.
+ * @note \p sprite_buffer must be pointing to a large enough buffer to hold
+ *       (width * height + 2) number of bytes.
+ */
+gfy_sprite_t *gfy_GetSprite(gfy_sprite_t *sprite_buffer, int x, int y);
 
-// /**
-//  * Scales an unclipped sprite.
-//  *
-//  * Scaling factors must be greater than or equal to 1, and an integer factor.
-//  * Sprites are scaled by multiplying the dimensions by the respective factors.
-//  *
-//  * @param[in] sprite Pointer to an initialized sprite structure.
-//  * @param[in] x X coordinate.
-//  * @param[in] y Y coordinate.
-//  * @param[in] width_scale Width scaling factor.
-//  * @param[in] height_scale Height scaling factor.
-//  * @note Usable with gfy_GetSprite in order to create clipped versions.
-//  */
-// void gfy_ScaledSprite_NoClip(const gfy_sprite_t *sprite,
-//                              uint24_t x,
-//                              uint8_t y,
-//                              uint8_t width_scale,
-//                              uint8_t height_scale);
+/**
+ * Scales an unclipped sprite.
+ *
+ * Scaling factors must be greater than or equal to 1, and an integer factor.
+ * Sprites are scaled by multiplying the dimensions by the respective factors.
+ *
+ * @param[in] sprite Pointer to an initialized sprite structure.
+ * @param[in] x X coordinate.
+ * @param[in] y Y coordinate.
+ * @param[in] width_scale Width scaling factor.
+ * @param[in] height_scale Height scaling factor.
+ * @note Usable with gfy_GetSprite in order to create clipped versions.
+ */
+void gfy_ScaledSprite_NoClip(const gfy_sprite_t *sprite,
+                             uint24_t x,
+                             uint8_t y,
+                             uint8_t width_scale,
+                             uint8_t height_scale);
 
-// /**
-//  * Scales an unclipped transparent sprite.
-//  *
-//  * Scaling factors must be greater than or equal to 1, and an integer factor.
-//  * Sprites are scaled by multiplying the dimensions by the respective factors.
-//  *
-//  * @param[in] sprite Pointer to an initialized sprite structure.
-//  * @param[in] x X coordinate.
-//  * @param[in] y Y coordinate.
-//  * @param[in] width_scale Width scaling factor.
-//  * @param[in] height_scale Height scaling factor.
-//  * @note Usable with gfy_GetSprite in order to create clipped versions.
-//  */
-// void gfy_ScaledTransparentSprite_NoClip(const gfy_sprite_t *sprite,
-//                                         uint24_t x,
-//                                         uint8_t y,
-//                                         uint8_t width_scale,
-//                                         uint8_t height_scale);
+/**
+ * Scales an unclipped transparent sprite.
+ *
+ * Scaling factors must be greater than or equal to 1, and an integer factor.
+ * Sprites are scaled by multiplying the dimensions by the respective factors.
+ *
+ * @param[in] sprite Pointer to an initialized sprite structure.
+ * @param[in] x X coordinate.
+ * @param[in] y Y coordinate.
+ * @param[in] width_scale Width scaling factor.
+ * @param[in] height_scale Height scaling factor.
+ * @note Usable with gfy_GetSprite in order to create clipped versions.
+ */
+void gfy_ScaledTransparentSprite_NoClip(const gfy_sprite_t *sprite,
+                                        uint24_t x,
+                                        uint8_t y,
+                                        uint8_t width_scale,
+                                        uint8_t height_scale);
 
 // /**
 //  * Fixed Rotation with scaling factor for sprites.
@@ -1420,96 +1420,96 @@ uint8_t gfy_SetTextTransparentColor(uint8_t color);
 //                                        uint8_t angle,
 //                                        uint8_t scale);
 
-// /**
-//  * Flips a sprite along the X axis.
-//  *
-//  * @param[in] sprite_in Input sprite to flip.
-//  * @param[out] sprite_out Pointer to where flipped sprite will be stored.
-//  * @returns A pointer to sprite_out.
-//  * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
-//  */
-// gfy_sprite_t *gfy_FlipSpriteX(const gfy_sprite_t *sprite_in,
-//                               gfy_sprite_t *sprite_out);
+/**
+ * Flips a sprite along the X axis.
+ *
+ * @param[in] sprite_in Input sprite to flip.
+ * @param[out] sprite_out Pointer to where flipped sprite will be stored.
+ * @returns A pointer to sprite_out.
+ * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
+ */
+gfy_sprite_t *gfy_FlipSpriteX(const gfy_sprite_t *sprite_in,
+                              gfy_sprite_t *sprite_out);
 
-// /**
-//  * Flips a sprite along the Y axis.
-//  *
-//  * @param[in] sprite_in Input sprite to flip.
-//  * @param[out] sprite_out Pointer to where flipped sprite will be stored.
-//  * @returns A pointer to sprite_out.
-//  * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
-//  */
-// gfy_sprite_t *gfy_FlipSpriteY(const gfy_sprite_t *sprite_in,
-//                               gfy_sprite_t *sprite_out);
+/**
+ * Flips a sprite along the Y axis.
+ *
+ * @param[in] sprite_in Input sprite to flip.
+ * @param[out] sprite_out Pointer to where flipped sprite will be stored.
+ * @returns A pointer to sprite_out.
+ * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
+ */
+gfy_sprite_t *gfy_FlipSpriteY(const gfy_sprite_t *sprite_in,
+                              gfy_sprite_t *sprite_out);
 
-// /**
-//  * Rotates a sprite 90 degrees clockwise.
-//  *
-//  * @param[in] sprite_in Input sprite to rotate.
-//  * @param[out] sprite_out Pointer to where rotated sprite will be stored.
-//  * @returns A pointer to sprite_out.
-//  * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
-//  */
-// gfy_sprite_t *gfy_RotateSpriteC(const gfy_sprite_t *sprite_in,
-//                                 gfy_sprite_t *sprite_out);
+/**
+ * Rotates a sprite 90 degrees clockwise.
+ *
+ * @param[in] sprite_in Input sprite to rotate.
+ * @param[out] sprite_out Pointer to where rotated sprite will be stored.
+ * @returns A pointer to sprite_out.
+ * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
+ */
+gfy_sprite_t *gfy_RotateSpriteC(const gfy_sprite_t *sprite_in,
+                                gfy_sprite_t *sprite_out);
 
-// /**
-//  * Rotates a sprite 90 degrees counter clockwise.
-//  *
-//  * @param[in] sprite_in Input sprite to rotate.
-//  * @param[out] sprite_out Pointer to where rotated sprite will be stored.
-//  * @returns A pointer to sprite_out.
-//  * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
-//  */
-// gfy_sprite_t *gfy_RotateSpriteCC(const gfy_sprite_t *sprite_in,
-//                                  gfy_sprite_t *sprite_out);
+/**
+ * Rotates a sprite 90 degrees counter clockwise.
+ *
+ * @param[in] sprite_in Input sprite to rotate.
+ * @param[out] sprite_out Pointer to where rotated sprite will be stored.
+ * @returns A pointer to sprite_out.
+ * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
+ */
+gfy_sprite_t *gfy_RotateSpriteCC(const gfy_sprite_t *sprite_in,
+                                 gfy_sprite_t *sprite_out);
 
-// /**
-//  * Rotates a sprite 180 degrees.
-//  *
-//  * @param[in] sprite_in Input sprite to rotate.
-//  * @param[out] sprite_out Pointer to where rotated sprite will be stored.
-//  * @returns A pointer to sprite_out.
-//  * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
-//  */
-// gfy_sprite_t *gfy_RotateSpriteHalf(const gfy_sprite_t *sprite_in,
-//                                    gfy_sprite_t *sprite_out);
+/**
+ * Rotates a sprite 180 degrees.
+ *
+ * @param[in] sprite_in Input sprite to rotate.
+ * @param[out] sprite_out Pointer to where rotated sprite will be stored.
+ * @returns A pointer to sprite_out.
+ * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
+ */
+gfy_sprite_t *gfy_RotateSpriteHalf(const gfy_sprite_t *sprite_in,
+                                   gfy_sprite_t *sprite_out);
 
-// /**
-//  * Resizes a sprite to new dimensions.
-//  *
-//  * Place new image dimensions in sprite_out;
-//  * i.e. sprite_out->width = 80; sprite_out->height = 20.
-//  * @param[in] sprite_in Input sprite to scale.
-//  * @param[out] sprite_out Pointer to where scaled sprite will be stored.
-//  * @returns A pointer to \p sprite_out.
-//  * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
-//  */
-// gfy_sprite_t *gfy_ScaleSprite(const gfy_sprite_t *sprite_in,
-//                               gfy_sprite_t *sprite_out);
+/**
+ * Resizes a sprite to new dimensions.
+ *
+ * Place new image dimensions in sprite_out;
+ * i.e. sprite_out->width = 80; sprite_out->height = 20.
+ * @param[in] sprite_in Input sprite to scale.
+ * @param[out] sprite_out Pointer to where scaled sprite will be stored.
+ * @returns A pointer to \p sprite_out.
+ * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
+ */
+gfy_sprite_t *gfy_ScaleSprite(const gfy_sprite_t *sprite_in,
+                              gfy_sprite_t *sprite_out);
 
-// /**
-//  * Fixed Rotation with scaling factor for sprites.
-//  *
-//  * The output sprite is updated with the dimensions required for the
-//  * implemented scaling factor. You must make sure that \p sprite_out
-//  * has enough memory to store the needed output sprite. This can be
-//  * found with the following formula:
-//  *   size = (max_scale / 64) * width * height + 2;
-//  *
-//  * @note A scale factor of 64 represents 100% scaling.
-//  * @warning This routine only accepts square input sprites.
-//  * @param[in] sprite_in Input sprite to rotate/scale.
-//  * @param[out] sprite_out Pointer to where rotated/scaled sprite will be stored.
-//  * @param[in] angle 256 position angular integer.
-//  * @param[in] scale Scaling factor; range is about 1% to 400% scale.
-//  * @returns A pointer to \p sprite_out.
-//  * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
-//  */
-// gfy_sprite_t *gfy_RotateScaleSprite(const gfy_sprite_t *sprite_in,
-//                                     gfy_sprite_t *sprite_out,
-//                                     uint8_t angle,
-//                                     uint8_t scale);
+/**
+ * Fixed Rotation with scaling factor for sprites.
+ *
+ * The output sprite is updated with the dimensions required for the
+ * implemented scaling factor. You must make sure that \p sprite_out
+ * has enough memory to store the needed output sprite. This can be
+ * found with the following formula:
+ *   size = (max_scale / 64) * width * height + 2;
+ *
+ * @note A scale factor of 64 represents 100% scaling.
+ * @warning This routine only accepts square input sprites.
+ * @param[in] sprite_in Input sprite to rotate/scale.
+ * @param[out] sprite_out Pointer to where rotated/scaled sprite will be stored.
+ * @param[in] angle 256 position angular integer.
+ * @param[in] scale Scaling factor; range is about 1% to 400% scale.
+ * @returns A pointer to \p sprite_out.
+ * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
+ */
+gfy_sprite_t *gfy_RotateScaleSprite(const gfy_sprite_t *sprite_in,
+                                    gfy_sprite_t *sprite_out,
+                                    uint8_t angle,
+                                    uint8_t scale);
 
 // /**
 //  * Creates a temporary character sprite.

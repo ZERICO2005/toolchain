@@ -180,19 +180,19 @@ extern "C"
  *          gfx_TilePtr
  *          gfx_TilePtrMapped
  *          gfx_Reserved
- *          gfx_AllocSprite
- *          gfx_Sprite
- *          gfx_TransparentSprite
- *          gfx_Sprite_NoClip
- *          gfx_TransparentSprite_NoClip
- *          gfx_GetSprite
- *          gfx_ScaledSprite_NoClip
- *          gfx_ScaledTransparentSprite_NoClip
- *          gfx_FlipSpriteY
- *          gfx_FlipSpriteX
- *          gfx_RotateSpriteC
- *          gfx_RotateSpriteCC
- *          gfx_RotateSpriteHalf
+ * Wrap     gfx_AllocSprite
+ * Minimal  gfx_Sprite
+ * Minimal  gfx_TransparentSprite
+ * Testing  gfx_Sprite_NoClip
+ * Testing  gfx_TransparentSprite_NoClip
+ * Testing  gfx_GetSprite
+ * Testing  gfx_ScaledSprite_NoClip
+ * Testing  gfx_ScaledTransparentSprite_NoClip
+ * Wrap     gfx_FlipSpriteY
+ * Wrap     gfx_FlipSpriteX
+ * Wrap     gfx_RotateSpriteC
+ * Wrap     gfx_RotateSpriteCC
+ * Wrap     gfx_RotateSpriteHalf
  *          gfx_Polygon
  *          gfx_Polygon_NoClip
  *          gfx_FillTriangle
@@ -218,7 +218,7 @@ extern "C"
  * v5 functions
  * ------------
  *          gfx_SetFontHeight
- *          gfx_ScaleSprite
+ * Wrap     gfx_ScaleSprite
  *          gfx_FloodFill
  * ------------
  * v6 functions
@@ -231,7 +231,7 @@ extern "C"
  * ------------
  * v7 functions
  * ------------
- *          gfx_RotateScaleSprite
+ * Wrap     gfx_RotateScaleSprite
  *          gfx_RotatedScaledTransparentSprite_NoClip
  *          gfx_RotatedScaledSprite_NoClip
  * ------------
@@ -264,8 +264,8 @@ extern "C"
  * 
  * background           > 
  * hello_world          > 
- * sprites              > 
- * sprites_rotate_flip  > 
+ * sprites              > Passed - Casts to (gfy_sprite_t*) were needed
+ * sprites_rotate_flip  > Passed - Casts to (gfy_sprite_t*) were needed
  * text_flipped         > 
  * background_appvar    > 
  * lighten_darken       > 
@@ -273,14 +273,14 @@ extern "C"
  * sprites_rotate_scale > 
  * tilemap              > 
  * blitting             > Passed
- * scaled_text          > Okay - Text transperency unimplemented
+ * scaled_text          > Okay - Text transparency unimplemented
  * sprites_compress     > 
- * sprites_scaled       > 
+ * sprites_scaled       > Passed - Took ~4 frames in CEmu
  * tilemap_appvar       > 
  * buffered_cube        > Passed - Line algorithm is slow
  * screen_shift         > Passed
- * sprites_moving       > 
- * text_clipped         > Okay - Text clipping is too extreme - Text transperency unimplemented
+ * sprites_moving       > Passed - Sprite clipping is too extreme 
+ * text_clipped         > Okay - Text clipping is too extreme - Text transparency unimplemented
  * tilemap_compressed   > 
  * floodfill            > 
  * shapes               > 
@@ -482,7 +482,7 @@ static int gfy_ClipYMax = GFY_LCD_HEIGHT;
         0x7B6F, 0x749A, 0x73E7, 0x79A7, 0x49ED, 0x79CF, 0x7BCF, 0x24A7, 0x7AAF, 0x79EF,
         0x5BEF, 0x7BC9, 0x724F, 0x7BE4, 0x72CF, 0x12CF
     };
-    __attribute__((unused)) void printUInt(int24_t in, uint8_t len, uint8_t base, uint24_t xC, uint24_t yC) {
+    __attribute__((unused)) static void printUInt(int24_t in, uint8_t len, uint8_t base, uint24_t xC, uint24_t yC) {
         uint8_t* off = ((uint8_t*)gfy_CurrentBuffer) + ((xC * GFY_LCD_HEIGHT) + yC);
         uint8_t* v = off + 1;
         len *= 4;
@@ -817,7 +817,7 @@ void gfy_PrintInt(int n, uint8_t length) {
         return;
     }
     gfy_PrintChar('-');
-    gfy_internal_PrintUInt(n, gfy_TextXPos + gfy_GetCharWidth('-'), length);
+    gfy_internal_PrintUInt(-n, gfy_TextXPos + gfy_GetCharWidth('-'), length);
 }
 
 /* gfy_PrintUInt */
@@ -1056,7 +1056,7 @@ void gfy_HorizLine(int x, int y, int length) {
     if (
         x >= gfy_ClipXMin && x < gfy_ClipXMax &&
         y >= gfy_ClipYMin && y < gfy_ClipYMax &&
-        x + length >= 0 && x + length <= gfy_ClipXMax
+        x + length > 0 && x + length <= gfy_ClipXMax
     ) {
         gfy_HorizLine_NoClip(x, y, length);
     }
@@ -1069,7 +1069,7 @@ void gfy_VertLine(int x, int y, int length) {
     if (
         x >= gfy_ClipXMin && x < gfy_ClipXMax &&
         y >= gfy_ClipYMin && y < gfy_ClipYMax &&
-        length >= 0 && y + length <= gfy_ClipYMax
+        length > 0 && y + length <= gfy_ClipYMax
     ) {
         gfy_VertLine_NoClip(x, y, length);
     }
@@ -1090,8 +1090,8 @@ void gfy_Rectangle(int x, int y, int width, int height) {
     if (
         x >= gfy_ClipXMin && x < gfy_ClipXMax &&
         y >= gfy_ClipYMin && y < gfy_ClipYMax &&
-        width >= 0 && x + width <= gfy_ClipXMax &&
-        height >= 0 && y + height <= gfy_ClipYMax
+        width > 0 && x + width <= gfy_ClipXMax &&
+        height > 0 && y + height <= gfy_ClipYMax
     ) {
         gfy_Rectangle_NoClip(x, y, width, height);
     }   
@@ -1104,8 +1104,8 @@ void gfy_FillRectangle(int x, int y, int width, int height) {
     if (
         x >= gfy_ClipXMin && x < gfy_ClipXMax &&
         y >= gfy_ClipYMin && y < gfy_ClipYMax &&
-        width >= 0 && x + width <= gfy_ClipXMax &&
-        height >= 0 && y + height <= gfy_ClipYMax
+        width > 0 && x + width <= gfy_ClipXMax &&
+        height > 0 && y + height <= gfy_ClipYMax
     ) {
         gfy_FillRectangle_NoClip(x, y, width, height);
     }
@@ -1187,7 +1187,7 @@ void gfy_ShiftDown(uint8_t pixels) {
     int x0 = gfy_ClipXMin;
     int x1 = gfy_ClipXMax;
     for (int x = x0; x < x1; x++) {
-        memmove(dst_buf, src_buf, copySize); // UNDEFINED BEHAVIOUR
+        memmove(dst_buf, src_buf, copySize); // memcpy would be UB
         src_buf += GFY_LCD_HEIGHT;
         dst_buf += GFY_LCD_HEIGHT;
     }
@@ -1203,7 +1203,7 @@ void gfy_ShiftUp(uint8_t pixels) {
     int x0 = gfy_ClipXMin;
     int x1 = gfy_ClipXMax;
     for (int x = x0; x < x1; x++) {
-        memmove(dst_buf, src_buf, copySize); // UNDEFINED BEHAVIOUR
+        memmove(dst_buf, src_buf, copySize); // memcpy would be UB
         src_buf += GFY_LCD_HEIGHT;
         dst_buf += GFY_LCD_HEIGHT;
     }
@@ -1275,55 +1275,222 @@ void gfy_ShiftRight(uint24_t pixels) {
 
 /* gfy_AllocSprite */
 
-
+gfy_sprite_t *gfy_AllocSprite(
+	uint8_t width,
+    uint8_t height,
+    void *(*malloc_routine)(size_t)
+) {
+	return (gfy_sprite_t*)gfx_AllocSprite(width, height, malloc_routine);
+}
 
 /* gfy_Sprite */
 
-
+void gfy_Sprite(const gfy_sprite_t *sprite, int x, int y) {
+	// Incorrect clipping
+    if (
+        x >= gfy_ClipXMin && x < gfy_ClipXMax &&
+        y >= gfy_ClipYMin && y < gfy_ClipYMax &&
+        sprite->width > 0 && x + sprite->width <= gfy_ClipXMax &&
+        sprite->height > 0 && y + sprite->height <= gfy_ClipYMax
+    ) {
+        gfy_Sprite_NoClip(sprite, (uint24_t)x, (uint8_t)y);
+    }
+}
 
 /* gfy_TransparentSprite */
 
-
+void gfy_TransparentSprite(const gfy_sprite_t *sprite, int x, int y) {
+    // Incorrect clipping
+    if (
+        x >= gfy_ClipXMin && x < gfy_ClipXMax &&
+        y >= gfy_ClipYMin && y < gfy_ClipYMax &&
+        sprite->width > 0 && x + sprite->width <= gfy_ClipXMax &&
+        sprite->height > 0 && y + sprite->height <= gfy_ClipYMax
+    ) {
+        gfy_TransparentSprite_NoClip(sprite, (uint24_t)x, (uint8_t)y);
+    }
+}
 
 /* gfy_Sprite_NoClip */
 
-
+void gfy_Sprite_NoClip(const gfy_sprite_t *sprite, uint24_t x, uint8_t y) {
+	const uint8_t* src_buf = sprite->data;
+	uint8_t* dst_buf = (uint8_t*)gfy_CurrentBuffer + y + (x * GFY_LCD_HEIGHT);
+	const uint24_t dst_jump = (GFY_LCD_HEIGHT * sprite->width) - 1;
+	
+	for (uint8_t y_cord = 0; y_cord < sprite->height; y_cord++) {
+		for (uint8_t x_cord = 0; x_cord < sprite->width; x_cord++) {
+			*dst_buf = *src_buf;
+			src_buf++;
+			dst_buf += GFY_LCD_HEIGHT;
+		}
+		dst_buf -= dst_jump;
+	}
+}
 
 /* gfy_TransparentSprite_NoClip */
 
-
+void gfy_TransparentSprite_NoClip(const gfy_sprite_t *sprite, uint24_t x, uint8_t y) {
+	const uint8_t* src_buf = sprite->data;
+	uint8_t* dst_buf = (uint8_t*)gfy_CurrentBuffer + y + (x * GFY_LCD_HEIGHT);
+	const uint24_t dst_jump = (GFY_LCD_HEIGHT * sprite->width) - 1;
+	
+	for (uint8_t y_cord = 0; y_cord < sprite->height; y_cord++) {
+		for (uint8_t x_cord = 0; x_cord < sprite->width; x_cord++) {
+			*dst_buf = (*src_buf != gfy_Transparent_Color) ? *src_buf : *dst_buf;
+			src_buf++;
+			dst_buf += GFY_LCD_HEIGHT;
+		}
+		dst_buf -= dst_jump;
+	}
+}
 
 /* gfy_GetSprite */
 
+gfy_sprite_t *gfy_GetSprite(gfy_sprite_t *sprite_buffer, int x, int y) {
+	uint8_t* dst_buf = sprite_buffer->data;
+	const uint8_t* src_buf = (uint8_t*)gfy_CurrentBuffer + y + (x * GFY_LCD_HEIGHT);
+	const uint24_t src_jump = (GFY_LCD_HEIGHT * sprite_buffer->width) - 1;
+	
+	for (uint8_t y_cord = 0; y_cord < sprite_buffer->height; y_cord++) {
+		for (uint8_t x_cord = 0; x_cord < sprite_buffer->width; x_cord++) {
+			*dst_buf = *src_buf;
+			dst_buf++;
+			src_buf += GFY_LCD_HEIGHT;
+		}
+		src_buf -= src_jump;
+	}
+	return sprite_buffer;
+}
 
+/* gfy_internal_ScaledSprite_ColumnRepeat */
+
+static void gfy_internal_ScaledSprite_ColumnRepeat(
+	const uint8_t* src_col,
+	const uint24_t col_jump,
+	uint8_t width_scale,
+	uint8_t height_scale,
+	uint8_t sprite_width,
+	uint8_t sprite_height
+) {
+	if (width_scale == 1) {
+		return;
+	}
+	// memcpy columns
+	const uint24_t copySize = sprite_height * height_scale; // This could probably be uint8_t
+	for (uint8_t col = 0; col < sprite_width; col++) {
+		uint8_t* dst_col = (uint8_t*)src_col + GFY_LCD_HEIGHT;
+		for (uint8_t x_cord = 1; x_cord < width_scale; x_cord++) {
+			memcpy(dst_col, src_col, copySize);
+			dst_col += GFY_LCD_HEIGHT;
+		}
+		src_col += col_jump;
+	}
+}
 
 /* gfy_ScaledSprite_NoClip */
 
-
+void gfy_ScaledSprite_NoClip(
+	const gfy_sprite_t *sprite,
+    uint24_t x,
+    uint8_t y,
+    uint8_t width_scale,
+    uint8_t height_scale
+) {
+	if (width_scale == 0 || height_scale == 0) {
+		return;
+	}
+	const uint8_t* src_buf = sprite->data;
+	uint8_t* buf_start = (uint8_t*)gfy_CurrentBuffer + y + (x * GFY_LCD_HEIGHT);
+	uint8_t* dst_buf = buf_start;
+	const uint24_t dst_jumpY = (GFY_LCD_HEIGHT * (sprite->width * width_scale)) - 1;
+	const uint24_t dst_jumpX = GFY_LCD_HEIGHT * width_scale;
+	
+	for (uint8_t y_cord = 0; y_cord < sprite->height; y_cord++) {
+		const uint8_t* src_buf_line = src_buf;
+		for (uint8_t v = 0; v < height_scale; v++) {
+			src_buf = src_buf_line;
+			for (uint8_t x_cord = 0; x_cord < sprite->width; x_cord++) {
+				*dst_buf = *src_buf;
+				dst_buf += dst_jumpX;
+				src_buf++;
+			}
+			dst_buf -= dst_jumpY;
+		}
+	}
+	gfy_internal_ScaledSprite_ColumnRepeat(
+		buf_start, dst_jumpX,
+		width_scale, height_scale,
+		sprite->width, sprite->height
+	);
+}
 
 /* gfy_ScaledTransparentSprite_NoClip */
 
-
+void gfy_ScaledTransparentSprite_NoClip(
+	const gfy_sprite_t *sprite,
+    uint24_t x,
+    uint8_t y,
+	uint8_t width_scale,
+    uint8_t height_scale
+) {
+	if (width_scale == 0 || height_scale == 0) {
+		return;
+	}
+	const uint8_t* src_buf = sprite->data;
+	uint8_t* buf_start = (uint8_t*)gfy_CurrentBuffer + y + (x * GFY_LCD_HEIGHT);
+	uint8_t* dst_buf = buf_start;
+	const uint24_t dst_jumpY = (GFY_LCD_HEIGHT * (sprite->width * width_scale)) - 1;
+	const uint24_t dst_jumpX = GFY_LCD_HEIGHT * width_scale;
+	
+	for (uint8_t y_cord = 0; y_cord < sprite->height; y_cord++) {
+		const uint8_t* src_buf_line = src_buf;
+		for (uint8_t v = 0; v < height_scale; v++) {
+			src_buf = src_buf_line;
+			for (uint8_t x_cord = 0; x_cord < sprite->width; x_cord++) {
+				*dst_buf = (*src_buf != gfy_Transparent_Color) ? *src_buf : *dst_buf;
+				dst_buf += dst_jumpX;
+				src_buf++;
+			}
+			dst_buf -= dst_jumpY;
+		}
+	}
+	gfy_internal_ScaledSprite_ColumnRepeat(
+		buf_start, dst_jumpX,
+		width_scale, height_scale,
+		sprite->width, sprite->height
+	);
+}
 
 /* gfy_FlipSpriteY */
 
-
+gfy_sprite_t *gfy_FlipSpriteY(const gfy_sprite_t *sprite_in, gfy_sprite_t *sprite_out) {
+	return (gfy_sprite_t*)gfx_FlipSpriteY((const gfx_sprite_t*)sprite_in, (gfx_sprite_t*)sprite_out);
+}
 
 /* gfy_FlipSpriteX */
 
-
+gfy_sprite_t *gfy_FlipSpriteX(const gfy_sprite_t *sprite_in, gfy_sprite_t *sprite_out) {
+	return (gfy_sprite_t*)gfx_FlipSpriteX((const gfx_sprite_t*)sprite_in, (gfx_sprite_t*)sprite_out);
+}
 
 /* gfy_RotateSpriteC */
 
-
+gfy_sprite_t *gfy_RotateSpriteC(const gfy_sprite_t *sprite_in, gfy_sprite_t *sprite_out) {
+	return (gfy_sprite_t*)gfx_RotateSpriteC((const gfx_sprite_t*)sprite_in, (gfx_sprite_t*)sprite_out);
+}
 
 /* gfy_RotateSpriteCC */
 
-
+gfy_sprite_t *gfy_RotateSpriteCC(const gfy_sprite_t *sprite_in, gfy_sprite_t *sprite_out) {
+	return (gfy_sprite_t*)gfx_RotateSpriteCC((const gfx_sprite_t*)sprite_in, (gfx_sprite_t*)sprite_out);
+}
 
 /* gfy_RotateSpriteHalf */
 
-
+gfy_sprite_t *gfy_RotateSpriteHalf(const gfy_sprite_t *sprite_in, gfy_sprite_t *sprite_out) {
+	return (gfy_sprite_t*)gfx_RotateSpriteHalf((const gfx_sprite_t*)sprite_in, (gfx_sprite_t*)sprite_out);
+}
 
 /* gfy_Polygon */
 
@@ -1411,7 +1578,9 @@ uint16_t gfy_Darken(uint16_t color, uint8_t amount) {
 
 /* gfy_ScaleSprite */
 
-
+gfy_sprite_t *gfy_ScaleSprite(const gfy_sprite_t *sprite_in, gfy_sprite_t *sprite_out) {
+	return (gfy_sprite_t*)gfx_ScaleSprite((const gfx_sprite_t*)sprite_in, (gfx_sprite_t*)sprite_out);
+}
 
 /* gfy_FloodFill */
 
@@ -1447,7 +1616,19 @@ uint16_t gfy_Darken(uint16_t color, uint8_t amount) {
 
 /* gfy_RotateScaleSprite */
 
-
+gfy_sprite_t *gfy_RotateScaleSprite(
+	const gfy_sprite_t *sprite_in,
+	gfy_sprite_t *sprite_out,
+	uint8_t angle,
+	uint8_t scale
+) {
+	return (gfy_sprite_t*)gfx_RotateScaleSprite(
+		(const gfy_sprite_t*)sprite_in,
+		(gfy_sprite_t*)sprite_out,
+		angle,
+		scale
+	);
+}
 
 /* gfy_RotatedScaledTransparentSprite_NoClip */
 
