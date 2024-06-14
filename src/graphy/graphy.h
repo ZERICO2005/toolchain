@@ -77,26 +77,26 @@ typedef struct gfy_sprite_t {
     uint8_t data[]; /**< Image data array.    */
 } gfy_sprite_t;
 
-// /**
-//  * Sprite (image) type with RLE transparency.
-//  *
-//  * @attention
-//  * Displaying a gfy_rletsprite_t (which includes transparency) is significantly
-//  * faster than displaying a gfy_sprite_t with transparency, and should be
-//  * preferred. However, gfy_rletsprite_t does not support transformations, such
-//  * as flipping and rotation. Such transformations can be applied to a
-//  * gfy_sprite_t, which can then be converted to a gfy_rletsprite_t for faster
-//  * display using gfy_ConvertToNewRLETSprite() or gfy_ConvertToRLETSprite().
-//  *
-//  * @remarks
-//  * Create at compile-time with a tool like
-//  * <a href="https://github.com/mateoconlechuga/convimg" target="_blank">convimg</a>.
-//  */
-// typedef struct gfy_rletsprite_t {
-//     uint8_t width; /**< Width of the image. */
-//     uint8_t height; /**< Height of the image. */
-//     uint8_t data[]; /**< Image data array. */
-// } gfy_rletsprite_t;
+/**
+ * Sprite (image) type with RLE transparency.
+ *
+ * @attention
+ * Displaying a gfy_rletsprite_t (which includes transparency) is significantly
+ * faster than displaying a gfy_sprite_t with transparency, and should be
+ * preferred. However, gfy_rletsprite_t does not support transformations, such
+ * as flipping and rotation. Such transformations can be applied to a
+ * gfy_sprite_t, which can then be converted to a gfy_rletsprite_t for faster
+ * display using gfy_ConvertToNewRLETSprite() or gfy_ConvertToRLETSprite().
+ *
+ * @remarks
+ * Create at compile-time with a tool like
+ * <a href="https://github.com/mateoconlechuga/convimg" target="_blank">convimg</a>.
+ */
+typedef struct gfy_rletsprite_t {
+    uint8_t width; /**< Width of the image. */
+    uint8_t height; /**< Height of the image. */
+    uint8_t data[]; /**< Image data array. */
+} gfy_rletsprite_t;
 
 // /**
 //  * A structure for working with 2D points.
@@ -280,112 +280,112 @@ gfy_AllocSprite(width, height, malloc)
 uint8_t name##_data[2 + (width) * (height)]; \
 gfy_sprite_t *name = (gfy_sprite_t *)name##_data
 
-// /**
-//  * Statically allocates memory for a sprite.
-//  *
-//  * Declares a <tt>gfy_sprite_t *</tt> with the given \p name pointing to the
-//  * allocated memory. \p width and \p height will be set in the sprite, unlike
-//  * gfy_UninitedSprite().
-//  *
-//  * @attention
-//  * Due to \p width and \p height being set, the memory will be allocated in the
-//  * initialized data segment. If the compiled program is not compressed, then
-//  * this could be a serious source of bloat and gfy_UninitedSprite() should be
-//  * preferred.
-//  *
-//  * @param[in] name Name of declared <tt>gfy_sprite_t *</tt>.
-//  * @param[in] width Sprite width.
-//  * @param[in] height Sprite height.
-//  * @see gfy_MallocSprite()
-//  */
-// #define gfy_TempSprite(name, width, height) \
-// uint8_t name##_data[2 + (width) * (height)] = { (width), (height) }; \
-// gfy_sprite_t *name = (gfy_sprite_t *)name##_data
+/**
+ * Statically allocates memory for a sprite.
+ *
+ * Declares a <tt>gfy_sprite_t *</tt> with the given \p name pointing to the
+ * allocated memory. \p width and \p height will be set in the sprite, unlike
+ * gfy_UninitedSprite().
+ *
+ * @attention
+ * Due to \p width and \p height being set, the memory will be allocated in the
+ * initialized data segment. If the compiled program is not compressed, then
+ * this could be a serious source of bloat and gfy_UninitedSprite() should be
+ * preferred.
+ *
+ * @param[in] name Name of declared <tt>gfy_sprite_t *</tt>.
+ * @param[in] width Sprite width.
+ * @param[in] height Sprite height.
+ * @see gfy_MallocSprite()
+ */
+#define gfy_TempSprite(name, width, height) \
+uint8_t name##_data[2 + (width) * (height)] = { (width), (height) }; \
+gfy_sprite_t *name = (gfy_sprite_t *)name##_data
 
-// /**
-//  * Dynamically allocates memory for a sprite with RLE transparency.
-//  *
-//  * Allocates the memory with \p malloc_routine. Returns \c NULL upon allocation
-//  * failure.
-//  *
-//  * \p data_size is the maximum predicted/calculated size of the sprite data
-//  * (excluding the width and height bytes) that will be stored in the allocated
-//  * sprite.
-//  * Sprite data size could be up to <tt>(width + 1) * height * 3 / 2</tt>
-//  * bytes in the worst case, in which pixels horizontally alternate between
-//  * non-transparent and transparent and each row begins with a non-transparent
-//  * pixel. But if the average length of a horizontal transparent run is at least
-//  * 2, then the sprite data will be no larger than <tt>(width + 1) * height</tt>
-//  * bytes. The exact data size necessary is <tt>2 * hr + nont + rnont - ret</tt>
-//  * bytes, where:
-//  *
-//  * <tt>hr</tt>: Number of horizontal transparent runs.
-//  *
-//  * <tt>nont</tt>: Number of non-transparent runs.
-//  *
-//  * <tt>rnont</tt>: Number of rows beginning with a non-transparent pixel.
-//  *
-//  * <tt>rbnont</tt>: Number of rows beginning with a non-transparent pixel.
-//  *
-//  * <tt>ret</tt>: Number of rows ending with a transparent pixel.
-//  *
-//  * @note
-//  * If not used in a dynamic context and \p data_size is static, consider
-//  * statically allocating the sprite instead with gfy_UninitedRLETSprite() or
-//  * gfy_TempRLETSprite().
-//  *
-//  * @remarks
-//  * If using \c malloc as the \p malloc_routine, gfy_MallocRLETSprite() can be
-//  * used as a shortcut.
-//  *
-//  * @param[in] data_size (Maximum) sprite data size.
-//  * @param[in] malloc_routine Malloc implementation to use.
-//  * @return A pointer to the allocated sprite, or NULL if the allocation failed..
-//  */
-// #define gfy_AllocRLETSprite(data_size, malloc_routine) \
-// ((gfy_rletsprite_t *)(malloc_routine)(data_size))
+/**
+ * Dynamically allocates memory for a sprite with RLE transparency.
+ *
+ * Allocates the memory with \p malloc_routine. Returns \c NULL upon allocation
+ * failure.
+ *
+ * \p data_size is the maximum predicted/calculated size of the sprite data
+ * (excluding the width and height bytes) that will be stored in the allocated
+ * sprite.
+ * Sprite data size could be up to <tt>(width + 1) * height * 3 / 2</tt>
+ * bytes in the worst case, in which pixels horizontally alternate between
+ * non-transparent and transparent and each row begins with a non-transparent
+ * pixel. But if the average length of a horizontal transparent run is at least
+ * 2, then the sprite data will be no larger than <tt>(width + 1) * height</tt>
+ * bytes. The exact data size necessary is <tt>2 * hr + nont + rnont - ret</tt>
+ * bytes, where:
+ *
+ * <tt>hr</tt>: Number of horizontal transparent runs.
+ *
+ * <tt>nont</tt>: Number of non-transparent runs.
+ *
+ * <tt>rnont</tt>: Number of rows beginning with a non-transparent pixel.
+ *
+ * <tt>rbnont</tt>: Number of rows beginning with a non-transparent pixel.
+ *
+ * <tt>ret</tt>: Number of rows ending with a transparent pixel.
+ *
+ * @note
+ * If not used in a dynamic context and \p data_size is static, consider
+ * statically allocating the sprite instead with gfy_UninitedRLETSprite() or
+ * gfy_TempRLETSprite().
+ *
+ * @remarks
+ * If using \c malloc as the \p malloc_routine, gfy_MallocRLETSprite() can be
+ * used as a shortcut.
+ *
+ * @param[in] data_size (Maximum) sprite data size.
+ * @param[in] malloc_routine Malloc implementation to use.
+ * @return A pointer to the allocated sprite, or NULL if the allocation failed..
+ */
+#define gfy_AllocRLETSprite(data_size, malloc_routine) \
+((gfy_rletsprite_t *)(malloc_routine)(data_size))
 
-// /**
-//  * Dynamically allocates memory for a sprite with RLE transparency using \c
-//  * malloc.
-//  *
-//  * \p data_size is the size to allocate for sprite data; see
-//  * gfy_AllocRLETSprite() for information. Returns \c NULL upon allocation
-//  * failure.
-//  *
-//  * @note
-//  * If not used in a dynamic context and \p data_size is static, consider
-//  * statically allocating the sprite instead with gfy_UninitedRLETSprite() or
-//  * gfy_TempRLETSprite().
-//  *
-//  * @param[in] data_size (Maximum) sprite data size.
-//  * @return A pointer to the allocated sprite, or NULL if the allocation failed.
-//  * @see gfy_AllocRLETSprite()
-//  */
-// #define gfy_MallocRLETSprite(data_size) \
-// gfy_AllocRLETSprite(data_size, malloc)
+/**
+ * Dynamically allocates memory for a sprite with RLE transparency using \c
+ * malloc.
+ *
+ * \p data_size is the size to allocate for sprite data; see
+ * gfy_AllocRLETSprite() for information. Returns \c NULL upon allocation
+ * failure.
+ *
+ * @note
+ * If not used in a dynamic context and \p data_size is static, consider
+ * statically allocating the sprite instead with gfy_UninitedRLETSprite() or
+ * gfy_TempRLETSprite().
+ *
+ * @param[in] data_size (Maximum) sprite data size.
+ * @return A pointer to the allocated sprite, or NULL if the allocation failed.
+ * @see gfy_AllocRLETSprite()
+ */
+#define gfy_MallocRLETSprite(data_size) \
+gfy_AllocRLETSprite(data_size, malloc)
 
-// /**
-//  * Statically allocates uninitialized memory for a sprite with RLE transparency.
-//  *
-//  * Declares a <tt>gfy_rletsprite_t *</tt> with the given \p name pointing to
-//  * the allocated memory. \p data_size is the size to allocate for sprite data;
-//  * see gfy_AllocRLETSprite() for information.
-//  *
-//  * @warning
-//  * If used outside of a function body, the memory will be allocated in the
-//  * global uninitialized data segment (BSS). If used inside a function body, the
-//  * memory will be allocated on the stack. If the sprite is sufficiently large,
-//  * usage inside a function body will overflow the stack, so it is recommended
-//  * that this normally be used outside of a function body.
-//  *
-//  * @param[in] name Name of declared <tt>gfy_rletsprite_t *</tt>.
-//  * @param[in] data_size (Maximum) sprite data size.
-//  * @see gfy_MallocRLETSprite()
-//  */
-// #define gfy_UninitedRLETSprite(name, data_size) \
-// uint8_t name##_data[2 + (data_size)]; \
-// gfy_rletsprite_t *name = (gfy_rletsprite_t *)name##_data
+/**
+ * Statically allocates uninitialized memory for a sprite with RLE transparency.
+ *
+ * Declares a <tt>gfy_rletsprite_t *</tt> with the given \p name pointing to
+ * the allocated memory. \p data_size is the size to allocate for sprite data;
+ * see gfy_AllocRLETSprite() for information.
+ *
+ * @warning
+ * If used outside of a function body, the memory will be allocated in the
+ * global uninitialized data segment (BSS). If used inside a function body, the
+ * memory will be allocated on the stack. If the sprite is sufficiently large,
+ * usage inside a function body will overflow the stack, so it is recommended
+ * that this normally be used outside of a function body.
+ *
+ * @param[in] name Name of declared <tt>gfy_rletsprite_t *</tt>.
+ * @param[in] data_size (Maximum) sprite data size.
+ * @see gfy_MallocRLETSprite()
+ */
+#define gfy_UninitedRLETSprite(name, data_size) \
+uint8_t name##_data[2 + (data_size)]; \
+gfy_rletsprite_t *name = (gfy_rletsprite_t *)name##_data
 
 /**
  * Sets a particular tile's sprite tileset index.
@@ -497,27 +497,27 @@ gfy_GetSprite((sprite_buffer), (x), (y))
 #define gfy_RotateSprite(sprite_in, sprite_out, angle) \
 gfy_RotateScaleSprite(sprite_in, sprite_out, angle, 64)
 
-// /**
-//  * Converts a sprite with normal transparency to a sprite with RLE transparency,
-//  * allocating the exact amount of necessary space for the converted sprite using
-//  * \c malloc.
-//  *
-//  * Width and height will be set in the converted sprite. Returns \c NULL upon
-//  * allocation failure.
-//  *
-//  * The transparent color index in the input sprite is controlled by
-//  * gfy_SetTransparentColor().
-//  *
-//  * @remarks
-//  * A gfy_sprite_t can be converted into an appropriately large,
-//  * already-allocated gfy_rletsprite_t using gfy_ConvertToRLETSprite().
-//  *
-//  * @param[in] sprite_in Input sprite with normal transparency.
-//  * @returns A newly allocated converted sprite with RLE transparency.
-//  * @see gfy_ConvertFromRLETSprite.
-//  */
-// #define gfy_ConvertMallocRLETSprite(sprite_in) \
-// gfy_ConvertToNewRLETSprite(sprite_in, malloc)
+/**
+ * Converts a sprite with normal transparency to a sprite with RLE transparency,
+ * allocating the exact amount of necessary space for the converted sprite using
+ * \c malloc.
+ *
+ * Width and height will be set in the converted sprite. Returns \c NULL upon
+ * allocation failure.
+ *
+ * The transparent color index in the input sprite is controlled by
+ * gfy_SetTransparentColor().
+ *
+ * @remarks
+ * A gfy_sprite_t can be converted into an appropriately large,
+ * already-allocated gfy_rletsprite_t using gfy_ConvertToRLETSprite().
+ *
+ * @param[in] sprite_in Input sprite with normal transparency.
+ * @returns A newly allocated converted sprite with RLE transparency.
+ * @see gfy_ConvertFromRLETSprite.
+ */
+#define gfy_ConvertMallocRLETSprite(sprite_in) \
+gfy_ConvertToNewRLETSprite(sprite_in, malloc)
 
 /**
  * Converts an RGB value to a palette color.
@@ -623,17 +623,17 @@ gfy_sprite_t *gfy_AllocSprite(uint8_t width,
                               uint8_t height,
                               void *(*malloc_routine)(size_t));
 
-// /**
-//  * Draws a tilemap.
-//  *
-//  * @param[in] tilemap Pointer to initialized tilemap structure.
-//  * @param[in] x_offset Offset in pixels from the left of the tilemap.
-//  * @param[in] y_offset Offset in pixels from the top of the tilemap.
-//  * @see gfy_tilemap_t.
-//  */
-// void gfy_Tilemap(const gfy_tilemap_t *tilemap,
-//                  uint24_t x_offset,
-//                  uint24_t y_offset);
+/**
+ * Draws a tilemap.
+ *
+ * @param[in] tilemap Pointer to initialized tilemap structure.
+ * @param[in] x_offset Offset in pixels from the left of the tilemap.
+ * @param[in] y_offset Offset in pixels from the top of the tilemap.
+ * @see gfy_tilemap_t.
+ */
+void gfy_Tilemap(const gfy_tilemap_t *tilemap,
+                 uint24_t x_offset,
+                 uint24_t y_offset);
 
 /**
  * Draws an unclipped tilemap.
@@ -647,29 +647,29 @@ void gfy_Tilemap_NoClip(const gfy_tilemap_t *tilemap,
                             uint24_t x_offset,
                             uint24_t y_offset);
 
-// /**
-//  * Draws a transparent tilemap.
-//  *
-//  * @param[in] tilemap Pointer to initialized tilemap structure.
-//  * @param[in] x_offset Offset in pixels from the left of the tilemap.
-//  * @param[in] y_offset Offset in pixels from the top of the tilemap.
-//  * @see gfy_tilemap_t.
-//  */
-// void gfy_TransparentTilemap(const gfy_tilemap_t *tilemap,
-//                             uint24_t x_offset,
-//                             uint24_t y_offset);
+/**
+ * Draws a transparent tilemap.
+ *
+ * @param[in] tilemap Pointer to initialized tilemap structure.
+ * @param[in] x_offset Offset in pixels from the left of the tilemap.
+ * @param[in] y_offset Offset in pixels from the top of the tilemap.
+ * @see gfy_tilemap_t.
+ */
+void gfy_TransparentTilemap(const gfy_tilemap_t *tilemap,
+                            uint24_t x_offset,
+                            uint24_t y_offset);
 
-// /**
-//  * Draws an unclipped transparent tilemap.
-//  *
-//  * @param[in] tilemap Pointer to initialized tilemap structure.
-//  * @param[in] x_offset Offset in pixels from the left of the tilemap.
-//  * @param[in] y_offset Offset in pixels from the top of the tilemap.
-//  * @see gfy_tilemap_t.
-//  */
-// void gfy_TransparentTilemap_NoClip(const gfy_tilemap_t *tilemap,
-//                                    uint24_t x_offset,
-//                                    uint24_t y_offset);
+/**
+ * Draws an unclipped transparent tilemap.
+ *
+ * @param[in] tilemap Pointer to initialized tilemap structure.
+ * @param[in] x_offset Offset in pixels from the left of the tilemap.
+ * @param[in] y_offset Offset in pixels from the top of the tilemap.
+ * @see gfy_tilemap_t.
+ */
+void gfy_TransparentTilemap_NoClip(const gfy_tilemap_t *tilemap,
+                                   uint24_t x_offset,
+                                   uint24_t y_offset);
 
 /**
  * Gets a pointer to a particular sprite tileset index.
@@ -1677,101 +1677,101 @@ uint16_t gfy_Darken(uint16_t color,
 //                    uint8_t y,
 //                    uint8_t color);
 
-// /**
-//  * Draws a sprite with RLE transparency.
-//  *
-//  * @param[in] sprite sprite to draw.
-//  * @param[in] x X coordinate.
-//  * @param[in] y Y coordinate.
-//  */
-// void gfy_RLETSprite(const gfy_rletsprite_t *sprite,
-//                     int x,
-//                     int y);
+/**
+ * Draws a sprite with RLE transparency.
+ *
+ * @param[in] sprite sprite to draw.
+ * @param[in] x X coordinate.
+ * @param[in] y Y coordinate.
+ */
+void gfy_RLETSprite(const gfy_rletsprite_t *sprite,
+                    int x,
+                    int y);
 
-// /**
-//  * Draws an unclipped sprite with RLE transparency.
-//  *
-//  * @param[in] sprite Sprite to draw.
-//  * @param[in] x X coordinate.
-//  * @param[in] y Y coordinate.
-//  */
-// void gfy_RLETSprite_NoClip(const gfy_rletsprite_t *sprite,
-//                            uint24_t x,
-//                            uint8_t y);
+/**
+ * Draws an unclipped sprite with RLE transparency.
+ *
+ * @param[in] sprite Sprite to draw.
+ * @param[in] x X coordinate.
+ * @param[in] y Y coordinate.
+ */
+void gfy_RLETSprite_NoClip(const gfy_rletsprite_t *sprite,
+                           uint24_t x,
+                           uint8_t y);
 
-// /**
-//  * Converts a sprite with RLE transparency to a sprite with normal transparency.
-//  *
-//  * Width and height will be set in the converted sprite.
-//  *
-//  * The transparent color index in the converted sprite is controlled by
-//  * gfy_SetTransparentColor().
-//  *
-//  * @attention
-//  * The output sprite must have been allocated with a large enough
-//  * \c data field to hold the converted sprite data, which will be
-//  * <tt>width * height</tt> bytes large.
-//  *
-//  * @param[in] sprite_in Input sprite with RLE transparency.
-//  * @param[out] sprite_out Converted sprite with normal transparency.
-//  * @returns The converted sprite.
-//  * @see gfy_ConvertMallocRLETSprite.
-//  * @see gfy_ConvertToRLETSprite.
-//  */
-// gfy_sprite_t *gfy_ConvertFromRLETSprite(const gfy_rletsprite_t *sprite_in,
-//                                         gfy_sprite_t *sprite_out);
+/**
+ * Converts a sprite with RLE transparency to a sprite with normal transparency.
+ *
+ * Width and height will be set in the converted sprite.
+ *
+ * The transparent color index in the converted sprite is controlled by
+ * gfy_SetTransparentColor().
+ *
+ * @attention
+ * The output sprite must have been allocated with a large enough
+ * \c data field to hold the converted sprite data, which will be
+ * <tt>width * height</tt> bytes large.
+ *
+ * @param[in] sprite_in Input sprite with RLE transparency.
+ * @param[out] sprite_out Converted sprite with normal transparency.
+ * @returns The converted sprite.
+ * @see gfy_ConvertMallocRLETSprite.
+ * @see gfy_ConvertToRLETSprite.
+ */
+gfy_sprite_t *gfy_ConvertFromRLETSprite(const gfy_rletsprite_t *sprite_in,
+                                        gfy_sprite_t *sprite_out);
 
-// /**
-//  * Converts a sprite with normal transparency to a sprite with RLE transparency.
-//  *
-//  * Width and height will be set in the converted sprite.
-//  *
-//  * The transparent color index in the input sprite is controlled by
-//  * gfy_SetTransparentColor().
-//  *
-//  * @attention
-//  * The output sprite must have been allocated with a large enough data field to
-//  * hold the converted sprite data; see gfy_AllocRLETSprite() for information.
-//  *
-//  * @note
-//  * To avoid needing to predict the output size and risking either the
-//  * prediction being too high and wasting space, or being too low and corrupting
-//  * memory, gfy_ConvertMallocRLETSprite() can be used instead to allocate the
-//  * exact amount of necessary space for the converted sprite.
-//  *
-//  * @param[in] sprite_in Input sprite with normal transparency.
-//  * @param[out] sprite_out Converted sprite with RLE transparency.
-//  * @returns The converted sprite.
-//  * @see gfy_ConvertFromRLETSprite.
-//  */
-// gfy_rletsprite_t *gfy_ConvertToRLETSprite(const gfy_sprite_t *sprite_in,
-//                                           gfy_rletsprite_t *sprite_out);
+/**
+ * Converts a sprite with normal transparency to a sprite with RLE transparency.
+ *
+ * Width and height will be set in the converted sprite.
+ *
+ * The transparent color index in the input sprite is controlled by
+ * gfy_SetTransparentColor().
+ *
+ * @attention
+ * The output sprite must have been allocated with a large enough data field to
+ * hold the converted sprite data; see gfy_AllocRLETSprite() for information.
+ *
+ * @note
+ * To avoid needing to predict the output size and risking either the
+ * prediction being too high and wasting space, or being too low and corrupting
+ * memory, gfy_ConvertMallocRLETSprite() can be used instead to allocate the
+ * exact amount of necessary space for the converted sprite.
+ *
+ * @param[in] sprite_in Input sprite with normal transparency.
+ * @param[out] sprite_out Converted sprite with RLE transparency.
+ * @returns The converted sprite.
+ * @see gfy_ConvertFromRLETSprite.
+ */
+gfy_rletsprite_t *gfy_ConvertToRLETSprite(const gfy_sprite_t *sprite_in,
+                                          gfy_rletsprite_t *sprite_out);
 
-// /**
-//  * Converts a sprite with normal transparency to a sprite with RLE transparency,
-//  * allocating the exact amount of necessary space for the converted sprite.
-//  *
-//  * Allocates the memory with \p malloc_routine. Width and height will be set in
-//  * the converted sprite. Returns \c NULL upon allocation failure.
-//  *
-//  * The transparent color index in the input sprite is controlled by
-//  * gfy_SetTransparentColor().
-//  *
-//  * @remarks
-//  * If using \c malloc as the \p malloc_routine, gfy_ConvertMallocRLETSprite()
-//  * can be used as a shortcut.
-//  *
-//  * @remarks
-//  * A gfy_sprite_t can be converted into an appropriately large,
-//  * already-allocated gfy_rletsprite_t using gfy_ConvertToRLETSprite().
-//  *
-//  * @param[in] sprite_in Input sprite with normal transparency.
-//  * @param[in] malloc_routine Malloc implementation to use.
-//  * @returns A newly allocated converted sprite with RLE transparency.
-//  * @see gfy_ConvertFromRLETSprite.
-//  */
-// gfy_rletsprite_t *gfy_ConvertToNewRLETSprite(const gfy_sprite_t *sprite_in,
-//                                              void *(*malloc_routine)(size_t));
+/**
+ * Converts a sprite with normal transparency to a sprite with RLE transparency,
+ * allocating the exact amount of necessary space for the converted sprite.
+ *
+ * Allocates the memory with \p malloc_routine. Width and height will be set in
+ * the converted sprite. Returns \c NULL upon allocation failure.
+ *
+ * The transparent color index in the input sprite is controlled by
+ * gfy_SetTransparentColor().
+ *
+ * @remarks
+ * If using \c malloc as the \p malloc_routine, gfy_ConvertMallocRLETSprite()
+ * can be used as a shortcut.
+ *
+ * @remarks
+ * A gfy_sprite_t can be converted into an appropriately large,
+ * already-allocated gfy_rletsprite_t using gfy_ConvertToRLETSprite().
+ *
+ * @param[in] sprite_in Input sprite with normal transparency.
+ * @param[in] malloc_routine Malloc implementation to use.
+ * @returns A newly allocated converted sprite with RLE transparency.
+ * @see gfy_ConvertFromRLETSprite.
+ */
+gfy_rletsprite_t *gfy_ConvertToNewRLETSprite(const gfy_sprite_t *sprite_in,
+                                             void *(*malloc_routine)(size_t));
 
 /* Compatibility defines (don't use please) */
 /* @cond */
