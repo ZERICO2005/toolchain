@@ -118,25 +118,25 @@ typedef struct gfy_region_t {
     int ymax; /**< Maximum y coordinate. */
 } gfy_region_t;
 
-// /**
-//  * Defines tilemap structure
-//  *
-//  * @see gfy_Tilemap
-//  */
-// typedef struct gfy_tilemap_t {
-//     uint8_t *map;            /**< Pointer to tilemap array. */
-//     gfy_sprite_t **tiles;    /**< Pointer to tileset sprites for the tilemap. */
-//     uint8_t tile_height;     /**< Individual tile height. */
-//     uint8_t tile_width;      /**< Individual tile width. */
-//     uint8_t draw_height;     /**< Number of tilemap rows to draw. */
-//     uint8_t draw_width;      /**< Number of tilemap columns to draw. */
-//     uint8_t type_width;      /**< Tile type height @see gfy_tilemap_type_t. */
-//     uint8_t type_height;     /**< Tile type width @see gfy_tilemap_type_t. */
-//     uint8_t height;          /**< Total number of rows in the tilemap. */
-//     uint8_t width;           /**< Total number of columns in the tilemap. */
-//     uint8_t y_loc;           /**< Y pixel location on the screen for the tilemap. */
-//     uint24_t x_loc;          /**< X pixel location on the screen for the tilemap. */
-// } gfy_tilemap_t;
+/**
+ * Defines tilemap structure
+ *
+ * @see gfy_Tilemap
+ */
+typedef struct gfy_tilemap_t {
+    uint8_t *map;            /**< Pointer to tilemap array. */
+    gfy_sprite_t **tiles;    /**< Pointer to tileset sprites for the tilemap. */
+    uint8_t tile_height;     /**< Individual tile height. */
+    uint8_t tile_width;      /**< Individual tile width. */
+    uint8_t draw_height;     /**< Number of tilemap rows to draw. */
+    uint8_t draw_width;      /**< Number of tilemap columns to draw. */
+    uint8_t type_width;      /**< Tile type height @see gfy_tilemap_type_t. */
+    uint8_t type_height;     /**< Tile type width @see gfy_tilemap_type_t. */
+    uint8_t height;          /**< Total number of rows in the tilemap. */
+    uint8_t width;           /**< Total number of columns in the tilemap. */
+    uint8_t y_loc;           /**< Y pixel location on the screen for the tilemap. */
+    uint24_t x_loc;          /**< X pixel location on the screen for the tilemap. */
+} gfy_tilemap_t;
 
 /**
  * Stores operating modes of this library.
@@ -146,21 +146,21 @@ typedef enum {
     gfy_8bpp = 0x27 /**< Enable 8 bits per pixel mode. */
 } gfy_mode_t;
 
-// /**
-//  * Used for defining tile types.
-//  *
-//  * @see gfy_tilemap_t.
-//  */
-// typedef enum {
-//     gfy_tile_no_pow2 = 0,     /**< Use when the tile width/height is not a power of 2. */
-//     gfy_tile_2_pixel,         /**< Use when the tile width/height is 2 pixels. */
-//     gfy_tile_4_pixel,         /**< Use when the tile width/height is 4 pixels. */
-//     gfy_tile_8_pixel,         /**< Use when the tile width/height is 8 pixels. */
-//     gfy_tile_16_pixel,        /**< Use when the tile width/height is 16 pixels. */
-//     gfy_tile_32_pixel,        /**< Use when the tile width/height is 32 pixels. */
-//     gfy_tile_64_pixel,        /**< Use when the tile width/height is 64 pixels. */
-//     gfy_tile_128_pixel        /**< Use when the tile width/height is 128 pixels. */
-// } gfy_tilemap_type_t;
+/**
+ * Used for defining tile types.
+ *
+ * @see gfy_tilemap_t.
+ */
+typedef enum {
+    gfy_tile_no_pow2 = 0,     /**< Use when the tile width/height is not a power of 2. */
+    gfy_tile_2_pixel,         /**< Use when the tile width/height is 2 pixels. */
+    gfy_tile_4_pixel,         /**< Use when the tile width/height is 4 pixels. */
+    gfy_tile_8_pixel,         /**< Use when the tile width/height is 8 pixels. */
+    gfy_tile_16_pixel,        /**< Use when the tile width/height is 16 pixels. */
+    gfy_tile_32_pixel,        /**< Use when the tile width/height is 32 pixels. */
+    gfy_tile_64_pixel,        /**< Use when the tile width/height is 64 pixels. */
+    gfy_tile_128_pixel        /**< Use when the tile width/height is 128 pixels. */
+} gfy_tilemap_type_t;
 
 /**
  * Different locations routines can be drawn to
@@ -387,62 +387,62 @@ gfy_sprite_t *name = (gfy_sprite_t *)name##_data
 // uint8_t name##_data[2 + (data_size)]; \
 // gfy_rletsprite_t *name = (gfy_rletsprite_t *)name##_data
 
-// /**
-//  * Sets a particular tile's sprite tileset index.
-//  * This function bases position on the pixel offset from the top-left of the tilemap.
-//  *
-//  * @param tilemap Pointer to initialized tilemap structure.
-//  * @param x_offset Offset in pixels from the left of the tilemap.
-//  * @param y_offset Offset in pixels from the top of the tilemap.
-//  * @param value Sprite index in tileset.
-//  */
-// #define gfy_SetTile(tilemap, x_offset, y_offset, value) \
-// (*(gfy_TilePtr((tilemap), (x_offset), (y_offset))) = (uint8_t)(value))
+/**
+ * Sets a particular tile's sprite tileset index.
+ * This function bases position on the pixel offset from the top-left of the tilemap.
+ *
+ * @param tilemap Pointer to initialized tilemap structure.
+ * @param x_offset Offset in pixels from the left of the tilemap.
+ * @param y_offset Offset in pixels from the top of the tilemap.
+ * @param value Sprite index in tileset.
+ */
+#define gfy_SetTile(tilemap, x_offset, y_offset, value) \
+(*(gfy_TilePtr((tilemap), (x_offset), (y_offset))) = (uint8_t)(value))
 
-// /**
-//  * Gets a particular tile's sprite tileset index.
-//  * This function bases position on the pixel offset from the top-left of the tilemap.
-//  *
-//  * @param[in] tilemap Pointer to an initialized tilemap structure.
-//  * @param[in] x_offset Offset in pixels from the left of the tilemap.
-//  * @param[in] y_offset Offset in pixels from the top of the tilemap.
-//  */
-// #define gfy_GetTile(tilemap, x_offset, y_offset) \
-// (*(gfy_TilePtr((tilemap), (x_offset), (y_offset))))
+/**
+ * Gets a particular tile's sprite tileset index.
+ * This function bases position on the pixel offset from the top-left of the tilemap.
+ *
+ * @param[in] tilemap Pointer to an initialized tilemap structure.
+ * @param[in] x_offset Offset in pixels from the left of the tilemap.
+ * @param[in] y_offset Offset in pixels from the top of the tilemap.
+ */
+#define gfy_GetTile(tilemap, x_offset, y_offset) \
+(*(gfy_TilePtr((tilemap), (x_offset), (y_offset))))
 
-// /**
-//  * Sets a particular tile's sprite tileset index.
-//  * This function uses the corrdinates from the tilemap array.
-//  *
-//  * @param[in] tilemap Pointer to initialized tilemap structure.
-//  * @param[in] col Column of tile in tilemap.
-//  * @param[in] row Row of tile in tilemap.
-//  * @param[in] value Sprite index in tileset.
-//  */
-// #define gfy_SetTileMapped(tilemap, col, row, value) \
-// (*(gfy_TilePtrMapped((tilemap), (col), (row))) = (uint8_t)(value))
+/**
+ * Sets a particular tile's sprite tileset index.
+ * This function uses the corrdinates from the tilemap array.
+ *
+ * @param[in] tilemap Pointer to initialized tilemap structure.
+ * @param[in] col Column of tile in tilemap.
+ * @param[in] row Row of tile in tilemap.
+ * @param[in] value Sprite index in tileset.
+ */
+#define gfy_SetTileMapped(tilemap, col, row, value) \
+(*(gfy_TilePtrMapped((tilemap), (col), (row))) = (uint8_t)(value))
 
-// /**
-//  * Gets a particular tile's sprite tileset index.
-//  * This function uses the corrdinates from the tilemap array.
-//  *
-//  * @param[in] tilemap Pointer to an initialized tilemap structure.
-//  * @param[in] col Column of tile in tilemap.
-//  * @param[in] row Row of tile in tilemap.
-//  */
-// #define gfy_GetTileMapped(tilemap, col, row) \
-// (*(gfy_TilePtrMapped((tilemap), (col), (row))))
+/**
+ * Gets a particular tile's sprite tileset index.
+ * This function uses the corrdinates from the tilemap array.
+ *
+ * @param[in] tilemap Pointer to an initialized tilemap structure.
+ * @param[in] col Column of tile in tilemap.
+ * @param[in] row Row of tile in tilemap.
+ */
+#define gfy_GetTileMapped(tilemap, col, row) \
+(*(gfy_TilePtrMapped((tilemap), (col), (row))))
 
-// /**
-//  * Draws an unclipped circle outline.
-//  *
-//  * Performs faster than using gfy_Circle, but can cause corruption if used outside the bounds of the screen.
-//  * @param[in] x X coordinate.
-//  * @param[in] y Y coordinate.
-//  * @param[in] radius The radius of the circle.
-//  */
-// #define gfy_Circle_NoClip(x, y, radius) \
-// gfy_Circle((x), (y), (radius))
+/**
+ * Draws an unclipped circle outline.
+ *
+ * Performs faster than using gfy_Circle, but can cause corruption if used outside the bounds of the screen.
+ * @param[in] x X coordinate.
+ * @param[in] y Y coordinate.
+ * @param[in] radius The radius of the circle.
+ */
+#define gfy_Circle_NoClip(x, y, radius) \
+gfy_Circle((x), (y), (radius))
 
 /**
  * Grabs the background behind an unclipped sprite.
@@ -482,7 +482,7 @@ gfy_GetSprite((sprite_buffer), (x), (y))
 //  * @see gfy_RotatedScaledTransparentSprite_NoClip.
 //  */
 // #define gfy_RotatedSprite_NoClip(sprite, x, y, angle) \
-gfy_RotatedScaledSprite_NoClip(sprite, x, y, angle, 64)
+// gfy_RotatedScaledSprite_NoClip(sprite, x, y, angle, 64)
 
 /**
  * Helper macro to only perform rotation using gfy_RotateScaleSprite.
@@ -635,17 +635,17 @@ gfy_sprite_t *gfy_AllocSprite(uint8_t width,
 //                  uint24_t x_offset,
 //                  uint24_t y_offset);
 
-// /**
-//  * Draws an unclipped tilemap.
-//  *
-//  * @param[in] tilemap Pointer to initialized tilemap structure.
-//  * @param[in] x_offset Offset in pixels from the left of the tilemap.
-//  * @param[in] y_offset Offset in pixels from the top of the tilemap.
-//  * @see gfy_tilemap_t.
-//  */
-// void gfy_Tilemap_NoClip(const gfy_tilemap_t *tilemap,
-//                             uint24_t x_offset,
-//                             uint24_t y_offset);
+/**
+ * Draws an unclipped tilemap.
+ *
+ * @param[in] tilemap Pointer to initialized tilemap structure.
+ * @param[in] x_offset Offset in pixels from the left of the tilemap.
+ * @param[in] y_offset Offset in pixels from the top of the tilemap.
+ * @see gfy_tilemap_t.
+ */
+void gfy_Tilemap_NoClip(const gfy_tilemap_t *tilemap,
+                            uint24_t x_offset,
+                            uint24_t y_offset);
 
 // /**
 //  * Draws a transparent tilemap.
@@ -671,29 +671,29 @@ gfy_sprite_t *gfy_AllocSprite(uint8_t width,
 //                                    uint24_t x_offset,
 //                                    uint24_t y_offset);
 
-// /**
-//  * Gets a pointer to a particular sprite tileset index.
-//  * This function bases position on the pixel offset from the top-left of the tilemap.
-//  *
-//  * @param[in] tilemap Pointer to initialized tilemap structure.
-//  * @param[in] x_offset Offset in pixels from the left of the tilemap.
-//  * @param[in] y_offset Offset in pixels from the top of the tilemap.
-//  */
-// uint8_t *gfy_TilePtr(const gfy_tilemap_t *tilemap,
-//                      uint24_t x_offset,
-//                      uint24_t y_offset);
+/**
+ * Gets a pointer to a particular sprite tileset index.
+ * This function bases position on the pixel offset from the top-left of the tilemap.
+ *
+ * @param[in] tilemap Pointer to initialized tilemap structure.
+ * @param[in] x_offset Offset in pixels from the left of the tilemap.
+ * @param[in] y_offset Offset in pixels from the top of the tilemap.
+ */
+uint8_t *gfy_TilePtr(const gfy_tilemap_t *tilemap,
+                     uint24_t x_offset,
+                     uint24_t y_offset);
 
-// /**
-//  * Gets a pointer to a particular sprite tileset index.
-//  * This function uses the corrdinates from the tilemap array.
-//  *
-//  * @param[in] tilemap Pointer to an initialized tilemap structure.
-//  * @param[in] col Column of tile in tilemap.
-//  * @param[in] row Row of tile in tilemap.
-//  */
-// uint8_t *gfy_TilePtrMapped(const gfy_tilemap_t *tilemap,
-//                            uint8_t col,
-//                            uint8_t row);
+/**
+ * Gets a pointer to a particular sprite tileset index.
+ * This function uses the corrdinates from the tilemap array.
+ *
+ * @param[in] tilemap Pointer to an initialized tilemap structure.
+ * @param[in] col Column of tile in tilemap.
+ * @param[in] row Row of tile in tilemap.
+ */
+uint8_t *gfy_TilePtrMapped(const gfy_tilemap_t *tilemap,
+                           uint8_t col,
+                           uint8_t row);
 
 /**
  * Sets the color index that drawing routines will use
@@ -890,38 +890,38 @@ void gfy_FillRectangle_NoClip(uint24_t x,
                               uint24_t width,
                               uint8_t height);
 
-// /**
-//  * Draws a circle outline.
-//  *
-//  * @param[in] x X coordinate.
-//  * @param[in] y Y coordinate.
-//  * @param[in] radius The radius of the circle.
-//  */
-// void gfy_Circle(int x,
-//                 int y,
-//                 uint24_t radius);
+/**
+ * Draws a circle outline.
+ *
+ * @param[in] x X coordinate.
+ * @param[in] y Y coordinate.
+ * @param[in] radius The radius of the circle.
+ */
+void gfy_Circle(int x,
+                int y,
+                uint24_t radius);
 
-// /**
-//  * Draws a filled circle.
-//  *
-//  * @param[in] x X coordinate.
-//  * @param[in] y Y coordinate.
-//  * @param[in] radius The radius of the circle.
-//  */
-// void gfy_FillCircle(int x,
-//                     int y,
-//                     uint24_t radius);
+/**
+ * Draws a filled circle.
+ *
+ * @param[in] x X coordinate.
+ * @param[in] y Y coordinate.
+ * @param[in] radius The radius of the circle.
+ */
+void gfy_FillCircle(int x,
+                    int y,
+                    uint24_t radius);
 
-// /**
-//  * Draws an unclipped filled circle.
-//  *
-//  * @param[in] x X coordinate.
-//  * @param[in] y Y coordinate.
-//  * @param[in] radius The radius of the circle.
-//  */
-// void gfy_FillCircle_NoClip(uint24_t x,
-//                            uint8_t y,
-//                            uint24_t radius);
+/**
+ * Draws an unclipped filled circle.
+ *
+ * @param[in] x X coordinate.
+ * @param[in] y Y coordinate.
+ * @param[in] radius The radius of the circle.
+ */
+void gfy_FillCircle_NoClip(uint24_t x,
+                           uint8_t y,
+                           uint24_t radius);
 
 // /**
 //  * Draws an unclipped filled ellipse.
@@ -1511,15 +1511,15 @@ gfy_sprite_t *gfy_RotateScaleSprite(const gfy_sprite_t *sprite_in,
                                     uint8_t angle,
                                     uint8_t scale);
 
-// /**
-//  * Creates a temporary character sprite.
-//  *
-//  * This may be useful for performing rotations and other.
-//  * operations on characters. The sprite returned is always 8x8 pixels.
-//  * @param[in] c Character to generate.
-//  * @returns A sprite of the character data.
-//  */
-// gfy_sprite_t *gfy_GetSpriteChar(char c);
+/**
+ * Creates a temporary character sprite.
+ *
+ * This may be useful for performing rotations and other.
+ * operations on characters. The sprite returned is always 8x8 pixels.
+ * @param[in] c Character to generate.
+ * @returns A sprite of the character data.
+ */
+gfy_sprite_t *gfy_GetSpriteChar(char c);
 
 /**
  * Sets the font's character data.
