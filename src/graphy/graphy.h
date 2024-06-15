@@ -98,13 +98,13 @@ typedef struct gfy_rletsprite_t {
     uint8_t data[]; /**< Image data array. */
 } gfy_rletsprite_t;
 
-// /**
-//  * A structure for working with 2D points.
-//  */
-// typedef struct gfy_point_t {
-//     int x; /**< x point. */
-//     int y; /**< y point. */
-// } gfy_point_t;
+/**
+ * A structure for working with 2D points.
+ */
+typedef struct gfy_point_t {
+    int x; /**< x point. */
+    int y; /**< y point. */
+} gfy_point_t;
 
 /**
  * Defines a rectangular graphics region.
@@ -1130,28 +1130,28 @@ void gfy_BlitRectangle(gfy_location_t src,
                        uint24_t width,
                        uint24_t height);
 
-// /**
-//  * Copies a rectangular region between graphics buffers or to the same graphics buffer.
-//  * The behavior is undefined when the rectangles overlap.
-//  * No clipping is performed as it is a copy not a draw.
-//  * @param[in] src Graphics buffer to copy from.i
-//  * @param[in] dst Graphics buffer to copy to.
-//  * @param[in] src_x X coordinate on src.
-//  * @param[in] src_y Y coordinate on src.
-//  * @param[in] dst_x X coordinate on dst.
-//  * @param[in] dst_y Y coordinate on dst.
-//  * @param[in] width Width of rectangle.
-//  * @param[in] height Height of rectangle.
-//  * @see gfy_location_t
-//  */
-// void gfy_CopyRectangle(gfy_location_t src,
-//                        gfy_location_t dst,
-//                        uint24_t src_x,
-//                        uint8_t src_y,
-//                        uint24_t dst_x,
-//                        uint8_t dst_y,
-//                        uint24_t width,
-//                        uint8_t height);
+/**
+ * Copies a rectangular region between graphics buffers or to the same graphics buffer.
+ * The behavior is undefined when the rectangles overlap.
+ * No clipping is performed as it is a copy not a draw.
+ * @param[in] src Graphics buffer to copy from.i
+ * @param[in] dst Graphics buffer to copy to.
+ * @param[in] src_x X coordinate on src.
+ * @param[in] src_y Y coordinate on src.
+ * @param[in] dst_x X coordinate on dst.
+ * @param[in] dst_y Y coordinate on dst.
+ * @param[in] width Width of rectangle.
+ * @param[in] height Height of rectangle.
+ * @see gfy_location_t
+ */
+void gfy_CopyRectangle(gfy_location_t src,
+                       gfy_location_t dst,
+                       uint24_t src_x,
+                       uint8_t src_y,
+                       uint24_t dst_x,
+                       uint8_t dst_y,
+                       uint24_t width,
+                       uint8_t height);
 
 /**
  * Sets the scaling for text. Scaling is performed by multiplying the
