@@ -284,7 +284,7 @@ extern "C"
  * tilemap_compressed   > 
  * floodfill            > 
  * shapes               > Bad - Incorrect Clipping - Missing Shapes
- * sprites_rlet         > 
+ * sprites_rlet         > Passed - Could be faster
  * text_custom          > 
 */
 
@@ -716,23 +716,23 @@ static void gfy_internal_PrintCharXY_NoClip(const char c, const uint8_t charWidt
     uint8_t *fillLinePtr = (uint8_t*)(gfy_CurrentBuffer + (posY + (posX * GFY_LCD_HEIGHT)));
     uint8_t b = 0x80;
     
-    for (uint8_t y = 0; y < 8; y++) {
-        for (uint8_t v = 0; v < gfy_TextWidthScale; v++) {
+    for (uint8_t x = 0; x < charWidth; x++) {
+        for (uint8_t u = 0; u < gfy_TextWidthScale; u++) {
             uint8_t *fillPtr = fillLinePtr;
-            for (uint8_t x = 0; x < charWidth; x++) {
+            for (uint8_t y = 0; y < 8; y++) {
                 const uint8_t fillColor = *bitImage & b ? gfy_Text_FG_Color : gfy_Text_BG_Color;
                 bitImage++;
                 if (fillColor == gfy_Text_TP_Color) {
                     fillPtr += gfy_TextHeightScale;
                     continue;
                 }
-                for (uint8_t u = 0; u < gfy_TextHeightScale; u++) {
+                for (uint8_t v = 0; v < gfy_TextHeightScale; v++) {
                     *fillPtr = fillColor;
                     fillPtr++;
                 }
             }
             fillLinePtr += GFY_LCD_HEIGHT;
-            bitImage -= charWidth;
+            bitImage -= 8;
         }
         b >>= 1;
     }
@@ -744,16 +744,14 @@ static void gfy_internal_PrintCharXY(const char c, int posX, int posY) {
     const uint8_t charWidth = gfy_GetCharWidth(c);
     const uint8_t textSizeX = charWidth * gfy_TextWidthScale;
     const uint8_t textSizeY = 8 * gfy_TextHeightScale;
-    if (gfy_PrintChar_Clip == gfy_text_clip) {
-        if (
-            gfy_PrintChar_Clip == gfy_text_noclip ||
-            /* Otherwise, if clipping is enabled */
-            posX >= gfy_ClipXMin || posY >= gfy_ClipYMin ||
-            posX + textSizeX <= gfy_ClipXMax ||
-            posY + textSizeY <= gfy_ClipYMax
-        ) {
-            gfy_internal_PrintCharXY_NoClip(c, charWidth, posX, posY);
-        }
+    if (
+        gfy_PrintChar_Clip == gfy_text_noclip ||
+        /* Otherwise, if clipping is enabled */
+        posX >= gfy_ClipXMin || posY >= gfy_ClipYMin ||
+        posX + textSizeX <= gfy_ClipXMax ||
+        posY + textSizeY <= gfy_ClipYMax
+    ) {
+        gfy_internal_PrintCharXY_NoClip(c, charWidth, posX, posY);
     }
 }
 
@@ -1325,7 +1323,7 @@ void gfy_ShiftRight(uint24_t pixels) {
 
 /* gfy_Tilemap */
 
-void gfy_Tilemap(const gfy_tilemap_t *tilemap, uint24_t x_offset, uint24_t y_offset) {
+void gfy_Tilemap(const gfy_tilemap_t* tilemap, uint24_t x_offset, uint24_t y_offset) {
     // Unoptimized and overclips a bit
     uint24_t map_row = x_offset / tilemap->tile_width;
     uint24_t map_col = y_offset / tilemap->tile_height;
