@@ -46,33 +46,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-/* Configuration */
-
-    /**
-     * Configures the graphy to use row-major graphx data instead of
-     * column-major graphy data. This may cause sprite and tilemap functions
-     * to run slower.
-     */
-    // #define USE_GRAPHX_SPRITE_DATA
-    
-    /**
-     * graphy will call additional graphx functions to ensure that internal
-     * variables will be in sync. Leaving this disabled can marginally improve
-     * performance and reduce the binary size slightly.
-     */
-    // #define IMPROVE_GRAPHX_COMPATIBILITY
-
-    #ifdef _EZ80
-        #ifndef RAM_ADDRESS
-            #define RAM_ADDRESS(x) ((void*)(x))
-        #endif
-        #ifndef RAM_OFFSET
-            #define RAM_OFFSET(ptr) ((uint24_t)(ptr))
-        #endif
-    #else
-        #include <PortCE.h>
-    #endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -100,13 +73,8 @@ extern "C" {
  * gfy_UninitedSprite(), or gfy_TempSprite().
  */
 typedef struct gfy_sprite_t {
-    #ifdef USE_GRAPHX_SPRITE_DATA
-        uint8_t width;   /**< Width of the image.  */
-        uint8_t height;  /**< Height of the image. */
-    #else
-        uint8_t height;  /**< Height of the image. */
-        uint8_t width;   /**< Width of the image.  */
-    #endif
+    uint8_t height;  /**< Height of the image. */
+    uint8_t width;   /**< Width of the image.  */
     uint8_t data[]; /**< Image data array.    */
 } gfy_sprite_t;
 
@@ -126,13 +94,8 @@ typedef struct gfy_sprite_t {
  * <a href="https://github.com/mateoconlechuga/convimg" target="_blank">convimg</a>.
  */
 typedef struct gfy_rletsprite_t {
-    #ifdef USE_GRAPHX_SPRITE_DATA
-        uint8_t width;   /**< Width of the image.  */
-        uint8_t height;  /**< Height of the image. */
-    #else
-        uint8_t width;  /**< Height of the image. */
-        uint8_t height;   /**< Width of the image.  */
-    #endif
+    uint8_t width;  /**< Height of the image. */
+    uint8_t height;   /**< Width of the image.  */
     uint8_t data[]; /**< Image data array. */
 } gfy_rletsprite_t;
 
