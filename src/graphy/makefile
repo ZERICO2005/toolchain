@@ -16,25 +16,26 @@
 
 include $(CURDIR)/../common.mk
 
-LIB_SRC := $(patsubst %,build/%.src,$(wildcard *.c *.cpp))
+BUILD_SRC := $(patsubst %,build/%.src,$(wildcard *.c *.cpp))
+LIB_SRC := graphy.asm
 LIB_LIB := graphy.lib
 LIB_8XV := graphy.8xv
 LIB_H := graphy.h
 
 EZCFLAGS := -Wall -Wextra -Wshadow -Oz
-EZCFLAGS += -D_EZ80 -isystem ../libc/include -isystem ../graphx
+EZCFLAGS += -D_EZ80 -isystem ../libc/include
 EZCXXFLAGS := $(EZCFLAGS) -fno-exceptions -fno-rtti
-EZCXXFLAGS += -isystem ../libc/include/c++
 
-WILDCARD_SRC = $(wildcard *.src) $(LIB_SRC)
+all: $(LIB_8XV) 
 
-all: $(LIB_SRC)
+$(LIB_8XV): $(BUILD_SRC)
+	$(Q)$(FASMG) $< $@
 
-build/%.c.src: %.c
+$(LIB_8XV): %.c
 	$(Q)$(call MKDIR,build)
 	$(Q)$(EZCC) $(EZCFLAGS) $< -o $@
 
-build/%.cpp.src: %.cpp
+$(LIB_8XV): %.cpp
 	$(Q)$(call MKDIR,build)
 	$(Q)$(EZCC) $(EZCXXFLAGS) $< -o $@
 
