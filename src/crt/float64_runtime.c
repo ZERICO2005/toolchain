@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <math.h>
 #include "../softfloat/include/softfloat.h"
 
 //------------------------------------------------------------------------------
@@ -23,6 +24,7 @@ typedef union F32_pun {
 
 /* long double _dneg_c(long double x) */
 
+#if 0
 long double _dadd_c(long double x, const long double *y) {
     F64_pun arg_x, arg_y, ret;
     arg_x.flt = x;
@@ -38,6 +40,37 @@ long double _dsub_c(long double x, const long double *y) {
     ret.soft = f64_sub(arg_x.soft, arg_y.soft);
     return ret.flt;
 }
+#else
+float64_t softfloat_addMagsF64( uint_fast64_t, uint_fast64_t, bool );
+float64_t softfloat_subMagsF64( uint_fast64_t, uint_fast64_t, bool );
+
+long double _dadd_c(long double x, const long double *y) {
+    F64_pun arg_x, arg_y, ret;
+    arg_x.flt = x;
+    arg_y.flt = *y;
+    bool sign_x = signbit(arg_x.flt);
+    if (sign_x == signbit(arg_y.flt)) {
+        ret.soft = softfloat_addMagsF64(arg_x.bin, arg_y.bin, sign_x);
+    } else {
+        ret.soft = softfloat_subMagsF64(arg_x.bin, arg_y.bin, sign_x);
+    }
+    return ret.flt;
+}
+
+long double _dsub_c(long double x, const long double *y) {
+    F64_pun arg_x, arg_y, ret;
+    arg_x.flt = x;
+    arg_y.flt = *y;
+    bool sign_x = signbit(arg_x.flt);
+    if (sign_x == signbit(arg_y.flt)) {
+        ret.soft = softfloat_subMagsF64(arg_x.bin, arg_y.bin, sign_x);
+    } else {
+        ret.soft = softfloat_addMagsF64(arg_x.bin, arg_y.bin, sign_x);
+    }
+    return ret.flt;
+}
+
+#endif
 
 long double _dmul_c(long double x, const long double *y) {
     F64_pun arg_x, arg_y, ret;
@@ -68,6 +101,9 @@ long double _drem_c(long double x, const long double *y) {
 //------------------------------------------------------------------------------
 // Convert to long double
 //------------------------------------------------------------------------------
+
+#if 0
+/* These functions have been inlined elsewhere */
 
 long double _ftod_c(float x) {
     F32_pun arg_x;
@@ -100,6 +136,8 @@ long double _ulltod_c(uint64_t x) {
     ret.soft = ui64_to_f64(x);
     return ret.flt;
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 // Convert from long double
