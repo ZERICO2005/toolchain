@@ -99,47 +99,6 @@ long double _drem_c(long double x, const long double *y) {
 /* int _dcmp_c(const long double *x, const long double* y) */
 
 //------------------------------------------------------------------------------
-// Convert to long double
-//------------------------------------------------------------------------------
-
-#if 0
-/* These functions have been inlined elsewhere */
-
-long double _ftod_c(float x) {
-    F32_pun arg_x;
-    F64_pun ret;
-    arg_x.flt = x;
-    ret.soft = f32_to_f64(arg_x.soft);
-    return ret.flt;
-}
-
-long double _ltod_c(int32_t x) {
-    F64_pun ret;
-    ret.soft = i32_to_f64(x);
-    return ret.flt;
-}
-
-long double _lltod_c(int64_t x) {
-    F64_pun ret;
-    ret.soft = i64_to_f64(x);
-    return ret.flt;
-}
-
-long double _ultod_c(uint32_t x) {
-    F64_pun ret;
-    ret.soft = ui32_to_f64(x);
-    return ret.flt;
-}
-
-long double _ulltod_c(uint64_t x) {
-    F64_pun ret;
-    ret.soft = ui64_to_f64(x);
-    return ret.flt;
-}
-
-#endif
-
-//------------------------------------------------------------------------------
 // Convert from long double
 //------------------------------------------------------------------------------
 
