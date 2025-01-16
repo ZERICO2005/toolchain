@@ -1,0 +1,22 @@
+	assume	adl=1
+
+	section	.text
+	public	_wmemcpy
+
+_wmemcpy:
+	ld	iy,0
+	add	iy,sp
+	; size_t count
+	ld	hl,(iy + 6)
+	; count *= sizeof(wchar_t)
+	adc	hl,hl
+	jr	z,.zero
+	; set bc to hl
+	push	hl
+	pop	bc
+	ld	de,(iy + 0)
+	ld	hl,(iy + 3)
+	ldir
+.zero:
+	ld	hl,(iy + 0)
+	ret
