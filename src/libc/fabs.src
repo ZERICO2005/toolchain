@@ -22,3 +22,10 @@ _fabsf:
 	ret
 
 end if
+
+_fabsl:
+	pop	iy, bc, hl, de
+	push	de, hl, bc, iy
+	res	7,d
+	ret
+	

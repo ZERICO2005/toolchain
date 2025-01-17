@@ -1,0 +1,43 @@
+	assume	adl=1
+
+	section	.text
+
+; needs testing
+if 0
+
+	public	__isinfl
+	
+__isinfl:
+	pop	iy, bc, de
+	dec	sp
+	pop	hl
+	inc sp
+	push	hl, de, bc, iy
+
+	res	7, h	; clear signbit
+	or	a, a
+	push	bc
+	ld	bc, $7FF000	; upper 24bits of Float64_exp_mask
+	sbc	hl, bc
+	pop	hl
+	jr	nz, .f64_finite
+	
+	add	hl, de
+	or	a, a
+	sbc	hl, de
+	jr	nz .f64_nan
+	; hl was zero, so the carry flag cannot have been set
+	ex	de, hl
+	sbc	hl, de
+	jr	nz .f64_nan
+	; both hl and de are zero
+	inc	hl
+	ret
+
+.f64_nan:
+.f64_finite:
+	or	a,a
+	sbc	hl,hl
+	ret
+	
+end if

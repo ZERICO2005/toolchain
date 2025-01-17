@@ -1,0 +1,43 @@
+	assume	adl=1
+
+	section	.text
+
+; needs testing
+if 0
+
+	public	__isinfl
+
+__isnanl:
+	pop	iy, bc, de
+	dec	sp
+	pop	hl
+	inc sp
+	push	hl, de, bc, iy
+
+	add	hl, hl	; clear signbit
+	push	bc
+	ld	bc, $2000	; (1 << (5 + 8))
+	add	hl, bc	; attempts to overflow the exponent
+	pop hl
+	jr	nc .f64_finite
+	
+	add	hl, de
+	or	a, a
+	sbc	hl, de
+	jr	nz .f64_nan
+	; hl was zero, so the carry flag cannot have been set
+	ex	de, hl
+	sbc	hl, de
+	jr	nz .f64_nan
+	; both hl and de are zero
+.f64_finite:
+	or	a,a
+	sbc	hl,hl
+	ret
+.f64_nan:
+	or	a,a
+	sbc	hl,hl
+	inc hl
+	ret
+	
+end if

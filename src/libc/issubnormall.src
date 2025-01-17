@@ -1,0 +1,7 @@
+	assume	adl=1
+
+	section	.text
+	
+; int _issubnormall(long double)
+
+; unimplemented

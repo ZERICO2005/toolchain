@@ -1,0 +1,54 @@
+	assume	adl=1
+
+	section	.text
+	
+	public	__iszerof, __iszerol
+
+; f32 ret i24
+__iszerof:
+	pop	bc, hl, de
+	push	de, hl, bc
+	; normal, inf, and NaN have non-zero exponents
+	ld	a, e
+	add	a, a; clears the signbit
+	jr	z .ret_false_fXX
+
+	; denormal input
+	add	hl, de
+	or	a, a
+	sbc	hl, de
+	jr	nz .ret_false_fXX
+	; hl is zero
+	inc	hl
+	ret
+
+.ret_false_fXX:
+	or	a, a
+	sbc	hl, hl
+	ret
+	
+; f64 ret i24
+__iszerol:
+	pop	iy, bc, hl, de
+	push	de, hl, bc, iy
+	; normal, inf, and NaN have non-zero exponents
+	ld	a, b
+	add	a, a; clears the signbit
+	or	a, c
+	jr	z .exp_zero_f64
+	sbc	hl, hl
+	ret
+.exp_zero_f64:
+	; denormal input
+	add	hl, de
+	or	a, a
+	sbc	hl, de
+	jr	nz .ret_false_fXX
+	; hl was zero, so the carry flag cannot have been set
+	ex	de, hl
+	sbc	hl, de
+	jr	nz .ret_false_fXX
+	; both hl and de are zero
+	inc	hl
+	ret
+	
