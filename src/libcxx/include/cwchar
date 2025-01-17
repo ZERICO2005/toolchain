@@ -1,0 +1,17 @@
+// -*- C++ -*-
+#ifndef _EZCXX_CWCHAR
+#define _EZCXX_CWCHAR
+
+#include <wchar.h>
+
+#pragma clang system_header
+
+namespace std {
+using ::wchar_t;
+
+using ::wmemset;
+using ::wmemcpy;
+using ::wmemmove;
+} // namespace std
+
+#endif // _EZCXX_CWCHAR

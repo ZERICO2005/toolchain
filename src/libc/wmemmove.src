@@ -1,0 +1,18 @@
+	assume	adl=1
+
+	section	.text
+
+	public	_wmemmove
+
+; wchar_t* wmemmove( wchar_t* dest, const wchar_t* src, size_t count )
+_wmemmove:
+	ld	hl, 9
+	add	hl, sp
+	ld	de, (hl)	; de = count
+	ex	de, hl
+	add	hl, hl	; de = count * 2
+	ex	de, hl
+	ld	(hl), de
+	jp	_memmove
+
+	extern	_memmove
