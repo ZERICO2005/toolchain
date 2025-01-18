@@ -1,6 +1,7 @@
 	assume	adl=1
 
 	section	.text
+	
 	public	_copysign, _copysignf
 _copysign:
 _copysignf:
@@ -33,4 +34,3 @@ _copysignl:
 	xor	a, (hl)
 	ld	(hl), a
 	ret
-	

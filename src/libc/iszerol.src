@@ -1,0 +1,35 @@
+	assume	adl=1
+
+	section	.text
+	
+	public	__iszerol
+
+; int iszerol(long double)
+__iszerol:
+	pop	iy, bc, hl, de
+	push	de, hl, bc, iy
+	; normal, inf, and NaN have non-zero exponents
+	ld	a, b
+	add	a, a; clears the signbit
+	or	a, c
+	jr	z .exp_zero_f64
+	sbc	hl, hl
+	ret
+.exp_zero_f64:
+	; __i48cmpzero
+	add	hl, de
+	or	a, a
+	sbc	hl, de
+	jr	nz, .mant_non_zero_f64
+	ex	de, hl
+	; hl was zero, so the carry flag cannot have been set
+	sbc	hl, de
+	jr	nz, .mant_non_zero_f64
+	inc	hl
+	ret
+	
+.mant_non_zero_f64:
+	or	a, a
+	sbc	hl, hl
+	inc hl
+	ret

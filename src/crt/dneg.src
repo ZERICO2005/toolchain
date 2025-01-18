@@ -3,11 +3,10 @@
 	section	.text
 
 	public	__dneg
-	
+
+; assumes BC:UDE:UHL
 __dneg:
-	push	af
-	ld	a, b
-	xor	a, -128
-	ld	b, a
-	pop	af
+	rl	b
+	ccf
+	rr	b
 	ret

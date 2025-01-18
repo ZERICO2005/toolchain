@@ -2,25 +2,25 @@
 
 	section	.text
 
-; needs testing
-if 0
-
-	public	__isinfl
+	public	__isnanl
 
 __isnanl:
 	pop	iy, bc, de
 	dec	sp
-	pop	hl
-	inc sp
+	pop	hl	; loads the upper 24bits instead of the upper 16bits
+	inc	sp
 	push	hl, de, bc, iy
 
 	add	hl, hl	; clear signbit
 	push	bc
 	ld	bc, $2000	; (1 << (5 + 8))
 	add	hl, bc	; attempts to overflow the exponent
-	pop hl
-	jr	nc .f64_finite
-	
+	pop	hl
+	jr	c .f64_non_finite:
+	sbc	hl, hl
+	ret	; most common path
+
+.f64_non_finite:
 	add	hl, de
 	or	a, a
 	sbc	hl, de
@@ -30,14 +30,10 @@ __isnanl:
 	sbc	hl, de
 	jr	nz .f64_nan
 	; both hl and de are zero
-.f64_finite:
-	or	a,a
-	sbc	hl,hl
 	ret
+
 .f64_nan:
 	or	a,a
 	sbc	hl,hl
-	inc hl
+	inc	hl
 	ret
-	
-end if

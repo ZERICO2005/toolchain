@@ -1,7 +1,42 @@
 	assume	adl=1
 
 	section	.text
-	
-; int _issubnormall(long double)
 
-; unimplemented
+	public	_issubnormall
+
+; int _issubnormall(long double)
+__issubnormall:
+	pop	iy, de, hl, bc
+	push	bc, de, hl, iy
+	
+	ld	a, b	; upper 8bits of the exponent
+	add	a, a
+	jr	z, .upper_exp_all_zero
+	; most common path
+	or	a, a
+.exp_non_zero:
+	sbc	hl, hl
+	ret
+	
+.mant_non_zero:
+	or	a, a
+	sbc	hl, hl
+	inc	hl
+	ret
+
+; normal, zero, or subnormal
+.upper_exp_all_zero
+	ld	a, c	; lower 8bits of the exponent
+	tst	a, $F0
+	jr	nz .exp_non_zero
+	
+	; __i48cmpzero
+	add	hl, de
+	or	a, a
+	sbc	hl, de
+	jr	nz, .mant_non_zero
+	ex	de, hl
+	; hl was zero, so the carry flag cannot have been set
+	sbc	hl, de
+	jr	nz, .mant_non_zero
+	ret
