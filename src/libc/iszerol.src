@@ -6,13 +6,13 @@
 
 ; int iszerol(long double)
 __iszerol:
-	pop	iy, bc, hl, de
-	push	de, hl, bc, iy
+	pop	iy, de, hl, bc
+	push	bc, hl, de, iy
 	; normal, inf, and NaN have non-zero exponents
 	ld	a, b
-	add	a, a; clears the signbit
+	add	a, a	; clears the signbit
 	or	a, c
-	jr	z .exp_zero_f64
+	jr	z, .exp_zero_f64
 	sbc	hl, hl
 	ret
 .exp_zero_f64:
@@ -31,5 +31,4 @@ __iszerol:
 .mant_non_zero_f64:
 	or	a, a
 	sbc	hl, hl
-	inc hl
 	ret

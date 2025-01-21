@@ -4,39 +4,36 @@
 
 	public	__isinfl
 	
+; int _isinfl(long double)
 __isinfl:
-	pop	iy, bc, de
-	dec	sp
-	pop	hl	; loads the upper 24bits instead of the upper 16bits
-	inc	sp
-	push	hl, de, bc, iy
-
-	; tests if hl equals the upper 24bits of infinity
-	res	7, h	; clear signbit
+	; load upper 24bits
+	ld	hl, 8	
+	add	hl, sp
+	ld	hl, (hl)
+	; clear signbit
+	add	hl, hl
 	or	a, a
-	push	bc
-	ld	bc, $7FF000	; upper 24bits of Float64_exp_mask
+	ld	bc, $FFE000
 	sbc	hl, bc
-	pop	hl
-	jr	nz, .f64_finite_nan	; most common NaN
+	jr	z, .mantissa_check
+	; finite and common NaN
+.mant_non_zero:
+	or	a, a
+	sbc	hl, hl
+	ret
 	
-	; We know that UHL is zero here
-	
+.mantissa_check:
+	pop	bc, hl, de
+	push	de, hl, bc
 	; __i40cmpzero
 	add	hl, de
 	or	a, a
 	sbc	hl, de
-	jr	nz .f64_nan
+	jr	nz, .mant_non_zero
 	; hl was zero, so the carry flag cannot have been set
 	ex	de, hl
 	sbc	hl, de
-	jr	nz .f64_nan
+	jr	nz, .mant_non_zero
 	; both hl and de are zero
 	inc	hl
-	ret
-
-.f64_nan:
-.f64_finite_nan:
-	or	a,a
-	sbc	hl,hl
 	ret
