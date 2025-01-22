@@ -1,0 +1,15 @@
+// -*- C++ -*-
+#ifndef _EZCXX_CINTTYPES
+#define _EZCXX_CINTTYPES
+
+#include <inttypes.h>
+
+#pragma clang system_header
+
+namespace std {
+using ::imaxabs;
+using ::imaxdiv_t;
+using ::imaxdiv;
+} // namespace std
+
+#endif // _EZCXX_CINTTYPES

@@ -64,4 +64,4 @@
 
 #define  FLT_ROUNDS      ((__fe_cur_env ^ 1) & 3)
 
-#endif
+#endif /* _FLOAT_H */

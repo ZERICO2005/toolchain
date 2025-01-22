@@ -15,10 +15,13 @@ using ::free;
 using ::atof;
 using ::atoi;
 using ::atol;
+using ::atoll;
 using ::strtof;
 using ::strtod;
 using ::strtol;
+using ::strtoll;
 using ::strtoul;
+using ::strtoull;
 
 using ::srand;
 using ::rand;
@@ -36,8 +39,10 @@ using ::_Exit;
 
 using ::abs;
 using ::labs;
+using ::llabs;
 using ::div;
 using ::ldiv;
+using ::lldiv;
 } // namespace std
 
 #endif // _EZCXX_CSTDLIB
