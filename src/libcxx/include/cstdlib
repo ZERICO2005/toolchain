@@ -17,6 +17,7 @@ using ::atoi;
 using ::atol;
 using ::strtof;
 using ::strtod;
+using ::strtold;
 using ::strtol;
 using ::strtoul;
 
