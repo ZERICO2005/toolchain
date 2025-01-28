@@ -1102,6 +1102,8 @@ void gfy_BlitLines(gfy_location_t src,
                 uint8_t y_loc,
                 uint8_t num_lines);
 
+#define gfy_BlitRows gfy_BlitLines
+
 /**
  * Copies columns from the input buffer to the opposite buffer.
  *

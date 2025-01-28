@@ -1099,6 +1099,8 @@ void gfx_BlitLines(gfx_location_t src,
                    uint8_t y_loc,
                    uint8_t num_lines);
 
+#define gfx_BlitRows gfx_BlitLines
+
 /**
  * Transfers a rectangle from the source graphics buffer to the opposite
  * buffer.
@@ -1116,6 +1118,18 @@ void gfx_BlitRectangle(gfx_location_t src,
                        uint8_t y,
                        uint24_t width,
                        uint24_t height);
+
+/**
+ * Copies columns from the input buffer to the opposite buffer.
+ *
+ * No clipping is performed as it is a copy not a draw.
+ * @param[in] src drawing location to copy from.
+ * @param[in] x_loc X Location to begin copying at.
+ * @param[in] num_columns Number of columns to copy.
+ * @see gfx_location_t.
+ */
+#define gfx_BlitColumns(src, x_loc, num_columns) \
+gfx_BlitRectangle(src, x_loc, 0, num_lines, GFX_LCD_HEIGHT)
 
 /**
  * Copies a rectangular region between graphics buffers or to the same graphics buffer.
