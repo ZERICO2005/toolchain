@@ -16,7 +16,6 @@
 
 include $(CURDIR)/../common.mk
 
-BUILD_SRC := $(patsubst %,build/%.src,$(wildcard *.c *.cpp))
 LIB_SRC := graphy.asm
 LIB_LIB := graphy.lib
 LIB_8XV := graphy.8xv
@@ -24,22 +23,18 @@ LIB_H := graphy.h
 
 EZCFLAGS := -Wall -Wextra -Wshadow -Oz
 EZCFLAGS += -D_EZ80 -isystem ../libc/include
-EZCXXFLAGS := $(EZCFLAGS) -fno-exceptions -fno-rtti
 
-all: $(LIB_8XV) 
+all: $(LIB_8XV)
 
-$(LIB_8XV): $(BUILD_SRC)
-	$(Q)$(FASMG) $< $@
-
-$(LIB_8XV): %.c
+build/graphy.c.asm: graphy.c
 	$(Q)$(call MKDIR,build)
 	$(Q)$(EZCC) $(EZCFLAGS) $< -o $@
 
-$(LIB_8XV): %.cpp
-	$(Q)$(call MKDIR,build)
-	$(Q)$(EZCC) $(EZCXXFLAGS) $< -o $@
+$(LIB_8XV): $(LIB_SRC) build/graphy.c.asm
+	$(Q)$(FASMG) $< $@
 
 clean:
+	$(Q)$(call REMOVE,$(LIB_LIB) $(LIB_8XV))
 	$(Q)$(call RMDIR,build)
 
 install: all

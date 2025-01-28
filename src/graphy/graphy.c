@@ -11,14 +11,9 @@
  * GraphY will use lcddrvce to send SPI commands to enable/disable Column-Major
  * mode on the LCD. Otherwise, generic code will be used to send the SPI
  * commands, which may or may not work on all Ti84CE models.
- *
- * GRAPHY_SHARE_SYMBOLS:
- * GraphY will reuse symbols from `graphx.asm` to cut down on binary size.
- *
  */
 
 #define GRAPHY_LCDDRVCE
-// #define GRAPHY_SHARE_SYMBOLS
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -167,34 +162,22 @@
 // global variables
 //------------------------------------------------------------------------------
 
-#ifdef GRAPHY_SHARE_SYMBOLS
+#if 1
 
-extern const uint8_t _DefaultCharSpacing[160];
-extern const uint8_t _DefaultTextData[1024];
-extern const uint8_t *_CharSpacing;
-extern const uint8_t *_TextData;
-#define gfy_DefaultCharSpacing _DefaultCharSpacing
-#define gfy_DefaultTextData    _DefaultTextData
-#define gfy_CharSpacing        _CharSpacing
-#define gfy_TextData           _TextData
+extern const uint8_t gfy_DefaultCharSpacing[160];
+extern const uint8_t gfy_DefaultTextData[1024];
+extern const uint8_t* gfy_CharSpacing;
+extern const uint8_t* gfy_TextData;
 
-extern int24_t _TextXPos;
-extern int24_t _TextYPos;
-extern uint8_t _TextWidthScale;
-extern uint8_t _TextHeightScale;
-extern uint8_t _PrintChar_Clip;
-extern uint8_t _FontHeight;
-extern uint8_t _TextFixedWidth;
-#define gfy_TextXPos        _TextXPos
-#define gfy_TextYPos        _TextYPos
-#define gfy_TextWidthScale  _TextWidthScale
-#define gfy_TextHeightScale _TextHeightScale
-#define gfy_PrintChar_Clip  _PrintChar_Clip
-#define gfy_FontHeight      _FontHeight
-#define gfy_MonospaceFont   _TextFixedWidth
+extern int24_t gfy_TextXPos;
+extern int24_t gfy_TextYPos;
+extern uint8_t gfy_TextWidthScale;
+extern uint8_t gfy_TextHeightScale;
+extern uint8_t gfy_PrintChar_Clip;
+extern uint8_t gfy_FontHeight;
+extern uint8_t gfy_MonospaceFont;
 
-extern uint8_t _TmpCharSprite[sizeof(gfy_sprite_t) + (8 * 8)];
-#define gfy_TmpCharSprite (*(gfy_sprite_t*)_TmpCharSprite)
+extern gfy_sprite_t *gfy_TmpCharSprite;
 
 extern uint8_t _Color;
 extern uint8_t TRANSPARENT_COLOR;
@@ -207,14 +190,12 @@ extern uint8_t TEXT_TP_COLOR;
 #define gfy_Text_BG_Color     TEXT_BG_COLOR
 #define gfy_Text_TP_Color     TEXT_TP_COLOR
 
-extern int24_t _ClipXMin;
-extern int24_t _ClipYMin;
-extern int24_t _ClipXMax;
-extern int24_t _ClipYMax;
-#define gfy_ClipXMin _ClipXMin
-#define gfy_ClipYMin _ClipYMin
-#define gfy_ClipXMax _ClipXMax
-#define gfy_ClipYMax _ClipYMax
+extern int24_t gfy_ClipXMin;
+extern int24_t gfy_ClipYMin;
+extern int24_t gfy_ClipXMax;
+extern int24_t gfy_ClipYMax;
+
+extern const int8_t gfy_SineTable[65];
 
 #else
 
@@ -390,6 +371,14 @@ static int24_t gfy_ClipYMin = 0;
 static int24_t gfy_ClipXMax = GFY_LCD_WIDTH;
 static int24_t gfy_ClipYMax = GFY_LCD_HEIGHT;
 
+static const int8_t gfy_SineTable[65] = {
+    0  ,3  ,6  ,9  ,  13 ,16 ,19 ,22 ,  25 ,28 ,31 ,34 ,  37 ,40 ,43 ,46 ,
+    49 ,52 ,55 ,58 ,  60 ,63 ,66 ,68 ,  71 ,74 ,76 ,79 ,  81 ,84 ,86 ,88 ,
+    91 ,93 ,95 ,97 ,  99 ,101,103,105,  106,108,110,111,  113,114,116,117,
+    118,119,121,122,  122,123,124,125,  126,126,127,127,  127,127,127,127,
+    127
+};
+
 #endif
 
 //------------------------------------------------------------------------------
@@ -406,7 +395,7 @@ static void gfy_InitColumnMajor(void) {
 }
 
 static void gfy_RestoreRowMajor(void) {
-   	lcd_SendCommand1(LCD_CMD_MADCTL, 0b00101000);
+    lcd_SendCommand1(LCD_CMD_MADCTL, 0b00101000);
     lcd_SendSizedCommandWords(CASET, 2, 0, 319);
     lcd_SendSizedCommandWords(RASET, 2, 0, 239);
     lcd_Cleanup();
@@ -429,14 +418,6 @@ static void gfy_RestoreRowMajor(void) {
 // internal routines
 //------------------------------------------------------------------------------
 
-static const int8_t gfy_SinTable[65] = {
-    0  ,3  ,6  ,9  ,  13 ,16 ,19 ,22 ,  25 ,28 ,31 ,34 ,  37 ,40 ,43 ,46 ,
-    49 ,52 ,55 ,58 ,  60 ,63 ,66 ,68 ,  71 ,74 ,76 ,79 ,  81 ,84 ,86 ,88 ,
-    91 ,93 ,95 ,97 ,  99 ,101,103,105,  106,108,110,111,  113,114,116,117,
-    118,119,121,122,  122,123,124,125,  126,126,127,127,  127,127,127,127,
-    127
-};
-
 /**
  * @brief Calculates sin(x) from a lookup table.
  * 
@@ -446,14 +427,14 @@ static const int8_t gfy_SinTable[65] = {
 __attribute__((unused)) static uint8_t gfy_Sin(uint8_t theta) {
     if (theta < 128) {
         if (theta < 64) {
-            return gfy_SinTable[theta]; // 0-63
+            return gfy_SineTable[theta]; // 0-63
         }
-        return gfy_SinTable[128 - theta]; // 64-127
+        return gfy_SineTable[128 - theta]; // 64-127
     }
     if (theta < 192) {
-        return -gfy_SinTable[theta - 128]; // 128-191
+        return -gfy_SineTable[theta - 128]; // 128-191
     }
-    return -gfy_SinTable[256 - theta]; // 192-255
+    return -gfy_SineTable[256 - theta]; // 192-255
 }
 
 /**
@@ -476,7 +457,7 @@ void gfy_Begin(void) {
 
     gfx_Begin();
 
-    #ifndef GRAPHY_SHARE_SYMBOLS
+    #if 1
         // Resetting globals
         gfy_Color = 0;
         gfy_Transparent_Color = 0;
@@ -513,48 +494,17 @@ void gfy_End(void) {
     gfx_End();
 }
 
-/* gfy_SetColor */
-
-#ifndef GRAPHY_SHARE_SYMBOLS
-uint8_t gfy_SetColor(uint8_t index) {
-    const uint8_t prev_Color = gfy_Color;
-    gfy_Color = index;
-    return prev_Color;
-}
-#else
-uint8_t gfy_SetColor(uint8_t) __attribute__((alias("gfx_SetColor")));
-#endif
-
-/* gfy_SetDefaultPalette */
-
-#if 0
-    __attribute__((unused)) static const uint16_t gfy_internal_default_palette[256] = {
-
-    };
-#endif
+/* gfy_SetColor (graphy.asm) */
 
 
-// void gfy_SetDefaultPalette(__attribute__((unused)) gfy_mode_t mode) {
-//     gfx_SetDefaultPalette((gfx_mode_t)mode);
-// }
 
-void gfy_SetDefaultPalette(gfy_mode_t) __attribute__((alias("gfx_SetDefaultPalette")));
+/* gfy_SetDefaultPalette (graphy.asm) */
 
-/* gfy_SetPalette */
+/* gfy_SetPalette (graphy.asm) */
 
-void gfy_SetPalette(const void*, uint24_t, uint8_t) __attribute__((alias("gfx_SetPalette")));
+/* gfy_FillScreen (graphy.asm) */
 
-/* gfy_FillScreen */
-
-void gfy_FillScreen(uint8_t) __attribute__((alias("gfx_FillScreen")));
-
-/* gfy_SetPixel */
-
-void gfy_SetPixel(uint24_t x, uint8_t y) {
-    if (x < GFY_LCD_WIDTH && y < GFY_LCD_HEIGHT) {
-        ((uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer))[(uint24_t)y + (x * GFY_LCD_HEIGHT)] = gfy_Color;
-    }
-}
+/* gfy_SetPixel (graphy.asm) */
 
 // Macro to write a pixel without clipping
 #define gfy_SetPixel_NoClip(x, y, color) \
@@ -575,29 +525,15 @@ void gfy_SetPixel(uint24_t x, uint8_t y) {
         ((uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer))[(y) + ((x) * GFY_LCD_HEIGHT)] = (color); \
     }
 
-/* gfy_GetPixel */
+/* gfy_GetPixel (graphy.asm) */
 
-uint8_t gfy_GetPixel(uint24_t x, uint8_t y) {
-    return ((const uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer))[(uint24_t)y + ((x & 0xFFFF) * GFY_LCD_HEIGHT)];
-}
+/* gfy_GetDraw (graphy.asm) */
 
-/* gfy_GetDraw */
+/* gfy_SetDraw (graphy.asm) */
 
-uint8_t gfy_GetDraw(void) __attribute__((alias("gfx_GetDraw")));
+/* gfy_SwapDraw (graphy.asm) */
 
-/* gfy_SetDraw */
-
-void gfy_SetDraw(uint8_t) __attribute__((alias("gfx_SetDraw")));
-
-/* gfy_SwapDraw */
-
-void gfy_SwapDraw(void) __attribute__((alias("gfx_SwapDraw")));
-
-/* gfy_Blit */
-
-void gfy_Blit(gfy_location_t src) {
-    gfx_Blit((gfx_location_t)src);
-}
+/* gfy_Blit (graphy.asm) */
 
 /* gfy_BlitLines */
 
@@ -812,88 +748,23 @@ void gfy_PrintStringXY(const char *string, int24_t x, int24_t y) {
     }
 }
 
-/* gfy_SetTextXY */
+/* gfy_SetTextXY (graphy.asm) */
 
-#ifdef GRAPHY_SHARE_SYMBOLS
-void gfy_SetTextXY(int24_t x, int24_t y) {
-    gfy_TextXPos = x;
-    gfy_TextYPos = y;
-}
-#else
-void gfy_SetTextXY(int24_t, int24_t) __attribute__((alias("gfx_SetTextXY")));
-#endif
+/* gfy_SetTextBGColor (graphy.asm) */
 
-/* gfy_SetTextBGColor */
+/* gfy_SetTextFGColor (graphy.asm) */
 
-#ifndef GRAPHY_SHARE_SYMBOLS
-uint8_t gfy_SetTextBGColor(uint8_t color) {
-    const uint8_t prev_Color = gfy_Text_BG_Color;
-    gfy_Text_BG_Color = color;
-    return prev_Color;
-}
-#else
-uint8_t gfy_SetTextBGColor(uint8_t) __attribute__((alias("gfx_SetTextBGColor")));
-#endif
+/* gfy_SetTextTransparentColor (graphy.asm) */
 
-/* gfy_SetTextFGColor */
+/* gfy_SetFontData (graphy.asm) */
 
-#ifndef GRAPHY_SHARE_SYMBOLS
-uint8_t gfy_SetTextFGColor(uint8_t color) {
-    const uint8_t prev_Color = gfy_Text_FG_Color;
-    gfy_Text_FG_Color = color;
-    return prev_Color;
-}
-#else
-uint8_t gfy_SetTextFGColor(uint8_t) __attribute__((alias("gfx_SetTextFGColor")));
-#endif
+/* gfy_SetFontSpacing (graphy.asm) */
 
-/* gfy_SetTextTransparentColor */
+/* gfy_SetMonospaceFont (graphy.asm) */
 
-#ifndef GRAPHY_SHARE_SYMBOLS
-uint8_t gfy_SetTextTransparentColor(uint8_t color) {
-    const uint8_t prev_Color = gfy_Text_TP_Color;
-    gfy_Text_TP_Color = color;
-    return prev_Color;
-}
-#else
-uint8_t gfy_SetTextTransparentColor(uint8_t) __attribute__((alias("gfx_SetTextTransparentColor")));
-#endif
+/* gfy_GetStringWidth (graphy.asm) */
 
-/* gfy_SetFontData */
-
-#ifndef GRAPHY_SHARE_SYMBOLS
-uint8_t *gfy_SetFontData(const uint8_t *data) {
-    uint8_t* temp = (uint8_t*)gfy_TextData;
-    gfy_TextData = (data == NULL) ? gfy_DefaultTextData : data;
-    return temp;
-}
-#else
-uint8_t *gfy_SetFontData(const uint8_t*) __attribute__((alias("gfx_SetFontData")));
-#endif
-
-/* gfy_SetFontSpacing */
-
-#ifndef GRAPHY_SHARE_SYMBOLS
-void gfy_SetFontSpacing(const uint8_t *data) {
-    gfy_CharSpacing = (data == NULL) ? gfy_DefaultCharSpacing : data;
-}
-#else
-void gfy_SetFontSpacing(const uint8_t*) __attribute__((alias("gfx_SetFontSpacing")));
-#endif
-
-/* gfy_SetMonospaceFont */
-
-#ifndef GRAPHY_SHARE_SYMBOLS
-void gfy_SetMonospaceFont(uint8_t spacing) {
-    gfy_MonospaceFont = spacing;
-}
-#else
-void gfy_SetMonospaceFont(uint8_t spacing) __attribute__((alias("gfx_SetMonospaceFont")));
-#endif
-
-/* gfy_GetStringWidth */
-
-#ifndef GRAPHY_SHARE_SYMBOLS
+#if 0
 uint24_t gfy_GetStringWidth(const char *string) {
     uint24_t len = 0;
     while (*string != '\0') {
@@ -902,39 +773,13 @@ uint24_t gfy_GetStringWidth(const char *string) {
     }
     return len * gfy_TextWidthScale;
 }
-#else
-uint24_t gfy_GetStringWidth(const char*) __attribute__((alias("gfx_GetStringWidth")));
 #endif
 
-/* gfy_GetCharWidth */
+/* gfy_GetCharWidth (graphy.asm) */
 
-#ifndef GRAPHY_SHARE_SYMBOLS
-uint24_t gfy_GetCharWidth(char c) {
-    return (gfy_MonospaceFont != 0) ? gfy_MonospaceFont : gfy_CharSpacing[(unsigned char)c];
-}
-#else
-uint24_t gfy_GetCharWidth(char) __attribute__((alias("gfx_GetCharWidth")));
-#endif
+/* gfy_GetTextX (graphy.asm) */
 
-/* gfy_GetTextX */
-
-#ifndef GRAPHY_SHARE_SYMBOLS
-int24_t gfy_GetTextX(void) {
-    return gfy_TextXPos;
-}
-#else
-int24_t gfy_GetTextX(void) __attribute__((alias("gfx_GetTextX")));
-#endif
-
-/* gfy_GetTextY */
-
-#ifndef GRAPHY_SHARE_SYMBOLS
-int24_t gfy_GetTextY(void) {
-    return gfy_TextYPos;
-}
-#else
-int24_t gfy_GetTextY(void) __attribute__((alias("gfx_GetTextY")));
-#endif
+/* gfy_GetTextY (graphy.asm) */
 
 /* gfy_Line */
 
@@ -1040,8 +885,9 @@ void gfy_VertLine(int24_t x, int24_t y, int24_t length) {
     gfy_VertLine_NoClip(x, y, length);
 }
 
-/* gfy_Circle */
+/* gfy_Circle (graphy.asm) */
 
+#if 0
 // https://zingl.github.io/bresenham.html
 /** @todo make function pixel perfect */
 void gfy_Circle(
@@ -1066,6 +912,7 @@ void gfy_Circle(
         }
     } while (x_pos < 0);
 }
+#endif
 
 /* gfy_FillCircle */
 
@@ -1094,14 +941,16 @@ void gfy_FillCircle(
     } while (x_pos < 0);
 }
 
-/* gfy_Rectangle */
+/* gfy_Rectangle (graphy.asm) */
 
+#if 0
 void gfy_Rectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
     gfy_HorizLine(x            , y             , width );
     gfy_HorizLine(x            , y + height - 1, width );
     gfy_VertLine (x            , y             , height);
     gfy_VertLine (x + width - 1, y             , height);
 }
+#endif
 
 /* gfy_FillRectangle */
 
@@ -1257,9 +1106,9 @@ void gfy_FillRectangle_NoClip(uint24_t x, uint8_t y, uint24_t width, uint8_t hei
     }
 }
 
-/* gfy_SetClipRegion */
+/* gfy_SetClipRegion (graphy.asm) */
 
-#ifndef GRAPHY_SHARE_SYMBOLS
+#if 0
 void gfy_SetClipRegion(int24_t xmin, int24_t ymin, int24_t xmax, int24_t ymax) {
     xmin = (xmin <  0) ? 0 : xmin; xmin = (xmin >= GFY_LCD_WIDTH ) ? (GFY_LCD_WIDTH -  1) : xmin;
     ymin = (ymin <  0) ? 0 : ymin; ymin = (ymin >= GFY_LCD_HEIGHT) ? (GFY_LCD_HEIGHT - 1) : ymin;
@@ -1270,30 +1119,26 @@ void gfy_SetClipRegion(int24_t xmin, int24_t ymin, int24_t xmax, int24_t ymax) {
     gfy_ClipXMax = xmax;
     gfy_ClipYMax = ymax;
 }
-#else
-void gfy_SetClipRegion(int24_t, int24_t, int24_t, int24_t) __attribute__((alias("gfx_SetClipRegion")));
 #endif
 
-/* gfy_GetClipRegion */
+/* gfy_GetClipRegion (graphy.asm) */
 
+#if 0
 /** @todo fix the stand-alone implementation */
 bool gfy_GetClipRegion(gfy_region_t *region) {
-    #ifdef GRAPHY_SHARE_SYMBOLS
-        return gfx_GetClipRegion((gfx_region_t*)region);
-    #else
-        if (
-            region->xmin >= GFY_LCD_WIDTH || region->ymin >= GFY_LCD_WIDTH ||
-            region->xmax <= 0 || region->ymax <= 0
-        ) {
-            return false;
-        }
-        if (region->xmin < 0) { region->xmin = 0; }
-        if (region->xmin < 0) { region->xmin = 0; }
-        if (region->xmax > GFY_LCD_WIDTH) { region->xmax = GFY_LCD_WIDTH; }
-        if (region->ymax > GFY_LCD_WIDTH) { region->ymax = GFY_LCD_WIDTH; }
-        return true;
-    #endif
+    if (
+        region->xmin >= GFY_LCD_WIDTH || region->ymin >= GFY_LCD_WIDTH ||
+        region->xmax <= 0 || region->ymax <= 0
+    ) {
+        return false;
+    }
+    if (region->xmin < 0) { region->xmin = 0; }
+    if (region->xmin < 0) { region->xmin = 0; }
+    if (region->xmax > GFY_LCD_WIDTH) { region->xmax = GFY_LCD_WIDTH; }
+    if (region->ymax > GFY_LCD_WIDTH) { region->ymax = GFY_LCD_WIDTH; }
+    return true;
 }
+#endif
 
 /* gfy_ShiftDown */
 
@@ -1702,8 +1547,9 @@ void gfy_TransparentTilemap_NoClip(const gfy_tilemap_t *tilemap, uint24_t x_offs
     }
 }
 
-/* gfy_TilePtr */
+/* gfy_TilePtr (graphy.asm) */
 
+#if 0
 uint8_t *gfy_TilePtr(const gfy_tilemap_t *tilemap, uint24_t x_offset, uint24_t y_offset) {
     uint24_t map_row = x_offset / tilemap->tile_width;
     uint24_t map_col = y_offset / tilemap->tile_height;
@@ -1711,20 +1557,24 @@ uint8_t *gfy_TilePtr(const gfy_tilemap_t *tilemap, uint24_t x_offset, uint24_t y
     uint24_t map_index = map_row + (map_col * tilemap->width);
     return &(tilemap->map[map_index]);
 }
+#endif
 
-/* gfy_TilePtrMapped */
+/* gfy_TilePtrMapped (graphy.asm) */
 
+#if 0
 uint8_t *gfy_TilePtrMapped(const gfy_tilemap_t *tilemap, uint8_t col, uint8_t row) {
     uint24_t map_index = row + (col * tilemap->width);
     return &(tilemap->map[map_index]);
 }
+#endif
 
-/* gfy_Reserved */
+/* gfy_Reserved (graphy.asm) */
 
 
 
-/* gfy_AllocSprite */
+/* gfy_AllocSprite (graphy.asm) */
 
+#if 0
 gfy_sprite_t *gfy_AllocSprite(
     uint8_t width,
     uint8_t height,
@@ -1732,6 +1582,7 @@ gfy_sprite_t *gfy_AllocSprite(
 ) {
     return (gfy_sprite_t*)gfx_AllocSprite(width, height, malloc_routine);
 }
+#endif
 
 /* gfy_Sprite */
 
@@ -1968,38 +1819,19 @@ void gfy_ScaledTransparentSprite_NoClip(
     }
 }
 
-/* gfy_FlipSpriteY */
+/* gfy_FlipSpriteY (graphy.asm) */
 
-gfy_sprite_t *gfy_FlipSpriteY(const gfy_sprite_t *sprite_in, gfy_sprite_t *sprite_out) {
-    return (gfy_sprite_t*)gfx_FlipSpriteX((const gfx_sprite_t*)sprite_in, (gfx_sprite_t*)sprite_out);
-}
+/* gfy_FlipSpriteX (graphy.asm) */
 
-/* gfy_FlipSpriteX */
+/* gfy_RotateSpriteC (graphy.asm) */
 
-gfy_sprite_t *gfy_FlipSpriteX(const gfy_sprite_t* sprite_in, gfy_sprite_t* sprite_out) {
-    return (gfy_sprite_t*)gfx_FlipSpriteY((const gfx_sprite_t*)sprite_in, (gfx_sprite_t*)sprite_out);
-}
+/* gfy_RotateSpriteCC (graphy.asm) */
 
-/* gfy_RotateSpriteC */
+/* gfy_RotateSpriteHalf (graphy.asm) */
 
-gfy_sprite_t *gfy_RotateSpriteC(const gfy_sprite_t *sprite_in, gfy_sprite_t *sprite_out) {
-     return (gfy_sprite_t*)gfx_RotateSpriteCC((const gfx_sprite_t*)sprite_in, (gfx_sprite_t*)sprite_out);
-}
+/* gfy_Polygon (graphy.asm) */
 
-/* gfy_RotateSpriteCC */
-
-gfy_sprite_t *gfy_RotateSpriteCC(const gfy_sprite_t *sprite_in, gfy_sprite_t *sprite_out) {
-    return (gfy_sprite_t*)gfx_RotateSpriteC((const gfx_sprite_t*)sprite_in, (gfx_sprite_t*)sprite_out);
-}
-
-/* gfy_RotateSpriteHalf */
-
-gfy_sprite_t *gfy_RotateSpriteHalf(const gfy_sprite_t *sprite_in, gfy_sprite_t *sprite_out) {
-    return (gfy_sprite_t*)gfx_RotateSpriteHalf((const gfx_sprite_t*)sprite_in, (gfx_sprite_t*)sprite_out);
-}
-
-/* gfy_Polygon */
-
+#if 0
 void gfy_Polygon(const int24_t *points, size_t num_points) {
     if (num_points < 2) {
         return;
@@ -2015,9 +1847,11 @@ void gfy_Polygon(const int24_t *points, size_t num_points) {
         );
     }
 }
+#endif
 
-/* gfy_Polygon_NoClip */
+/* gfy_Polygon_NoClip (graphy.asm) */
 
+#if 0
 void gfy_Polygon_NoClip(const int24_t *points, size_t num_points) {
     if (num_points < 2) {
         return;
@@ -2033,8 +1867,11 @@ void gfy_Polygon_NoClip(const int24_t *points, size_t num_points) {
         );
     }
 }
+#endif
 
-/* gfy_FillTriangle */
+/* gfy_FillTriangle (graphy.asm) */
+
+#if 0
 
 // y2 >= y1 >= y0
 static void gfy_internal_triangle_sort(
@@ -2125,9 +1962,11 @@ void gfy_FillTriangle(
         gfy_HorizLine(a, y, b - a + 1);
     }
 }
+#endif
 
-/* gfy_FillTriangle_NoClip */
+/* gfy_FillTriangle_NoClip (graphy.asm) */
 
+#if 0
 void gfy_FillTriangle_NoClip(
     int24_t x0, int24_t y0,
     int24_t x1, int24_t y1,
@@ -2188,94 +2027,43 @@ void gfy_FillTriangle_NoClip(
         gfy_HorizLine_NoClip(a, (uint8_t)y, b - a + 1);
     }
 }
+#endif
 
 //------------------------------------------------------------------------------
 // v2 functions
 //------------------------------------------------------------------------------
 
-/* gfy_Deprecated */
+/* gfy_Deprecated (graphy.asm) */
 
-
-
-/* gfy_SetTextScale */
-
-#ifndef GRAPHY_SHARE_SYMBOLS
-void gfy_SetTextScale(uint8_t width_scale, uint8_t height_scale) {
-    gfy_TextWidthScale = width_scale;
-    gfy_TextHeightScale = height_scale;
-}
-#else
-void gfy_SetTransparentColor(uint8_t, uint8_t) __attribute__((alias("gfx_SetTextScale")));
-#endif
+/* gfy_SetTextScale (graphy.asm) */
 
 //------------------------------------------------------------------------------
 // v3 functions
 //------------------------------------------------------------------------------
 
-/* gfy_SetTransparentColor */
+/* gfy_SetTransparentColor (graphy.asm) */
 
-#ifndef GRAPHY_SHARE_SYMBOLS
-uint8_t gfy_SetTransparentColor(uint8_t index) {
-    const uint8_t prev_Color = gfy_Transparent_Color;
-    gfy_Transparent_Color = index;
-    return prev_Color;
-}
-#else
-uint8_t gfy_SetTransparentColor(uint8_t) __attribute__((alias("gfx_SetTransparentColor")));
-#endif
+/* gfy_ZeroScreen (graphy.asm) */
 
-/* gfy_ZeroScreen */
+/* gfy_SetTextConfig (graphy.asm) */
 
-void gfy_ZeroScreen(void) __attribute__((alias("gfx_ZeroScreen")));
-
-/* gfy_SetTextConfig */
-
-#ifndef GRAPHY_SHARE_SYMBOLS
-void gfy_SetTextConfig(uint8_t config) {
-    gfy_PrintChar_Clip = config;
-}
-#else
-void gfy_SetTextConfig(uint8_t) __attribute__((alias("gfx_SetTextConfig")));
-#endif
-
-/* gfy_GetSpriteChar */
-
-
+/* gfy_GetSpriteChar (graphy.asm) */
 
 //------------------------------------------------------------------------------
 // v4 functions
 //------------------------------------------------------------------------------
 
-/* gfy_Lighten */
+/* gfy_Lighten (graphy.asm) */
 
-uint16_t gfy_Lighten(uint16_t, uint8_t) __attribute__((alias("gfx_Lighten")));
-
-/* gfy_Darken */
-
-uint16_t gfy_Darken(uint16_t, uint8_t) __attribute__((alias("gfx_Darken")));
+/* gfy_Darken (graphy.asm) */
 
 //------------------------------------------------------------------------------
 // v5 functions
 //------------------------------------------------------------------------------
 
-/* gfy_SetFontHeight */
+/* gfy_SetFontHeight (graphy.asm) */
 
-#ifndef GRAPHY_SHARE_SYMBOLS
-uint8_t gfy_SetFontHeight(uint8_t height) {
-    // The assembly doesn't appear to do any input validation
-    uint8_t temp = gfy_FontHeight;
-    gfy_FontHeight = height;
-    return temp;
-}
-#else
-uint8_t gfy_SetFontHeight(uint8_t) __attribute__((alias("gfx_SetFontHeight")));
-#endif
-
-/* gfy_ScaleSprite */
-
-gfy_sprite_t *gfy_ScaleSprite(const gfy_sprite_t *sprite_in, gfy_sprite_t *sprite_out) {
-    return (gfy_sprite_t*)gfx_ScaleSprite((const gfx_sprite_t*)sprite_in, (gfx_sprite_t*)sprite_out);
-}
+/* gfy_ScaleSprite (graphy.asm) */
 
 /* gfy_FloodFill */
 
@@ -2664,43 +2452,17 @@ void gfy_RLETSprite_NoClip(const gfy_rletsprite_t *sprite, const uint24_t x, con
     }
 }
 
-/* gfy_ConvertFromRLETSprite */
+/* gfy_ConvertFromRLETSprite (graphy.asm) */
 
-gfy_sprite_t *gfy_ConvertFromRLETSprite(const gfy_rletsprite_t *sprite_in, gfy_sprite_t *sprite_out) {
-    return (gfy_sprite_t*)gfx_ConvertFromRLETSprite((const gfx_rletsprite_t*)sprite_in, (gfx_sprite_t*)sprite_out);
-}
+/* gfy_ConvertToRLETSprite (graphy.asm) */
 
-/* gfy_ConvertToRLETSprite */
-
-gfy_rletsprite_t *gfy_ConvertToRLETSprite(const gfy_sprite_t *sprite_in, gfy_rletsprite_t *sprite_out) {
-    return (gfy_rletsprite_t*)gfx_ConvertToRLETSprite((const gfx_sprite_t*)sprite_in, (gfx_rletsprite_t*)sprite_out);
-}
-
-/* gfy_ConvertToNewRLETSprite */
-
-gfy_rletsprite_t *gfy_ConvertToNewRLETSprite(const gfy_sprite_t *sprite_in, void *(*malloc_routine)(size_t)) {
-    return (gfy_rletsprite_t*)gfx_ConvertToNewRLETSprite((const gfx_sprite_t*)sprite_in, malloc_routine);
-}
+/* gfy_ConvertToNewRLETSprite (graphy.asm) */
 
 //------------------------------------------------------------------------------
 // v7 functions
 //------------------------------------------------------------------------------
 
-/* gfy_RotateScaleSprite */
-
-gfy_sprite_t *gfy_RotateScaleSprite(
-    const gfy_sprite_t *sprite_in,
-    gfy_sprite_t *sprite_out,
-    uint8_t angle,
-    uint8_t scale
-) {
-    return (gfy_sprite_t*)gfx_RotateScaleSprite(
-        (const gfx_sprite_t*)sprite_in,
-        (gfx_sprite_t*)sprite_out,
-        angle,
-        scale
-    );
-}
+/* gfy_RotateScaleSprite (graphy.asm) */
 
 /* gfy_RotatedScaledTransparentSprite_NoClip */
 
@@ -2714,17 +2476,13 @@ gfy_sprite_t *gfy_RotateScaleSprite(
 // v8 functions
 //------------------------------------------------------------------------------
 
-/* gfy_SetCharData */
-
-uint8_t *gfy_SetCharData(uint8_t, const uint8_t*) __attribute__((alias("gfx_SetCharData")));
+/* gfy_SetCharData (graphy.asm) */
 
 //------------------------------------------------------------------------------
 // v9 functions
 //------------------------------------------------------------------------------
 
-/* gfy_Wait */
-
-void gfy_Wait(void) __attribute__((alias("gfx_Wait")));
+/* gfy_Wait (graphy.asm) */
 
 //------------------------------------------------------------------------------
 // v10 functions
@@ -2768,6 +2526,8 @@ void gfy_CopyRectangle(
 //------------------------------------------------------------------------------
 // v12 functions
 //------------------------------------------------------------------------------
+
+#if 0
 
 /* gfy_internal_Ellipse */
 
@@ -2850,45 +2610,58 @@ static void gfy_internal_Ellipse(
     } 
 }
 
-/* gfy_Ellipse */
+#endif
 
+/* gfy_Ellipse (graphy.asm) */
+
+#if 0
 void gfy_Ellipse(int24_t x, int24_t y, uint24_t a, uint24_t b) {
     gfy_internal_Ellipse(
         x, y, a, b,
         gfy_internal_Ellipse_dual_point
     );
 }
+#endif
 
-/* gfy_Ellipse_NoClip */
+/* gfy_Ellipse_NoClip (graphy.asm) */
 
+#if 0
 void gfy_Ellipse_NoClip(uint24_t x, uint24_t y, uint8_t a, uint8_t b) {
     gfy_internal_Ellipse(
         (int24_t)x, (int24_t)y, (uint24_t)a, (uint24_t)b,
         gfy_internal_Ellipse_dual_point_NoClip
     );
 }
+#endif
 
-/* gfy_FillEllipse */
+/* gfy_FillEllipse (graphy.asm) */
 
+#if 0
 void gfy_FillEllipse(int24_t x, int24_t y, uint24_t a, uint24_t b) {
     gfy_internal_Ellipse(
         x, y, a, b,
         gfy_internal_Ellipse_dual_line
     );
 }
+#endif
 
-/* gfy_FillEllipse_NoClip */
+/* gfy_FillEllipse_NoClip (graphy.asm) */
 
+#if 0
 void gfy_FillEllipse_NoClip(uint24_t x, uint24_t y, uint8_t a, uint8_t b) {
     gfy_internal_Ellipse(
         (int24_t)x, (int24_t)y, (uint24_t)a, (uint24_t)b,
         gfy_internal_Ellipse_dual_line_NoClip
     );
 }
+#endif
+
 
 //------------------------------------------------------------------------------
 // compatibility (transposed) routines
 //------------------------------------------------------------------------------
+
+#if 0
 
 void gfy_Transpose_Sprite(const gfx_sprite_t *restrict sprite, int24_t x, int24_t y);
 void gfy_Transpose_TransparentSprite(const gfx_sprite_t *restrict sprite, int24_t x, int24_t y);
@@ -3261,3 +3034,5 @@ void gfy_Transpose_RLETSprite_NoClip(const gfx_rletsprite_t *sprite, const uint2
         dst_buf -= dst_jump;
     }
 }
+
+#endif
