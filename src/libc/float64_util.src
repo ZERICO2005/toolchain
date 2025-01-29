@@ -1,0 +1,21 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__f64_fast_mul_two
+
+; long double _f64_fast_mul_two(long double)
+__f64_fast_mul_two:
+	; 15 bytes CC: 17F + 15R + 12W + 2 (worst case)
+	; x * 2.0L must be normalized, otherwise undefined.
+	; This function is intended as a size optimization as the value
+	; of 2.0L does not need to be pushed onto the stack
+	pop	iy, bc, de
+	ex	(sp), hl
+	push	de, bc, iy
+	ld	a, l
+	add	a, $10
+	ld	l, a
+	ret	nc
+	inc	h	; handles carry
+	ret
