@@ -1,0 +1,87 @@
+	assume	adl=1
+
+	section	.text
+
+	public	_conjf, _conj, _conjl
+
+if 0
+
+; float _Complex conjf(float _Complex)
+_conjf:
+_conj:
+	ld	hl, 12
+	add	hl, sp
+	rl	(hl)
+	ccf	; negate imag-part
+	rr	(hl)
+	pop	iy	; return address
+	pop	hl, de	; return real-part by value
+	; imag-part is at the top of the stack
+	jp	(iy)
+
+
+; float _Complex conjf(float _Complex)
+_conjf:
+_conj:
+	pop	iy	; return address
+	pop	hl, de	; return real-part by value
+	pop	bc	; return lower-imag-part by value
+	ex	(sp), hl
+	ld	a, l
+	xor	a, $80
+	ld	l, a
+	ex	(sp), hl
+	jp	(iy)
+
+
+
+; long double _Complex conjl(long double _Complex)
+_conjl:
+	ld	hl, 19
+	add	hl, sp
+	rl	(hl)
+	ccf	; negate imag-part
+	rr	(hl)
+	pop	iy	; return address
+	pop	hl, de, bc	; return real-part by value
+	; imag-part is at the top of the stack
+	jp	(iy)
+
+else
+
+; float _Complex conjf(float _Complex) /* struct ABI */
+_conjf:
+_conj:
+	pop	iy, de
+	or	a, a
+	sbc	hl, hl
+	add	hl, sp
+	push	de	; ZDS II sret
+	ld	bc, 8	; sizeof(float _Complex)
+	ldir
+	ex	de, hl
+	dec	hl
+	ld	a, (hl)
+	xor	a, $80
+	ld	(hl), a
+	ex	(sp), hl ; ZDS II sret
+	jp	(iy)
+
+; long double _Complex conjl(long double _Complex) /* struct ABI */
+_conjl:
+	pop	iy, de
+	or	a, a
+	sbc	hl, hl
+	add	hl, sp
+	push	de	; ZDS II sret
+	ld	bc, 16	; sizeof(long double _Complex)
+	ldir
+	ex	de, hl
+	dec	hl
+	ld	a, (hl)
+	xor	a, $80
+	ld	(hl), a
+	ex	(sp), hl ; ZDS II sret
+	jp	(iy)
+
+end if

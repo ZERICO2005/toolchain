@@ -1,0 +1,26 @@
+	assume	adl=1
+
+	section	.text
+
+	public	___divdc3
+
+; long double _Complex _divdc3_c(long double _Complex) /* struct ABI */
+___divdc3:
+	push	af, iy, de, bc
+	ld	hl, 3 + 12
+	add	hl, sp
+	push	hl	; ZDS II sret (long double**)
+	push	hl	; destination (long double**)
+	inc	hl
+	inc	hl
+	inc	hl
+	push	hl	; source (long double*)
+	
+	call	__divdc3_c
+	pop	hl, hl
+	pop	hl	; ZDS II sret (long double**)
+	ld	hl, (hl)	; ZDS II sret (long double*)
+	pop	bc, de, iy, af
+	ret
+	
+	extern	__divdc3_c

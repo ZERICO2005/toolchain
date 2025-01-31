@@ -1,0 +1,26 @@
+	assume	adl=1
+
+	section	.text
+
+	public	___mulsc3
+
+; float _Complex _mulsc3_c(float _Complex) /* struct ABI */
+___mulsc3:
+	push	af, iy, de, bc
+	ld	hl, 3 + 12
+	add	hl, sp
+	push	hl	; ZDS II sret (float**)
+	push	hl	; destination (float**)
+	inc	hl
+	inc	hl
+	inc	hl
+	push	hl	; source (float*)
+	
+	call	__mulsc3_c
+	pop	hl, hl
+	pop	hl	; ZDS II sret (float**)
+	ld	hl, (hl)	; ZDS II sret (float*)
+	pop	bc, de, iy, af
+	ret
+	
+	extern	__mulsc3_c
