@@ -43,18 +43,18 @@ library GRAPHY, 12
 	export gfy_GetTextX
 	export gfy_GetTextY
 ;	export gfy_Line
-;	export gfy_HorizLine
-;	export gfy_VertLine
+	export gfy_HorizLine
+	export gfy_VertLine
 	export gfy_Circle
 ;	export gfy_FillCircle
 	export gfy_Rectangle
-;	export gfy_FillRectangle
+	export gfy_FillRectangle
 ;	export gfy_Line_NoClip
-;	export gfy_HorizLine_NoClip
-;	export gfy_VertLine_NoClip
+	export gfy_HorizLine_NoClip
+	export gfy_VertLine_NoClip
 ;	export gfy_FillCircle_NoClip
-;	export gfy_Rectangle_NoClip
-;	export gfy_FillRectangle_NoClip
+	export gfy_Rectangle_NoClip
+	export gfy_FillRectangle_NoClip
 	export gfy_SetClipRegion
 	export gfy_GetClipRegion
 ;	export gfy_ShiftDown
@@ -573,7 +573,7 @@ _GetPixel:
 	; UBC = 0xx
 	; E = 00y
 	dec	b		; tests if x >= 256
-	jr	z, .x_lt_256
+	jr	nz, .x_lt_256
 	ld	d, $F0		; ti.lcdHeight * 256
 .x_lt_256:
 	ld	b, ti.lcdHeight
@@ -623,7 +623,7 @@ _SetPixel_NoClip_NoWait:
 	ld	hl, (CurrentBuffer)
 	
 	dec	b		; tests if x >= 256
-	jr	z, .x_lt_256
+	jr	nz, .x_lt_256
 	ld	d, $F0		; ti.lcdHeight * 256
 .x_lt_256:
 	ld	b, ti.lcdHeight
@@ -631,7 +631,7 @@ _SetPixel_NoClip_NoWait:
 	ld	hl, (CurrentBuffer)
 	add	hl, bc		; add x cord
 	add	hl, de		; add y cord
-	ld	(hl), 0			; get the actual pixel
+	ld	(hl), 0		; get the actual pixel
 smcByte _Color
 	ret
 
@@ -670,7 +670,37 @@ gfy_FillRectangle: ; COPIED_FROM_GRAPHX
 	jr	_FillRectangle_NoClip
 
 ;-------------------------------------------------------------------------------
-; gfy_FillRectangle_NoClip:
+gfy_Rectangle_NoClip:
+; Draws an unclipped rectangle outline with the global color index
+; Arguments:
+;  arg0 : X coordinate
+;  arg1 : Y coordinate
+;  arg2 : Width
+;  arg3 : Height
+; Returns:
+;  None
+	ld	iy,0
+	add	iy,sp
+	ld	a,(iy+12)		; a = height
+	or	a,a
+	ret	z			; abort if height == 0
+	ld	bc,(iy+9)		; bc = width
+	sbc	hl,hl
+	adc	hl,bc
+	ret	z			; abort if width == 0
+	push	bc
+	call	_HorizLine_NoClip_NotDegen_StackXY ; draw top horizontal line
+						   ; hl = &buf[y][x+width-1]
+	ld	b,a			; b = height
+	call	_VertLine_NoClip_Draw	; draw right vertical line
+	ld	b,(iy+12)		; b = height
+	ld	e,(iy+6)		; e = y
+	call	_VertLine_NoClip_NotDegen_StackX ; draw left vertical line
+						 ; hl = &buf[y+height][x]
+						 ; de = ti.lcdWidth
+	sbc	hl,de			; hl = &buf[y+height-1][x]
+	pop	bc			; bc = width
+	jp	_HorizLine_NoClip_Draw	; draw bottom horizontal line
 
 ;-------------------------------------------------------------------------------
 gfy_Rectangle: ; COPIED_FROM_GRAPHX
@@ -724,19 +754,268 @@ gfy_Rectangle: ; COPIED_FROM_GRAPHX
 	ret
 
 ;-------------------------------------------------------------------------------
-; gfy_Rectangle_NoClip:
+gfy_FillRectangle_NoClip:
+; Draws an unclipped rectangle with the global color index
+; Arguments:
+;  arg0 : X coordinate
+;  arg1 : Y coordinate
+;  arg2 : Width
+;  arg3 : Height
+; Returns:
+;  None
+	ld	iy, 0
+	add	iy, sp
+	ld	a, (iy+12)		; a = height
+	or	a, a
+	ret	z			; make sure height is not 0
+	ld	bc, (iy+9)		; bc = width
+	sbc	hl, hl
+	adc	hl, bc
+	ret	z			; make sure width is not 0
+	ld	hl, (iy+3)		; hl = x coordinate
+	ld	e, (iy+6)		; e = y coordinate
+_FillRectangle_NoClip:
+	ld	d, h		; maybe ld d, 0
+	dec	h		; tests if x >= 256
+	ld	h, ti.lcdHeight
+	jr	nz, .x_lt_256
+	ld	d, h		; ld d, ti.lcdHeight * 256
+.x_lt_256:
+	mlt	hl
+	ex.s	de, hl		; clear upper byte of DE
+	add	hl, de		; add y cord
+	ld	de, (CurrentBuffer)
+	add	hl, de		; add buffer offset
+	ex	de, hl			; de -> place to begin drawing
+	push	de
+	
+	ld	(.height1), a
+	ld	(.height2), a
+	ld	hl, _Color
+	; swap width and height
+	ld	b, c
+	ld	c, a
+	ld	a, b
+	ld	b, 0
+	; a = width
+	; bc = height
+	wait_quick
+	ldi				; check if we only need to draw 1 pixel
+	pop	hl
+	jp	po, .skip
+	ldir
+.skip:
+	dec	a
+	ret	z
+	ld	c, ti.lcdHeight
+.loop:
+	add	hl, bc
+	dec	de
+	ex	de, hl
+.height1 = $ + 1
+	ld	bc, 0
+	lddr
+	dec	a
+	ret	z
+	; ld bc, (2 * ti.lcdHeight) + 1
+	inc	b
+	ld	c, $E1
+	add	hl, bc
+	inc	de
+	ex	de, hl
+	
+.height2 = $ + 1
+	ld	bc, 0
+	ldir
+	; ld bc, (2 * ti.lcdHeight) - 1
+	inc	b
+	ld	c, $DF
+	dec	a
+	jr	nz, .loop
+
+	ld	a, (iy+10)
+	dec	a
+	ret	nz	; width < 256
+	xor	a, a
+	jr	.loop
+	
+;-------------------------------------------------------------------------------
+gfy_HorizLine:
+; Draws an clipped horizontal line with the global color index
+; Arguments:
+;  arg0 : X coordinate
+;  arg1 : Y coordinate
+;  arg2 : Length
+; Returns:
+;  None
+	ld	iy,0
+	add	iy,sp
+	ld	hl,(iy+6)
+	ld	de,ti.lcdHeight
+smcWord _YMax
+	sbc	hl,de			; subtract maximum y
+	ld	de,ti.lcdHeight		; add y bounds span
+smcWord _YSpan
+	add	hl,de
+	ret	nc			; return if not within y bounds
+	ld	hl,(iy+9)
+	ld	de,(iy+3)
+	add	hl,de
+	push	hl
+	ld	hl,0
+smcWord _XMin
+	call	_Maximum		; get minimum x
+	ex	(sp),hl
+	ld	de,ti.lcdWidth
+smcWord _XMax
+	call	_Minimum		; get maximum x
+	pop	de
+	scf
+	sbc	hl,de
+	ret	c
+	inc	hl
+	push	hl
+	pop	bc			; bc = length
+	ex	de,hl
+	jr	_HorizLine_NoClip_NotDegen_StackY
 
 ;-------------------------------------------------------------------------------
-; gfy_HorizLine:
-
+ gfy_HorizLine_NoClip:
+; Draws an unclipped vertical line with the global color index
+; Arguments:
+;  arg0 : X coordinate
+;  arg1 : Y coordinate
+;  arg2 : Length
+; Returns:
+;  None
+	ld	iy, 0
+	add	iy, sp
+	ld	bc, (iy+9)		; b = length
+_HorizLine_NoClip_StackXY:
+	xor	a, a
+	or	a, b
+_HorizLine_NoClip_MaybeDegen_StackXY:
+	ret	z			; abort if length == 0
+_HorizLine_NoClip_NotDegen_StackXY:
+	ld	hl,(iy+3)		; hl = x
+	ld	e, (iy+6)		; e = y
+_HorizLine_NoClip_NotDegen:
+	ld	d, h		; maybe ld d, 0
+	dec	h		; tests if x >= 256
+	ld	h, ti.lcdHeight
+	jr	nz, .x_lt_256
+	ld	d, h		; ld d, ti.lcdHeight * 256
+.x_lt_256:
+	mlt	hl
+	ex.s	de, hl		; clear upper byte of DE
+	add	hl, de		; add y cord
+	ld	de, (CurrentBuffer)
+	add	hl, de		; add buffer offset
+	
+_HorizLine_NoClip_Draw:
+	ld	de, ti.lcdHeight
+	ld	a, 0
+smcByte _Color
+	wait_quick
+.loop:
+	ld	(hl), a			; loop for width
+	add	hl, de
+	djnz	.loop
+	dec	c
+	ret	nz	; length < 256
+	ld	b, 0
+	jr	.loop
+	
 ;-------------------------------------------------------------------------------
-; gfy_HorizLine_NoClip:
-
-;-------------------------------------------------------------------------------
-; gfy_VertLine:
+gfy_VertLine:
+; Draws an clipped vertical line with the global color index
+; Arguments:
+;  arg0 : X coordinate
+;  arg1 : Y coordinate
+;  arg2 : Length
+; Returns:
+;  None
+	ld	iy,0
+	add	iy,sp
+	ld	hl,(iy+3)
+	ld	de,ti.lcdWidth
+smcWord _XMax
+	sbc	hl,de			; subtract maximum x
+	ld	de,ti.lcdWidth
+smcWord _XSpan
+	add	hl,de			; add x bounds span
+	ret	nc			; return if not within x bounds
+	ld	hl,(iy+9)
+	ld	de,(iy+6)
+	add	hl,de
+	push	hl
+	ld	hl,0
+smcWord _YMin
+	call	_Maximum		; get minimum y
+	ex	(sp),hl
+	ld	de,ti.lcdHeight
+smcWord _YMax
+	call	_Minimum		; get maximum y
+	pop	de
+	ld	a,l
+	sub	a,e
+	ret	c			; return if not within y bounds
+	ld	b,a
+	; jr	_VertLine_NoClip_MaybeDegen_StackX	; from GraphX
+	ret	z		; abort if length == 0
+	ld	hl, (iy+3)	; hl = x
+	jr	_VertLine_NoClip_NotDegen	; jump to unclipped version
 
 ;-------------------------------------------------------------------------------
 ; gfy_VertLine_NoClip:
+
+gfy_VertLine_NoClip:
+; Draws an unclipped horizontal line with the global color index
+; Arguments:
+;  arg0 : X coordinate
+;  arg1 : Y coordinate
+;  arg2 : Length
+; Returns:
+;  None
+	ld	iy, 0
+	add	iy, sp
+	ld	bc, (iy+9)		; bc = length
+_VertLine_NoClip_StackXY:
+	sbc	hl, hl
+	ex	de, hl
+	sbc	hl, hl
+	adc	hl, bc
+	ret	z			; abort if length == 0
+_VertLine_NoClip_NotDegen_StackXY:
+	ld	e, (iy+6)		; e = y
+_VertLine_NoClip_NotDegen_StackX:
+	ld	hl, (iy+3)		; hl = x
+_VertLine_NoClip_NotDegen:
+	wait_quick
+_VertLine_NoClip_NotDegen_NoWait:
+	ld	d, h		; maybe ld d, 0
+	dec	h		; tests if x >= 256
+	ld	h, ti.lcdHeight
+	jr	nz, .x_lt_256
+	ld	d, h		; ld d, ti.lcdHeight * 256
+.x_lt_256:
+	mlt	hl
+	ex.s	de, hl		; clear upper byte of DE
+	add	hl, de		; add y cord
+	ld	de, (CurrentBuffer)
+	add	hl, de		; add buffer offset
+	
+_VertLine_NoClip_Draw:
+	ld	(hl), 0
+smcByte _Color
+	cpi
+	ex	de, hl
+	ld	hl, -1
+	add	hl, de
+; Delay 1-wide early return for consistent register output values.
+	ret	po
+	ldir
+	ret
 
 ;-------------------------------------------------------------------------------
 gfy_SetDraw: ; COPIED_FROM_GRAPHX
@@ -808,7 +1087,7 @@ _WaitQuick:
 	db	$2E			; ret || push hl -> ld l,*
 
 ;-------------------------------------------------------------------------------
-gfy_Wait:
+gfy_Wait: ; COPIED_FROM_GRAPHX
 ; Waits for the screen buffer to finish being displayed after gfy_SwapDraw
 ; Arguments:
 ;  None
@@ -851,7 +1130,7 @@ end repeat
 	ret
 
 ;-------------------------------------------------------------------------------
-gfy_SwapDraw:
+gfy_SwapDraw: ; COPIED_FROM_GRAPHX
 ; Swaps the roles of the screen and drawing buffers
 ; Arguments:
 ;  None

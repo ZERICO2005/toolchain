@@ -185,7 +185,7 @@ typedef enum {
  * The palette has 256 entries, each 2 bytes in size.
  */
 #define gfy_palette \
-((uint16_t*)RAM_ADDRESS(0xE30200))
+((uint16_t*)0xE30200)
 
 /**
  * Direct LCD VRAM access.
@@ -193,7 +193,7 @@ typedef enum {
  * Total of 153600 bytes in size.
  */
 #define gfy_vram \
-((uint8_t*)RAM_ADDRESS(0xD40000))
+((uint8_t*)0xD40000)
 
 /**
  * Number of pixels wide the screen is.
@@ -215,7 +215,7 @@ typedef enum {
  * @note gfy_vbuffer is [x][y], while gfx_vbuffer is [y][x]
  */
 #define gfy_vbuffer \
-(**(uint8_t(**)[320][240])RAM_ADDRESS(0xE30014))
+(**(uint8_t(**)[320][240])0xE30014)
 
 /**
  * Makes graphics routines act on the non-visible buffer.
