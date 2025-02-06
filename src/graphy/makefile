@@ -28,10 +28,12 @@ all: $(LIB_8XV)
 
 build/graphy.c.asm: graphy.c
 	$(Q)$(call MKDIR,build)
-	$(Q)$(EZCC) $(EZCFLAGS) $< -o $@
+	$(Q)$(EZCC) $(EZCFLAGS) -o build/graphy.c.asm graphy.c
 
-$(LIB_8XV): $(LIB_SRC) build/graphy.c.asm
-	$(Q)$(FASMG) $< $@
+$(LIB_8XV): $(LIB_SRC) graphy.c
+	$(Q)$(FASMG) $(LIB_8XV) $(LIB_SRC) 
+	$(Q)$(EZCC) $(EZCFLAGS) graphy.c
+
 
 clean:
 	$(Q)$(call REMOVE,$(LIB_LIB) $(LIB_8XV))
