@@ -26,6 +26,10 @@
 #define	q1	0.194809660700890e2
 #define	q2	-0.891110902798312e1
 
+/**
+ * @remarks Minimum relative precision of:
+ * 2^-21 at +7.792485356e-01
+ */
 float _logf_c(float arg)
 {
 	double x,z, zsq, temp;

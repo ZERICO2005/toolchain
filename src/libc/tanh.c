@@ -7,29 +7,31 @@
 /*									*/
 /************************************************************************/
 /*
-	tanh(arg) computes the hyperbolic tangent of its floating
-	point argument.
+    tanh(arg) computes the hyperbolic tangent of its floating
+    point argument.
 
-	sinh and cosh are called except for large arguments, which
-	would cause overflow improperly.
+    sinh and cosh are called except for large arguments, which
+    would cause overflow improperly.
 */
 
 #include <math.h>
 
-float _tanhf_c(float arg)
-{
-	float sign;
+/**
+ * @remarks Minimum relative precision of:
+ * 2^-22    at +9.155276930e-04 with ideal sinhf coshf
+ * 2^-20.67 at +3.083078936e-02 with current sinhf coshf and ideal expf
+ * 2^-20.19 at +5.236846209e-01 with current sinhf coshf and expf
+ */
+float _tanhf_c(float arg) {
+    float x = fabsf(arg);
 
-	sign = 1.;
-	if(arg < 0.){
-		arg = -arg;
-		sign = -1.;
-	}
+    if(x > 21.0f) {
+        x = 1.0f;
+    } else {
+        x = sinhf(x) / coshf(x);
+    }
 
-	if(arg > 21.)
-		return(sign);
-
-	return(sign*sinhf(arg)/coshf(arg));
+    return copysignf(x, arg);
 }
 
 double _tanh_c(double) __attribute__((alias("_tanhf_c")));

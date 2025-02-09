@@ -4,10 +4,10 @@
 /*									*/
 /************************************************************************/
 /*
-	C program for floating point sin/cos.
-	Calls modf.
-	There are no error exits.
-	Coefficients are #3370 from Hart & Cheney (18.80D).
+    C program for floating point sin/cos.
+    Calls modf.
+    There are no error exits.
+    Coefficients are #3370 from Hart & Cheney (18.80D).
 */
 #include <math.h>
 
@@ -25,41 +25,45 @@
 
 float sinus(float arg, int quad)
 {
-	float e, f;
-	int k;
-	float ysq;
-	float x,y;
-	float temp1, temp2;
+    float e, f;
+    int k;
+    float ysq;
+    float x,y;
+    float temp1, temp2;
 
-	x = arg;
-	if(x<0) {
-		x = -x;
-		quad = quad + 2;
-	}
-	x = x*twoopi;	/*underflow?*/
-	if(x>32764){
-		y = modff(x,&e);
-		e = e + quad;
-		modff(0.25*e,&f);
-		quad = e - 4*f;
-	}else{
-		k = x;
-		y = x - k;
-		quad = (quad + k) & 03;
-	}
-	if (quad & 01)
-		y = 1-y;
-	if(quad > 1)
-		y = -y;
+    x = arg;
+    if(x<0) {
+        x = -x;
+        quad = quad + 2;
+    }
+    x = x*twoopi;	/*underflow?*/
+    if(x>32764){
+        y = modff(x,&e);
+        e = e + quad;
+        modff(0.25*e,&f);
+        quad = e - 4*f;
+    }else{
+        k = x;
+        y = x - k;
+        quad = (quad + k) & 03;
+    }
+    if (quad & 01)
+        y = 1-y;
+    if(quad > 1)
+        y = -y;
 
-	ysq = y*y;
-	temp1 = ((((p4*ysq+p3)*ysq+p2)*ysq+p1)*ysq+p0)*y;
-	temp2 = ((((ysq+q3)*ysq+q2)*ysq+q1)*ysq+q0);
-	return(temp1/temp2);
+    ysq = y*y;
+    temp1 = ((((p4*ysq+p3)*ysq+p2)*ysq+p1)*ysq+p0)*y;
+    temp2 = ((((ysq+q3)*ysq+q2)*ysq+q1)*ysq+q0);
+    return(temp1/temp2);
 }
 
 float _sinf_c(float arg) {
-	return sinus(arg, 0);
+    /* arg < 0x1.0p-11f */
+	if (fabsf(arg) < 0.00048828125f) {
+		return arg;
+	}
+    return sinus(arg, 0);
 }
 
 double _sin_c(double) __attribute__((alias("_sinf_c")));
