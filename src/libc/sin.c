@@ -23,6 +23,10 @@
 #define q2	  0.946309610153821e4
 #define q3	  0.132653490878614e3
 
+/**
+ * @remarks Minimum relative precision of:
+ * 2^-20.67 at +1.934948494e-03 (x > 0.0f && x < pi/2)
+ */
 float sinus(float arg, int quad)
 {
     float e, f;
@@ -60,9 +64,9 @@ float sinus(float arg, int quad)
 
 float _sinf_c(float arg) {
     /* arg < 0x1.0p-11f */
-	if (fabsf(arg) < 0.00048828125f) {
-		return arg;
-	}
+    if (fabsf(arg) < 0.00048828125f) {
+        return arg;
+    }
     return sinus(arg, 0);
 }
 

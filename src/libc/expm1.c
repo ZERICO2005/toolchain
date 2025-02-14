@@ -5,7 +5,7 @@
 #if 0
 
 /**
- * @remarks Relative precision of:
+ * @remarks Minimum relative precision of:
  * 2^-18.54 at -3.099555522e-02 with ideal expf
  * 2^-16.12 at -3.158956021e-02 with current expf
  */
@@ -21,7 +21,7 @@ float expm1f(float x) {
 #else
 
 /**
- * @remarks Relative precision of:
+ * @remarks Minimum relative precision of:
  * 2^-18.09 at +3.988865763e-02 with ideal expf
  * 2^-17.04 at +5.245876685e-02 with current expf
  */
