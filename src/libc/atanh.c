@@ -6,7 +6,7 @@
  * 2^-19.83 at +5.882683396e-02 with current log1pf and ideal logf
  * 2^-19.54 at +6.091820449e-02 with current log1pf and logf
  */
-float _atanhf_c(float arg) {
+float atanhf(float arg) {
     float x = fabsf(arg);
     x = 0.5f * log1pf((2.0f * x) / (1.0f - x));
     return copysignf(x, arg);

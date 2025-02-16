@@ -1,6 +1,21 @@
 #include <errno.h>
 #include <math.h>
 
+/*
+; only works for normalized values
+; CC: 9F + 12R + 9W + 1 | 8 bytes
+__f32_fast_div4:
+	pop	bc, hl, de
+	dec	e	; subtracts 2 from the exponent
+	push	de, hl, bc
+	ret
+*/
+float _f32_fast_div4(float x);
+
+/**
+ * @remarks Minimum relative precision of:
+ * 2^-23 at +8.407790786e-45
+ */
 float _sqrtf_c(float x)
 {
     float f, y;
@@ -17,13 +32,14 @@ float _sqrtf_c(float x)
     y=0.41731+0.59016*f; /*Educated guess*/
     /*For a 24 bit mantisa (float), two iterations are sufficient*/
     y+=f/y;
-    y=ldexpf(y, -2) + f/y; /*Faster version of 0.25 * y + f/y*/
+    y = _f32_fast_div4(y) + f/y; /*Faster version of 0.25 * y + f/y*/
 
     if (n&1)
     {
         y*=0.7071067812;
         ++n;
     }
+    /* n will be [-148, 128] prior to division */
     return ldexpf(y, n/2);
 }
 

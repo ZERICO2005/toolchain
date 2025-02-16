@@ -15,10 +15,10 @@
  */
 #include <math.h>
 
-#define sq2p1 2.41421356237309e0L
-#define sq2m1 0.414213562373095e0L
-#define pio2  1.57079632679489e0L
-#define pio4  0.785398163397448e0L
+#define sq2p1 2.4142135623730950488016887242097L
+#define sq2m1 0.4142135623730950488016887242097L
+#define pio2  1.5707963267948966192313216916398L
+#define pio4  0.78539816339744830961566084581988L
 
 #define p4 0.161536412982230e2L
 #define p3 0.268425481955040e3L
@@ -80,7 +80,7 @@ long double f64_satan(long double arg) {
         /* arg > 0x1.0p+54f */
         if (arg > 18014398509481984.0L) {
             /* rounds to pi/2 */
-            return 1.57079632679489661923132169L;
+            return pio2;
         }
         return(pio2 - f64_xatan(1.0L / arg));
     } else {

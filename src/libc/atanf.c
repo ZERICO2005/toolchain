@@ -85,7 +85,7 @@ float satan(float arg) {
         /* arg > 0x1.0p+25f */
         if (arg > 33554432.0f) {
             /* rounds to pi/2 */
-            return (float)M_PI_2;
+            return pio2;
         }
         return(pio2 - xatan(1.0f/arg));
     } else {

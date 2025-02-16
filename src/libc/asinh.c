@@ -4,11 +4,12 @@
  * @remarks Relative precision of:
  * 2^-18.67 at +6.239842623e-02
  */
- float _asinhf_c(float arg) {
+ float asinhf(float arg) {
     float x = fabsf(arg);
     if (x < 0.0703125f) {
-        x = x - (x * x * x) * 0.166666666666667f;
-    } else if (x < 9223372036854775808.0f /* x < 0x1.0p+63 */) {
+        x = x - (x * x * x) * 0.166666666666666666667f;
+    } else if (x < 9223372036854775808.0f) {
+        /* x < 0x1.0p+63 */
         x = logf(x + sqrtf(x * x + 1.0f));
     } else {
         x = logf(x) + (float)M_LN2;
