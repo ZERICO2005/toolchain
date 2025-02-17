@@ -1,10 +1,10 @@
 #include <math.h>
 
 /**
- * @remarks Minimum relative precision of:
- * 2^-23    at +6.250000745e-02 with ideal powf (1/16 < fabsf(x) < 16)
- * 2^-18.91 at +4.344025239e-44 with ideal powf (fabsf(x) < 1.0e-30f)
- * 2^-19.09 at +1.329224985e+36 with ideal powf (fabsf(x) > 1.0e+30f)
+ * @remarks Minimum ulp:
+ * ulp of -1  at +0x1.000002p-4   with ideal powf (1/16 < fabsf(x) < 16)
+ * ulp of -17 at +0x1.000000p-147 with ideal powf (fabsf(x) < 1.0e-30f)
+ * ulp of +15 at +0x1.ea7c60p+122 with ideal powf (fabsf(x) > 1.0e+30f)
  */
 float cbrtf(float x)
 {

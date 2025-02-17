@@ -31,10 +31,9 @@
 #define q2 -0.173678953558234e+3f
 
 /**
- * @remarks Minimum relative precision of:
- * 2^-21.41 at +3.774713026e-03 with ideal expf (x < 88.5f)
- * 2^-17    at +7.901648712e+01 with current expf (x < 80.0f)
- * 2^-18.83 at +1.662612534e+01 with current expf (x < 21.0f)
+ * @remarks Minimum ulp:
+ * ulp of -3  at +0x1.eec25ap-9 with ideal expf (|x| < 21.0f)
+ * ulp of -18 at +0x1.0a049cp+4 with current expf (|x| < 21.0f)
  */
 float _sinhf_c(float arg) {
     float temp, argsq, x;

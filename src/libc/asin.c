@@ -9,11 +9,9 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define pio2 1.57079632679490f
-
 /**
- * @remarks Minimum relative precision of:
- * 2^-20 at +9.998270869e-01 with ideal atanf
+ * @remarks Minimum ulp:
+ * ulp of +8 at +0x1.ffe956p-1
  */
 float _asinf_c(float arg) {
 	bool arg_sign;
@@ -28,7 +26,7 @@ float _asinf_c(float arg) {
 
 	temp = sqrtf(1.0f - arg*arg);
 	if(arg > 0.7f) {
-		temp = pio2 - atanf(temp/arg);
+		temp = (float)M_PI_2 - atanf(temp/arg);
 	} else {
 		temp = atanf(arg/temp);
 	}

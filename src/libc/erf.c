@@ -1,9 +1,9 @@
 #include <math.h>
 
 /**
- * @remarks Minimum relative precision of:
- * 2^-19.83 at +3.125144914e-02 with ideal erfcf (x >= 0.0f)
- * 2^-18.91 at -3.125094622e-02 with ideal erfcf (x < 0.0f)
+ * @remarks Minimum ulp:
+ * ulp of -9    at +0x1.00030ap-5 with ideal erfcf
+ * ulp of +5549 at +0x1.c46b04p-5 with current erfcf
  */
 float erff(float x) {
     /* arg < 0x1.0p-5f */

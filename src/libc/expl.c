@@ -43,7 +43,7 @@
 long double expl(long double arg) {
     long double fraction;
     long double temp1, temp2, xsq;
-    int ent;
+    long double ent;
 
     if ( arg == 0.0L ){
         return 1.0L;
@@ -63,5 +63,5 @@ long double expl(long double arg) {
     temp1 = ((p2 * xsq + p1) * xsq + p0) * fraction;
     temp2 = ((xsq + q2) * xsq + q1) * xsq + q0;
     /* sqrt(2) */
-    return ldexpl( f64_sqrt2 * ((temp2+temp1) / (temp2-temp1)), ent );
+    return ldexpl( f64_sqrt2 * ((temp2+temp1) / (temp2-temp1)), (int)ent );
 }

@@ -27,8 +27,8 @@
 #define	q2 -0.891110902798312e1f
 
 /**
- * @remarks Minimum relative precision of:
- * 2^-21 at +7.792485356e-01
+ * @remarks Minimum ulp:
+ * ulp of +4 at +0x1.8ef9aap-1
  *
  * See the purple line for relative precision (lag warning):
  * https://www.desmos.com/calculator/gae4qofdtc

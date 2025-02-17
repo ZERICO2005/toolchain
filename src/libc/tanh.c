@@ -17,10 +17,10 @@
 #include <math.h>
 
 /**
- * @remarks Minimum relative precision of:
- * 2^-22    at +9.155276930e-04 with ideal sinhf coshf
- * 2^-20.67 at +3.083078936e-02 with current sinhf coshf and ideal expf
- * 2^-20.19 at +5.236846209e-01 with current sinhf coshf and expf
+ * @remarks Minimum ulp:
+ * ulp of -2 at +0x1.e0000cp-11 with ideal sinhf and coshf
+ * ulp of -5 at +0x1.f921b4p-6  with current sinhf coshf and ideal expf
+ * ulp of -7 at +0x1.0c2064p-1  with current sinhf coshf and expf
  */
 float _tanhf_c(float arg) {
     float x = fabsf(arg);

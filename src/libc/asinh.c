@@ -1,8 +1,8 @@
 #include <math.h>
 
 /**
- * @remarks Relative precision of:
- * 2^-18.67 at +6.239842623e-02
+ * @remarks Minimum ulp:
+ * ulp of -20 at +0x1.ff2afcp-5
  */
  float asinhf(float arg) {
     float x = fabsf(arg);

@@ -1,5 +1,9 @@
 #include <math.h>
 
+/**
+ * ulp of -1453    at +0x1.b477fcp-1 with ideal expf (x < 1.0f)
+ * ulp of +1477198 at +0x1.252f22p+3 with ideal expf (x >= 1.0f)
+ */
 float erfcf(float x)
 {
     static const float p = 0.47047f, a1 = 0.3480242f, a2 = -0.0958798f, a3 = 0.7478556f;

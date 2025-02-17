@@ -33,9 +33,9 @@
 #endif
 
 /**
- * @remarks Minimum relative precision of:
- * 2^-21    at +6.320388317e-01 (-ln(2) < x < +ln(2))
- * 2^-17.09 at +6.030083084e+01 (-64.0L < x < +64.0L)
+ * @remarks Minimum ulp:
+ * ulp of -4  at +0x1.439a98p-1 (-ln(2) < x < +ln(2))
+ * ulp of -60 at +0x1.e2681ap+5 (-64.0f < x < +64.0f)
  *
  * See the purple line for relative precision (lag warning):
  * https://www.desmos.com/calculator/zlrmxatxkf
@@ -43,12 +43,12 @@
 float _expf_c(float arg) {
     float fraction;
     float temp1, temp2, xsq;
-    int ent;
+    float ent;
 
-    if ( arg == 0.0f ){
+    if ( arg == 0.0f){
         return 1.0f;
     }
-    if ( arg < exp_min_arg ){
+    if ( arg < -exp_min_arg ){
         return 0.0f;
     }
     if ( arg > exp_max_arg ){
@@ -61,7 +61,7 @@ float _expf_c(float arg) {
     xsq = fraction * fraction;
     temp1 = ((p2 * xsq + p1) * xsq + p0) * fraction;
     temp2 = ((xsq + q2) * xsq + q1) * xsq + q0;
-    return ldexpf( (float)M_SQRT2 * (temp2+temp1) / (temp2-temp1), ent );
+    return ldexpf( (float)M_SQRT2 * (temp2+temp1) / (temp2-temp1), (int)ent );
 }
 
 double _exp_c(double) __attribute__((alias("_expf_c")));

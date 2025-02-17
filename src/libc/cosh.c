@@ -23,10 +23,9 @@
 #include <math.h>
 
 /**
- * @remarks Minimum relative precision of:
- * 2^-23    at +2.991109795e-04 with ideal expf (x < 88.5f)
- * 2^-17    at +7.901648712e+01 with current expf (x < 80.0f)
- * 2^-18.83 at +1.662612534e+01 with current expf (x < 21.0f)
+ * @remarks Minimum ulp:
+ * ulp of -1  at +0x1.39a3fep-12 with ideal expf (|x| < 21.0f)
+ * ulp of -18 at +0x1.0a049cp+4  with current expf (|x| < 21.0f)
  */
 float _coshf_c(float arg) {
     float val;

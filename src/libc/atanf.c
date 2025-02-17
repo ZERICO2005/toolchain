@@ -38,8 +38,8 @@
  * atan makes its argument positive and
  * calls the inner routine satan.
  *
- * @remarks Minimum relative precision of:
- * 2^-21 at +4.143992364e-01
+ * @remarks Minimum ulp:
+ * ulp of +4 at +0x1.a85846p-2
  */
 float _atanf_c(float arg) {
     float satan(float);
