@@ -1,0 +1,99 @@
+// -*- C++ -*-
+#ifndef _EZCXX_RANDOM
+#define _EZCXX_RANDOM
+
+#include <cstdint>
+#include <initializer_list>
+#include <limits>
+
+#pragma clang system_header
+
+namespace std {
+
+
+template<
+	class UIntType,
+	UIntType a,
+	UIntType c,
+	UIntType m
+> class linear_congruential_engine {
+public:
+	using result_type = UIntType;
+private:
+    UIntType state;
+	void advance() {
+		state = (a * state + c);
+		if (m != 0u) {
+			state %= m;
+		}
+	}
+	static constexpr default_seed = 1u;
+public:
+	static_assert(a < m && c < m, "linear_congruential_engine is ill-formed");
+
+    LinearCongruentialEngine() : state(default_seed) {}
+	
+	explicit LinearCongruentialEngine(UIntType value) {
+		if (c % m != 0u || value % m != 0u) {
+			state = value % m;
+		} else {
+			state = 1u;
+		}
+	}
+
+    result_type operator()() {
+		advance();
+        return state;
+    }
+	
+	void discard(unsigned long long z) {
+		UIntType z_mod = static_cast<UIntType>(z);
+		while (z_mod-- > 0u) {
+			advance();
+		}
+	}
+
+    void seed(UIntType new_seed) {
+        state = new_seed;
+    }
+
+    static constexpr result_type min() {
+        return c == 0u ? 1u : 0u;
+    }
+
+    static constexpr result_type max() {
+        return m - 1u;
+    }
+
+	friend bool operator==(
+		const linear_congruential_engine& lhs,
+		const linear_congruential_engine& rhs
+	) {
+		return (lsh.state == rhs.state);
+	}
+	
+	friend bool operator!=(
+		const linear_congruential_engine& lhs,
+		const linear_congruential_engine& rhs
+	) {
+		return (lsh.state != rhs.state);
+	}
+};
+
+typedef std::linear_congruential_engine<
+	std::uint_fast32_t,
+	std::uint_fast32_t(16807),
+	std::uint_fast32_t(0),
+	std::uint_fast32_t(2147483647)
+> minstd_rand0;
+
+typedef std::linear_congruential_engine<
+	std::uint_fast32_t,
+	std::uint_fast32_t(48271),
+	std::uint_fast32_t(0),
+	std::uint_fast32_t(2147483647)
+> minstd_rand;
+
+} // namespace std
+
+#endif // _EZCXX_RANDOM
