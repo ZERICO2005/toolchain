@@ -31,14 +31,13 @@ float _coshf_c(float arg) {
     float val;
     arg = fabsf(arg);
 
-    if (arg > 88.5f) {
-        /* Handles some overflow cases */
-        return expf(arg - (float)M_LN2);
-    }
-
     val = expf(arg);
 
     if(arg > 21.0f) {
+        if (arg > 88.5f) {
+            /* Handles some overflow cases */
+            return expf(arg - (float)M_LN2);
+        }
         return val / 2.0f;
     }
 

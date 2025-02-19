@@ -5,9 +5,9 @@
 #if 0
 
 /**
- * @remarks Minimum relative precision of:
- * 2^-18.54 at -3.099555522e-02 with ideal expf
- * 2^-16.12 at -3.158956021e-02 with current expf
+ * @remarks Minimum ulp:
+ * ulp of +22  at -0x1.fbd4c8p-6 with ideal expf
+ * ulp of +117 at -0x1.02c81cp-5 with current expf
  */
 float expm1f(float x) {
     /* 0x1.0p-5f */
@@ -21,9 +21,9 @@ float expm1f(float x) {
 #else
 
 /**
- * @remarks Minimum relative precision of:
- * 2^-18.09 at +3.988865763e-02 with ideal expf
- * 2^-17.04 at +5.245876685e-02 with current expf
+ * @remarks Minimum ulp:
+ * ulp of -30 at +0x1.46c494p-5 with ideal expf
+ * ulp of -62 at +0x1.adbe02p-5 with current expf (|x| < 64.0f)
  */
 float expm1f(float x) {
     if (fabsf(x) < 0.04f) {

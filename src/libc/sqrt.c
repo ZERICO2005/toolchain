@@ -13,8 +13,7 @@ __f32_fast_div4:
 float _f32_fast_div4(float x);
 
 /**
- * @remarks Minimum relative precision of:
- * 2^-23 at +8.407790786e-45
+ * @remarks Minimum ulp of -1
  */
 float _sqrtf_c(float x)
 {

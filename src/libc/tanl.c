@@ -75,7 +75,7 @@ long double tanl(long double arg)
 
     xsq = x*x;
     temp = ((((p4*xsq+p3)*xsq+p2)*xsq+p1)*xsq+p0)*x;
-    temp = temp/(((1.0L*xsq+q2)*xsq+q1)*xsq+q0);
+    temp = temp/(((xsq+q2)*xsq+q1)*xsq+q0);
 
     if(flag) {
         if(temp == 0.0L) {

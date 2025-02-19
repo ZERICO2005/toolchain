@@ -10,6 +10,7 @@ extern "C" {
 
 #define HUGE_VALF    __builtin_inff()
 #define HUGE_VAL     __builtin_inf()
+#define HUGE_VALL    __builtin_inf()
 
 #define M_E           2.71828182845904523536     /* e              */
 #define M_LOG2E       1.44269504088896340736     /* log2(e)        */

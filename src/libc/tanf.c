@@ -32,8 +32,9 @@
 #define q2 -0.155503316403171e+3f
 
 /**
- * @remarks Minimum relative precision of:
- * 2^-20 at +1.293566942e+00 (-1.3f < x < +1.3f)
+ * @remarks Minimum ulp:
+ * ulp of -5  at +0x1.82c9b0p-1 (-1.0f < x < 1.0f)
+ * ulp of -24 at +0x1.7fd63ap+0 (-1.5f < x < 1.5f)
  *
  * See the purple line for relative precision (lag warning):
  * https://www.desmos.com/calculator/c0zs4b8sqk
@@ -79,7 +80,7 @@ float _tanf_c(float arg)
 
     xsq = x*x;
     temp = ((((p4*xsq+p3)*xsq+p2)*xsq+p1)*xsq+p0)*x;
-    temp = temp/(((1.0f*xsq+q2)*xsq+q1)*xsq+q0);
+    temp = temp/(((xsq+q2)*xsq+q1)*xsq+q0);
 
     if(flag) {
         if(temp == 0.0f) {

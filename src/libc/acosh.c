@@ -1,9 +1,9 @@
 #include <math.h>
 
 /**
- * @remarks Minimum relative precision of:
- * 2^-22    at +1.000120640e+00 with ideal log1pf
- * 2^-19.83 at +1.006979227e+00 with current log1pf
+ * @remarks Minimum ulp:
+ * ulp of -2  at +0x1.0007e8p+0 with ideal log1pf
+ * ulp of +10 at +0x1.01c964p+0 with current log1pf
  */
 float acoshf(float x) {
     /* x < 0x1.0p+63f */
