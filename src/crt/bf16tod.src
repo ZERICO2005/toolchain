@@ -1,0 +1,14 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__bf16tod
+
+	; (long double)__bf16
+; input HL output BC:UDE:UHL
+__bf16tod:
+	call	__bf16tof
+	call	__ftod
+
+extern	__bf16tof
+extern	__ftod
