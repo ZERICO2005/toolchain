@@ -1,0 +1,12 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__bf16neg
+
+; same as __hneg
+__bf16neg:
+	rl	h
+	ccf
+	rr	h
+	ret

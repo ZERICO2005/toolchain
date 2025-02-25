@@ -1,0 +1,14 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__lltobf16
+
+	; (__bf16)signed long long
+; input BC:UDE:UHL output HL
+__lltobf16:
+	call	__lltof
+	call	__ftobf16
+
+extern	__lltof
+extern	__ftobf16

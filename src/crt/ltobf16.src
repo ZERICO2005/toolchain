@@ -1,0 +1,26 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__ltobf16
+
+	; (__bf16)unsigned long
+; input E:UHL output HL
+__ltobf16:
+	push	af, bc	; preserve
+	
+	; convert calling conventions
+	push	hl
+	pop	bc
+	ld	a, e
+	call	__ltof
+	ld	e, a
+	push	bc
+	pop	hl
+	
+	pop	af, bc	; restore
+	
+	call	__ftobf16
+
+extern	__ltof
+extern	__ftobf16

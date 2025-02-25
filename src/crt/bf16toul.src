@@ -1,0 +1,26 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__bf16toul
+
+	; (signed long)__bf16
+; input HL output E:UHL
+__bf16toul:
+	call	__bf16tof
+	
+	push	af, bc	; preserve
+	
+	; convert calling conventions
+	push	hl
+	pop	bc
+	ld	a, e
+	call	__ftoul
+	ld	e, a
+	push	bc
+	pop	hl
+	
+	pop	bc, af	; restore
+
+extern	__bf16tof
+extern	__ftoul

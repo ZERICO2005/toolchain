@@ -1,0 +1,23 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__bf16tof
+
+; (float)__bf16
+; input HL output E:UHL
+__bf16tof:
+	ld	l, h
+	ld	h, e
+	; hl <<= 8
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	
+	ld	h, l	; l is already 0
+	ret
