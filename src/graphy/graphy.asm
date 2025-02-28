@@ -1,8 +1,10 @@
 ;-------------------------------------------------------------------------------
+
 include '../include/library.inc'
+
 ;-------------------------------------------------------------------------------
 
-library GRAPHY, 12
+library GRAPHY, 13
 
 ;-------------------------------------------------------------------------------
 ; no dependencies
@@ -11,8 +13,8 @@ library GRAPHY, 12
 ;-------------------------------------------------------------------------------
 ; v1 functions
 ;-------------------------------------------------------------------------------
-;	export gfy_Begin		
-;	export gfy_End
+	export gfy_Begin		
+	export gfy_End
 	export gfy_SetColor
 	export gfy_SetDefaultPalette
 	export gfy_SetPalette
@@ -23,14 +25,14 @@ library GRAPHY, 12
 	export gfy_SetDraw
 	export gfy_SwapDraw
 	export gfy_Blit
-;	export gfy_BlitLines
-;	export gfy_BlitColumns
-;	export gfy_BlitRectangle
-;	export gfy_PrintChar
-;	export gfy_PrintInt
-;	export gfy_PrintUInt
-;	export gfy_PrintString
-;	export gfy_PrintStringXY
+	export gfy_BlitLines
+	export gfy_BlitColumns
+	export gfy_BlitRectangle
+	export gfy_PrintChar
+	export gfy_PrintInt
+	export gfy_PrintUInt
+	export gfy_PrintString
+	export gfy_PrintStringXY
 	export gfy_SetTextXY
 	export gfy_SetTextBGColor
 	export gfy_SetTextFGColor
@@ -42,61 +44,61 @@ library GRAPHY, 12
 	export gfy_GetCharWidth
 	export gfy_GetTextX
 	export gfy_GetTextY
-;	export gfy_Line
+	export gfy_Line
 	export gfy_HorizLine
 	export gfy_VertLine
 	export gfy_Circle
-;	export gfy_FillCircle
+	export gfy_FillCircle
 	export gfy_Rectangle
 	export gfy_FillRectangle
-;	export gfy_Line_NoClip
+	export gfy_Line_NoClip
 	export gfy_HorizLine_NoClip
 	export gfy_VertLine_NoClip
-;	export gfy_FillCircle_NoClip
+	export gfy_FillCircle_NoClip
 	export gfy_Rectangle_NoClip
 	export gfy_FillRectangle_NoClip
 	export gfy_SetClipRegion
 	export gfy_GetClipRegion
-;	export gfy_ShiftDown
-;	export gfy_ShiftUp
-;	export gfy_ShiftLeft
-;	export gfy_ShiftRight
-;	export gfy_Tilemap
-;	export gfy_Tilemap_NoClip
-;	export gfy_TransparentTilemap
-;	export gfy_TransparentTilemap_NoClip
+	export gfy_ShiftDown
+	export gfy_ShiftUp
+	export gfy_ShiftLeft
+	export gfy_ShiftRight
+	export gfy_Tilemap
+	export gfy_Tilemap_NoClip
+	export gfy_TransparentTilemap
+	export gfy_TransparentTilemap_NoClip
 	export gfy_TilePtr
 	export gfy_TilePtrMapped
 	export gfy_Reserved
 	export gfy_AllocSprite
-;	export gfy_Sprite
-;	export gfy_TransparentSprite
-;	export gfy_Sprite_NoClip
-;	export gfy_TransparentSprite_NoClip
-;	export gfy_GetSprite
-;	export gfy_ScaledSprite_NoClip
-;	export gfy_ScaledTransparentSprite_NoClip
+	export gfy_Sprite
+	export gfy_TransparentSprite
+	export gfy_Sprite_NoClip
+	export gfy_TransparentSprite_NoClip
+	export gfy_GetSprite
+	export gfy_ScaledSprite_NoClip
+	export gfy_ScaledTransparentSprite_NoClip
 	export gfy_FlipSpriteY
 	export gfy_FlipSpriteX
 	export gfy_RotateSpriteC
 	export gfy_RotateSpriteCC
 	export gfy_RotateSpriteHalf
-;	export gfy_Polygon
-;	export gfy_Polygon_NoClip
+	export gfy_Polygon
+	export gfy_Polygon_NoClip
 	export gfy_FillTriangle
 	export gfy_FillTriangle_NoClip
 ;-------------------------------------------------------------------------------
 ; v2 functions
 ;-------------------------------------------------------------------------------
 	export gfy_Deprecated
-;	export gfy_SetTextScale
+	export gfy_SetTextScale
 ;-------------------------------------------------------------------------------
 ; v3 functions
 ;-------------------------------------------------------------------------------
 	export gfy_SetTransparentColor
 	export gfy_ZeroScreen
-;	export gfy_SetTextConfig
-;	export gfy_GetSpriteChar
+	export gfy_SetTextConfig
+	export gfy_GetSpriteChar
 ;-------------------------------------------------------------------------------
 ; v4 functions
 ;-------------------------------------------------------------------------------
@@ -107,12 +109,12 @@ library GRAPHY, 12
 ;-------------------------------------------------------------------------------
 	export gfy_SetFontHeight
 	export gfy_ScaleSprite
-;	export gfy_FloodFill
+	export gfy_FloodFill
 ;-------------------------------------------------------------------------------
 ; v6 functions
 ;-------------------------------------------------------------------------------
-;	export gfy_RLETSprite
-;	export gfy_RLETSprite_NoClip
+	export gfy_RLETSprite
+	export gfy_RLETSprite_NoClip
 	export gfy_ConvertFromRLETSprite
 	export gfy_ConvertToRLETSprite
 	export gfy_ConvertToNewRLETSprite
@@ -120,8 +122,8 @@ library GRAPHY, 12
 ; v7 functions
 ;-------------------------------------------------------------------------------
 	export gfy_RotateScaleSprite
-;	export gfy_RotatedScaledTransparentSprite_NoClip
-;	export gfy_RotatedScaledSprite_NoClip
+	export gfy_RotatedScaledTransparentSprite_NoClip
+	export gfy_RotatedScaledSprite_NoClip
 ;-------------------------------------------------------------------------------
 ; v8 functions
 ;-------------------------------------------------------------------------------
@@ -137,7 +139,7 @@ library GRAPHY, 12
 ;-------------------------------------------------------------------------------
 ; v11 functions
 ;-------------------------------------------------------------------------------
-;	export gfy_CopyRectangle
+	export gfy_CopyRectangle
 ;-------------------------------------------------------------------------------
 ; v12 functions
 ;-------------------------------------------------------------------------------
@@ -292,6 +294,38 @@ end macro
 ; gfy_Begin:
 
 ;-------------------------------------------------------------------------------
+gfy_internal_Begin:
+; Sets up the graphics canvas
+; Arguments:
+;  arg0: bpp mode to start in
+; Returns:
+;  None
+	call	ti.boot.ClearVRAM	; clear the screen
+lcdGraphxMode := ti.lcdWatermark+ti.lcdIntFront+ti.lcdPwr+ti.lcdBgr+ti.lcdBpp8
+	ld	de,lcdGraphxMode
+	ld	hl,CurrentBuffer
+SetGfy:
+	ld	bc,ti.vRam
+	ld	(hl),bc			; set the current draw to the screen
+assert CurrentBuffer and -$100 = ti.mpLcdRange
+	ld	l,ti.lcdCtrl
+	ld	(hl),de			; set lots of control parameters
+	ld	l,ti.lcdTiming0+1
+	ld	de,_LcdTiming
+assert ti.vRam and $FF = 0
+	ld	b,8+1			; +1 because c = 0, so first ldi will
+					; decrement b
+.ExchangeTimingLoop:			; exchange stored and active timing
+	ld	a,(de)
+	ldi
+	dec	hl
+	ld	(hl),a
+	inc	hl
+	djnz	.ExchangeTimingLoop
+;	jp	gfy_SetDefaultPalette	; setup the default palette
+assert $ = gfy_SetDefaultPalette
+
+;-------------------------------------------------------------------------------
 gfy_SetDefaultPalette: ; COPIED_FROM_GRAPHX
 ; Sets up the default palette where H=L
 ; Arguments:
@@ -322,6 +356,18 @@ gfy_SetDefaultPalette: ; COPIED_FROM_GRAPHX
 
 ;-------------------------------------------------------------------------------
 ; gfy_End:
+
+;-------------------------------------------------------------------------------
+gfy_internal_End:
+; Closes the graphics library and sets up for the TI-OS
+; Arguments:
+;  None
+; Returns:
+;  None
+	call	ti.boot.ClearVRAM	; clear the screen
+	ld	de,ti.lcdNormalMode
+	ld	hl,ti.mpLcdBase
+	jr	SetGfy			; restore the screen mode
 
 ;-------------------------------------------------------------------------------
 gfy_AllocSprite: ; COPIED_FROM_GRAPHX
@@ -517,6 +563,7 @@ gfy_SetTransparentColor: ; COPIED_FROM_GRAPHX
 ;  arg0 : Transparent color index
 ; Returns:
 ;  Previous transparent color index
+
 	setSmcBytes _TransparentColor
 
 ;-------------------------------------------------------------------------------
@@ -789,6 +836,7 @@ gfy_Rectangle: ; COPIED_FROM_GRAPHX
 	ret
 
 ;-------------------------------------------------------------------------------
+if 0
 gfy_FillRectangle: ; COPIED_FROM_GRAPHX
 ; Draws a clipped rectangle with the global color index
 ; Arguments:
@@ -907,7 +955,9 @@ _FillRectangle_NoClip:
 	ret	nz	; width < 256
 	xor	a, a
 	jr	.loop
-	
+
+end if
+
 ;-------------------------------------------------------------------------------
 gfy_HorizLine:
 ; Draws an clipped horizontal line with the global color index
@@ -1061,6 +1111,7 @@ _VertLine_NoClip_NotDegen:
 	wait_quick
 _VertLine_NoClip_NotDegen_NoWait:
 	ld	d, h		; maybe ld d, 0
+	ld	d, 0	; DEBUG
 	dec	h		; tests if x >= 256
 	ld	h, ti.lcdHeight
 	jr	nz, .x_lt_256
@@ -1740,133 +1791,7 @@ gfy_Circle: ; COPIED_FROM_GRAPHX
 	ret
 
 ;-------------------------------------------------------------------------------
-gfy_FillCircle: ; COPIED_FROM_GRAPHX
-; Draws an clipped circle
-; Arguments:
-;  arg0 : X coordinate
-;  arg1 : Y coordinate
-;  arg2 : Radius
-; Returns:
-;  None
-	push	ix
-	ld	ix,0
-	add	ix,sp
-	lea	hl,ix-9
-	ld	sp,hl
-	ld	bc,(ix+12)
-	ld	(ix-6),bc
-	sbc	hl,hl
-	ld	(ix-3),hl
-	adc	hl,bc
-	jp	z,_ResetStack
-	ld	hl,1
-	or	a,a
-	sbc	hl,bc
-	jp	.cmp3
-.fillsectors:
-	ld	hl,(ix-3)
-	add	hl,hl
-	inc	hl
-	ld	(.circle0),hl
-	push	hl
-	ld	bc,(ix-6)
-	ld	hl,(ix+9)
-	add	hl,bc
-	push	hl
-	ld	bc,(ix-3)
-	ld	hl,(ix+6)
-	or	a,a
-	sbc	hl,bc
-	ld	(.circle1),hl
-	push	hl
-	call	gfy_HorizLine
-	ld	hl,0
-.circle0 := $-3
-	push	hl
-	ld	bc,(ix-6)
-	ld	hl,(ix+9)
-	or	a,a
-	sbc	hl,bc
-	push	hl
-	ld	hl,0
-.circle1 := $-3
-	push	hl
-	call	gfy_HorizLine
-	ld	hl,(ix-6)
-	add	hl,hl
-	inc	hl
-	ld	(.circle2),hl
-	push	hl
-	ld	bc,(ix-3)
-	ld	hl,(ix+9)
-	add	hl,bc
-	push	hl
-	ld	bc,(ix-6)
-	ld	hl,(ix+6)
-	or	a,a
-	sbc	hl,bc
-	ld	(.circle3),hl
-	push	hl
-	call	gfy_HorizLine
-	ld	hl,0
-.circle2 := $-3
-	push	hl
-	ld	bc,(ix-3)
-	ld	hl,(ix+9)
-	or	a,a
-	sbc	hl,bc
-	push	hl
-	ld	hl,0
-.circle3 := $-3
-	push	hl
-	call	gfy_HorizLine
-	lea	hl,ix-9
-	ld	sp,hl
-	ld	bc,(ix-3)
-	inc	bc
-	ld	(ix-3),bc
-	ld	bc,(ix-9)
-	or	a,a
-	sbc	hl,hl
-	sbc	hl,bc
-	jp	m,.cmp0
-	jp	pe,.cmp2
-	jr	.cmp1
-.cmp0:
-	jp	po,.cmp2
-.cmp1:
-	ld	hl,(ix-3)
-	add	hl,hl
-	inc	hl
-	add	hl,bc
-	jr	.cmp3
-.cmp2:
-	ld	bc,(ix-6)
-	dec	bc
-	ld	(ix-6),bc
-	ld	hl,(ix-3)
-	ld	de,(ix-9)
-	or	a,a
-	sbc	hl,bc
-	add	hl,hl
-	inc	hl
-	add	hl,de
-.cmp3:
-	ld	(ix-9),hl
-	ld	bc,(ix-3)
-	ld	hl,(ix-6)
-	or	a,a
-	sbc	hl,bc
-	jp	p,.check
-	jp	pe,.fillsectors
-	ld	sp,ix
-	pop	ix
-	ret
-.check:
-	jp	po,.fillsectors
-	ld	sp,ix
-	pop	ix
-	ret
+; gfy_FillCircle:
 
 ;-------------------------------------------------------------------------------
 ; gfy_FillCircle_NoClip:
@@ -2176,10 +2101,56 @@ gfy_SetFontHeight: ; COPIED_FROM_GRAPHX
 ; gfy_PrintString:
 
 ;-------------------------------------------------------------------------------
-; gfy_SetTextScale:
+gfy_SetTextScale: ; COPIED_FROM_GRAPHX
+; Changes the amount of text scaling (note that height and width are independent)
+; Arguments:
+;  arg0 : Width scale (1 is default)
+;  arg1 : Height scale (1 is default)
+; Returns:
+;  None
+	pop	de
+	pop	hl
+	pop	bc
+	push	bc
+	push	hl
+	push	de
+	ld	a,l
+	ld	de,_TextWidthScale
+;	ld	hl,_TextScaleJump
+	cp	a,c
+	jr	z,.match
+	jr	.nomatch
+.match:
+	dec	a
+	jr	z,.bothone		; if they are both one; just use normal drawing
+	inc	a
+.nomatch:
+	or	a,a
+	ret	z			; null check
+	ld	(de),a
+	ld	a,c
+	or	a,a
+	ret	z			; null check
+	ld	(_TextHeightScale),a
+;	ld	(hl),_PrintLargeFont - _PrintNormalFont
+	ret
+.bothone:
+;	ld	(hl),a			; store a 0, which means no (literal) jump
+	inc	a
+	ld	(de),a
+	ret
 
 ;-------------------------------------------------------------------------------
-; gfy_SetTextConfig:
+gfy_SetTextConfig:
+	pop	de
+	ex	(sp),hl			; hl = config
+	push	de
+	ld	a, l
+	ld	(gfy_PrintChar_Clip), a
+	ret
+
+gfy_PrintChar_Clip:
+	db $00
 
 ;-------------------------------------------------------------------------------
 ; gfy_PrintChar:
@@ -2317,6 +2288,52 @@ _GetCharWidth:
 	ret
 
 ;-------------------------------------------------------------------------------
+gfy_GetSpriteChar: ; COPIED_FROM_GRAPHX
+; Sets the data in char_sprite (must have previously allocated an 8x8 width sprite)
+; the pixel map of the character c
+; Arguments:
+;  arg0 : Pointer to allocated sprite
+;  arg1 : Character
+; Returns:
+;  Pointer to sprite
+	pop	hl
+	pop	de
+	push	de
+	push	hl
+	ld	a,(_TextFixedWidth)
+	or	a,a
+	jr	nz,.fixed
+	sbc	hl,hl
+	ld	l,e			; hl = character
+	ld	bc,(_CharSpacing)
+	add	hl,bc
+	ld	a,(hl)			; a = char width
+.fixed:
+	or	a,a
+	sbc	hl,hl
+	ld	l,e			; hl = character
+	add	hl,hl
+	add	hl,hl
+	add	hl,hl
+	ld	bc,(_TextData)		; get text data array
+	add	hl,bc			; de = draw location
+	ld	de,_TmpCharSprite
+	ex	de,hl
+	push	hl			; save pointer to sprite
+	ld	a,8
+smcByte _TextHeight
+	ld	iyh,a			; ixh = char width
+	ld	(hl),a			; store width of character we are drawing
+	inc	hl
+	ld	iyl,a			; height of char
+	inc	hl
+	ex	de,hl
+	call	_GetChar		; read the character into the array
+	pop	hl
+	ret
+
+if 0
+
 ; gfy_GetSpriteChar:
 
 ; ...
@@ -2324,7 +2341,51 @@ _GetCharWidth:
 smcByte _TextHeight
 	ld	iyh,a			; ixh = char width
 
+end if
+
 ;-------------------------------------------------------------------------------
+_GetChar: ; COPIED_FROM_GRAPHX
+; Places a character data into a nice buffer
+; Inputs:
+;  HL : Points to character pixmap
+;  DE : Points to output buffer
+; Outputs:
+;  Stored pixmap image
+;  Uses IY
+.loop:
+	ld	c,(hl)			; c = 8 pixels (or width based)
+	ld	b,iyh
+.nextpixel:
+	ld	a,TEXT_BG_COLOR
+smcByte _TextBGColor
+	rlc	c
+	jr	nc,.bgcolor
+	ld	a,TEXT_FG_COLOR
+smcByte _TextFGColor
+.bgcolor:
+	cp	a,TEXT_TP_COLOR		; check if transparent
+smcByte _TextTPColor
+	jr	z,.transparent
+	ld	(de),a
+	inc	de
+	djnz	.nextpixel
+	inc	hl
+	dec	iyl
+	jr	nz,.loop
+	ret
+.transparent:
+	ld	a,0
+smcByte _TextTPColor
+	ld	(de),a
+	inc	de			; move to next pixel
+	djnz	.nextpixel
+	inc	hl
+	dec	iyl
+	jr	nz,.loop		; okay we stored the character sprite now draw it
+	ret
+
+if 0
+
 ; _GetChar:
 
 ; ...
@@ -2341,6 +2402,8 @@ smcByte _TextFGColor
 
 	cp	a,TEXT_TP_COLOR		; check if transparent
 smcByte _TextTPColor
+
+end if
 
 ;-------------------------------------------------------------------------------
 gfy_SetFontData: ; COPIED_FROM_GRAPHX
@@ -3164,10 +3227,12 @@ dv_shr_8_times_width_plus_width := $-3
 	ret
 
 ;-------------------------------------------------------------------------------
-; gfy_RotatedScaledSprite_NoClip:
+gfy_RotatedScaledSprite_NoClip: ; UNIMPLEMENTED
+	ret
 
 ;-------------------------------------------------------------------------------
-; gfy_RotatedScaledTransparentSprite_NoClip:
+gfy_RotatedScaledTransparentSprite_NoClip: ; UNIMPLEMENTED
+	ret
 
 ; ...
 
@@ -3460,7 +3525,8 @@ _16Mul16SignedNeg:
 	ret
 
 ;-------------------------------------------------------------------------------
-; gfy_FloodFill:
+gfy_FloodFill: ; UNIMPLEMENTED
+	ret
 
 ;-------------------------------------------------------------------------------
 ; gfy_RLETSprite:
@@ -4227,35 +4293,95 @@ _TmpCharData:
 	db	0,0,0,0,0,0,0,0
 	db	0,0,0,0,0,0,0,0
 
-if 1
+;-------------------------------------------------------------------------------
 
-	export	gfy_DefaultCharSpacing
-	export	gfy_DefaultTextData
-	export	gfy_CharSpacing
-	export	gfy_TextData
+	ld a, 0
+gfy_Color := $-1
+smcByte _Color
 
-	export	gfy_TextXPos
-	export gfy_TextYPos
-	export gfy_TextWidthScale
-	export gfy_TextHeightScale
-	export gfy_FontHeight
-	export gfy_MonospaceFont
-	export gfy_TmpCharSprite
-	
-	export	gfy_Color
-	export	gfy_Transparent_Color
-	export	gfy_Text_FG_Color
-	export	gfy_Text_BG_Color
-	export	gfy_Text_TP_Color
-	
-	export	gfy_ClipXMin
-	export	gfy_ClipYMin
-	export	gfy_ClipXMax
-	export	gfy_ClipYMax
-	export	gfy_ClipXSpan
-	export	gfy_ClipYSpan
-	export	gfy_ClipXMaxMinus1
-	export	gfy_ClipYMaxMinus1
+	ld	a, TRASPARENT_COLOR
+gfy_Transparent_Color := $-1
+smcByte _TransparentColor
+
+	ld	a, TEXT_FG_COLOR
+gfy_Text_FG_Color := $-1
+smcByte _TextFGColor
+
+	ld	a, TEXT_BG_COLOR
+gfy_Text_BG_Color := $-1
+smcByte _TextBGColor
+
+	ld	a, TEXT_TP_COLOR
+gfy_Text_TP_Color := $-1
+smcByte _TextTPColor
+
+	ld	a, 8
+gfy_FontHeight := $-1
+smcByte _TextHeight
+
+;-------------------------------------------------------------------------------
+
+	ld	hl, 0
+gfy_ClipXMin := $-3
+smcWord _XMin
+
+	ld	hl, 0
+gfy_ClipYMin := $-3
+smcByte _YMin
+
+	ld	hl, ti.lcdWidth
+gfy_ClipXMax := $-3
+smcWord _XMax
+
+	ld	hl, ti.lcdHeight
+gfy_ClipYMax := $-3
+smcByte _YMax
+
+	ld	hl, ti.lcdWidth
+gfy_ClipXSpan := $-3
+smcWord _XSpan
+
+	ld	hl, ti.lcdHeight
+gfy_ClipYSpan := $-3
+smcWord _YSpan
+
+	ld	hl, ti.lcdWidth-1
+gfy_ClipXMaxMinus1 := $-3
+smcWord _XMaxMinus1
+
+	ld	hl, ti.lcdHeight-1
+gfy_ClipYMaxMinus1 := $-3
+smcWord _YMaxMinus1
+
+;-------------------------------------------------------------------------------
+
+; export	gfy_DefaultCharSpacing
+; export	gfy_DefaultTextData
+; export	gfy_CharSpacing
+; export	gfy_TextData
+
+; export	gfy_TextXPos
+; export	gfy_TextYPos
+; export	gfy_TextWidthScale
+; export	gfy_TextHeightScale
+; export	gfy_FontHeight
+; export	gfy_MonospaceFont
+; export	gfy_TmpCharSprite
+
+; export	gfy_Color
+; export	gfy_Transparent_Color
+; export	gfy_Text_FG_Color
+; export	gfy_Text_BG_Color
+; export	gfy_Text_TP_Color
+
+; export	gfy_ClipXMin
+; export	gfy_ClipYMin
+; export	gfy_ClipXMax
+; export	gfy_ClipYMax
+; export	gfy_ClipXSpan
+; export	gfy_ClipYSpan
+; export	gfy_ClipXMaxMinus1
+; export	gfy_ClipYMaxMinus1
 
 gfy_DefaultCharSpacing := _DefaultCharSpacing
 gfy_DefaultTextData    := _DefaultTextData
@@ -4266,25 +4392,90 @@ gfy_TextXPos        := _TextXPos
 gfy_TextYPos        := _TextYPos
 gfy_TextWidthScale  := _TextWidthScale
 gfy_TextHeightScale := _TextHeightScale
-gfy_FontHeight      := _TextHeight
+; gfy_FontHeight      := _TextHeight
 gfy_MonospaceFont   := _TextFixedWidth
 gfy_TmpCharSprite   := _TmpCharSprite
 
-gfy_Color             := _Color
-gfy_Transparent_Color := _TransparentColor
-gfy_Text_FG_Color     := _TextFGColor
-gfy_Text_BG_Color     := _TextBGColor
-gfy_Text_TP_Color     := _TextTPColor
+; gfy_Color             := _Color
+; gfy_Transparent_Color := _TransparentColor
+; gfy_Text_FG_Color     := _TextFGColor
+; gfy_Text_BG_Color     := _TextBGColor
+; gfy_Text_TP_Color     := _TextTPColor
 
-gfy_ClipXMin := _XMin
-gfy_ClipYMin := _YMin
-gfy_ClipXMax := _XMax
-gfy_ClipYMax := _YMax
-gfy_ClipXSpan := _XSpan
-gfy_ClipYSpan := _YSpan
-gfy_ClipXMaxMinus1 := _XMaxMinus1
-gfy_ClipYMaxMinus1 := _YMaxMinus1
+; gfy_ClipXMin := _XMin
+; gfy_ClipYMin := _YMin
+; gfy_ClipXMax := _XMax
+; gfy_ClipYMax := _YMax
+; gfy_ClipXSpan := _XSpan
+; gfy_ClipYSpan := _YSpan
+; gfy_ClipXMaxMinus1 := _XMaxMinus1
+; gfy_ClipYMaxMinus1 := _YMaxMinus1
 
 gfy_SineTable := _SineTable
 
-end if
+;-------------------------------------------------------------------------------
+; libc
+;-------------------------------------------------------------------------------
+
+; __bremu     := 
+_memcpy     := $0000A4
+__idivs     := $00013C
+__idivu     := $000140
+__ixor      := $000198
+__sremu     := $00023C
+__ineg      := $000160
+; __indcallhl := 
+_memmove    := $0000A8
+__imulu     := $000154
+__ishl      := $000174
+__setflag   := $000218
+__iand      := $000134
+_memset     := $0000AC
+__frameset  := $00012C
+__iremu     := $000170
+__bshl      := $000100
+
+__bremu:
+; I: A=dividend, C=divisor
+; O: a=A%C
+	push	bc
+	push	hl
+	ld	b, a
+	call	__bdvrmu
+	ld	a, h
+	pop	hl
+	pop	bc
+	ret
+
+__bdvrmu:
+; I: B=dividend, C=divisor
+; O: a=?, b=0, h=B%C, l=B/C
+	ld	l, b
+.hijack_l_dividend:
+	ld	h, 0
+	ld	b, 8
+.loop:
+	add	hl, hl
+	ld	a, h
+	sub	a, c
+	jr	c, .bit_skip
+	ld	h, a
+	inc	l
+.bit_skip:
+	djnz	.loop
+	ret
+
+__indcallhl:
+	jp	(hl)
+
+;-------------------------------------------------------------------------------
+; graphy_lcddrvce.asm
+;-------------------------------------------------------------------------------
+
+include 'graphy_lcddrvce.asm'
+
+;-------------------------------------------------------------------------------
+; graphy.c.src
+;-------------------------------------------------------------------------------
+
+include 'graphy.c.src'

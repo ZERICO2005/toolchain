@@ -461,31 +461,35 @@ gfy_Circle((x), (y), (radius))
 #define gfy_GetSprite_NoClip(sprite_buffer, x, y) \
 gfy_GetSprite((sprite_buffer), (x), (y))
 
-// /**
-//  * Helper macro to only perform rotation using
-//  * gfy_RotatedScaledTransparentSprite_NoClip.
-//  *
-//  * @param[in] sprite Input sprite to rotate/scale.
-//  * @param[in] x X coordinate position.
-//  * @param[in] y Y coordinate position.
-//  * @param[in] angle 256 position angular integer.
-//  * @see gfy_RotatedScaledTransparentSprite_NoClip.
-//  */
-// #define gfy_RotatedTransparentSprite_NoClip(sprite, x, y, angle) \
-// gfy_RotatedScaledTransparentSprite_NoClip(sprite, x, y, angle, 64)
+#if 0
 
-// /**
-//  * Helper macro to only perform rotation using
-//  * gfy_RotatedScaledSprite_NoClip.
-//  *
-//  * @param[in] sprite Input sprite to rotate/scale.
-//  * @param[in] x X coordinate position.
-//  * @param[in] y Y coordinate position.
-//  * @param[in] angle 256 position angular integer.
-//  * @see gfy_RotatedScaledTransparentSprite_NoClip.
-//  */
-// #define gfy_RotatedSprite_NoClip(sprite, x, y, angle) \
-// gfy_RotatedScaledSprite_NoClip(sprite, x, y, angle, 64)
+/**
+ * Helper macro to only perform rotation using
+ * gfy_RotatedScaledTransparentSprite_NoClip.
+ *
+ * @param[in] sprite Input sprite to rotate/scale.
+ * @param[in] x X coordinate position.
+ * @param[in] y Y coordinate position.
+ * @param[in] angle 256 position angular integer.
+ * @see gfy_RotatedScaledTransparentSprite_NoClip.
+ */
+#define gfy_RotatedTransparentSprite_NoClip(sprite, x, y, angle) \
+gfy_RotatedScaledTransparentSprite_NoClip(sprite, x, y, angle, 64)
+
+/**
+ * Helper macro to only perform rotation using
+ * gfy_RotatedScaledSprite_NoClip.
+ *
+ * @param[in] sprite Input sprite to rotate/scale.
+ * @param[in] x X coordinate position.
+ * @param[in] y Y coordinate position.
+ * @param[in] angle 256 position angular integer.
+ * @see gfy_RotatedScaledTransparentSprite_NoClip.
+ */
+#define gfy_RotatedSprite_NoClip(sprite, x, y, angle) \
+gfy_RotatedScaledSprite_NoClip(sprite, x, y, angle, 64)
+
+#endif
 
 /**
  * Helper macro to only perform rotation using gfy_RotateScaleSprite.
@@ -551,40 +555,44 @@ gfy_ConvertToNewRLETSprite(sprite_in, malloc)
 ((y1) < ((y0) + (h0))) && \
 (((y1) + (h1)) > (y0)))
 
-// /* byte 0 of compressed data is always literal - is the width */
-// #define gfy_GetZX7SpriteWidth(zx7_sprite)                     \
-//     __extension__({                                           \
-//         const uint8_t *_Data = (const uint8_t *)(zx7_sprite); \
-//         _Data[0];                                             \
-//     })
+#if 0
 
-// /* byte 1 of compressed data is flag. If bit 7 set, copy byte 0, else byte 2 */
-// #define gfy_GetZX7SpriteHeight(zx7_sprite)                    \
-//     __extension__({                                           \
-//         const uint8_t *_Data = (const uint8_t *)(zx7_sprite); \
-//         _Data[_Data[1] & 0x80 ? 0 : 2];                       \
-//     })
+/* byte 0 of compressed data is always literal - is the width */
+#define gfy_GetZX7SpriteWidth(zx7_sprite)                     \
+    __extension__({                                           \
+        const uint8_t *_Data = (const uint8_t *)(zx7_sprite); \
+        _Data[0];                                             \
+    })
 
-// /**
-//  * Calculates the amount of memory that a zx7-compressed
-//  * sprite would use when decompressed.
-//  *
-//  * Sprite size is calculated as 2 + (width * height).
-//  *
-//  * ZX7 data always starts with a literal, which is the sprite's width. The next
-//  * byte contains flags, which indicates if the following bytes are literals or
-//  * codewords. If bit 7 of that is zero, the byte immediately after it is a
-//  * literal and can be read in as sprite height. Otherwise, the bits that follows
-//  * indicates a codeword, making sprite height the same as width.
-//  *
-//  * @param[in] zx7_sprite ZX7-compressed sprite
-//  * @return Size, in bytes, of decompressed sprite
-// */
-// #define gfy_GetZX7SpriteSize(zx7_sprite)                                      \
-//     __extension__({                                                           \
-//         const void *_Sprite = (const void *)(zx7_sprite);                     \
-//         2 + gfy_GetZX7SpriteWidth(_Sprite) * gfy_GetZX7SpriteHeight(_Sprite); \
-//     })
+/* byte 1 of compressed data is flag. If bit 7 set, copy byte 0, else byte 2 */
+#define gfy_GetZX7SpriteHeight(zx7_sprite)                    \
+    __extension__({                                           \
+        const uint8_t *_Data = (const uint8_t *)(zx7_sprite); \
+        _Data[_Data[1] & 0x80 ? 0 : 2];                       \
+    })
+
+/**
+ * Calculates the amount of memory that a zx7-compressed
+ * sprite would use when decompressed.
+ *
+ * Sprite size is calculated as 2 + (width * height).
+ *
+ * ZX7 data always starts with a literal, which is the sprite's width. The next
+ * byte contains flags, which indicates if the following bytes are literals or
+ * codewords. If bit 7 of that is zero, the byte immediately after it is a
+ * literal and can be read in as sprite height. Otherwise, the bits that follows
+ * indicates a codeword, making sprite height the same as width.
+ *
+ * @param[in] zx7_sprite ZX7-compressed sprite
+ * @return Size, in bytes, of decompressed sprite
+*/
+#define gfy_GetZX7SpriteSize(zx7_sprite)                                      \
+    __extension__({                                                           \
+        const void *_Sprite = (const void *)(zx7_sprite);                     \
+        2 + gfy_GetZX7SpriteWidth(_Sprite) * gfy_GetZX7SpriteHeight(_Sprite); \
+    })
+
+#endif
 
 /**
  * Initializes the `graphx` library context.
@@ -1386,44 +1394,48 @@ void gfy_ScaledTransparentSprite_NoClip(const gfy_sprite_t *sprite,
                                         uint8_t width_scale,
                                         uint8_t height_scale);
 
-// /**
-//  * Fixed Rotation with scaling factor for sprites.
-//  *
-//  * @note A scale factor of 64 represents 100% scaling.
-//  * @warning This routine only accepts square input sprites.
-//  * @param[in] sprite Input sprite to rotate/scale.
-//  * @param[in] x X coordinate position.
-//  * @param[in] y Y coordinate position.
-//  * @param[in] angle 256 position angular integer.
-//  * @param[in] scale Scaling factor; range is about 1% to 400% scale.
-//  * @returns The size of the sprite after scaling.
-//  *          This can be used for centering purposes.
-//  */
-// uint8_t gfy_RotatedScaledTransparentSprite_NoClip(const gfy_sprite_t *sprite,
-//                                                   uint24_t x,
-//                                                   uint8_t y,
-//                                                   uint8_t angle,
-//                                                   uint8_t scale);
+/**
+ * Fixed Rotation with scaling factor for sprites.
+ *
+ * @note A scale factor of 64 represents 100% scaling.
+ * @warning This routine only accepts square input sprites.
+ * @param[in] sprite Input sprite to rotate/scale.
+ * @param[in] x X coordinate position.
+ * @param[in] y Y coordinate position.
+ * @param[in] angle 256 position angular integer.
+ * @param[in] scale Scaling factor; range is about 1% to 400% scale.
+ * @returns The size of the sprite after scaling.
+ *          This can be used for centering purposes.
+ */
+uint8_t gfy_RotatedScaledTransparentSprite_NoClip(const gfy_sprite_t *sprite,
+                                                  uint24_t x,
+                                                  uint8_t y,
+                                                  uint8_t angle,
+                                                  uint8_t scale);
 
-// /**
-//  * Fixed Rotation with scaling fator for sprites without transparency.
-//  *
-//  * @note A scale factor of 64 represents 100% scaling.
-//  * @warning This routine only accepts square input sprites.
-//  * @param[in] sprite Input sprite to rotate/scale.
-//  * @param[in] x X coordinate position.
-//  * @param[in] y Y coordinate position.
-//  * @param[in] angle 256 position angular integer.
-//  * @param[in] scale Scaling factor; range is about 1% to 400% scale.
-//  *        64 represents 100% scaling.
-//  * @returns The size of the sprite after scaling.
-//  *          This can be used for centering purposes.
-//  */
-// uint8_t gfy_RotatedScaledSprite_NoClip(const gfy_sprite_t *sprite,
-//                                        uint24_t x,
-//                                        uint8_t y,
-//                                        uint8_t angle,
-//                                        uint8_t scale);
+#if 0
+
+/**
+ * Fixed Rotation with scaling fator for sprites without transparency.
+ *
+ * @note A scale factor of 64 represents 100% scaling.
+ * @warning This routine only accepts square input sprites.
+ * @param[in] sprite Input sprite to rotate/scale.
+ * @param[in] x X coordinate position.
+ * @param[in] y Y coordinate position.
+ * @param[in] angle 256 position angular integer.
+ * @param[in] scale Scaling factor; range is about 1% to 400% scale.
+ *        64 represents 100% scaling.
+ * @returns The size of the sprite after scaling.
+ *          This can be used for centering purposes.
+ */
+uint8_t gfy_RotatedScaledSprite_NoClip(const gfy_sprite_t *sprite,
+                                       uint24_t x,
+                                       uint8_t y,
+                                       uint8_t angle,
+                                       uint8_t scale);
+
+#endif
 
 /**
  * Flips a sprite along the X axis.

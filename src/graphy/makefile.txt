@@ -28,10 +28,12 @@ all: $(LIB_8XV)
 
 build/graphy.c.asm: graphy.c
 	$(Q)$(call MKDIR,build)
+	$(Q)$(EZCC) $(EZCFLAGS) -o build/graphy.c.asm graphy.c
+
+$(LIB_8XV): $(LIB_SRC) graphy.c
+	$(Q)$(FASMG) $(LIB_8XV) $(LIB_SRC) 
 	$(Q)$(EZCC) $(EZCFLAGS) graphy.c
 
-$(LIB_8XV): $(LIB_SRC)
-	$(Q)$(FASMG) $< $@
 
 clean:
 	$(Q)$(call REMOVE,$(LIB_LIB) $(LIB_8XV))
@@ -43,5 +45,4 @@ install: all
 	$(Q)$(call COPY,$(LIB_LIB),$(INSTALL_LIB))
 	$(Q)$(call COPY,$(LIB_H),$(INSTALL_H))
 
-.PHONY: all clean install
-
+.PHONY: all clean
