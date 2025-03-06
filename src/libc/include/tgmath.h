@@ -339,6 +339,12 @@
     float: frexpf \
 )((x), (y))
 
+#define __hypot3(x, y, z) _Generic(__tgmath_promote(x) + __tgmath_promote(y) + __tgmath_promote(z), \
+    long double: __hypot3l, \
+    default: __hypot3, \
+    float: __hypot3f \
+)((x), (y), (z))
+
 #define ldexp(x, y) _Generic(__tgmath_promote(x), \
     long double: ldexpl, \
     default: ldexp, \
