@@ -90,7 +90,7 @@ int vprintf(const char *__restrict format, va_list va)
     __attribute__((format(__printf__, 1, 0)));
 
 int sprintf(char *__restrict buffer, const char *__restrict format, ...)
-    __attribute__((format(__printf__, 2, 3)));
+    __attribute__((format (__printf__, 2, 3)));
 
 int vsprintf(char *__restrict buffer, const char *__restrict format, va_list va)
     __attribute__((format(__printf__, 2, 0)));
@@ -101,10 +101,16 @@ int snprintf(char* buffer, size_t count, const char *__restrict format, ...)
 int vsnprintf(char* buffer, size_t count, const char *__restrict format, va_list va)
     __attribute__((format(__printf__, 3, 0)));
 
-int asprintf(char **__restrict p_str, const char *__restrict format, ...)
-    __attribute__((format(__printf__, 2, 3)));
-    
-int vasprintf(char **__restrict p_str, const char *__restrict format, va_list va)
+int asprintf(char **__restrict p_buffer, const char *__restrict format, ...)
+    __attribute__((format (__printf__, 2, 3)));
+
+int vasprintf(char **__restrict p_buffer, const char *__restrict format, va_list va)
+    __attribute__((format(__printf__, 2, 0)));
+
+int fprintf(FILE* __restrict stream, const char* __restrict format, ...)
+    __attribute__((format (__printf__, 2, 3)));
+
+int vfprintf(FILE* __restrict stream, const char* __restrict format, va_list va)
     __attribute__((format(__printf__, 2, 0)));
 
 void perror(const char* str);

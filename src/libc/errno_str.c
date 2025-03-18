@@ -5,7 +5,7 @@
 
 int _ti_sprintf(
     char *__restrict buffer, const char *__restrict format, ...
-) __attribute__ ((format (__printf__, 2, 3)));
+) __attribute__((format(__printf__, 2, 3)));
 
 static char const * const errno_strings[] = {
     "no error",
@@ -48,8 +48,7 @@ size_t strerrorlen_s(errno_t errnum) {
 void perror(const char *str) {
     if (str != NULL && *str != '\0') {
         fputs(str, stderr);
-        fputc(':', stderr);
-        fputc(' ', stderr);
+        fputs(". ", stderr);
     }
     fputs(strerror(errno), stderr);
     fputc('\n', stderr);

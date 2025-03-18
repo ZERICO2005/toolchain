@@ -35,6 +35,8 @@ using ::sprintf;
 using ::vsprintf;
 using ::snprintf;
 using ::vsnprintf;
+using ::fprintf;
+using ::vfprintf;
 using ::asprintf;
 using ::vasprintf;
 using ::perror;
