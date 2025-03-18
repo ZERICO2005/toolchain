@@ -25,7 +25,6 @@ library GRAPHY, 13
 	export gfy_SetDraw
 	export gfy_SwapDraw
 	export gfy_Blit
-	export gfy_BlitLines
 	export gfy_BlitColumns
 	export gfy_BlitRectangle
 	export gfy_PrintChar
@@ -1122,7 +1121,7 @@ _VertLine_NoClip_NotDegen_NoWait:
 	add	hl, de		; add y cord
 	ld	de, (CurrentBuffer)
 	add	hl, de		; add buffer offset
-	
+
 _VertLine_NoClip_Draw:
 	ld	(hl), 0
 smcByte _Color
