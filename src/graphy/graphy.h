@@ -1,7 +1,7 @@
 /**
  * @file
  *
- * The below example template shows the best graphx buffer usage pattern:
+ * The below example template shows the best graphy buffer usage pattern:
  * @code{.cpp}
  * // Standard #includes omitted
  *
@@ -73,8 +73,8 @@ extern "C" {
  * gfy_UninitedSprite(), or gfy_TempSprite().
  */
 typedef struct gfy_sprite_t {
-    uint8_t height;  /**< Height of the image. */
-    uint8_t width;   /**< Width of the image.  */
+    uint8_t width;  /**< Height of the image. */
+    uint8_t height; /**< Width of the image.  */
     uint8_t data[]; /**< Image data array.    */
 } gfy_sprite_t;
 
@@ -95,8 +95,8 @@ typedef struct gfy_sprite_t {
  */
 typedef struct gfy_rletsprite_t {
     uint8_t width;  /**< Height of the image. */
-    uint8_t height;   /**< Width of the image.  */
-    uint8_t data[]; /**< Image data array. */
+    uint8_t height; /**< Width of the image.  */
+    uint8_t data[]; /**< Image data array.    */
 } gfy_rletsprite_t;
 
 /**
@@ -595,14 +595,14 @@ gfy_ConvertToNewRLETSprite(sprite_in, malloc)
 #endif
 
 /**
- * Initializes the `graphx` library context.
+ * Initializes the `graphy` library context.
  *
- * This function should be called before any other `graphx` library routines.
+ * This function should be called before any other `graphy` library routines.
  */
 void gfy_Begin();
 
 /**
- * Ends the `graphx` library context.
+ * Ends the `graphy` library context.
  *
  * Restores the LCD to 16bpp and clears the screen.
  * 16bpp is used by the OS, so if you don't call this, the screen will look
@@ -754,7 +754,7 @@ void gfy_FillScreen(uint8_t index);
  *
  * @see gfy_FillScreen.
  */
-void gfy_ZeroScreen(void);
+#define gfy_ZeroScreen() gfy_FillScreen(0)
 
 /**
  * Sets a pixel to the global color index.
@@ -1063,7 +1063,7 @@ uint8_t gfy_GetDraw(void);
  * Swaps the roles of the screen and drawing buffers.
  *
  * Does not wait for the old screen buffer to finish being displayed. Instead,
- * the next invocation of a graphx drawing function will block, (pause program
+ * the next invocation of a graphy drawing function will block, (pause program
  * execution) waiting for this event. To block and wait explicitly, use gfy_Wait().
  *
  * The LCD driver maintains its own screen buffer pointer for the duration of a
@@ -1072,7 +1072,7 @@ uint8_t gfy_GetDraw(void);
  *
  * @remarks
  * In practice, this function should be invoked immediately after finishing
- * drawing a frame to the drawing buffer, and invocation of the first graphx
+ * drawing a frame to the drawing buffer, and invocation of the first graphy
  * drawing function for the next frame should be scheduled as late as possible
  * relative to non-drawing logic. Non-drawing logic can execute during time when
  * a drawing function may otherwise block.
@@ -1097,34 +1097,6 @@ void gfy_Wait(void);
  */
 void gfy_Blit(gfy_location_t src);
 
-/**scr
- * Copies lines from the input buffer to the opposite buffer.
- *
- * No clipping is performed as it is a copy not a draw.
- * @param[in] src drawing location to copy from.
- * @param[in] y_loc Y Location to begin copying at.
- * @param[in] num_lines Number of lines to copy.
- * @see gfy_location_t.
- */
-void gfy_BlitLines(gfy_location_t src,
-                uint8_t y_loc,
-                uint8_t num_lines);
-
-#define gfy_BlitRows gfy_BlitLines
-
-/**
- * Copies columns from the input buffer to the opposite buffer.
- *
- * No clipping is performed as it is a copy not a draw.
- * @param[in] src drawing location to copy from.
- * @param[in] x_loc X Location to begin copying at.
- * @param[in] num_columns Number of columns to copy.
- * @see gfy_location_t.
- */
-void gfy_BlitColumns(gfy_location_t src,
-                    uint24_t x_loc,
-                    uint24_t num_columns);
-
 /**
  * Transfers a rectangle from the source graphics buffer to the opposite
  * buffer.
@@ -1138,10 +1110,45 @@ void gfy_BlitColumns(gfy_location_t src,
  * @see gfy_location_t.
  */
 void gfy_BlitRectangle(gfy_location_t src,
-                    uint24_t x,
-                    uint8_t y,
-                    uint24_t width,
-                    uint24_t height);
+                       uint24_t x,
+                       uint8_t y,
+                       uint24_t width,
+                       uint24_t height);
+
+/**
+ * Copies lines from the input buffer to the opposite buffer.
+ *
+ * No clipping is performed as it is a copy not a draw.
+ * @param[in] src drawing location to copy from.
+ * @param[in] y_loc Y Location to begin copying at.
+ * @param[in] num_lines Number of lines to copy.
+ * @see gfy_location_t.
+ */
+#define gfy_BlitLines(src, y_loc, num_lines) \
+gfy_BlitRectangle(src, 0, y_loc, GFY_LCD_WIDTH, num_lines)
+
+/**
+ * Copies rows from the input buffer to the opposite buffer.
+ *
+ * No clipping is performed as it is a copy not a draw.
+ * @param[in] src drawing location to copy from.
+ * @param[in] y_loc Y Location to begin copying at.
+ * @param[in] num_rows Number of rows to copy.
+ * @see gfy_location_t.
+ */
+#define gfy_BlitRows(src, y_loc, num_rows) \
+gfy_BlitRectangle(src, 0, y_loc, GFY_LCD_WIDTH, num_rows)
+
+/**
+ * Copies columns from the input buffer to the opposite buffer.
+ *
+ * No clipping is performed as it is a copy not a draw.
+ * @param[in] src drawing location to copy from.
+ * @param[in] x_loc X Location to begin copying at.
+ * @param[in] num_columns Number of columns to copy.
+ * @see gfy_location_t.
+ */
+void gfy_BlitColumns(gfy_location_t src, uint24_t x_loc, uint24_t num_columns);
 
 /**
  * Copies a rectangular region between graphics buffers or to the same graphics buffer.
@@ -1158,13 +1165,13 @@ void gfy_BlitRectangle(gfy_location_t src,
  * @see gfy_location_t
  */
 void gfy_CopyRectangle(gfy_location_t src,
-                    gfy_location_t dst,
-                    uint24_t src_x,
-                    uint8_t src_y,
-                    uint24_t dst_x,
-                    uint8_t dst_y,
-                    uint24_t width,
-                    uint8_t height);
+                       gfy_location_t dst,
+                       uint24_t src_x,
+                       uint8_t src_y,
+                       uint24_t dst_x,
+                       uint8_t dst_y,
+                       uint24_t width,
+                       uint8_t height);
 
 /**
  * Sets the scaling for text. Scaling is performed by multiplying the
@@ -1479,7 +1486,7 @@ gfy_sprite_t *gfy_RotateSpriteC(const gfy_sprite_t *sprite_in,
  * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
  */
 gfy_sprite_t *gfy_RotateSpriteCC(const gfy_sprite_t *sprite_in,
-                                gfy_sprite_t *sprite_out);
+                                 gfy_sprite_t *sprite_out);
 
 /**
  * Rotates a sprite 180 degrees.
@@ -1490,7 +1497,27 @@ gfy_sprite_t *gfy_RotateSpriteCC(const gfy_sprite_t *sprite_in,
  * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
  */
 gfy_sprite_t *gfy_RotateSpriteHalf(const gfy_sprite_t *sprite_in,
-                                gfy_sprite_t *sprite_out);
+                                   gfy_sprite_t *sprite_out);
+
+
+/**
+ * Transposes a sprite
+ *
+ * @param[in] sprite_in Input sprite to transpose.
+ * @param[out] sprite_out Pointer to where transposed sprite will be stored.
+ * @returns A pointer to sprite_out.
+ * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
+ */
+gfy_sprite_t *gfy_TransposeSprite(const gfy_sprite_t *sprite_in,
+                                  gfy_sprite_t *sprite_out);
+
+#ifdef GRAPHX_H
+#define gfy_sprite_from_gfx_sprite(gfx_sprite_in, gfy_sprite_out) \
+gfy_TransposeSprite((const gfy_sprite_t*)((const void*)gfx_sprite_in), gfy_sprite_out)
+
+#define gfy_sprite_from_gfx_sprite(gfy_sprite_in, gfx_sprite_out) \
+((gfx_sprite_t*)((void*)gfy_TransposeSprite(gfy_sprite_in, (gfy_sprite_t*)((void*)gfx_sprite_out))))
+#endif /* GRAPHX_H */
 
 /**
  * Resizes a sprite to new dimensions.
@@ -1503,7 +1530,7 @@ gfy_sprite_t *gfy_RotateSpriteHalf(const gfy_sprite_t *sprite_in,
  * @note sprite_in and sprite_out cannot be the same. Ensure sprite_out is allocated.
  */
 gfy_sprite_t *gfy_ScaleSprite(const gfy_sprite_t *sprite_in,
-                            gfy_sprite_t *sprite_out);
+                              gfy_sprite_t *sprite_out);
 
 /**
  * Fixed Rotation with scaling factor for sprites.
@@ -1564,7 +1591,7 @@ uint8_t *gfy_SetFontData(const uint8_t *data);
  * @see gfy_SetFontData.
  */
 uint8_t *gfy_SetCharData(uint8_t index,
-                        const uint8_t *data);
+                         const uint8_t *data);
 
 /**
  * Sets the font spacing for each character.
@@ -1667,7 +1694,7 @@ void gfy_ShiftRight(uint24_t pixels);
  * @note 0 returns full white, 255 returns original color.
  */
 uint16_t gfy_Lighten(uint16_t color,
-                    uint8_t amount);
+                     uint8_t amount);
 
 /**
  * Darkens a given 1555 color; useful for palette color conversions.
@@ -1691,8 +1718,8 @@ uint16_t gfy_Darken(uint16_t color,
  *       but you must ensure it starts in the window.
  */
 void gfy_FloodFill(uint24_t x,
-                uint8_t y,
-                uint8_t color);
+                   uint8_t y,
+                   uint8_t color);
 
 /**
  * Draws a sprite with RLE transparency.
@@ -1713,8 +1740,8 @@ void gfy_RLETSprite(const gfy_rletsprite_t *sprite,
  * @param[in] y Y coordinate.
  */
 void gfy_RLETSprite_NoClip(const gfy_rletsprite_t *sprite,
-                        uint24_t x,
-                        uint8_t y);
+                           uint24_t x,
+                           uint8_t y);
 
 /**
  * Converts a sprite with RLE transparency to a sprite with normal transparency.
@@ -1762,7 +1789,7 @@ gfy_sprite_t *gfy_ConvertFromRLETSprite(const gfy_rletsprite_t *sprite_in,
  * @see gfy_ConvertFromRLETSprite.
  */
 gfy_rletsprite_t *gfy_ConvertToRLETSprite(const gfy_sprite_t *sprite_in,
-                                        gfy_rletsprite_t *sprite_out);
+                                          gfy_rletsprite_t *sprite_out);
 
 /**
  * Converts a sprite with normal transparency to a sprite with RLE transparency,
@@ -1788,7 +1815,7 @@ gfy_rletsprite_t *gfy_ConvertToRLETSprite(const gfy_sprite_t *sprite_in,
  * @see gfy_ConvertFromRLETSprite.
  */
 gfy_rletsprite_t *gfy_ConvertToNewRLETSprite(const gfy_sprite_t *sprite_in,
-                                            void *(*malloc_routine)(size_t));
+                                             void *(*malloc_routine)(size_t));
 
 /* Compatibility defines (don't use please) */
 /* @cond */

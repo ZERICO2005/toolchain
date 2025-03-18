@@ -1087,21 +1087,6 @@ void gfx_Wait(void);
 void gfx_Blit(gfx_location_t src);
 
 /**
- * Copies lines from the input buffer to the opposite buffer.
- *
- * No clipping is performed as it is a copy not a draw.
- * @param[in] src drawing location to copy from.
- * @param[in] y_loc Y Location to begin copying at.
- * @param[in] num_lines Number of lines to copy.
- * @see gfx_location_t.
- */
-void gfx_BlitLines(gfx_location_t src,
-                   uint8_t y_loc,
-                   uint8_t num_lines);
-
-#define gfx_BlitRows gfx_BlitLines
-
-/**
  * Transfers a rectangle from the source graphics buffer to the opposite
  * buffer.
  *
@@ -1118,6 +1103,30 @@ void gfx_BlitRectangle(gfx_location_t src,
                        uint8_t y,
                        uint24_t width,
                        uint24_t height);
+
+/**
+ * Copies lines from the input buffer to the opposite buffer.
+ *
+ * No clipping is performed as it is a copy not a draw.
+ * @param[in] src drawing location to copy from.
+ * @param[in] y_loc Y Location to begin copying at.
+ * @param[in] num_lines Number of lines to copy.
+ * @see gfx_location_t.
+ */
+void gfx_BlitLines(gfx_location_t src,
+                   uint8_t y_loc,
+                   uint8_t num_lines);
+
+/**
+ * Copies rows from the input buffer to the opposite buffer.
+ *
+ * No clipping is performed as it is a copy not a draw.
+ * @param[in] src drawing location to copy from.
+ * @param[in] y_loc Y Location to begin copying at.
+ * @param[in] num_rows Number of rows to copy.
+ * @see gfy_location_t.
+ */
+#define gfx_BlitRows gfx_BlitLines
 
 /**
  * Copies columns from the input buffer to the opposite buffer.
