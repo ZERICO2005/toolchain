@@ -126,6 +126,8 @@ Unfortunately, it also much slower.
 
 This, however, has nothing to do with the calculator's hardware, and is instead covered on a different page.
 
+The OS provides routines for :code:`float` so it won't add much to the size of the program. Using :code:`long double` will typically add 12KiB-27Kib to the program size depending on which routines are used.
+
 The Memory Map
 ^^^^^^^^^^^^^^
 

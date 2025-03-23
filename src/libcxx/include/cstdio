@@ -6,6 +6,11 @@
 
 #pragma clang system_header
 
+#ifndef HAS_PRINTF
+# undef snprintf
+# undef asprintf
+#endif /* HAS_PRINTF */
+
 namespace std {
 using ::size_t;
 using ::FILE;
@@ -41,5 +46,10 @@ using ::asprintf;
 using ::vasprintf;
 using ::perror;
 } // namespace std
+
+#ifndef HAS_PRINTF
+# define snprintf ce_snprintf
+# define asprintf ce_asprintf
+#endif /* HAS_PRINTF */
 
 #endif // _EZCXX_CSTDINT
