@@ -12,7 +12,7 @@ It is highly recommended to not use `printf` and related functions at all becaus
 If you insist on using these functions, this page details how to do so in the next section.
 
 Alternatively, a limited `sprintf` implementation is baked into the OS which doesn't add any extra size to the resultant program.
-Only the 'c', 'd', 'i', 'n', 'o', 'p' 'u', 'x', 'X', and 's' format specifiers will probably work. It can be accessed through the `<ce_sprintf.h> header <https://ce-programming.github.io/toolchain/headers/ce_sprintf.html>`_, which provides `ce_sprintf`, `ce_snprintf`, and `ce_asprintf`.
+Only the 'c', 'd', 'i', 'n', 'o', 'p' 'u', 'x', 'X', and 's' format specifiers will probably work. It can be accessed through the `<boot_sprintf.h> header <https://ce-programming.github.io/toolchain/headers/boot_sprintf.html>`_, which provides `boot_sprintf`, `boot_snprintf`, and `boot_asprintf`.
 To disable all other printf functions and use this `sprintf` implementation, add the following line to the Makefile:
 
 .. code-block:: makefile

@@ -12,7 +12,7 @@ extern "C" {
  * @brief C89 `sprintf`. `long` arguments and width specifiers are unsupported.
  * @note `%s` will write up to 255 characters.
  */
-int ce_sprintf(
+int boot_sprintf(
     char *__restrict buffer, const char *__restrict format, ...
 ) __attribute__((format (__printf__, 2, 3)));
 
@@ -21,18 +21,18 @@ int ce_sprintf(
  * @warning `__VA_ARGS__` is evaluated twice.
  * @note Undefined behaviour if the output is longer than ~258000 characters.
  */
-#define ce_snprintf(buffer, count, ...)\
+#define boot_snprintf(buffer, count, ...)\
 ({\
     char * const __buffer = buffer;\
     const int __count = count;\
     int __ret = -1;\
-    int __str_len = ce_sprintf((char*)0xFC1000, __VA_ARGS__);\
+    int __str_len = boot_sprintf((char*)0xFC1000, __VA_ARGS__);\
     if (__buffer == NULL || __count == 0) {\
         __ret = __str_len;\
     } else if ((size_t)__str_len > __count) {\
         *__buffer = '\0'; /* won't fit or invalid formatting */\
     } else {\
-        __ret = ce_sprintf(__buffer, __VA_ARGS__);\
+        __ret = boot_sprintf(__buffer, __VA_ARGS__);\
     }\
     __ret;\
 })
@@ -43,16 +43,16 @@ int ce_sprintf(
  * @warning `__VA_ARGS__` is evaluated twice.
  * @note Undefined behaviour if the output is longer than ~258000 characters.
  */
-#define ce_asprintf(p_buffer, ...)\
+#define boot_asprintf(p_buffer, ...)\
 ({\
     char** const __p_buffer = p_buffer;\
     int __ret = -1;\
-    int __str_len = ce_sprintf((char*)0xFC1000, __VA_ARGS__);\
+    int __str_len = boot_sprintf((char*)0xFC1000, __VA_ARGS__);\
     if (__str_len >= 0) {\
         size_t __buffer_size = (size_t)__str_len + 1;\
         *__p_buffer = (char*)malloc(__buffer_size);\
         if (*__p_buffer != NULL) {\
-            __ret = ce_sprintf(*__p_buffer, __VA_ARGS__);\
+            __ret = boot_sprintf(*__p_buffer, __VA_ARGS__);\
         }\
     }\
     __ret;\

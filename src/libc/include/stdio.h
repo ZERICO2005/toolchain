@@ -4,9 +4,11 @@
 #include <cdefs.h>
 #include <stdarg.h>
 
-#ifndef HAS_PRINTF
-# include <ce_sprintf.h>
-#endif /* HAS_PRINTF */
+#if 0
+# ifndef HAS_PRINTF
+#  include <boot_sprintf.h>
+# endif /* HAS_PRINTF */
+#endif
 
 #ifdef HAS_CUSTOM_FILE
 #include CUSTOM_FILE_FILE
@@ -121,9 +123,11 @@ void perror(const char *str);
 
 __END_DECLS
 
-#ifndef HAS_PRINTF
-# define snprintf ce_snprintf
-# define asprintf ce_asprintf
-#endif /* HAS_PRINTF */
+#if 0
+# ifndef HAS_PRINTF
+#  define snprintf boot_snprintf
+#  define asprintf boot_asprintf
+# endif /* HAS_PRINTF */
+#endif
 
 #endif /* _STDIO_H */
