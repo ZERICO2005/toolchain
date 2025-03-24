@@ -25,7 +25,7 @@ The :code:`<boot_sprintf.h>` header provides `boot_sprintf`. `boot_snprintf` and
 
     int boot_asprintf(char **restrict p_buffer, const char *restrict format, ...)
 
-Because the OS does not provide `vsprintf`, `boot_snprintf` and `boot_asprintf` are implemented as macros. This means that :code:`...` or :code:`__VA_ARGS__` will be evaluated twice when the macro is expanded. `sprintf` is traditionally "unsafe" because a maximum output length cannot be specified. By writing to an unmapped memory address :code:`0xFC1000`, `boot_sprintf` can safely write up to ~258000 bytes which can then be used to determine the length of the output.
+Because the OS does not provide `vsprintf`, `boot_snprintf` and `boot_asprintf` are implemented as macros. This means that :code:`...` or :code:`__VA_ARGS__` will be evaluated twice when the macro is expanded. `sprintf` is traditionally "unsafe" because a maximum output length cannot be specified, which can cause buffer overflows. By writing to an unmapped memory address :code:`0xFC1000`, `boot_sprintf` can safely write up to ~258000 bytes which can then be used to determine the length of the output.
 
 replacing printf functions
 ----------------------------
@@ -70,6 +70,7 @@ printf and fprintf
     char* output;
     boot_asprintf(&output, format, ...);
     if (output != NULL) {
+        // fprintf(stdout, ...) == printf(...)
         fputs(stdout, output);
         free(output);
     }

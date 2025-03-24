@@ -4,11 +4,9 @@
 #include <cdefs.h>
 #include <stdarg.h>
 
-#if 0
-# ifndef HAS_PRINTF
-#  include <boot_sprintf.h>
-# endif /* HAS_PRINTF */
-#endif
+#ifndef HAS_PRINTF
+# include <boot_sprintf.h>
+#endif /* HAS_PRINTF */
 
 #ifdef HAS_CUSTOM_FILE
 #include CUSTOM_FILE_FILE
@@ -123,11 +121,47 @@ void perror(const char *str);
 
 __END_DECLS
 
-#if 0
-# ifndef HAS_PRINTF
-#  define snprintf boot_snprintf
-#  define asprintf boot_asprintf
-# endif /* HAS_PRINTF */
-#endif
+#ifdef __cplusplus
+namespace std {
+    using ::size_t;
+    using ::FILE;
+    
+    using ::fopen;
+    using ::fclose;
+    using ::fflush;
+    using ::ferror;
+    using ::feof;
+    using ::clearerr;
+    using ::fputs;
+    using ::fread;
+    using ::fwrite;
+    using ::ftell;
+    using ::fseek;
+    using ::fgetc;
+    using ::fputc;
+    using ::fgets;
+    using ::remove;
+    using ::rewind;
+    using ::getchar;
+    using ::putchar;
+    using ::puts;
+    using ::printf;
+    using ::vprintf;
+    using ::sprintf;
+    using ::vsprintf;
+    using ::snprintf;
+    using ::vsnprintf;
+    using ::fprintf;
+    using ::vfprintf;
+    using ::asprintf;
+    using ::vasprintf;
+    using ::perror;
+} /* namespace std */
+#endif /* __cplusplus */
+
+#ifndef HAS_PRINTF
+# define snprintf boot_snprintf
+# define asprintf boot_asprintf
+#endif /* HAS_PRINTF */
 
 #endif /* _STDIO_H */

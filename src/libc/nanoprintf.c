@@ -641,7 +641,7 @@ static void npf_putc_std(int c, void *ctx) {
   outchar(c);
 }
 
-#if 0
+#if 1
 static void npf_fputc_std(int c, void *ctx) {
   fputc(c, (FILE*)ctx);
 }
@@ -1067,7 +1067,7 @@ int _asprintf_c(char **__restrict p_str, const char *__restrict format, ...) {
   return ret;
 }
 
-#if 0
+#if 1
 int _vfprintf_c(FILE* __restrict stream, const char* __restrict format, va_list vlist)
 {
   return npf_vpprintf(npf_fputc_std, (void*)stream, format, vlist);
