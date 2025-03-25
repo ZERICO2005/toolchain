@@ -1,0 +1,34 @@
+	assume	adl=1
+	section	.text
+
+	public	_truncf
+_truncf:
+	ld	iy, 0
+	add	iy, sp
+	ld	bc, (iy + 3)
+	sbc	hl, hl
+	add	hl, bc
+
+	ld	e, (iy + 6)
+	add	hl, hl
+	ld	a, e
+	rla
+	sub	a, 127
+	jr	c, .ret_zero
+	sub	a, 23
+	jr	nc, .ret_self
+	neg
+
+	push	de
+	push	bc
+	ld	hl, (iy + 3)
+	ld	e, (iy + 6)
+
+.ret_zero:
+	ld	a, e
+	and	a, $80
+	ld	e, a
+	sbc	hl, hl
+
+.ret_self:
+	
