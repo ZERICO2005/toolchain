@@ -21,7 +21,7 @@ The :code:`<boot_sprintf.h>` header provides `boot_sprintf`. `boot_snprintf` and
 
     int boot_sprintf(char *restrict buffer, const char *restrict format, ...)
 
-    int boot_snprintf(char *buffer, size_t count, const char *restrict format, ...)
+    int boot_snprintf(char *restrict buffer, size_t count, const char *restrict format, ...)
 
     int boot_asprintf(char **restrict p_buffer, const char *restrict format, ...)
 
@@ -53,6 +53,7 @@ boot_snprintf
 The truncating behavior of C99 `snprintf` can be replicated with `boot_asprintf`
 
 .. code-block:: c
+
     char buf[20];
     char* temp;
     boot_asprintf(&temp, format, ...);
@@ -67,6 +68,7 @@ printf and fprintf
 `printf` and `fprintf` can be replicated by using `boot_asprintf` and `fputs`
 
 .. code-block:: c
+
     char* output;
     boot_asprintf(&output, format, ...);
     if (output != NULL) {

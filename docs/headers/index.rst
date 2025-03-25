@@ -9,6 +9,7 @@ These headers contain various defines and prototypes, as well as any backwards c
     :maxdepth: 1
     :glob:
 
+    boot_sprintf
     compression
     intce
     tice
