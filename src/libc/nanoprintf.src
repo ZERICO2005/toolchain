@@ -1,0 +1,10 @@
+	assume	adl=1
+
+	section	.text
+
+	public	_npf_bufputc_nop
+_npf_bufputc_nop:
+;	call	__frameset0
+;	pop	ix
+;	ret
+	ret
