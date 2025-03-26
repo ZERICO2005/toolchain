@@ -4,17 +4,16 @@
 
 	public	_truncf, _trunc
 
-; float truncf(float)
-_truncf:
 _trunc:
+_truncf:
 	ld	iy, 0
 	add	iy, sp
-	
+	ld	e, (iy + 6)
+__round_to_zero_f32:
 	ld	bc, (iy + 3)
 	sbc	hl, hl
 	add	hl, bc	; copy BC to HL
 	add	hl, hl
-	ld	e, (iy + 6)
 	ld	a, e
 	rla
 
@@ -30,6 +29,12 @@ _trunc:
 	ld	c, d	; restore C
 	jp	__iand
 
+.ret_self:
+	; already (large) integer, inf, or NaN
+	sbc	hl, hl
+	add	hl, bc
+	ret
+
 .ret_zero:
 	; return signed zero
 	ld	a, e
@@ -37,12 +42,3 @@ _trunc:
 	ld	e, a
 	sbc	hl, hl
 	ret
-
-.ret_self:
-	; already (large) integer, inf, or NaN
-	sbc	hl, hl
-	add	hl, bc
-	ret
-
-	extern	__ishl
-	extern	__iand

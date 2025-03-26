@@ -1,0 +1,73 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__round_away_zero_f32
+
+; used by floorf and ceilf
+__round_away_zero_f32:
+	ld	bc, (iy + 3)
+	sbc	hl, hl
+	add	hl, bc	; copy BC to HL
+	add	hl, hl
+	ld	a, e
+	rla
+
+	sub	a, 127	; exponent bias
+	jr	c, .ret_one
+	sub	a, 23	; bits in the mantissa
+	jr	nc, .ret_self
+	ld	hl, 1
+	neg
+	ld	d, c	; store C
+	ld	c, a
+	call	__ishl
+	ld	c, d	; restore C
+
+	push	hl
+	dec	hl
+	call	__inot
+	call	__iand
+	
+	push	hl
+	or	a, a
+	sbc	hl, bc	; tests if x was already an integer
+	pop	hl
+
+	pop	bc	
+	jr	z, .skip
+	add	hl, bc
+.skip:
+	ld	a, 0
+	adc	a, e
+	ld	e, a
+	ret
+
+.ret_zero:
+	sbc	hl, hl
+	add	hl, bc
+	ld	a, e
+	jr	c, .ret_one
+	rla
+	or	a, a
+	ld	a, e
+	jr	nz, .ret_one
+	; return signed zero
+	inc	hl
+	and	a, $80
+	ld	e, a
+	ret
+.ret_one:
+	or	a, $3F
+	ld	e, a
+	ld	hl, $800000
+	ret
+
+.ret_self:
+	; already (large) integer, inf, or NaN
+	sbc	hl, hl
+	add	hl, bc
+	ret
+
+	extern	__ishl
+	extern	__iand

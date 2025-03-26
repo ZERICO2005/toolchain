@@ -17,8 +17,6 @@ typedef union F32_pun {
     uint32_t bin;
 } F32_pun;
 
-float my_truncf(float);
-
 size_t run_test(void) {
     typedef F32_pun input_t;
     typedef F32_pun output_t;
