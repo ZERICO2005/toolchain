@@ -32,10 +32,10 @@ size_t run_test(void) {
         trunc_part.bin = 0xCAFEBABE;
         frac_part.flt = modff(input[i].flt, &(trunc_part.flt));
         if (frac_part.bin != output[i].frac_part.bin || trunc_part.bin != output[i].trunc_part.bin) {
-            if (
-                fpclassify(frac_part.flt) != fpclassify(output[i].frac_part.flt) ||
-                fpclassify(trunc_part.flt) != fpclassify(output[i].trunc_part.flt)
-            ) {
+            if (!(
+                isnan(frac_part.flt) && isnan(output[i].frac_part.flt) &&
+                isnan(trunc_part.flt) && isnan(output[i].trunc_part.flt)
+            )) {
                 printf(
                     "I: %08lX T: %zu\nG: %08lX %08lX\nT: %08lX %08lX\n",
                     input[i].bin, i,

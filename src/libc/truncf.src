@@ -1,34 +1,48 @@
 	assume	adl=1
+
 	section	.text
 
-	public	_truncf
+	public	_truncf, _trunc
+
+; float truncf(float)
 _truncf:
+_trunc:
 	ld	iy, 0
 	add	iy, sp
+	
 	ld	bc, (iy + 3)
 	sbc	hl, hl
-	add	hl, bc
-
-	ld	e, (iy + 6)
+	add	hl, bc	; copy BC to HL
 	add	hl, hl
+	ld	e, (iy + 6)
 	ld	a, e
 	rla
-	sub	a, 127
-	jr	c, .ret_zero
-	sub	a, 23
-	jr	nc, .ret_self
-	neg
 
-	push	de
-	push	bc
-	ld	hl, (iy + 3)
-	ld	e, (iy + 6)
+	sub	a, 127	; exponent bias
+	jr	c, .ret_zero
+	sub	a, 23	; bits in the mantissa
+	jr	nc, .ret_self
+	sbc	hl, hl	; HL = 0xFFFFFF
+	neg
+	ld	d, c	; store C
+	ld	c, a
+	call	__ishl
+	ld	c, d	; restore C
+	jp	__iand
 
 .ret_zero:
+	; return signed zero
 	ld	a, e
 	and	a, $80
 	ld	e, a
 	sbc	hl, hl
+	ret
 
 .ret_self:
-	
+	; already (large) integer, inf, or NaN
+	sbc	hl, hl
+	add	hl, bc
+	ret
+
+	extern	__ishl
+	extern	__iand
