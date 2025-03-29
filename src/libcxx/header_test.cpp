@@ -34,6 +34,8 @@
 #include <utility>
 #include <version>
 
+#include <complex>
+
 #include <alloca.h>
 #include <assert.h>
 #include <byteswap.h>
