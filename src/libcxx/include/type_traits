@@ -615,6 +615,15 @@ struct __find_first<__type_list<_Head, _Tail...>, _Size, false> {
   using type _EZCXX_NODEBUG = typename __find_first<__type_list<_Tail...>, _Size>::type;
 };
 
+// nat
+
+struct __nat {
+    __nat()                        = delete;
+    __nat(const __nat&)            = delete;
+    __nat& operator=(const __nat&) = delete;
+    ~__nat()                       = delete;
+};
+
 //------------------------------------------------------------------------------
 // make_signed make_unsigned
 //------------------------------------------------------------------------------
