@@ -1,0 +1,455 @@
+// -*- C++ -*-
+#ifndef _EZCXX_IOSFWD
+#define _EZCXX_IOSFWD
+
+#include <__config>
+#include <cstddef>
+#include <string>
+
+#pragma clang system_header
+
+namespace std {
+
+//------------------------------------------------------------------------------
+// fstream
+//------------------------------------------------------------------------------
+
+template <class _CharT, class _Traits = char_traits<_CharT> >
+class _EZCXX_TEMPLATE_VIS basic_filebuf;
+template <class _CharT, class _Traits = char_traits<_CharT> >
+class _EZCXX_TEMPLATE_VIS basic_ifstream;
+template <class _CharT, class _Traits = char_traits<_CharT> >
+class _EZCXX_TEMPLATE_VIS basic_ofstream;
+template <class _CharT, class _Traits = char_traits<_CharT> >
+class _EZCXX_TEMPLATE_VIS basic_fstream;
+
+using filebuf  = basic_filebuf<char>;
+using ifstream = basic_ifstream<char>;
+using ofstream = basic_ofstream<char>;
+using fstream  = basic_fstream<char>;
+
+//------------------------------------------------------------------------------
+// ios
+//------------------------------------------------------------------------------
+
+class _EZCXX_EXPORTED_FROM_ABI ios_base;
+
+template <class _CharT, class _Traits = char_traits<_CharT> >
+class _EZCXX_TEMPLATE_VIS basic_ios;
+
+using ios = basic_ios<char>;
+
+using streamoff = ptrdiff_t;
+
+//------------------------------------------------------------------------------
+// istream
+//------------------------------------------------------------------------------
+
+template <class _CharT, class _Traits = char_traits<_CharT> >
+class _EZCXX_TEMPLATE_VIS basic_istream;
+
+template <class _CharT, class _Traits = char_traits<_CharT> >
+class _EZCXX_TEMPLATE_VIS basic_iostream;
+
+using istream  = basic_istream<char>;
+using iostream = basic_iostream<char>;
+
+//------------------------------------------------------------------------------
+// ostream
+//------------------------------------------------------------------------------
+
+template <class _CharT, class _Traits = char_traits<_CharT> >
+class _EZCXX_TEMPLATE_VIS basic_ostream;
+
+using ostream = basic_ostream<char>;
+
+//------------------------------------------------------------------------------
+// sstream
+//------------------------------------------------------------------------------
+
+template <class _CharT, class _Traits = char_traits<_CharT>, class _Allocator = allocator<_CharT> >
+class _EZCXX_TEMPLATE_VIS basic_stringbuf;
+
+template <class _CharT, class _Traits = char_traits<_CharT>, class _Allocator = allocator<_CharT> >
+class _EZCXX_TEMPLATE_VIS basic_istringstream;
+template <class _CharT, class _Traits = char_traits<_CharT>, class _Allocator = allocator<_CharT> >
+class _EZCXX_TEMPLATE_VIS basic_ostringstream;
+template <class _CharT, class _Traits = char_traits<_CharT>, class _Allocator = allocator<_CharT> >
+class _EZCXX_TEMPLATE_VIS basic_stringstream;
+
+using stringbuf     = basic_stringbuf<char>;
+using istringstream = basic_istringstream<char>;
+using ostringstream = basic_ostringstream<char>;
+using stringstream  = basic_stringstream<char>;
+
+//------------------------------------------------------------------------------
+// streambuf
+//------------------------------------------------------------------------------
+
+template <class _CharT, class _Traits = char_traits<_CharT> >
+class _EZCXX_TEMPLATE_VIS basic_streambuf;
+
+using streambuf = basic_streambuf<char>;
+
+
+//------------------------------------------------------------------------------
+// char_traits
+//------------------------------------------------------------------------------
+
+template <class _CharT>
+struct char_traits;
+/*
+The Standard does not define the base template for char_traits because it is impossible to provide
+a correct definition for arbitrary character types. Instead, it requires implementations to provide
+specializations for predefined character types like `char`, `wchar_t` and others. We provide this as
+exposition-only to document what members a char_traits specialization should provide:
+{
+        using char_type  = _CharT;
+        using int_type   = ...;
+        using off_type   = ...;
+        using pos_type   = ...;
+        using state_type = ...;
+
+        static void assign(char_type&, const char_type&);
+        static bool eq(char_type, char_type);
+        static bool lt(char_type, char_type);
+
+        static int              compare(const char_type*, const char_type*, size_t);
+        static size_t           length(const char_type*);
+        static const char_type* find(const char_type*, size_t, const char_type&);
+        static char_type*       move(char_type*, const char_type*, size_t);
+        static char_type*       copy(char_type*, const char_type*, size_t);
+        static char_type*       assign(char_type*, size_t, char_type);
+
+        static int_type  not_eof(int_type);
+        static char_type to_char_type(int_type);
+        static int_type  to_int_type(char_type);
+        static bool      eq_int_type(int_type, int_type);
+        static int_type  eof();
+};
+*/
+
+// char_traits<char>
+
+template <>
+struct _EZCXX_TEMPLATE_VIS char_traits<char> {
+    using char_type  = char;
+    using int_type   = int;
+    using off_type   = streamoff;
+    using pos_type   = streampos;
+    using state_type = mbstate_t;
+
+    static inline _EZCXX_HIDE_FROM_ABI constexpr void
+    assign(char_type& __c1, const char_type& __c2) noexcept {
+        __c1 = __c2;
+    }
+
+    // TODO: Make this _EZCXX_HIDE_FROM_ABI
+    static inline _EZCXX_HIDDEN constexpr bool eq(char_type __c1, char_type __c2) noexcept {
+        return __c1 == __c2;
+    }
+    static inline _EZCXX_HIDE_FROM_ABI constexpr bool lt(char_type __c1, char_type __c2) noexcept {
+        return (unsigned char)__c1 < (unsigned char)__c2;
+    }
+
+    // __constexpr_memcmp requires a trivially lexicographically comparable type, but char is not when char is a signed
+    // type
+    static _EZCXX_HIDE_FROM_ABI constexpr int
+    compare(const char_type* __lhs, const char_type* __rhs, size_t __count) noexcept {
+        return __builtin_memcmp(__lhs, __rhs, __count);
+    }
+
+    static inline _EZCXX_HIDE_FROM_ABI size_t constexpr length(const char_type* __s) noexcept {
+        return __constexpr_strlen(__s);
+    }
+
+    static _EZCXX_HIDE_FROM_ABI constexpr const char_type*
+    find(const char_type* __s, size_t __n, const char_type& __a) noexcept {
+        if (__n == 0)
+            return nullptr;
+        return __constexpr_memchr(__s, __a, __n);
+    }
+
+    static inline _EZCXX_HIDE_FROM_ABI constexpr char_type*
+    move(char_type* __s1, const char_type* __s2, size_t __n) noexcept {
+        return __constexpr_memmove(__s1, __s2, __element_count(__n));
+    }
+
+    static inline _EZCXX_HIDE_FROM_ABI constexpr char_type*
+    copy(char_type* __s1, const char_type* __s2, size_t __n) noexcept {
+        _EZCXX_ASSERT_NON_OVERLAPPING_RANGES(!__is_pointer_in_range(__s1, __s1 + __n, __s2),
+                                                                                    "char_traits::copy: source and destination ranges overlap");
+        __constexpr_memmove(__s1, __s2, __element_count(__n));
+        return __s1;
+    }
+
+    static inline _EZCXX_HIDE_FROM_ABI constexpr char_type*
+    assign(char_type* __s, size_t __n, char_type __a) noexcept {
+        fill_n(__s, __n, __a);
+        return __s;
+    }
+
+    static inline _EZCXX_HIDE_FROM_ABI constexpr int_type not_eof(int_type __c) noexcept {
+        return eq_int_type(__c, eof()) ? ~eof() : __c;
+    }
+    static inline _EZCXX_HIDE_FROM_ABI constexpr char_type to_char_type(int_type __c) noexcept {
+        return char_type(__c);
+    }
+    static inline _EZCXX_HIDE_FROM_ABI constexpr int_type to_int_type(char_type __c) noexcept {
+        return int_type((unsigned char)__c);
+    }
+    static inline _EZCXX_HIDE_FROM_ABI constexpr bool eq_int_type(int_type __c1, int_type __c2) noexcept {
+        return __c1 == __c2;
+    }
+    static inline _EZCXX_HIDE_FROM_ABI constexpr int_type eof() noexcept { return int_type(EOF); }
+};
+
+template <class _CharT, class _IntT, _IntT _EOFVal>
+struct __char_traits_base {
+    using char_type  = _CharT;
+    using int_type   = _IntT;
+    using off_type   = streamoff;
+    using state_type = mbstate_t;
+
+    // There are different aliases for the different char types, but they are all aliases to this type
+    using pos_type = fpos<mbstate_t>;
+
+    _EZCXX_HIDE_FROM_ABI static inline constexpr void
+    assign(char_type& __lhs, const char_type& __rhs) noexcept {
+        __lhs = __rhs;
+    }
+
+    _EZCXX_HIDE_FROM_ABI static constexpr bool eq(char_type __lhs, char_type __rhs) noexcept {
+        return __lhs == __rhs;
+    }
+
+    _EZCXX_HIDE_FROM_ABI static constexpr bool lt(char_type __lhs, char_type __rhs) noexcept {
+        return __lhs < __rhs;
+    }
+
+    _EZCXX_HIDE_FROM_ABI static constexpr char_type*
+    move(char_type* __dest, const char_type* __src, size_t __n) noexcept {
+        return __constexpr_memmove(__dest, __src, __element_count(__n));
+    }
+
+    _EZCXX_HIDE_FROM_ABI static constexpr char_type*
+    copy(char_type* __dest, const char_type* __src, size_t __n) noexcept {
+        _EZCXX_ASSERT_NON_OVERLAPPING_RANGES(!__is_pointer_in_range(__dest, __dest + __n, __src),
+                                                                                    "char_traits::copy: source and destination ranges overlap");
+        return __constexpr_memmove(__dest, __src, __element_count(__n));
+    }
+
+    _EZCXX_HIDE_FROM_ABI static constexpr char_type*
+    assign(char_type* __str, size_t __n, char_type __fill_char) noexcept {
+        fill_n(__str, __n, __fill_char);
+        return __str;
+    }
+
+    _EZCXX_HIDE_FROM_ABI static constexpr char_type to_char_type(int_type __c) noexcept {
+        return char_type(__c);
+    }
+
+    _EZCXX_HIDE_FROM_ABI static constexpr int_type to_int_type(char_type __c) noexcept { return int_type(__c); }
+
+    _EZCXX_HIDE_FROM_ABI static constexpr bool eq_int_type(int_type __lhs, int_type __rhs) noexcept {
+        return __lhs == __rhs;
+    }
+
+    _EZCXX_HIDE_FROM_ABI static constexpr int_type eof() noexcept { return _EOFVal; }
+
+    _EZCXX_HIDE_FROM_ABI static constexpr int_type not_eof(int_type __c) noexcept {
+        return eq_int_type(__c, eof()) ? static_cast<int_type>(~eof()) : __c;
+    }
+};
+
+// helper fns for basic_string and string_view
+
+// __str_find
+template <class _CharT, class _SizeT, class _Traits, _SizeT __npos>
+inline _SizeT constexpr _EZCXX_HIDE_FROM_ABI
+__str_find(const _CharT* __p, _SizeT __sz, _CharT __c, _SizeT __pos) noexcept {
+    if (__pos >= __sz)
+        return __npos;
+    const _CharT* __r = _Traits::find(__p + __pos, __sz - __pos, __c);
+    if (__r == nullptr)
+        return __npos;
+    return static_cast<_SizeT>(__r - __p);
+}
+
+template <class _CharT, class _Traits>
+_EZCXX_HIDE_FROM_ABI inline constexpr const _CharT* __search_substring(
+        const _CharT* __first1, const _CharT* __last1, const _CharT* __first2, const _CharT* __last2) noexcept {
+    // Take advantage of knowing source and pattern lengths.
+    // Stop short when source is smaller than pattern.
+    const ptrdiff_t __len2 = __last2 - __first2;
+    if (__len2 == 0)
+        return __first1;
+
+    ptrdiff_t __len1 = __last1 - __first1;
+    if (__len1 < __len2)
+        return __last1;
+
+    // First element of __first2 is loop invariant.
+    _CharT __f2 = *__first2;
+    while (true) {
+        __len1 = __last1 - __first1;
+        // Check whether __first1 still has at least __len2 bytes.
+        if (__len1 < __len2)
+            return __last1;
+
+        // Find __f2 the first byte matching in __first1.
+        __first1 = _Traits::find(__first1, __len1 - __len2 + 1, __f2);
+        if (__first1 == nullptr)
+            return __last1;
+
+        // It is faster to compare from the first byte of __first1 even if we
+        // already know that it matches the first byte of __first2: this is because
+        // __first2 is most likely aligned, as it is user's "pattern" string, and
+        // __first1 + 1 is most likely not aligned, as the match is in the middle of
+        // the string.
+        if (_Traits::compare(__first1, __first2, __len2) == 0)
+            return __first1;
+
+        ++__first1;
+    }
+}
+
+template <class _CharT, class _SizeT, class _Traits, _SizeT __npos>
+inline _SizeT constexpr _EZCXX_HIDE_FROM_ABI
+__str_find(const _CharT* __p, _SizeT __sz, const _CharT* __s, _SizeT __pos, _SizeT __n) noexcept {
+    if (__pos > __sz)
+        return __npos;
+
+    if (__n == 0) // There is nothing to search, just return __pos.
+        return __pos;
+
+    const _CharT* __r = __search_substring<_CharT, _Traits>(__p + __pos, __p + __sz, __s, __s + __n);
+
+    if (__r == __p + __sz)
+        return __npos;
+    return static_cast<_SizeT>(__r - __p);
+}
+
+// __str_rfind
+
+template <class _CharT, class _SizeT, class _Traits, _SizeT __npos>
+inline _SizeT constexpr _EZCXX_HIDE_FROM_ABI
+__str_rfind(const _CharT* __p, _SizeT __sz, _CharT __c, _SizeT __pos) noexcept {
+    if (__sz < 1)
+        return __npos;
+    if (__pos < __sz)
+        ++__pos;
+    else
+        __pos = __sz;
+    for (const _CharT* __ps = __p + __pos; __ps != __p;) {
+        if (_Traits::eq(*--__ps, __c))
+            return static_cast<_SizeT>(__ps - __p);
+    }
+    return __npos;
+}
+
+template <class _CharT, class _SizeT, class _Traits, _SizeT __npos>
+inline _SizeT constexpr _EZCXX_HIDE_FROM_ABI
+__str_rfind(const _CharT* __p, _SizeT __sz, const _CharT* __s, _SizeT __pos, _SizeT __n) noexcept {
+    __pos = min(__pos, __sz);
+    if (__n < __sz - __pos)
+        __pos += __n;
+    else
+        __pos = __sz;
+    const _CharT* __r = __find_end_classic(__p, __p + __pos, __s, __s + __n, _Traits::eq);
+    if (__n > 0 && __r == __p + __pos)
+        return __npos;
+    return static_cast<_SizeT>(__r - __p);
+}
+
+// __str_find_first_of
+template <class _CharT, class _SizeT, class _Traits, _SizeT __npos>
+inline _SizeT constexpr _EZCXX_HIDE_FROM_ABI
+__str_find_first_of(const _CharT* __p, _SizeT __sz, const _CharT* __s, _SizeT __pos, _SizeT __n) noexcept {
+    if (__pos >= __sz || __n == 0)
+        return __npos;
+    const _CharT* __r = __find_first_of_ce(__p + __pos, __p + __sz, __s, __s + __n, _Traits::eq);
+    if (__r == __p + __sz)
+        return __npos;
+    return static_cast<_SizeT>(__r - __p);
+}
+
+// __str_find_last_of
+template <class _CharT, class _SizeT, class _Traits, _SizeT __npos>
+inline _SizeT constexpr _EZCXX_HIDE_FROM_ABI
+__str_find_last_of(const _CharT* __p, _SizeT __sz, const _CharT* __s, _SizeT __pos, _SizeT __n) noexcept {
+    if (__n != 0) {
+        if (__pos < __sz)
+            ++__pos;
+        else
+            __pos = __sz;
+        for (const _CharT* __ps = __p + __pos; __ps != __p;) {
+            const _CharT* __r = _Traits::find(__s, __n, *--__ps);
+            if (__r)
+                return static_cast<_SizeT>(__ps - __p);
+        }
+    }
+    return __npos;
+}
+
+// __str_find_first_not_of
+template <class _CharT, class _SizeT, class _Traits, _SizeT __npos>
+inline _SizeT constexpr _EZCXX_HIDE_FROM_ABI
+__str_find_first_not_of(const _CharT* __p, _SizeT __sz, const _CharT* __s, _SizeT __pos, _SizeT __n) noexcept {
+    if (__pos < __sz) {
+        const _CharT* __pe = __p + __sz;
+        for (const _CharT* __ps = __p + __pos; __ps != __pe; ++__ps)
+            if (_Traits::find(__s, __n, *__ps) == nullptr)
+                return static_cast<_SizeT>(__ps - __p);
+    }
+    return __npos;
+}
+
+template <class _CharT, class _SizeT, class _Traits, _SizeT __npos>
+inline _SizeT constexpr _EZCXX_HIDE_FROM_ABI
+__str_find_first_not_of(const _CharT* __p, _SizeT __sz, _CharT __c, _SizeT __pos) noexcept {
+    if (__pos < __sz) {
+        const _CharT* __pe = __p + __sz;
+        for (const _CharT* __ps = __p + __pos; __ps != __pe; ++__ps)
+            if (!_Traits::eq(*__ps, __c))
+                return static_cast<_SizeT>(__ps - __p);
+    }
+    return __npos;
+}
+
+// __str_find_last_not_of
+template <class _CharT, class _SizeT, class _Traits, _SizeT __npos>
+inline _SizeT constexpr _EZCXX_HIDE_FROM_ABI
+__str_find_last_not_of(const _CharT* __p, _SizeT __sz, const _CharT* __s, _SizeT __pos, _SizeT __n) noexcept {
+    if (__pos < __sz)
+        ++__pos;
+    else
+        __pos = __sz;
+    for (const _CharT* __ps = __p + __pos; __ps != __p;)
+        if (_Traits::find(__s, __n, *--__ps) == nullptr)
+            return static_cast<_SizeT>(__ps - __p);
+    return __npos;
+}
+
+template <class _CharT, class _SizeT, class _Traits, _SizeT __npos>
+inline _SizeT constexpr _EZCXX_HIDE_FROM_ABI
+__str_find_last_not_of(const _CharT* __p, _SizeT __sz, _CharT __c, _SizeT __pos) noexcept {
+    if (__pos < __sz)
+        ++__pos;
+    else
+        __pos = __sz;
+    for (const _CharT* __ps = __p + __pos; __ps != __p;)
+        if (!_Traits::eq(*--__ps, __c))
+            return static_cast<_SizeT>(__ps - __p);
+    return __npos;
+}
+
+template <class _Ptr>
+inline _EZCXX_HIDE_FROM_ABI size_t __do_string_hash(_Ptr __p, _Ptr __e) {
+    typedef typename iterator_traits<_Ptr>::value_type value_type;
+    return __hash_memory(__p, (__e - __p) * sizeof(value_type));
+}
+
+} // namespace std
+
+#endif // _EZCXX_IOSFWD

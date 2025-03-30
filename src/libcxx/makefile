@@ -21,7 +21,7 @@ BUILD_SRC := $(patsubst %,build/%.src,$(wildcard *.c *.cpp))
 EZCFLAGS := -S -ffreestanding -Wall -Wextra -Wimplicit-float-conversion -Wimplicit-int-float-conversion -Oz
 EZCFLAGS += -D_EZ80 -isystem ../libc/include -isystem ../ce/include -isystem ../fileioc -mllvm -profile-guided-section-prefix=false
 EZCXXFLAGS := $(EZCFLAGS) -fno-exceptions -fno-rtti -fno-use-cxa-atexit
-EZCXXFLAGS += -isystem ../libcxx/include
+EZCXXFLAGS += -isystem ../libcxx/include -isystem ../ea/EASTL/include -isystem ../ea/EABase/include/Common
 
 WILDCARD_SRC = $(wildcard *.src) $(BUILD_SRC)
 WILDCARD_H := $(wildcard include/*)

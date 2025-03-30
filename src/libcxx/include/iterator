@@ -1,0 +1,16 @@
+// -*- C++ -*-
+#ifndef _EZCXX_ITERATOR
+#define _EZCXX_ITERATOR
+
+#include <EASTL/iterator.h>
+
+#pragma clang system_header
+
+namespace std {
+
+template<typename _Ptr>
+using iterator_traits = eastl::iterator_traits<_Ptr>;
+
+} // namespace std
+
+#endif // _EZCXX_ITERATOR

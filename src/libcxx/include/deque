@@ -1,0 +1,16 @@
+// -*- C++ -*-
+#ifndef _EZCXX_DEQUE
+#define _EZCXX_DEQUE
+
+#include <EASTL/deque.h>
+
+#pragma clang system_header
+
+namespace std {
+
+template <typename _Tp>
+using deque = eastl::deque<_Tp>;
+
+} // namespace std
+
+#endif // _EZCXX_DEQUE

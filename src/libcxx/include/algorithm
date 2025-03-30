@@ -15,6 +15,8 @@
 // currently unused, but included in the standard
 #include <initializer_list>
 
+#include <EASTL/algorithm.h>
+
 #pragma clang system_header
 
 // very limited implementation of <algorithm>
@@ -57,6 +59,16 @@ template <class _Tp> _EZCXX_NODISCARD_EXT inline constexpr
 const _Tp& clamp(const _Tp& __v, const _Tp& __lo, const _Tp& __hi)
 {
     return (__v < __lo) ? __lo : (__hi < __v) ? __hi : __v;
+}
+
+template<typename _ForwardIt, typename _Tp>
+void fill(_ForwardIt first, _ForwardIt last, const _Tp& value) {
+    eastl::fill(first, last, value);
+}
+
+template<typename _OutputIt, typename _Size, typename _Tp>
+_OutputIt fill_n(_OutputIt first, _Size count, const _Tp& value) {
+    return eastl::fill_n(first, count, value);
 }
 
 } // namespace std

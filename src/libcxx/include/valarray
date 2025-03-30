@@ -1,0 +1,16 @@
+// -*- C++ -*-
+#ifndef _EZCXX_VALARRAY
+#define _EZCXX_VALARRAY
+
+#include <EASTL/valarray.h>
+
+#pragma clang system_header
+
+namespace std {
+
+template <typename _Tp>
+using valarray = eastl::valarray<_Tp>;
+
+} // namespace std
+
+#endif // _EZCXX_VALARRAY

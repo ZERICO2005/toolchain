@@ -63,4 +63,6 @@
 #include <time.h>
 #include <wchar.h>
 
+#include <iostream>
+
 // tests for conflicts

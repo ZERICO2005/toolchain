@@ -2,9 +2,14 @@
 #ifndef _EZCXX_MEMORY
 #define _EZCXX_MEMORY
 
+#include <EASTL/memory.h>
+
 #pragma clang system_header
 
 namespace std {
+
+template <typename _Tp>
+using allocator = eastl::allocator;
 
 template <class _Tp>
 inline _Tp* addressof(_Tp& __x) noexcept {

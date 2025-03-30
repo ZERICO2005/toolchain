@@ -1,0 +1,16 @@
+// -*- C++ -*-
+#ifndef _EZCXX_VECTOR
+#define _EZCXX_VECTOR
+
+#include <EASTL/vector.h>
+
+#pragma clang system_header
+
+namespace std {
+
+template <typename _Tp>
+using vector = eastl::vector<_Tp>;
+
+} // namespace std
+
+#endif // _EZCXX_VECTOR

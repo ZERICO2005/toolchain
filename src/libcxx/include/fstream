@@ -1,0 +1,15 @@
+// -*- C++ -*-
+#ifndef _EZCXX_FSTREAM
+#define _EZCXX_FSTREAM
+
+#include <iosfwd>
+
+#pragma clang system_header
+
+namespace std {
+
+
+
+} // namespace std
+
+#endif // _EZCXX_FSTREAM

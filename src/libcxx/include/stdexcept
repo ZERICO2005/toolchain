@@ -1,0 +1,13 @@
+// -*- C++ -*-
+#ifndef _EZCXX_STDEXCEPT
+#define _EZCXX_STDEXCEPT
+
+#pragma clang system_header
+
+namespace std {
+
+
+
+} // namespace std
+
+#endif // _EZCXX_STDEXCEPT

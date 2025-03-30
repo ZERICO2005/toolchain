@@ -1,0 +1,16 @@
+// -*- C++ -*-
+#ifndef _EZCXX_STACK
+#define _EZCXX_STACK
+
+#include <EASTL/stack.h>
+
+#pragma clang system_header
+
+namespace std {
+
+template <typename _Tp>
+using stack = eastl::stack<_Tp>;
+
+} // namespace std
+
+#endif // _EZCXX_STACK

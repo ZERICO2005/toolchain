@@ -1,0 +1,16 @@
+// -*- C++ -*-
+#ifndef _EZCXX_ARRAY
+#define _EZCXX_ARRAY
+
+#include <EASTL/array.h>
+
+#pragma clang system_header
+
+namespace std {
+
+template <typename _Tp>
+using array = eastl::array<_Tp>;
+
+} // namespace std
+
+#endif // _EZCXX_ARRAY

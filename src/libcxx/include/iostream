@@ -1,0 +1,21 @@
+// -*- C++ -*-
+#ifndef _EZCXX_IOSTREAM
+#define _EZCXX_IOSTREAM
+
+#include <ios>
+#include <istream>
+#include <ostream>
+#include <streambuf>
+
+#pragma clang system_header
+
+namespace std {
+
+extern istream cin;
+extern ostream cout;
+extern ostream cerr;
+extern ostream clog;
+
+} // namespace std
+
+#endif // _EZCXX_IOSTREAM

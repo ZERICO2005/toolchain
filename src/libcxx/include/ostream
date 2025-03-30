@@ -1,0 +1,14 @@
+// -*- C++ -*-
+#ifndef _EZCXX_OSTREAM
+#define _EZCXX_OSTREAM
+
+#include <ios>
+
+#pragma clang system_header
+
+namespace std {
+
+
+} // namespace std
+
+#endif // _EZCXX_OSTREAM

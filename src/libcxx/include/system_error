@@ -1,0 +1,300 @@
+// -*- C++ -*-
+//===----------------------------------------------------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+#ifndef _EZCXX_SYSTEM_ERROR
+#define _EZCXX_SYSTEM_ERROR
+
+#include <__config>
+#include <cerrno>
+#include <string>
+#include <cstddef>
+#include <type_traits>
+#include <functional>
+
+#pragma clang system_header
+
+namespace std {
+
+//------------------------------------------------------------------------------
+// errc
+//------------------------------------------------------------------------------
+
+enum errc {
+    argument_out_of_domain  = EDOM,
+    invalid_argument        = EINVAL,
+    io_error                = EIO,
+    not_a_stream            = EINVAL,
+    operation_not_permitted = EPERM,
+    result_out_of_range     = ERANGE,
+};
+
+//------------------------------------------------------------------------------
+// error_category
+//------------------------------------------------------------------------------
+
+
+class _EZCXX_EXPORTED_FROM_ABI error_condition;
+class _EZCXX_EXPORTED_FROM_ABI error_code;
+
+class _EZCXX_HIDDEN __do_message;
+
+class _EZCXX_EXPORTED_FROM_ABI error_category {
+public:
+    virtual ~error_category() noexcept;
+
+    _EZCXX_HIDE_FROM_ABI constexpr error_category() noexcept = default;
+
+    error_category(const error_category&)            = delete;
+    error_category& operator=(const error_category&) = delete;
+
+    virtual const char* name() const noexcept = 0;
+    virtual error_condition default_error_condition(int __ev) const noexcept;
+    virtual bool equivalent(int __code, const error_condition& __condition) const noexcept;
+    virtual bool equivalent(const error_code& __code, int __condition) const noexcept;
+    virtual string message(int __ev) const = 0;
+
+    _EZCXX_HIDE_FROM_ABI bool operator==(const error_category& __rhs) const noexcept { return this == &__rhs; }
+
+    _EZCXX_HIDE_FROM_ABI bool operator!=(const error_category& __rhs) const noexcept { return !(*this == __rhs); }
+
+    _EZCXX_HIDE_FROM_ABI bool operator<(const error_category& __rhs) const noexcept { return this < &__rhs; }
+
+    friend class _EZCXX_HIDDEN __do_message;
+};
+
+class _EZCXX_HIDDEN __do_message : public error_category {
+public:
+    string message(int __ev) const override;
+};
+
+__attribute__((__const__)) _EZCXX_EXPORTED_FROM_ABI const error_category& generic_category() noexcept;
+__attribute__((__const__)) _EZCXX_EXPORTED_FROM_ABI const error_category& system_category() noexcept;
+
+//------------------------------------------------------------------------------
+// error_condition
+//------------------------------------------------------------------------------
+
+template <class _Tp>
+struct _EZCXX_TEMPLATE_VIS is_error_condition_enum : public false_type {};
+
+template <class _Tp>
+inline constexpr bool is_error_condition_enum_v = is_error_condition_enum<_Tp>::value;
+
+template <>
+struct _EZCXX_TEMPLATE_VIS is_error_condition_enum<errc> : true_type {};
+
+namespace __adl_only {
+// Those cause ADL to trigger but they are not viable candidates,
+// so they are never actually selected.
+void make_error_condition() = delete;
+} // namespace __adl_only
+
+class _EZCXX_EXPORTED_FROM_ABI error_condition {
+    int __val_;
+    const error_category* __cat_;
+
+public:
+     _EZCXX_HIDE_FROM_ABI error_condition() noexcept : __val_(0), __cat_(&generic_category()) {}
+
+    _EZCXX_HIDE_FROM_ABI error_condition(int __val, const error_category& __cat) noexcept
+        : __val_(__val),
+            __cat_(&__cat) {}
+
+    template <class _Ep, enable_if_t<is_error_condition_enum<_Ep>::value, int> = 0>
+    _EZCXX_HIDE_FROM_ABI error_condition(_Ep __e) noexcept {
+        using __adl_only::make_error_condition;
+        *this = make_error_condition(__e);
+    }
+
+    _EZCXX_HIDE_FROM_ABI void assign(int __val, const error_category& __cat) noexcept {
+        __val_ = __val;
+        __cat_ = &__cat;
+    }
+
+    template <class _Ep, enable_if_t<is_error_condition_enum<_Ep>::value, int> = 0>
+    _EZCXX_HIDE_FROM_ABI error_condition& operator=(_Ep __e) noexcept {
+        using __adl_only::make_error_condition;
+        *this = make_error_condition(__e);
+        return *this;
+    }
+
+    _EZCXX_HIDE_FROM_ABI void clear() noexcept {
+        __val_ = 0;
+        __cat_ = &generic_category();
+    }
+
+    _EZCXX_HIDE_FROM_ABI int value() const noexcept { return __val_; }
+
+    _EZCXX_HIDE_FROM_ABI const error_category& category() const noexcept { return *__cat_; }
+    string message() const;
+
+    _EZCXX_HIDE_FROM_ABI explicit operator bool() const noexcept { return __val_ != 0; }
+};
+
+inline _EZCXX_HIDE_FROM_ABI error_condition make_error_condition(errc __e) noexcept {
+      return error_condition(static_cast<int>(__e), generic_category());
+}
+
+inline _EZCXX_HIDE_FROM_ABI bool operator==(const error_condition& __x, const error_condition& __y) noexcept {
+      return __x.category() == __y.category() && __x.value() == __y.value();
+}
+
+inline _EZCXX_HIDE_FROM_ABI bool operator!=(const error_condition& __x, const error_condition& __y) noexcept {
+    return !(__x == __y);
+}
+
+inline _EZCXX_HIDE_FROM_ABI bool operator<(const error_condition& __x, const error_condition& __y) noexcept {
+    return __x.category() < __y.category() || (__x.category() == __y.category() && __x.value() < __y.value());
+}
+
+#if 0
+template <>
+struct _EZCXX_TEMPLATE_VIS hash<error_condition> : public unary_function<error_condition, size_t> {
+    _EZCXX_HIDE_FROM_ABI size_t operator()(const error_condition& __ec) const noexcept {
+        return static_cast<size_t>(__ec.value());
+    }
+};
+#endif
+
+//------------------------------------------------------------------------------
+// error_code
+//------------------------------------------------------------------------------
+
+template <class _Tp>
+struct _EZCXX_TEMPLATE_VIS is_error_code_enum : public false_type {};
+
+template <class _Tp>
+inline constexpr bool is_error_code_enum_v = is_error_code_enum<_Tp>::value;
+
+namespace __adl_only {
+// Those cause ADL to trigger but they are not viable candidates,
+// so they are never actually selected.
+void make_error_code() = delete;
+} // namespace __adl_only
+
+class _EZCXX_EXPORTED_FROM_ABI error_code {
+    int __val_;
+    const error_category* __cat_;
+
+public:
+    _EZCXX_HIDE_FROM_ABI error_code() noexcept : __val_(0), __cat_(&system_category()) {}
+
+    _EZCXX_HIDE_FROM_ABI error_code(int __val, const error_category& __cat) noexcept : __val_(__val), __cat_(&__cat) {}
+
+    template <class _Ep, enable_if_t<is_error_code_enum<_Ep>::value, int> = 0>
+    _EZCXX_HIDE_FROM_ABI error_code(_Ep __e) noexcept {
+        using __adl_only::make_error_code;
+        *this = make_error_code(__e);
+    }
+
+    _EZCXX_HIDE_FROM_ABI void assign(int __val, const error_category& __cat) noexcept {
+        __val_ = __val;
+        __cat_ = &__cat;
+    }
+
+    template <class _Ep, enable_if_t<is_error_code_enum<_Ep>::value, int> = 0>
+    _EZCXX_HIDE_FROM_ABI error_code& operator=(_Ep __e) noexcept {
+        using __adl_only::make_error_code;
+        *this = make_error_code(__e);
+        return *this;
+    }
+
+    _EZCXX_HIDE_FROM_ABI void clear() noexcept {
+        __val_ = 0;
+        __cat_ = &system_category();
+    }
+
+    _EZCXX_HIDE_FROM_ABI int value() const noexcept { return __val_; }
+
+    _EZCXX_HIDE_FROM_ABI const error_category& category() const noexcept { return *__cat_; }
+
+    _EZCXX_HIDE_FROM_ABI error_condition default_error_condition() const noexcept {
+        return __cat_->default_error_condition(__val_);
+    }
+
+     string message() const;
+
+    _EZCXX_HIDE_FROM_ABI explicit operator bool() const noexcept { return __val_ != 0; }
+};
+
+inline _EZCXX_HIDE_FROM_ABI error_code make_error_code(errc __e) noexcept {
+     return error_code(static_cast<int>(__e), generic_category());
+}
+
+inline _EZCXX_HIDE_FROM_ABI bool operator==(const error_code& __x, const error_code& __y) noexcept {
+     return __x.category() == __y.category() && __x.value() == __y.value();
+}
+
+inline _EZCXX_HIDE_FROM_ABI bool operator==(const error_code& __x, const error_condition& __y) noexcept {
+     return __x.category().equivalent(__x.value(), __y) || __y.category().equivalent(__x, __y.value());
+}
+
+inline _EZCXX_HIDE_FROM_ABI bool operator==(const error_condition& __x, const error_code& __y) noexcept {
+     return __y == __x;
+}
+
+inline _EZCXX_HIDE_FROM_ABI bool operator!=(const error_code& __x, const error_code& __y) noexcept {
+    return !(__x == __y);
+}
+
+inline _EZCXX_HIDE_FROM_ABI bool operator!=(const error_code& __x, const error_condition& __y) noexcept {
+     return !(__x == __y);
+}
+
+inline _EZCXX_HIDE_FROM_ABI bool operator!=(const error_condition& __x, const error_code& __y) noexcept {
+  return !(__x == __y);
+}
+
+inline _EZCXX_HIDE_FROM_ABI bool operator<(const error_code& __x, const error_code& __y) noexcept {
+  return __x.category() < __y.category() || (__x.category() == __y.category() && __x.value() < __y.value());
+}
+
+#if 0
+template <>
+struct _EZCXX_TEMPLATE_VIS hash<error_code> : public unary_function<error_code, size_t> {
+    _EZCXX_HIDE_FROM_ABI size_t operator()(const error_code& __ec) const noexcept {
+        return static_cast<size_t>(__ec.value());
+    }
+};
+#endif
+
+//------------------------------------------------------------------------------
+// system_error
+//------------------------------------------------------------------------------
+
+#if 0
+class _EZCXX_EXPORTED_FROM_ABI system_error : public runtime_error {
+error_code __ec_;
+
+public:
+    system_error(error_code __ec, const string& __what_arg);
+    system_error(error_code __ec, const char* __what_arg);
+    system_error(error_code __ec);
+    system_error(int __ev, const error_category& __ecat, const string& __what_arg);
+    system_error(int __ev, const error_category& __ecat, const char* __what_arg);
+    system_error(int __ev, const error_category& __ecat);
+    _EZCXX_HIDE_FROM_ABI system_error(const system_error&) noexcept = default;
+    #if 1
+    ~system_error() noexcept override;
+    #endif
+
+    _EZCXX_HIDE_FROM_ABI const error_code& code() const noexcept { return __ec_; }
+};
+  
+// __ev is expected to be an error in the generic_category domain (e.g. from
+// errno, or std::errc::*), not system_category (e.g. from windows syscalls).
+[[__noreturn__]] _EZCXX_EXPORTED_FROM_ABI void __throw_system_error(int __ev, const char* __what_arg);
+
+[[__noreturn__]] _EZCXX_HIDE_FROM_ABI inline void __throw_system_error(error_code __ec, const char* __what_arg) {
+    throw system_error(__ec, __what_arg);
+}
+#endif
+
+} // namespace std
+
+#endif // _EZCXX_SYSTEM_ERROR

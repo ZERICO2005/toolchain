@@ -1,0 +1,16 @@
+// -*- C++ -*-
+#ifndef _EZCXX_LIST
+#define _EZCXX_LIST
+
+#include <EASTL/list.h>
+
+#pragma clang system_header
+
+namespace std {
+
+template <typename _Tp>
+using list = eastl::list<_Tp>;
+
+} // namespace std
+
+#endif // _EZCXX_LIST
