@@ -2,13 +2,69 @@
 #ifndef _EZCXX_ISTREAM
 #define _EZCXX_ISTREAM
 
-#include <iosfwd>
+#include <ios>
+#include <cstdlib>
+#include <cstdio>
+
 
 #pragma clang system_header
 
 namespace std {
 
+struct istream { };
+extern istream cin;
 
+inline istream & operator >> (istream & os, char & ch) {
+    ch = std::getchar();
+    return os;
+}
+    
+inline istream & operator >> (istream & os, char * s) {
+    int i;
+    for (i = 0; i < 255; i++){
+        char ch; os >> ch;
+        if (ch < 32 || ch >= 127) {
+            break;
+        }
+        s[i] = ch;
+    }
+    s[i] = 0;
+    return os;
+}
+
+inline istream & operator >> (istream & os, std::string& s) {
+    s = "";
+    int i;
+    for (i = 0; i < 255; i++){
+        char ch; os >> ch;
+        if (ch < 32 || ch >= 127) {
+            break;
+        }
+        s += ch;
+    }
+    return os;
+}
+    
+inline istream & operator >> (istream & os, int & i) {
+    char s[256];
+    os >> s;
+    i = strtol(s, 0, 10);
+    return os;
+}
+    
+inline istream & operator >> (istream & os, unsigned &i) {
+    char s[256];
+    os >> s;
+    i = strtol(s, 0, 10);
+    return os;
+}
+    
+inline istream & operator >> (istream & os, double & d) {
+    char s[256];
+    os >> s;
+    d = strtod(s ,0);
+    return os;
+}
 
 } // namespace std
 

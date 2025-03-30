@@ -13,6 +13,13 @@
 extern "C" {
 #endif
 
+#undef dbg_printf
+#undef dbg_sprintf
+#undef dbg_ClearConsole
+#undef dbg_Debugger
+#undef dbg_WatchpointSet
+#undef dbg_WatchpointRemoveAll
+
 #ifndef NDEBUG
 
 /** Standard debug output */

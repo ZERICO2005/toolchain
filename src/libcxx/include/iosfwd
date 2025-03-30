@@ -11,93 +11,10 @@
 
 #include <__config>
 #include <cstddef>
-#include <string>
-#include <string_view>
 
 #pragma clang system_header
 
 namespace std {
-
-//------------------------------------------------------------------------------
-// fstream
-//------------------------------------------------------------------------------
-
-template <class _CharT, class _Traits = char_traits<_CharT> >
-class _EZCXX_TEMPLATE_VIS basic_filebuf;
-template <class _CharT, class _Traits = char_traits<_CharT> >
-class _EZCXX_TEMPLATE_VIS basic_ifstream;
-template <class _CharT, class _Traits = char_traits<_CharT> >
-class _EZCXX_TEMPLATE_VIS basic_ofstream;
-template <class _CharT, class _Traits = char_traits<_CharT> >
-class _EZCXX_TEMPLATE_VIS basic_fstream;
-
-using filebuf  = basic_filebuf<char>;
-using ifstream = basic_ifstream<char>;
-using ofstream = basic_ofstream<char>;
-using fstream  = basic_fstream<char>;
-
-//------------------------------------------------------------------------------
-// ios
-//------------------------------------------------------------------------------
-
-class _EZCXX_EXPORTED_FROM_ABI ios_base;
-
-template <class _CharT, class _Traits = char_traits<_CharT> >
-class _EZCXX_TEMPLATE_VIS basic_ios;
-
-using ios = basic_ios<char>;
-
-using streamoff = ptrdiff_t;
-
-//------------------------------------------------------------------------------
-// istream
-//------------------------------------------------------------------------------
-
-template <class _CharT, class _Traits = char_traits<_CharT> >
-class _EZCXX_TEMPLATE_VIS basic_istream;
-
-template <class _CharT, class _Traits = char_traits<_CharT> >
-class _EZCXX_TEMPLATE_VIS basic_iostream;
-
-using istream  = basic_istream<char>;
-using iostream = basic_iostream<char>;
-
-//------------------------------------------------------------------------------
-// ostream
-//------------------------------------------------------------------------------
-
-template <class _CharT, class _Traits = char_traits<_CharT> >
-class _EZCXX_TEMPLATE_VIS basic_ostream;
-
-using ostream = basic_ostream<char>;
-
-//------------------------------------------------------------------------------
-// sstream
-//------------------------------------------------------------------------------
-
-template <class _CharT, class _Traits = char_traits<_CharT>, class _Allocator = allocator<_CharT> >
-class _EZCXX_TEMPLATE_VIS basic_stringbuf;
-
-template <class _CharT, class _Traits = char_traits<_CharT>, class _Allocator = allocator<_CharT> >
-class _EZCXX_TEMPLATE_VIS basic_istringstream;
-template <class _CharT, class _Traits = char_traits<_CharT>, class _Allocator = allocator<_CharT> >
-class _EZCXX_TEMPLATE_VIS basic_ostringstream;
-template <class _CharT, class _Traits = char_traits<_CharT>, class _Allocator = allocator<_CharT> >
-class _EZCXX_TEMPLATE_VIS basic_stringstream;
-
-using stringbuf     = basic_stringbuf<char>;
-using istringstream = basic_istringstream<char>;
-using ostringstream = basic_ostringstream<char>;
-using stringstream  = basic_stringstream<char>;
-
-//------------------------------------------------------------------------------
-// streambuf
-//------------------------------------------------------------------------------
-
-template <class _CharT, class _Traits = char_traits<_CharT> >
-class _EZCXX_TEMPLATE_VIS basic_streambuf;
-
-using streambuf = basic_streambuf<char>;
 
 } // namespace std
 

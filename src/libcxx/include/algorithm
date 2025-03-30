@@ -15,8 +15,13 @@
 // currently unused, but included in the standard
 #include <initializer_list>
 
+#include <iterator>
+#include <tuple>
+#include <utility>
+
 #include <EASTL/algorithm.h>
 #include <EASTL/heap.h>
+#include <EASTL/sort.h>
 
 #pragma clang system_header
 
@@ -72,11 +77,73 @@ _OutputIt fill_n(_OutputIt first, _Size count, const _Tp& value) {
     return eastl::fill_n(first, count, value);
 }
 
-// template<typename _RandomIt>
-// using make_heap = eastl::make_heap<_RandomIt, _RandomIt>;
+template<class _RandomIt >
+void make_heap(_RandomIt first, _RandomIt last) {
+    return eastl::make_heap(first, last);
+}
 
-// template<typename _RandomIt, typename _Compare>
-// using make_heap = eastl::make_heap<_RandomIt, _RandomIt, _Compare>;
+template<class _RandomIt, class _Compare>
+void make_heap(_RandomIt first, _RandomIt last, _Compare comp) {
+    return eastl::make_heap(first, last, comp);
+}
+
+template<class _RandomIt >
+void push_heap(_RandomIt first, _RandomIt last) {
+    return eastl::push_heap(first, last);
+}
+
+template<class _RandomIt, class _Compare>
+void push_heap(_RandomIt first, _RandomIt last, _Compare comp) {
+    return eastl::push_heap(first, last, comp);
+}
+
+template<class _RandomIt >
+void pop_heap(_RandomIt first, _RandomIt last) {
+    return eastl::pop_heap(first, last);
+}
+
+template<class _RandomIt, class _Compare>
+void pop_heap(_RandomIt first, _RandomIt last, _Compare comp) {
+    return eastl::pop_heap(first, last, comp);
+}
+
+template<class _RandomIt >
+void sort(_RandomIt first, _RandomIt last) {
+    return eastl::sort(first, last);
+}
+
+template<class _RandomIt, class _Compare>
+void sort(_RandomIt first, _RandomIt last, _Compare comp) {
+    return eastl::sort(first, last, comp);
+}
+
+template<class _ForwardIt, class _Tp>
+std::pair<_ForwardIt, _ForwardIt>
+equal_range(_ForwardIt first, _ForwardIt last, const _Tp& value) {
+    return eastl::equal_range(first, last, value);
+}
+
+template<class _ForwardIt, class _Tp, class _Compare>
+std::pair<_ForwardIt, _ForwardIt>
+equal_range(_ForwardIt first, _ForwardIt last, const _Tp& value, _Compare comp) {
+    return eastl::equal_range(first, last, value, comp);
+}
+
+template<class _InputIt, class _Tp>
+_InputIt find(_InputIt first, _InputIt last, const _Tp& value) {
+    return eastl::find(first, last, value);
+}
+
+template<class _InputIt, class _Up>
+_InputIt find_if(_InputIt first, _InputIt last, _Up pred) {
+    return eastl::find_if(first, last, pred);
+}
+
+template<class _InputIt, class _Up>
+_InputIt find_if_not(_InputIt first, _InputIt last, _Up pred) {
+    return eastl::find_if_not(first, last, pred);
+}
+
 
 } // namespace std
 

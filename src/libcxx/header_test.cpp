@@ -63,6 +63,7 @@
 #include <time.h>
 #include <wchar.h>
 
+#include <tuple>
 #include <iostream>
 
 // tests for conflicts
