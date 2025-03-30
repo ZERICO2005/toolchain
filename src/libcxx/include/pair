@@ -1,0 +1,18 @@
+// -*- C++ -*-
+#ifndef _EZCXX_PAIR
+#define _EZCXX_PAIR
+
+#include <__config>
+#include <EASTL/tuple.h>
+#include <EASTL/utility.h>
+
+#pragma clang system_header
+
+namespace std {
+
+template<typename _T1, typename _T2>
+using pair = eastl::pair<_T1, _T2>;
+
+} // namespace std
+
+#endif // _EZCXX_PAIR

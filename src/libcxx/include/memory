@@ -3,10 +3,21 @@
 #define _EZCXX_MEMORY
 
 #include <EASTL/memory.h>
+#include <EASTL/unique_ptr.h>
+#include <EASTL/shared_ptr.h>
 
 #pragma clang system_header
 
 namespace std {
+
+template <typename _Tp, class _Deleter = void>
+using unique_ptr = eastl::unique_ptr<_Tp>;
+
+template <typename _Tp>
+using shared_ptr = eastl::shared_ptr<_Tp>;
+
+template <typename _Tp>
+using weak_ptr = eastl::weak_ptr<_Tp>;
 
 template <typename _Tp>
 using allocator = eastl::allocator;

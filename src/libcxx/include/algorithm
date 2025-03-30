@@ -16,6 +16,7 @@
 #include <initializer_list>
 
 #include <EASTL/algorithm.h>
+#include <EASTL/heap.h>
 
 #pragma clang system_header
 
@@ -70,6 +71,12 @@ template<typename _OutputIt, typename _Size, typename _Tp>
 _OutputIt fill_n(_OutputIt first, _Size count, const _Tp& value) {
     return eastl::fill_n(first, count, value);
 }
+
+// template<typename _RandomIt>
+// using make_heap = eastl::make_heap<_RandomIt, _RandomIt>;
+
+// template<typename _RandomIt, typename _Compare>
+// using make_heap = eastl::make_heap<_RandomIt, _RandomIt, _Compare>;
 
 } // namespace std
 

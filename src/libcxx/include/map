@@ -3,6 +3,9 @@
 #define _EZCXX_MAP
 
 #include <EASTL/map.h>
+#include <functional>
+#include <pair>
+#include <utility>
 
 #pragma clang system_header
 
@@ -11,18 +14,18 @@ namespace std {
 template <
     class _Key,
     class _Tp,
-    class _Compare,
-    class _Allocator
+    class _Compare = std::less<_Key>,
+    class _Allocator = void
 >
-using map = eastl::map<_Key, _Tp, _Compare, _Allocator>;
+using map = eastl::map<_Key, _Tp, _Compare>;
 
 template <
     class _Key,
     class _Tp,
-    class _Compare,
-    class _Allocator
+    class _Compare = std::less<_Key>,
+    class _Allocator = void
 >
-using multimap = eastl::multimap<_Key, _Tp, _Compare, _Allocator>;
+using multimap = eastl::multimap<_Key, _Tp, _Compare>;
 
 } // namespace std
 

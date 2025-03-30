@@ -25,6 +25,63 @@ struct _EZCXX_TEMPLATE_VIS binary_function {
 template <typename _Tp>
 using hash = eastl::hash<_Tp>;
 
+template<
+    class _Arg,
+    class _Result
+>
+using pointer_to_unary_function = eastl::pointer_to_unary_function<_Arg, _Result>;
+
+template<
+    class _Arg1,
+    class _Arg2,
+    class _Result
+>
+using pointer_to_binary_function = eastl::pointer_to_binary_function<_Arg1, _Arg2, _Result>;
+
+template <typename _Tp = void>
+using plus = eastl::plus<_Tp>;
+template <typename _Tp = void>
+using minus = eastl::minus<_Tp>;
+template <typename _Tp = void>
+using multiplies = eastl::multiplies<_Tp>;
+template <typename _Tp = void>
+using divides = eastl::divides<_Tp>;
+template <typename _Tp = void>
+using modulus = eastl::modulus<_Tp>;
+template <typename _Tp = void>
+using negate = eastl::negate<_Tp>;
+template <typename _Tp = void>
+using logical_and = eastl::logical_and<_Tp>;
+template <typename _Tp = void>
+using logical_or = eastl::logical_or<_Tp>;
+template <typename _Tp = void>
+using logical_not = eastl::logical_not<_Tp>;
+
+template <typename _Tp = void>
+using less = eastl::less<_Tp>;
+template <typename _Tp = void>
+using less_equal = eastl::less_equal<_Tp>;
+template <typename _Tp = void>
+using greater = eastl::greater<_Tp>;
+template <typename _Tp = void>
+using greater_equal = eastl::greater_equal<_Tp>;
+template <typename _Tp = void>
+using equal_to = eastl::equal_to<_Tp>;
+template <typename _Tp = void>
+using not_equal_to = eastl::not_equal_to<_Tp>;
+
+template <class _Arg, class _Result>
+inline _EZCXX_HIDE_FROM_ABI pointer_to_unary_function<_Arg, _Result>
+ptr_fun(_Result (*__f)(_Arg)) {
+  	return pointer_to_unary_function<_Arg, _Result>(__f);
+}
+
+template <class _Arg1, class _Arg2, class _Result>
+inline _EZCXX_HIDE_FROM_ABI pointer_to_binary_function<_Arg1, _Arg2, _Result>
+ptr_fun(_Result (*__f)(_Arg1, _Arg2)) {
+  	return pointer_to_binary_function<_Arg1, _Arg2, _Result>(__f);
+}
+
 } // namespace std
 
 #endif // _EZCXX_FUNCTIONAL

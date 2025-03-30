@@ -1,0 +1,17 @@
+// -*- C++ -*-
+#ifndef _EZCXX_STRING_VIEW
+#define _EZCXX_STRING_VIEW
+
+#include <__config>
+#include <EASTL/string_view.h>
+
+#pragma clang system_header
+
+namespace std {
+
+template <typename _CharT, typename _Traits = void>
+using basic_string_view = eastl::basic_string_view<_CharT>;
+
+} // namespace std
+
+#endif // _EZCXX_STRING_VIEW

@@ -15,6 +15,9 @@
 
 namespace std {
 
+template <class _CharT, class _Traits = void, class _Allocator = void>
+using basic_string = eastl::basic_string<_CharT>;
+
 using string = eastl::string;
 
 template <class _CharT>

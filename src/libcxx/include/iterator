@@ -11,6 +11,18 @@ namespace std {
 template<typename _Ptr>
 using iterator_traits = eastl::iterator_traits<_Ptr>;
 
+using input_iterator_tag = eastl::input_iterator_tag;
+
+using output_iterator_tag = eastl::output_iterator_tag;
+
+using forward_iterator_tag = eastl::forward_iterator_tag;
+
+using bidirectional_iterator_tag = eastl::bidirectional_iterator_tag;
+
+using random_access_iterator_tag = eastl::random_access_iterator_tag;
+
+using contiguous_iterator_tag = eastl::contiguous_iterator_tag;
+
 } // namespace std
 
 #endif // _EZCXX_ITERATOR
