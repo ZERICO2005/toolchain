@@ -1,0 +1,18 @@
+// -*- C++ -*-
+#ifndef _EZCXX_LIST
+#define _EZCXX_LIST
+
+#include <EASTL/list.h>
+#include <initializer_list>
+#include <memory>
+
+#pragma clang system_header
+
+namespace std {
+
+template <typename _Tp, typename _Allocator = std::allocator<_Tp>>
+using list = eastl::list<_Tp, _Allocator>;
+	
+} // namespace std
+
+#endif // _EZCXX_LIST

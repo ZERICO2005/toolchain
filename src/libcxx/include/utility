@@ -8,6 +8,9 @@
 #include <initializer_list>
 #include <type_traits>
 
+#include <EASTL/tuple.h>
+#include <EASTL/utility.h>
+
 namespace std {
 
 template<class _Tp> _EZCXX_INLINE constexpr _Tp&& forward(remove_reference_t<_Tp>&  __value) noexcept {
@@ -31,6 +34,13 @@ template<class _Tp> _EZCXX_INLINE constexpr auto as_const(_Tp const&& __value) n
 
 [[noreturn]] inline void unreachable() { __builtin_unreachable(); }
 
+} // namespace std
+
+namespace std {
+
+    template<typename _T1, typename _T2>
+    using pair = eastl::pair<_T1, _T2>;
+    
 } // namespace std
 
 #endif // _EZCXX_UTILITY

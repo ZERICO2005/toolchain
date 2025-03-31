@@ -1,0 +1,30 @@
+// -*- C++ -*-
+#ifndef _EZCXX_SET
+#define _EZCXX_SET
+
+#include <EASTL/set.h>
+#include <initializer_list>
+#include <memory>
+#include <functional>
+
+#pragma clang system_header
+
+namespace std {
+
+template <
+    typename _Key,
+    typename _Compare = std::less<_Key>,
+    typename _Allocator = std::allocator<_Key>
+>
+using set = eastl::set<_Key, _Compare, _Allocator>;
+
+template <
+    typename _Key,
+    typename _Compare = std::less<_Key>,
+    typename _Allocator = std::allocator<_Key>
+>
+using multiset = eastl::multiset<_Key,  _Compare, _Allocator>;
+
+} // namespace std
+
+#endif // _EZCXX_SET

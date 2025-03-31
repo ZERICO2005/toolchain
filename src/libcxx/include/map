@@ -1,0 +1,34 @@
+// -*- C++ -*-
+#ifndef _EZCXX_MAP
+#define _EZCXX_MAP
+
+#include <EASTL/map.h>
+#include <initializer_list>
+#include <memory>
+#include <functional>
+#include <pair>
+#include <utility>
+
+#pragma clang system_header
+
+namespace std {
+
+template <
+    typename _Key,
+    typename _Tp,
+    typename _Compare = std::less<_Key>,
+    typename _Allocator = std::allocator<std::pair<const _Key, _Tp>>
+>
+using map = eastl::map<_Key, _Tp, _Compare, _Allocator>;
+
+template <
+    typename _Key,
+    typename _Tp,
+    typename _Compare = std::less<_Key>,
+    typename _Allocator = std::allocator<std::pair<const _Key, _Tp>>
+>
+using multimap = eastl::multimap<_Key, _Tp, _Compare, _Allocator>;
+
+} // namespace std
+
+#endif // _EZCXX_MAP

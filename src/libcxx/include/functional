@@ -1,0 +1,72 @@
+// -*- C++ -*-
+#ifndef _EZCXX_FUNCTIONAL
+#define _EZCXX_FUNCTIONAL
+
+#include <__config>
+#include <EASTL/functional.h>
+
+#pragma clang system_header
+
+namespace std {
+
+template <class _Arg, class _Result>
+struct _EZCXX_TEMPLATE_VIS unary_function {
+    typedef _Arg argument_type;
+    typedef _Result result_type;
+};
+
+template <class _Arg1, class _Arg2, class _Result>
+struct _EZCXX_TEMPLATE_VIS binary_function {
+    typedef _Arg1 first_argument_type;
+    typedef _Arg2 second_argument_type;
+    typedef _Result result_type;
+};
+
+template<
+    class _Arg,
+    class _Result
+>
+using pointer_to_unary_function = eastl::pointer_to_unary_function<_Arg, _Result>;
+
+template<
+    class _Arg1,
+    class _Arg2,
+    class _Result
+>
+using pointer_to_binary_function = eastl::pointer_to_binary_function<_Arg1, _Arg2, _Result>;
+
+template <typename _Tp = void>
+using plus = eastl::plus<_Tp>;
+template <typename _Tp = void>
+using minus = eastl::minus<_Tp>;
+template <typename _Tp = void>
+using multiplies = eastl::multiplies<_Tp>;
+template <typename _Tp = void>
+using divides = eastl::divides<_Tp>;
+template <typename _Tp = void>
+using modulus = eastl::modulus<_Tp>;
+template <typename _Tp = void>
+using negate = eastl::negate<_Tp>;
+template <typename _Tp = void>
+using logical_and = eastl::logical_and<_Tp>;
+template <typename _Tp = void>
+using logical_or = eastl::logical_or<_Tp>;
+template <typename _Tp = void>
+using logical_not = eastl::logical_not<_Tp>;
+
+template <typename _Tp = void>
+using less = eastl::less<_Tp>;
+template <typename _Tp = void>
+using less_equal = eastl::less_equal<_Tp>;
+template <typename _Tp = void>
+using greater = eastl::greater<_Tp>;
+template <typename _Tp = void>
+using greater_equal = eastl::greater_equal<_Tp>;
+template <typename _Tp = void>
+using equal_to = eastl::equal_to<_Tp>;
+template <typename _Tp = void>
+using not_equal_to = eastl::not_equal_to<_Tp>;
+
+} // namespace std
+
+#endif // _EZCXX_FUNCTIONAL

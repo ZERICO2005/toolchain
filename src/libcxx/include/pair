@@ -1,0 +1,11 @@
+// -*- C++ -*-
+#ifndef _EZCXX_PAIR
+#define _EZCXX_PAIR
+
+// convenience header. std::pair comes from <utility>
+
+#include <utility>
+
+#pragma clang system_header
+
+#endif // _EZCXX_PAIR
