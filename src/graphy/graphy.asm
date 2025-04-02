@@ -1117,7 +1117,6 @@ _VertLine_NoClip_NotDegen:
 	wait_quick
 _VertLine_NoClip_NotDegen_NoWait:
 	ld	d, h		; maybe ld d, 0
-	ld	d, 0	; DEBUG
 	dec	h		; tests if x >= 256
 	ld	h, ti.lcdHeight
 	jr	nz, .x_lt_256
@@ -2951,7 +2950,7 @@ d_18:	ld	bc,(ix-17)
 	ret
 
 ;-------------------------------------------------------------------------------
-gfy_FlipSpriteX: ; COPIED_FROM_GRAPHX gfx_FlipSpriteY
+gfy_FlipSpriteX: ; MODIFIED_FROM_GRAPHX gfx_FlipSpriteY
 ; Flips an array horizontally about the center vertical axis
 ; Arguments:
 ;  arg0 : Pointer to sprite struct input
@@ -2962,7 +2961,7 @@ gfy_FlipSpriteX: ; COPIED_FROM_GRAPHX gfx_FlipSpriteY
 	add	iy,sp
 	push	ix
 	ld	ix,(iy+3)
-	ld	a,(ix+0)		; a = width of sprite
+	ld	a,(ix+1)		; a = width of sprite
 	sbc	hl,hl
 	ld	l,a
 	ld	c,a
@@ -2970,13 +2969,13 @@ gfy_FlipSpriteX: ; COPIED_FROM_GRAPHX gfx_FlipSpriteY
 	ld	(.width),a
 	add	hl,hl
 	ld	(.delta),hl		; width*2
-	ld	a,(ix+1)		; a = height of sprite
+	ld	a,(ix+0)		; a = height of sprite
 	pop	hl
 	lea	de,ix+2
 	add	hl,de
 	ld	ix,(iy+6)
-	ld	(ix+1),a		; store height to width
-	ld	(ix+0),c		; store width to height
+	ld	(ix+0),a		; store height to width
+	ld	(ix+1),c		; store width to height
 	lea	de,ix+2			; de -> sprite data
 	ex	(sp),ix			; restore stack frame
 .loop:
@@ -2999,7 +2998,7 @@ gfy_FlipSpriteX: ; COPIED_FROM_GRAPHX gfx_FlipSpriteY
 	ret
 
 ;-------------------------------------------------------------------------------
-gfy_FlipSpriteY: ; COPIED_FROM_GRAPHX gfx_FlipSpriteX
+gfy_FlipSpriteY: ; MODIFIED_FROM_GRAPHX gfx_FlipSpriteX
 ; Flip a sprite vertically about the center horizontal axis
 ; Arguments:
 ;  arg0 : Pointer to sprite struct input
@@ -3011,11 +3010,11 @@ gfy_FlipSpriteY: ; COPIED_FROM_GRAPHX gfx_FlipSpriteX
 	push	ix
 	ld	ix,(iy+3)
 	xor	a,a
-	sub	a,(ix+0)
+	sub	a,(ix+1)
 	ld	(.delta),a
 	neg
 	ld	(.width),a
-	ld	l,(ix+1)
+	ld	l,(ix+0)
 	ld	c,l
 	dec	l
 	ld	h,a
@@ -3023,8 +3022,8 @@ gfy_FlipSpriteY: ; COPIED_FROM_GRAPHX gfx_FlipSpriteX
 	lea	de,ix+2
 	add	hl,de
 	ld	ix,(iy+6)
-	ld	(ix+0),a
-	ld	(ix+1),c
+	ld	(ix+1),a
+	ld	(ix+0),c
 	lea	de,ix+2
 	push	ix
 .loop:
@@ -3042,7 +3041,7 @@ gfy_FlipSpriteY: ; COPIED_FROM_GRAPHX gfx_FlipSpriteX
 	ret
 
 ;-------------------------------------------------------------------------------
-gfy_RotateSpriteCC: ; COPIED_FROM_GRAPHX gfy_RotateSpriteC
+gfy_RotateSpriteCC: ; MODIFIED_FROM_GRAPHX gfy_RotateSpriteC
 ; Rotates an array 90 degress clockwise
 ; Arguments:
 ;  arg0 : Pointer to sprite struct input
@@ -3054,28 +3053,29 @@ gfy_RotateSpriteCC: ; COPIED_FROM_GRAPHX gfy_RotateSpriteC
 	push	ix
 	ld	hl,(iy+6)
 	ld	iy,(iy+3)
-	ld	ix,(iy+0)		; ixl = width  ,  ixh = height
+	ld	ix,(iy+0)		; ixl = height  ,  ixh = width
+	ld	a, ixl
 	lea	bc,ix
-	ld	(hl),b
-	inc	hl
 	ld	(hl),c
+	inc	hl
+	ld	(hl),b
 	mlt	bc
 	add	hl,bc
 	ex	de,hl
-	ld	c,ixl
+	ld	c,ixh
 	ld	b,0
 	inc	bc
 .outer:
 	lea	hl,iy
 	dec	iy
-	ld	a,ixh
+	ld	a,ixl
 .inner:
 	add	hl,bc
 	inc	bc
 	ldd
 	dec	a
 	jr	nz,.inner
-	dec	ixl
+	dec	ixh
 	jr	nz,.outer
 	dec	de
 	ex	de,hl
@@ -3083,7 +3083,7 @@ gfy_RotateSpriteCC: ; COPIED_FROM_GRAPHX gfy_RotateSpriteC
 	ret
 
 ;-------------------------------------------------------------------------------
-gfy_RotateSpriteC: ; COPIED_FROM_GRAPHX gfy_RotateSpriteCC
+gfy_RotateSpriteC: ; MODIFIED_FROM_GRAPHX gfy_RotateSpriteCC
 ; Rotates a sprite 90 degrees counter clockwise
 ; Arguments:
 ;  arg0 : Pointer to sprite struct input
@@ -3097,11 +3097,11 @@ gfy_RotateSpriteC: ; COPIED_FROM_GRAPHX gfy_RotateSpriteCC
 	ld	hl,(iy+6)
 	push	hl
 	ld	iy,(iy+3)
-	ld	ix,(iy+0)		; ixl = width  ,  ixh = height
+	ld	ix,(iy+0)		; ixl = height  ,  ixh = width
 	lea	de,ix
-	ld	(hl),d
-	inc	hl
 	ld	(hl),e
+	inc	hl
+	ld	(hl),d
 	inc	hl
 	dec	e
 	ld	c,e
@@ -3109,21 +3109,21 @@ gfy_RotateSpriteC: ; COPIED_FROM_GRAPHX gfy_RotateSpriteCC
 .outer:
 	lea	hl,iy+2
 	dec	iy
-	ld	a,ixh
+	ld	a,ixl
 .inner:
 	add	hl,bc
 	inc	c
 	ldi
 	dec	a
 	jr	nz,.inner
-	dec	ixl
+	dec	ixh
 	jr	nz,.outer
 	pop	hl
 	pop	ix
 	ret
 
 ;-------------------------------------------------------------------------------
-gfy_RotateSpriteHalf: ; COPIED_FROM_GRAPHX
+gfy_RotateSpriteHalf: ; MODIFIED_FROM_GRAPHX
 ; Rotates an array 180 degrees
 ; Arguments:
 ;  arg0 : Pointer to sprite struct input
@@ -3133,9 +3133,9 @@ gfy_RotateSpriteHalf: ; COPIED_FROM_GRAPHX
 	ld	iy,0
 	add	iy,sp
 	ld	hl,(iy+3)
-	ld	c,(hl)			; c = width
+	ld	b,(hl)			; c = height
 	inc	hl
-	ld	b,(hl)			; b = height
+	ld	c,(hl)			; b = width
 	ld	iy,(iy+6)
 	ld	(iy+0),bc
 	mlt	bc
@@ -3151,6 +3151,10 @@ gfy_RotateSpriteHalf: ; COPIED_FROM_GRAPHX
 	ret
 
 ;-------------------------------------------------------------------------------
+if 1
+gfy_ScaleSprite: ; UNIMPLEMENTED
+	ret
+else
 gfy_ScaleSprite: ; COPIED_FROM_GRAPHX
 ; Scale an image using an output buffer
 ; Arguments:
@@ -3164,46 +3168,52 @@ gfy_ScaleSprite: ; COPIED_FROM_GRAPHX
 	push	ix
 	ld	hl,(iy+6)
 	push	hl
-	ld	a,(hl)
-	ld	ixh,a			; target_width
-	ld	(ScaleWidth),a
-	inc	hl
+
+	; -target_width
 	xor	a,a
 	sub	a,(hl)
-	ld	ixl,a			; -target_height
+	ld	ixh,a
+
+	inc	hl
+
+	; target_height
+	ld	a,(hl)
+	ld	ixl,a			
+	ld	(ScaleHeight),a
+		
 	inc	hl
 	push	hl			; hl->tgt_data
 	ld	hl,(iy+3)
-	ld	e,(hl)			; src_width
-	inc	hl
 	ld	c,(hl)			; src_height
 	inc	hl
+	ld	e,(hl)			; src_width
+	inc	hl
 	push	hl			; hl->src_data
-	push	de			; e = src_width
-	call	_UCDivA			; ca = dv = (source_height*256)/target_height
-	pop	hl			; l = src_width
+	push	de			; e = src_height
+	call	_UCDivA			; ca = dv = (source_width*256)/target_width
+	pop	hl			; l = src_height
 	ld	(dv_shl_16),a
 	ld	h,c
 	ld	c,l
 	mlt	hl
-	ld	(dv_shr_8_times_width),hl
+	ld	(dv_shr_8_times_height),hl
 	add	hl,bc
-	ld	(dv_shr_8_times_width_plus_width),hl
+	ld	(dv_shr_8_times_height_plus_height),hl
 	xor	a,a
-	sub	a,ixh			; -target_width
-	call	_UCDivA			; ca = du = (source_width*256)/target_width
+	sub	a,ixl			; -target_height
+	call	_UCDivA			; ca = du = (source_height*256)/target_height
 	pop	hl			; hl->src_data
 	pop	de			; de->tgt_data
 	ld	iy,0
 	ld	iyl,a
 	ld	a,c			; du = bc:iyl
-	ld	(du),a			; ixl = target_height
+	ld	(du),a			; ixh = target_width
 
 ; b = out_loop_times
 ; de = target buffer adress
 .outer:
 	push	hl
-ScaleWidth := $+2
+ScaleHeight := $+2
 	ld	iyh, 0
 	xor	a,a
 	ld	b,a
@@ -3219,11 +3229,11 @@ du := $-1
 	ld	bc,0			; dv<<16
 dv_shl_16 := $-1
 	add	iy,bc
-	ld	bc,0			; dv>>8*src_width
-dv_shr_8_times_width := $-3
+	ld	bc,0			; dv>>8*src_height
+dv_shr_8_times_Height := $-3
 	jr	nc,.skip
-	ld	bc,0			; dv>>8*src_width+src_width
-dv_shr_8_times_width_plus_width := $-3
+	ld	bc,0			; dv>>8*src_height+src_height
+dv_shr_8_times_Height_plus_Height := $-3
 .skip:
 	add	hl,bc
 	inc	ixl
@@ -3231,6 +3241,7 @@ dv_shr_8_times_width_plus_width := $-3
 	pop	hl
 	pop	ix
 	ret
+end if
 
 ;-------------------------------------------------------------------------------
 gfy_RotatedScaledSprite_NoClip: ; UNIMPLEMENTED
