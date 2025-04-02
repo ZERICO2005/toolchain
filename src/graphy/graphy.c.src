@@ -1,3 +1,4 @@
+if 0
 ;	section	.text,"ax",@progbits
 ;	assume	adl = 1
 ;	section	.text,"ax",@progbits
@@ -72,6 +73,469 @@ gfy_End:
 	call	lcd_Cleanup
 	jp	gfy_internal_End
 ;	section	.text,"ax",@progbits
+
+else
+
+;	section	.text,"ax",@progbits
+;	public	_gfy_Begin
+gfy_Begin:
+	call	gfy_internal_Begin
+	ld.sis	hl, 2343
+	ld	iy, -1900520
+	ld	(iy), l
+	ld	(iy + 1), h
+	call	900
+	ld	e, 1
+	ld	l, 0
+	ld	a, l
+	ld	(-524264), a
+	ld	a, 6
+	ld	(-524264), a
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB0_1:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB0_1
+BB0_2:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB0_2
+	ld	a, l
+	ld	(-524280), a
+	ld	h, 4
+	ld	a, h
+	ld	(-524264), a
+	ld	d, 5
+	ld	a, d
+	ld	(-524264), a
+	ld	a, l
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+	ld	c, 7
+BB0_4:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB0_4
+BB0_5:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB0_5
+	ld	a, l
+	ld	(-524280), a
+	ld	(-524264), a
+	ld	a, d
+	ld	(-524264), a
+	ld	a, 2
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB0_7:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB0_7
+BB0_8:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB0_8
+	ld	a, l
+	ld	(-524280), a
+	ld	a, h
+	ld	(-524264), a
+	ld	a, l
+	ld	(-524264), a
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB0_10:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB0_10
+BB0_11:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB0_11
+	ld	a, l
+	ld	(-524280), a
+	ld	a, h
+	ld	(-524264), a
+	ld	a, l
+	ld	(-524264), a
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB0_13:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB0_13
+BB0_14:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB0_14
+	ld	a, l
+	ld	(-524280), a
+	ld	a, h
+	ld	(-524264), a
+	ld	a, l
+	ld	(-524264), a
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB0_16:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB0_16
+BB0_17:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB0_17
+	ld	a, l
+	ld	(-524280), a
+	ld	a, c
+	ld	(-524264), a
+	ld	a, d
+	ld	(-524264), a
+	ld	a, c
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB0_19:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB0_19
+BB0_20:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB0_20
+	ld	a, l
+	ld	(-524280), a
+	ld	(-524264), a
+	ld	a, d
+	ld	(-524264), a
+	ld	a, 3
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB0_22:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB0_22
+BB0_23:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB0_23
+	ld	a, l
+	ld	(-524280), a
+	ld	a, h
+	ld	(-524264), a
+	ld	a, l
+	ld	(-524264), a
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB0_25:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB0_25
+BB0_26:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB0_26
+	ld	a, l
+	ld	(-524280), a
+	ld	a, h
+	ld	(-524264), a
+	ld	a, l
+	ld	(-524264), a
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB0_28:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB0_28
+BB0_29:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB0_29
+	ld	a, l
+	ld	(-524280), a
+	ld	a, h
+	ld	(-524264), a
+	ld	a, l
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524264), a
+	ld	(-524280), a
+BB0_31:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB0_31
+BB0_32:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB0_32
+	ld	a, l
+	ld	(-524280), a
+	ld	a, h
+	ld	(-524264), a
+	ld	a, c
+	ld	(-524264), a
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB0_34:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB0_34
+BB0_35:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB0_35
+	ld	a, l
+	ld	(-524280), a
+	ld.sis	hl, 2343
+	ld	iy, -1900520
+	ld	(iy), l
+	ld	(iy + 1), h
+	ret
+;	section	.text,"ax",@progbits
+
+;	section	.text,"ax",@progbits
+;	public	_gfy_End
+gfy_End:
+	ld	l, 0
+	ld	c, 6
+	ld	e, 1
+	ld	d, 4
+	ld	iyh, 5
+	ld	b, 2
+	ld	h, 7
+	ld	iyl, 3
+	ld	a, l
+	ld	(-524264), a
+	ld	a, c
+	ld	(-524264), a
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB1_1:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB1_1
+BB1_2:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB1_2
+	ld	a, l
+	ld	(-524280), a
+	ld	a, d
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524264), a
+	ld	a, l
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB1_4:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB1_4
+BB1_5:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB1_5
+	ld	a, l
+	ld	(-524280), a
+	ld	(-524264), a
+	ld	a, iyh
+	ld	(-524264), a
+	ld	a, b
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB1_7:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB1_7
+BB1_8:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB1_8
+	ld	a, l
+	ld	(-524280), a
+	ld	a, d
+	ld	(-524264), a
+	ld	a, l
+	ld	(-524264), a
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB1_10:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB1_10
+BB1_11:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB1_11
+	ld	a, l
+	ld	(-524280), a
+	ld	a, d
+	ld	(-524264), a
+	ld	a, l
+	ld	(-524264), a
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB1_13:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB1_13
+BB1_14:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB1_14
+	ld	a, l
+	ld	(-524280), a
+	ld	a, d
+	ld	(-524264), a
+	ld	a, l
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524264), a
+	ld	(-524280), a
+BB1_16:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB1_16
+BB1_17:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB1_17
+	ld	a, l
+	ld	(-524280), a
+	ld	a, d
+	ld	(-524264), a
+	ld	a, h
+	ld	(-524264), a
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB1_19:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB1_19
+BB1_20:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB1_20
+	ld	a, l
+	ld	(-524280), a
+	ld	(-524264), a
+	ld	a, iyh
+	ld	(-524264), a
+	ld	a, iyl
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB1_22:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB1_22
+BB1_23:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB1_23
+	ld	a, l
+	ld	(-524280), a
+	ld	a, d
+	ld	(-524264), a
+	ld	a, l
+	ld	(-524264), a
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB1_25:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB1_25
+BB1_26:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB1_26
+	ld	a, l
+	ld	(-524280), a
+	ld	a, d
+	ld	(-524264), a
+	ld	a, l
+	ld	(-524264), a
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB1_28:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB1_28
+BB1_29:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB1_29
+	ld	a, l
+	ld	(-524280), a
+	ld	a, d
+	ld	(-524264), a
+	ld	a, l
+	ld	(-524264), a
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB1_31:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB1_31
+BB1_32:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB1_32
+	ld	a, l
+	ld	(-524280), a
+	ld	a, h
+	ld	(-524264), a
+	ld	a, iyh
+	ld	(-524264), a
+	ld	a, h
+	ld	(-524264), a
+	ld	a, e
+	ld	(-524280), a
+BB1_34:
+	ld	a, (-524275)
+	cp	a, 16
+	jr	nc, BB1_34
+BB1_35:
+	ld	a, (-524276)
+	bit	2, a
+	jr	nz, BB1_35
+	ld	a, l
+	ld	(-524280), a
+	ld.sis	hl, 2349
+	ld	e, l
+	ld	d, h
+	ld	hl, -1900520
+	ld	(hl), e
+	inc	hl
+	ld	(hl), d
+	call	gfy_internal_End
+	ld.sis	hl, 2349
+	ld	iy, -1900520
+	ld	(iy), l
+	ld	(iy + 1), h
+	ret
+;	section	.text,"ax",@progbits
+
+end if
 
 ;	section	.text,"ax",@progbits
 ;	public	gfy_BlitLines

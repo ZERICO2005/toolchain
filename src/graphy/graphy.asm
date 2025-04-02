@@ -998,7 +998,7 @@ smcWord _XMax
 	jr	_HorizLine_NoClip_NotDegen_StackY
 
 ;-------------------------------------------------------------------------------
- gfy_HorizLine_NoClip:
+gfy_HorizLine_NoClip:
 ; Draws an unclipped vertical line with the global color index
 ; Arguments:
 ;  arg0 : X coordinate
@@ -1033,6 +1033,11 @@ _HorizLine_NoClip_NotDegen:
 	
 _HorizLine_NoClip_Draw:
 	ld	de, ti.lcdHeight
+	; swap b and c
+	ld	a, b
+	ld	b, c
+	ld	c, a
+
 	ld	a, 0
 smcByte _Color
 	wait_quick
@@ -1079,7 +1084,8 @@ smcWord _YMax
 	ld	a,l
 	sub	a,e
 	ret	c			; return if not within y bounds
-	ld	b,a
+	ld	bc, 0
+	ld	c, a
 	jr	_VertLine_NoClip_MaybeDegen_StackX	; from GraphX
 
 ;-------------------------------------------------------------------------------
@@ -1095,7 +1101,8 @@ gfy_VertLine_NoClip:
 ;  None
 	ld	iy, 0
 	add	iy, sp
-	ld	bc, (iy+9)		; bc = length
+	ld	bc, 0
+	ld	c, (iy+9)		; bc = length
 _VertLine_NoClip_StackXY:
 	sbc	hl, hl
 	ex	de, hl

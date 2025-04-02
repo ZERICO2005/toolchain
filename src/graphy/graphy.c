@@ -13,13 +13,12 @@
  * commands, which may or may not work on all Ti84CE models.
  */
 
-#define GRAPHY_LCDDRVCE
+// #define GRAPHY_LCDDRVCE
 
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 
-#include "../graphx/graphx.h"
 #include "graphy.h"
 
 /**
@@ -56,7 +55,7 @@
 //------------------------------------------------------------------------------
 
 #ifdef GRAPHY_LCDDRVCE
-   #include "../lcddrvce/lcddrvce.h"
+   #include <lcddrvce.h>
 #else
 
     /* @cond */
@@ -156,8 +155,6 @@
 #define RAM_ADDRESS(x) ((void*)(x))	
 #define RAM_OFFSET(ptr) ((uint24_t)(ptr))
 
-#define GFY_CLIPPING_ASSUMPTIONS()
-
 //------------------------------------------------------------------------------
 // global variables
 //------------------------------------------------------------------------------
@@ -174,26 +171,21 @@ extern int24_t gfy_TextYPos;
 extern uint8_t gfy_TextWidthScale;
 extern uint8_t gfy_TextHeightScale;
 extern uint8_t gfy_PrintChar_Clip;
-extern uint8_t gfy_FontHeight;
+extern const volatile uint8_t gfy_FontHeight;
 extern uint8_t gfy_MonospaceFont;
 
 extern gfy_sprite_t *gfy_TmpCharSprite;
 
-extern uint8_t _Color;
-extern uint8_t TRANSPARENT_COLOR;
-extern uint8_t TEXT_FG_COLOR;
-extern uint8_t TEXT_BG_COLOR;
-extern uint8_t TEXT_TP_COLOR;
-#define gfy_Color             _Color
-#define gfy_Transparent_Color TRANSPARENT_COLOR
-#define gfy_Text_FG_Color     TEXT_FG_COLOR
-#define gfy_Text_BG_Color     TEXT_BG_COLOR
-#define gfy_Text_TP_Color     TEXT_TP_COLOR
+extern const volatile uint8_t gfy_Color;
+extern const volatile uint8_t gfy_Transparent_Color;
+extern const volatile uint8_t gfy_Text_FG_Color;
+extern const volatile uint8_t gfy_Text_BG_Color;
+extern const volatile uint8_t gfy_Text_TP_Color;
 
-extern int24_t gfy_ClipXMin;
-extern int24_t gfy_ClipYMin;
-extern int24_t gfy_ClipXMax;
-extern int24_t gfy_ClipYMax;
+extern const volatile int24_t gfy_ClipXMin;
+extern const volatile int24_t gfy_ClipYMin;
+extern const volatile int24_t gfy_ClipXMax;
+extern const volatile int24_t gfy_ClipYMax;
 
 extern const int8_t gfy_SineTable[65];
 
@@ -452,12 +444,19 @@ __attribute__((unused)) static uint8_t gfy_Cos(uint8_t theta) {
 //------------------------------------------------------------------------------
 
 /* gfy_Begin */
+
+void gfy_internal_Begin(void);
+
 void gfy_Begin(void) {
+    gfy_internal_Begin();
+    
+    lcd_VideoMode = lcd_BGR8bit;
+    
     gfy_InitColumnMajor();
 
-    gfx_Begin();
+    lcd_VideoMode = lcd_BGR8bit;
 
-    #if 1
+    #if 0
         // Resetting globals
         gfy_Color = 0;
         gfy_Transparent_Color = 0;
@@ -488,10 +487,16 @@ void gfy_Begin(void) {
 
 /* gfy_End */
 
+void gfy_internal_End(void);
+
 void gfy_End(void) {
     gfy_RestoreRowMajor();
 
-    gfx_End();
+    lcd_VideoMode = lcd_BGR16bit;
+
+    gfy_internal_End();
+
+    lcd_VideoMode = lcd_BGR16bit;
 }
 
 /* gfy_SetColor (graphy.asm) */
@@ -641,6 +646,8 @@ void gfy_PrintChar(const char c) {
     uint8_t *fillLinePtr = (uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer) + (gfy_TextYPos + (gfy_TextXPos * GFY_LCD_HEIGHT));
     uint8_t b = (1 << 7);
     gfy_TextXPos += charWidth * gfy_TextWidthScale;
+    uint8_t const * const lo_addr = (uint8_t * const)RAM_ADDRESS(gfy_CurrentBuffer);
+    uint8_t const * const hi_addr = (uint8_t * const)RAM_ADDRESS(gfy_CurrentBuffer) + GFY_LCD_WIDTH * GFY_LCD_HEIGHT;
     for (uint8_t x = 0; x < charWidth; x++) {
         for (uint8_t u = 0; u < gfy_TextWidthScale; u++) {
             uint8_t *fillPtr = fillLinePtr;
@@ -652,10 +659,7 @@ void gfy_PrintChar(const char c) {
                     continue;
                 }
                 for (uint8_t v = 0; v < gfy_TextHeightScale; v++) {
-                    if (
-                        fillPtr >= (uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer) &&
-                        fillPtr < (uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer + GFY_LCD_WIDTH * GFY_LCD_HEIGHT)
-                    ) {
+                    if (fillPtr >= lo_addr &&fillPtr < hi_addr) {
                         *fillPtr = fillColor;   
                     }
                     fillPtr++;
@@ -954,7 +958,7 @@ void gfy_Rectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
 
 /* gfy_FillRectangle (graphy.asm) */
 
-#if 0
+#if 1
 void gfy_FillRectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
     if (x < gfy_ClipXMin) {
         width -= gfy_ClipXMin - x;
@@ -1102,7 +1106,7 @@ void gfy_Rectangle_NoClip(uint24_t x, uint8_t y, uint24_t width, uint8_t height)
 
 /* gfy_FillRectangle_NoClip */
 
-#if 0
+#if 1
 void gfy_FillRectangle_NoClip(uint24_t x, uint8_t y, uint24_t width, uint8_t height) {
     if (width == 0 || height == 0) {
         return;
@@ -1339,32 +1343,31 @@ void gfy_Tilemap(const gfy_tilemap_t* tilemap, uint24_t x_offset, uint24_t y_off
     const uint24_t map_jump = (tilemap->width - draw_sizeX);
 
     void (*plot_function)(const gfy_sprite_t*, uint24_t, uint8_t) = gfy_Sprite_NoClip;
-    #ifndef USE_GRAPHX_SPRITE_DATA
-        switch (tilemap->type_height) {
-            case gfy_tile_2_pixel:
-                plot_function = gfy_Sprite_NoClip_Size2;
-                break;
-            case gfy_tile_4_pixel:
-                plot_function = gfy_Sprite_NoClip_Size4;
-                break;
-            case gfy_tile_8_pixel:
-                plot_function = gfy_Sprite_NoClip_Size8;
-                break;
-            case gfy_tile_16_pixel:
-                plot_function = gfy_Sprite_NoClip_Size16;
-                break;
-            case gfy_tile_32_pixel:
-                plot_function = gfy_Sprite_NoClip_Size32;
-                break;
-            case gfy_tile_64_pixel:
-                plot_function = gfy_Sprite_NoClip_Size64;
-                break;
-            case gfy_tile_128_pixel:
-                plot_function = gfy_Sprite_NoClip_Size128;
-                break;
-        }
-    #endif
-    
+
+    switch (tilemap->type_height) {
+        case gfy_tile_2_pixel:
+            plot_function = gfy_Sprite_NoClip_Size2;
+            break;
+        case gfy_tile_4_pixel:
+            plot_function = gfy_Sprite_NoClip_Size4;
+            break;
+        case gfy_tile_8_pixel:
+            plot_function = gfy_Sprite_NoClip_Size8;
+            break;
+        case gfy_tile_16_pixel:
+            plot_function = gfy_Sprite_NoClip_Size16;
+            break;
+        case gfy_tile_32_pixel:
+            plot_function = gfy_Sprite_NoClip_Size32;
+            break;
+        case gfy_tile_64_pixel:
+            plot_function = gfy_Sprite_NoClip_Size64;
+            break;
+        case gfy_tile_128_pixel:
+            plot_function = gfy_Sprite_NoClip_Size128;
+            break;
+    }
+
     const uint24_t limitX = gfy_ClipXMax - tilemap->tile_width;
     const uint24_t limitY = gfy_ClipYMax - tilemap->tile_height;
     for (uint8_t draw_y = 0; draw_y < draw_sizeY; draw_y++) {
@@ -1414,31 +1417,29 @@ void gfy_Tilemap_NoClip(const gfy_tilemap_t *tilemap, uint24_t x_offset, uint24_
 
     void (*plot_function)(const gfy_sprite_t*, uint24_t, uint8_t) = gfy_Sprite_NoClip;
 
-    #ifndef USE_GRAPHX_SPRITE_DATA
-        switch (tilemap->type_height) {
-            case gfy_tile_2_pixel:
-                plot_function = gfy_Sprite_NoClip_Size2;
-                break;
-            case gfy_tile_4_pixel:
-                plot_function = gfy_Sprite_NoClip_Size4;
-                break;
-            case gfy_tile_8_pixel:
-                plot_function = gfy_Sprite_NoClip_Size8;
-                break;
-            case gfy_tile_16_pixel:
-                plot_function = gfy_Sprite_NoClip_Size16;
-                break;
-            case gfy_tile_32_pixel:
-                plot_function = gfy_Sprite_NoClip_Size32;
-                break;
-            case gfy_tile_64_pixel:
-                plot_function = gfy_Sprite_NoClip_Size64;
-                break;
-            case gfy_tile_128_pixel:
-                plot_function = gfy_Sprite_NoClip_Size128;
-                break;
-        }
-    #endif
+    switch (tilemap->type_height) {
+        case gfy_tile_2_pixel:
+            plot_function = gfy_Sprite_NoClip_Size2;
+            break;
+        case gfy_tile_4_pixel:
+            plot_function = gfy_Sprite_NoClip_Size4;
+            break;
+        case gfy_tile_8_pixel:
+            plot_function = gfy_Sprite_NoClip_Size8;
+            break;
+        case gfy_tile_16_pixel:
+            plot_function = gfy_Sprite_NoClip_Size16;
+            break;
+        case gfy_tile_32_pixel:
+            plot_function = gfy_Sprite_NoClip_Size32;
+            break;
+        case gfy_tile_64_pixel:
+            plot_function = gfy_Sprite_NoClip_Size64;
+            break;
+        case gfy_tile_128_pixel:
+            plot_function = gfy_Sprite_NoClip_Size128;
+            break;
+    }
 
     for (uint8_t draw_y = 0; draw_y < tilemap->draw_height; draw_y++) {
         uint24_t posX = posX0;
@@ -1832,7 +1833,7 @@ void gfy_ScaledTransparentSprite_NoClip(
 
 /* gfy_Polygon (graphy.asm) */
 
-#if 0
+#if 1
 void gfy_Polygon(const int24_t *points, size_t num_points) {
     if (num_points < 2) {
         return;
@@ -1852,7 +1853,7 @@ void gfy_Polygon(const int24_t *points, size_t num_points) {
 
 /* gfy_Polygon_NoClip (graphy.asm) */
 
-#if 0
+#if 1
 void gfy_Polygon_NoClip(const int24_t *points, size_t num_points) {
     if (num_points < 2) {
         return;
