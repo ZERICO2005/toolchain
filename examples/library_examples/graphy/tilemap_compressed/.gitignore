@@ -1,0 +1,7 @@
+obj/
+bin/
+src/gfy/*.c
+src/gfy/*.h
+src/gfy/*.8xv
+.DS_Store
+convimg.yaml.lst
