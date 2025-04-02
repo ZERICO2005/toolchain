@@ -542,6 +542,8 @@ void gfy_End(void) {
 
 /* gfy_BlitLines */
 
+#if 0
+#undef gfy_BlitLines
 void gfy_BlitLines(gfy_location_t src, uint8_t y_loc, uint8_t num_lines) {
     const uint8_t *src_buf = gfy_vram;
     uint8_t *dst_buf = gfy_vram + (GFY_LCD_HEIGHT * GFY_LCD_WIDTH);
@@ -557,6 +559,7 @@ void gfy_BlitLines(gfy_location_t src, uint8_t y_loc, uint8_t num_lines) {
         dst_buf += GFY_LCD_HEIGHT;
     }
 }
+#endif
 
 /* gfy_BlitLines */
 
@@ -947,7 +950,7 @@ void gfy_FillCircle(
 
 /* gfy_Rectangle (graphy.asm) */
 
-#if 0
+#if 1
 void gfy_Rectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
     gfy_HorizLine(x            , y             , width );
     gfy_HorizLine(x            , y + height - 1, width );
@@ -958,7 +961,7 @@ void gfy_Rectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
 
 /* gfy_FillRectangle (graphy.asm) */
 
-#if 1
+#if 0
 void gfy_FillRectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
     if (x < gfy_ClipXMin) {
         width -= gfy_ClipXMin - x;
@@ -974,6 +977,15 @@ void gfy_FillRectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
         return;
     }
     gfy_FillRectangle_NoClip(x, y, width, height);
+}
+#elif 1
+void gfy_FillRectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
+    if (width == 0 || height == 0) {
+        return;
+    }
+    for (int24_t x_cord = 0; x_cord < width; x_cord++) {
+        gfy_VertLine(x_cord + x, y, height);
+    }
 }
 #endif
 
@@ -1095,8 +1107,11 @@ void gfy_FillCircle_NoClip(
 
 /* gfy_Rectangle_NoClip (graphy.asm) */
 
-#if 0
+#if 1
 void gfy_Rectangle_NoClip(uint24_t x, uint8_t y, uint24_t width, uint8_t height) {
+    if (width == 0 || height == 0) {
+        return;
+    }
     gfy_HorizLine_NoClip(x            , y             , width );
     gfy_HorizLine_NoClip(x            , y + height - 1, width );
     gfy_VertLine_NoClip (x            , y             , height);
@@ -1117,6 +1132,21 @@ void gfy_FillRectangle_NoClip(uint24_t x, uint8_t y, uint24_t width, uint8_t hei
         fill += GFY_LCD_HEIGHT;
     }
 }
+#elif 1
+#include <ti/sprintf.h>
+
+void gfy_FillRectangle_NoClip(uint24_t x, uint8_t y, uint24_t width, uint8_t height) {
+    volatile char* print_out = (volatile char*)0xFB0000;
+    boot_sprintf((char*)print_out, "gfy_FillRectangle_NoClip %d %d %d %d\n", x, y, width, height);
+    if (width == 0 || height == 0) {
+        return;
+    }
+    for (uint24_t x_cord = 0; x_cord < width; x_cord++) {
+        gfy_VertLine_NoClip(x_cord + x, y, height);
+        boot_sprintf((char*)print_out, "%d: %d\n", x_cord, x_cord + x);
+    }
+}
+
 #endif
 
 /* gfy_SetClipRegion (graphy.asm) */
