@@ -751,6 +751,7 @@ smcByte _Color
 	ret
 
 ;-------------------------------------------------------------------------------
+if 0
 gfy_Rectangle_NoClip:
 ; Draws an unclipped rectangle outline with the global color index
 ; Arguments:
@@ -782,8 +783,9 @@ gfy_Rectangle_NoClip:
 	sbc	hl,de			; hl = &buf[y+height-1][x]
 	pop	bc			; bc = width
 	jp	_HorizLine_NoClip_Draw	; draw bottom horizontal line
-
+end if
 ;-------------------------------------------------------------------------------
+if 0
 gfy_Rectangle: ; COPIED_FROM_GRAPHX
 ; Draws an clipped rectangle outline with the global color index
 ; Arguments:
@@ -833,6 +835,7 @@ gfy_Rectangle: ; COPIED_FROM_GRAPHX
 	ld	sp,ix
 	pop	ix
 	ret
+end if
 
 ;-------------------------------------------------------------------------------
 if 0
@@ -4451,6 +4454,9 @@ _memset     := $0000AC
 __frameset  := $00012C
 __iremu     := $000170
 __bshl      := $000100
+
+; for debugging
+_boot_sprintf := $0000BC
 
 __bremu:
 ; I: A=dividend, C=divisor
