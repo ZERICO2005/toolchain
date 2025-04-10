@@ -190,7 +190,10 @@ extern const volatile uint8_t gfy_Text_BG_Color;
 extern const volatile uint8_t gfy_Text_TP_Color;
 
 extern const volatile int24_t gfy_ClipXMin;
-extern const volatile int24_t gfy_ClipYMin;
+extern const volatile uint8_t gfy_ClipYMin;
+#define gfy_ClipYMin ((int24_t)gfy_ClipYMin)
+// extern const volatile int24_t gfy_ClipYMin;
+
 extern const volatile int24_t gfy_ClipXMax;
 extern const volatile uint8_t gfy_ClipYMax;
 #define gfy_ClipYMax ((int24_t)gfy_ClipYMax)
@@ -969,7 +972,7 @@ void gfy_FillCircle(
 
 /* gfy_Rectangle (graphy.asm) */
 
-#if 1
+#if 0
 void gfy_Rectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
     test_printf(
         "%s: %02X (%d, %d) %dx%d [%d,%d:%d,%d]\n",
@@ -985,7 +988,7 @@ void gfy_Rectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
 
 /* gfy_FillRectangle (graphy.asm) */
 
-#if 1
+#if 0
 void gfy_FillRectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
     test_printf(
         "%s: %02X (%d, %d) %dx%d [%d,%d:%d,%d]\n",
@@ -2458,8 +2461,8 @@ void gfy_RLETSprite(const gfy_rletsprite_t *sprite, const int24_t x, const int24
 
                 for(uint8_t r = 0; r < len; r++) {
                     if (
-                        y + posY >= gfy_ClipYMin &&
-                        y + posY < gfy_ClipYMax
+                        y + posY >= (uint24_t)gfy_ClipYMin &&
+                        y + posY < (uint24_t)gfy_ClipYMax
                     ) {
                         *dst_buf = *src_buf;
                     }

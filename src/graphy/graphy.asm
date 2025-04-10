@@ -838,7 +838,7 @@ gfy_Rectangle: ; COPIED_FROM_GRAPHX
 end if
 
 ;-------------------------------------------------------------------------------
-if 0
+if 1
 gfy_FillRectangle: ; COPIED_FROM_GRAPHX
 ; Draws a clipped rectangle with the global color index
 ; Arguments:
@@ -882,89 +882,77 @@ gfy_FillRectangle_NoClip:
 ;  arg3 : Height
 ; Returns:
 ;  None
-	ld	iy, 0
-	add	iy, sp
-	ld	a, (iy+12)		; a = height
-	or	a, a
-	ret	z			; make sure height is not 0
-	ld	bc, (iy+9)		; bc = width
-	sbc	hl, hl
-	adc	hl, bc
-	ret	z			; make sure width is not 0
-	ld	hl, (iy+3)		; hl = x coordinate
-	ld	e, (iy+6)		; e = y coordinate
+    ld  iy, 0
+    add iy, sp
+    ld  a, (iy+12)      ; a = height
+    or  a, a
+    ret z           ; make sure height is not 0
+    ld  bc, (iy+9)      ; bc = width
+    sbc hl, hl
+    adc hl, bc
+    ret z           ; make sure width is not 0
+    ld  hl, (iy+3)      ; hl = x coordinate
+    ld  e, (iy+6)       ; e = y coordinate
 _FillRectangle_NoClip:
-	ld	d, h		; maybe ld d, 0
-	dec	h		; tests if x >= 256
-	ld	h, ti.lcdHeight
-	jr	nz, .x_lt_256
-	ld	d, h		; ld d, ti.lcdHeight * 256
+    ld  d, h        ; maybe ld d, 0
+    dec h       ; tests if x >= 256
+    ld  h, ti.lcdHeight
+    jr  nz, .x_lt_256
+    ld  d, h        ; ld d, ti.lcdHeight * 256
 .x_lt_256:
-	mlt	hl
-	ex.s	de, hl		; clear upper byte of DE
-	add	hl, de		; add y cord
-	ld	de, (CurrentBuffer)
-	add	hl, de		; add buffer offset
-	ex	de, hl			; de -> place to begin drawing
-	push	de
-	
-	ld	(.height1), a
-	ld	(.height2), a
-	ld	hl, _Color
-	; swap width and height
-	push	af
-	ld	a, b
-	ld	(.width), a
-	pop	af
-	ld	b, c
-	ld	c, a
-	ld	a, b
-	ld	b, 0
-	; a = width
-	; bc = height
-	wait_quick
-	ldi				; check if we only need to draw 1 pixel
-	pop	hl
-	jp	po, .skip
-	ldir
+    mlt hl
+    ex.s    de, hl      ; clear upper byte of DE
+    add hl, de      ; add y cord
+    ld  de, (CurrentBuffer)
+    add hl, de      ; add buffer offset
+    ex  de, hl          ; de -> place to begin drawing
+    push    de
+ 
+    ld  hl, _Color
+    ; divide (width-1) by 2, and set Z flag
+    dec bc
+    srl b
+    rr  c
+    ld  iyl, c
+    ld  c, a
+    ld  b, 0
+    ; iyl = (width-1)/2
+    ; carry = (width-1)%2
+    ; zero = iyl==0
+    ; a = bc = height
+    wait_quick
+    ldi             ; check if we only need to draw 1 pixel
+    pop hl
+    jp  po, .skip
+    ldir
 .skip:
-	dec	a
-	ret	z
-	ld	c, ti.lcdHeight
+    jr  z, .final
+    push    af  ; save carry
 .loop:
-	add	hl, bc
-	dec	de
-	ex	de, hl
-.height1 = $ + 1
-	ld	bc, 0
-	lddr
-	dec	a
-	ret	z
-	; ld bc, (2 * ti.lcdHeight) + 1
-	inc	b
-	ld	c, $E1
-	add	hl, bc
-	inc	de
-	ex	de, hl
-	
-.height2 = $ + 1
-	ld	bc, 0
-	ldir
-	; ld bc, (2 * ti.lcdHeight) - 1
-	inc	b
-	ld	c, $DF
-	dec	a
-	jr	nz, .loop
-
-	ld	a, (.width)
-	dec	a
-	ld	(.width), a
-	ret	nz	; width < 256
-	xor	a, a
-	jr	.loop
-
-.width:
-	db $00
+    dec de
+    ld  hl, ti.lcdHeight
+    add hl, de
+    ex  de, hl
+    ld  c, a
+    lddr
+    inc de
+    ld  hl, ti.lcdHeight
+    add hl, de
+    ex  de, hl
+    ld  c, a
+    ldir
+    dec iyl
+    jr  nz, .loop
+    pop af  ; restore carry
+.final:
+    ret nc
+    dec de
+    ld  hl, ti.lcdHeight
+    add hl, de
+    ex  de, hl
+    ld  c, a
+    lddr
+    ret
 
 end if
 
