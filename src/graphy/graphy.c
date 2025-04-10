@@ -21,6 +21,13 @@
 
 #include "graphy.h"
 
+#if 0
+#include <ti/sprintf.h>
+#define test_printf(...) boot_sprintf((char*)0xFB0000, __VA_ARGS__)
+#else
+#define test_printf(...)
+#endif
+
 /**
  * @brief (Out of date) examples/library_examples/graphx status
  * 
@@ -185,7 +192,9 @@ extern const volatile uint8_t gfy_Text_TP_Color;
 extern const volatile int24_t gfy_ClipXMin;
 extern const volatile int24_t gfy_ClipYMin;
 extern const volatile int24_t gfy_ClipXMax;
-extern const volatile int24_t gfy_ClipYMax;
+extern const volatile uint8_t gfy_ClipYMax;
+#define gfy_ClipYMax ((int24_t)gfy_ClipYMax)
+// extern const volatile int24_t gfy_ClipYMax;
 
 extern const int8_t gfy_SineTable[65];
 
@@ -858,6 +867,11 @@ void gfy_Line(int24_t x0, int24_t y0, int24_t x1, int24_t y1) {
 
 #if 0
 void gfy_HorizLine(int24_t x, int24_t y, int24_t length) {
+    test_printf(
+        "%s: %02X (%d, %d) %d [%d,%d:%d,%d]\n",
+        __func__, gfy_Color, x, y, length,
+        gfy_ClipXMin, gfy_ClipYMin, gfy_ClipXMax, gfy_ClipYMax
+    );
     if (y < gfy_ClipYMin || y >= gfy_ClipYMax || x >= gfy_ClipXMax) {
         return;
     }
@@ -877,6 +891,11 @@ void gfy_HorizLine(int24_t x, int24_t y, int24_t length) {
 
 #if 0
 void gfy_VertLine(int24_t x, int24_t y, int24_t length) {
+    test_printf(
+        "%s: %02X (%d, %d) %d [%d,%d:%d,%d]\n",
+        __func__, gfy_Color, x, y, length,
+        gfy_ClipXMin, gfy_ClipYMin, gfy_ClipXMax, gfy_ClipYMax
+    );
     if (x < gfy_ClipXMin || x >= gfy_ClipXMax || y >= gfy_ClipYMax) {
         return;
     }
@@ -952,6 +971,11 @@ void gfy_FillCircle(
 
 #if 1
 void gfy_Rectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
+    test_printf(
+        "%s: %02X (%d, %d) %dx%d [%d,%d:%d,%d]\n",
+        __func__, gfy_Color, x, y, width, height,
+        gfy_ClipXMin, gfy_ClipYMin, gfy_ClipXMax, gfy_ClipYMax
+    );
     gfy_HorizLine(x            , y             , width );
     gfy_HorizLine(x            , y + height - 1, width );
     gfy_VertLine (x            , y             , height);
@@ -961,8 +985,14 @@ void gfy_Rectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
 
 /* gfy_FillRectangle (graphy.asm) */
 
-#if 0
+#if 1
 void gfy_FillRectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
+    test_printf(
+        "%s: %02X (%d, %d) %dx%d [%d,%d:%d,%d]\n",
+        __func__, gfy_Color, x, y, width, height,
+        gfy_ClipXMin, gfy_ClipYMin, gfy_ClipXMax, gfy_ClipYMax
+    );
+
     if (x < gfy_ClipXMin) {
         width -= gfy_ClipXMin - x;
         x = 0;
@@ -978,7 +1008,7 @@ void gfy_FillRectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
     }
     gfy_FillRectangle_NoClip(x, y, width, height);
 }
-#elif 1
+#elif 0
 void gfy_FillRectangle(int24_t x, int24_t y, int24_t width, int24_t height) {
     if (width == 0 || height == 0) {
         return;
@@ -1061,6 +1091,8 @@ void gfy_Line_NoClip(uint24_t x0, uint8_t y0, uint24_t x1, uint8_t y1) {
 
 #if 0
 void gfy_HorizLine_NoClip(uint24_t x, uint8_t y, uint24_t length) { //x start, y postion, x length
+    test_printf("%s: %02X (%d, %d) %d\n", __func__, gfy_Color, x, y, length);
+    gfy_Wait();
     uint8_t *fill = (uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer) + (x * GFY_LCD_HEIGHT) + (uint24_t)y;
     for (uint24_t x_cord = 0; x_cord < length; x_cord++) {
         *fill = gfy_Color;
@@ -1073,6 +1105,8 @@ void gfy_HorizLine_NoClip(uint24_t x, uint8_t y, uint24_t length) { //x start, y
 
 #if 0
 void gfy_VertLine_NoClip(uint24_t x, uint8_t y, uint24_t length) { //x postion, y start, y length
+    test_printf("%s: %02X (%d, %d) %d\n", __func__, gfy_Color, x, y, length);
+    gfy_Wait();
     uint8_t *fill = (uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer) + ((uint24_t)y + (x * GFY_LCD_HEIGHT));
     memset(fill, gfy_Color, length);
 }
@@ -1123,9 +1157,11 @@ void gfy_Rectangle_NoClip(uint24_t x, uint8_t y, uint24_t width, uint8_t height)
 
 #if 1
 void gfy_FillRectangle_NoClip(uint24_t x, uint8_t y, uint24_t width, uint8_t height) {
+    test_printf("%s: %02X (%d, %d) %dx%d\n", __func__, gfy_Color, x, y, width, height);
     if (width == 0 || height == 0) {
         return;
     }
+    gfy_Wait();
     uint8_t *fill = (uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer) + ((uint24_t)y + (x * GFY_LCD_HEIGHT));
     for (uint24_t x_cord = 0; x_cord < width; x_cord++) {
         memset(fill, gfy_Color, height);
@@ -1621,6 +1657,11 @@ gfy_sprite_t *gfy_AllocSprite(
 /* gfy_Sprite */
 
 void gfy_Sprite(const gfy_sprite_t *restrict sprite, int24_t x, int24_t y) {
+    test_printf(
+        "%s: %02X (%d, %d) %dx%d [%d,%d:%d,%d]\n",
+        __func__, gfy_Color, x, y, sprite->width, sprite->height,
+        gfy_ClipXMin, gfy_ClipYMin, gfy_ClipXMax, gfy_ClipYMax
+    );
     if (
         x >= gfy_ClipXMax || y >= gfy_ClipYMax ||
         sprite->width == 0 || sprite->height == 0 ||
@@ -2395,20 +2436,20 @@ void gfy_RLETSprite(const gfy_rletsprite_t *sprite, const int24_t x, const int24
     // Naive clipping method
     const uint8_t* src_buf = sprite->data;
     uint8_t* dst_buf = (uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer) + (y + (GFY_LCD_HEIGHT * x));
-    const uint24_t dst_jump = GFY_LCD_HEIGHT - sprite->width;
-    for (uint8_t posY = 0; posY < sprite->height; posY++) {
-        uint8_t posX = 0;
+    const uint24_t dst_jump = GFY_LCD_HEIGHT - sprite->height;
+    for (uint8_t posX = 0; posX < sprite->width; posX++) {
+        uint24_t posY = 0;
         if (
-            x + posY >= gfy_ClipXMin &&
-            x + posY < gfy_ClipXMax
+            x + posX >= gfy_ClipXMin &&
+            x + posX < gfy_ClipXMax
         ) {
-            while (posX < sprite->width) {
+            while (posY < sprite->height) {
                 const uint8_t jump_TP = *src_buf;
-                posX += jump_TP;
+                posY += jump_TP;
                 dst_buf += jump_TP;
                 src_buf++;
                 
-                if (posX >= sprite->width) {
+                if (posY >= sprite->height) {
                     break;
                 }
 
@@ -2417,33 +2458,33 @@ void gfy_RLETSprite(const gfy_rletsprite_t *sprite, const int24_t x, const int24
 
                 for(uint8_t r = 0; r < len; r++) {
                     if (
-                        y + posX >= gfy_ClipYMin &&
-                        y + posX < gfy_ClipYMax
+                        y + posY >= gfy_ClipYMin &&
+                        y + posY < gfy_ClipYMax
                     ) {
                         *dst_buf = *src_buf;
                     }
                     src_buf++;
-                    posX++;
+                    posY++;
                     dst_buf++;
                 }
             }
             dst_buf += dst_jump;
         } else {
-            if (x + posY >= gfy_ClipXMax) {
+            if (x + posX >= gfy_ClipXMax) {
                 return;
             }
             // Fast forward through the decompression
-            while (posX < sprite->width) {
-                posX += *src_buf;
+            while (posY < sprite->height) {
+                posY += *src_buf;
                 src_buf++;
                 
-                if (posX >= sprite->width) {
+                if (posY >= sprite->height) {
                     break;
                 }
 
                 const uint8_t len = *src_buf;
                 src_buf += len + 1;
-                posX += len;
+                posY += len;
             }
             dst_buf += GFY_LCD_HEIGHT;
         }
@@ -2455,23 +2496,23 @@ void gfy_RLETSprite(const gfy_rletsprite_t *sprite, const int24_t x, const int24
 void gfy_RLETSprite_NoClip(const gfy_rletsprite_t *sprite, const uint24_t x, const uint8_t y) {
     const uint8_t* src_buf = sprite->data;
     uint8_t* dst_buf = (uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer) + (y + (GFY_LCD_HEIGHT * x));
-    const uint24_t dst_jump = GFY_LCD_HEIGHT - sprite->width;
+    const uint24_t dst_jump = GFY_LCD_HEIGHT - sprite->height;
     
-    for (uint8_t posY = 0; posY < sprite->height; posY++) {
-        uint8_t posX = 0;
-        while (posX < sprite->width) {
+    for (uint8_t posX = 0; posX < sprite->width; posX++) {
+        uint24_t posY = 0;
+        while (posY < sprite->height) {
             const uint8_t jump_TP = *src_buf;
-            posX += jump_TP;
+            posY += jump_TP;
             dst_buf += jump_TP;
             src_buf++;
             
-            if (posX >= sprite->width) {
+            if (posY >= sprite->height) {
                 break;
             }
 
             const uint8_t len = *src_buf;
             src_buf++;
-            posX += len;
+            posY += len;
             for(uint8_t r = 0; r < len; r++) {
                 *dst_buf = *src_buf;
                 src_buf++;

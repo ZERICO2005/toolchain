@@ -912,6 +912,10 @@ _FillRectangle_NoClip:
 	ld	(.height2), a
 	ld	hl, _Color
 	; swap width and height
+	push	af
+	ld	a, b
+	ld	(.width), a
+	pop	af
 	ld	b, c
 	ld	c, a
 	ld	a, b
@@ -952,15 +956,43 @@ _FillRectangle_NoClip:
 	dec	a
 	jr	nz, .loop
 
-	ld	a, (iy+10)
+	ld	a, (.width)
 	dec	a
+	ld	(.width), a
 	ret	nz	; width < 256
 	xor	a, a
 	jr	.loop
 
+.width:
+	db $00
+
 end if
 
 ;-------------------------------------------------------------------------------
+if 0
+; gfy_HorizLine_NoClip:
+
+; ...
+
+	ld	de,ti.lcdHeight
+smcWord _YMax
+
+; ...
+
+	ld	de,ti.lcdHeight		; add y bounds span
+smcWord _YSpan
+
+; ...
+
+	ld	hl,0
+smcWord _XMin
+
+; ...
+
+	ld	de,ti.lcdWidth
+smcWord _XMax
+
+else
 gfy_HorizLine:
 ; Draws an clipped horizontal line with the global color index
 ; Arguments:
@@ -1000,7 +1032,19 @@ smcWord _XMax
 	ex	de,hl
 	jr	_HorizLine_NoClip_NotDegen_StackY
 
+end if
+
 ;-------------------------------------------------------------------------------
+if 0
+; gfy_HorizLine_NoClip:
+
+; ...
+
+	ld	a, 0
+smcByte _Color
+
+else
+
 gfy_HorizLine_NoClip:
 ; Draws an unclipped vertical line with the global color index
 ; Arguments:
@@ -1011,10 +1055,11 @@ gfy_HorizLine_NoClip:
 ;  None
 	ld	iy, 0
 	add	iy, sp
-	ld	bc, (iy+9)		; b = length
+	ld	bc, (iy+9)		; bc = length
 _HorizLine_NoClip_StackXY:
 	xor	a, a
 	or	a, b
+	or	a, c
 _HorizLine_NoClip_MaybeDegen_StackXY:
 	ret	z			; abort if length == 0
 _HorizLine_NoClip_NotDegen_StackXY:
@@ -1045,15 +1090,41 @@ _HorizLine_NoClip_Draw:
 smcByte _Color
 	wait_quick
 .loop:
-	ld	(hl), a			; loop for width
+	ld	(hl), a		; loop for width
 	add	hl, de
 	djnz	.loop
 	dec	c
 	ret	nz	; length < 256
 	ld	b, 0
 	jr	.loop
-	
+
+end if
+
 ;-------------------------------------------------------------------------------
+if 0
+; gfy_VertLine:
+
+; ...
+
+	ld	de,ti.lcdWidth
+smcWord _XMax
+
+; ...
+
+	ld	de,ti.lcdWidth
+smcWord _XSpan
+
+; ...
+
+	ld	hl,0
+smcWord _YMin
+
+; ...
+
+	ld	de,ti.lcdHeight
+smcWord _YMax
+
+else
 gfy_VertLine:
 ; Draws an clipped vertical line with the global color index
 ; Arguments:
@@ -1091,8 +1162,18 @@ smcWord _YMax
 	ld	c, a
 	jr	_VertLine_NoClip_MaybeDegen_StackX	; from GraphX
 
+end if
+
 ;-------------------------------------------------------------------------------
+if 0
 ; gfy_VertLine_NoClip:
+
+; ...
+
+	ld	(hl), 0
+smcByte _Color
+
+else
 
 gfy_VertLine_NoClip:
 ; Draws an unclipped horizontal line with the global color index
@@ -1142,6 +1223,7 @@ smcByte _Color
 	ret	po
 	ldir
 	ret
+end if
 
 ;-------------------------------------------------------------------------------
 gfy_SetDraw: ; COPIED_FROM_GRAPHX
@@ -4452,6 +4534,7 @@ __setflag   := $000218
 __iand      := $000134
 _memset     := $0000AC
 __frameset  := $00012C
+__frameset0 := $000130
 __iremu     := $000170
 __bshl      := $000100
 
