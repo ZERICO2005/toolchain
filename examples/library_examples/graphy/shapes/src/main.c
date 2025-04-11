@@ -52,14 +52,10 @@ int main(void)
         gfy_Ellipse_NoClip(100, 100, i, 40);
     }
     gfy_SetColor(195);
-    while (!os_GetCSC());
     gfy_Ellipse(300, 35, 140, 80);
     gfy_SetColor(5);
-    while (!os_GetCSC());
-    // won't draw
     gfy_FillEllipse_NoClip(200, 150, 120, 50);
     gfy_SetColor(210);
-    while (!os_GetCSC());
     gfy_FillEllipse(25, 200, 60, 90);
     
     /* Waits for a key */
@@ -70,18 +66,12 @@ int main(void)
 
     /* Rectangle Drawing */
     gfy_SetColor(227);
-    while (!os_GetCSC());
     gfy_Rectangle(20, 20, 280, 200);
-    while (!os_GetCSC());
     gfy_SetColor(18);
     gfy_Rectangle(-10, -10, 50, 50);
-    while (!os_GetCSC());
     gfy_Rectangle(280, -10, 50, 50);
-    while (!os_GetCSC());
     gfy_Rectangle(-10, 200, 50, 50);
-    while (!os_GetCSC());
     gfy_Rectangle(280, 200, 50, 50);
-    while (!os_GetCSC());
     gfy_SetColor(4);
     gfy_Rectangle_NoClip(30, 30, 260, 180);
 
@@ -92,19 +82,13 @@ int main(void)
     gfy_FillScreen(255);
 
     /* Filled Rectangle Drawing */
-    while (!os_GetCSC());
     gfy_SetColor(227);
     gfy_FillRectangle(20, 20, 280, 200);
-    while (!os_GetCSC());
     gfy_SetColor(18);
     gfy_FillRectangle(-10, -10, 50, 50);
-    while (!os_GetCSC());
     gfy_FillRectangle(280, -10, 50, 50);
-    while (!os_GetCSC());
     gfy_FillRectangle(-10, 200, 50, 50);
-    while (!os_GetCSC());
     gfy_FillRectangle(280, 200, 50, 50);
-    while (!os_GetCSC());
     gfy_SetColor(4);
     gfy_FillRectangle(30, 30, 260, 180);
 

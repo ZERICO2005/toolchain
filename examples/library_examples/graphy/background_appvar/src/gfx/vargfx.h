@@ -1,17 +1,17 @@
-#ifndef vargfx_appvar_include_file
-#define vargfx_appvar_include_file
+#ifndef vargfy_appvar_include_file
+#define vargfy_appvar_include_file
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define vargfx_appvar_size 57840
+#define vargfy_appvar_size 57840
 #define sizeof_global_palette 512
-#define global_palette (vargfx_appvar[0])
+#define global_palette (vargfy_appvar[0])
 #define tileset_palette_offset 0
 #define image_tile_width 80
 #define image_tile_height 80
-#define image_compressed vargfx_appvar[1]
+#define image_compressed vargfy_appvar[1]
 #define image_tiles_num 12
 extern unsigned char *image_tiles_compressed[12];
 #define image_tile_0_compressed image_tiles_compressed[0]
@@ -26,9 +26,9 @@ extern unsigned char *image_tiles_compressed[12];
 #define image_tile_9_compressed image_tiles_compressed[9]
 #define image_tile_10_compressed image_tiles_compressed[10]
 #define image_tile_11_compressed image_tiles_compressed[11]
-#define vargfx_entries_num 2
-extern unsigned char *vargfx_appvar[2];
-unsigned char vargfx_init(void);
+#define vargfy_entries_num 2
+extern unsigned char *vargfy_appvar[2];
+unsigned char vargfy_init(void);
 
 #ifdef __cplusplus
 }

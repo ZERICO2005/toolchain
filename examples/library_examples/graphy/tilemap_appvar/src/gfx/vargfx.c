@@ -1,9 +1,9 @@
 #include "vargfx.h"
 #include <fileioc.h>
 
-#define vargfx_HEADER_SIZE 0
+#define vargfy_HEADER_SIZE 0
 
-unsigned char *vargfx_appvar[2] =
+unsigned char *vargfy_appvar[2] =
 {
     (unsigned char*)0,
     (unsigned char*)154,
@@ -141,7 +141,7 @@ unsigned char *tileset_tiles_data[128] =
     (unsigned char*)32766,
 };
 
-unsigned char vargfx_init(void)
+unsigned char vargfy_init(void)
 {
     unsigned int data, i;
     uint8_t appvar;
@@ -152,15 +152,15 @@ unsigned char vargfx_init(void)
         return 0;
     }
 
-    data = (unsigned int)ti_GetDataPtr(appvar) - (unsigned int)vargfx_appvar[0] + vargfx_HEADER_SIZE;
+    data = (unsigned int)ti_GetDataPtr(appvar) - (unsigned int)vargfy_appvar[0] + vargfy_HEADER_SIZE;
     for (i = 0; i < 2; i++)
     {
-        vargfx_appvar[i] += data;
+        vargfy_appvar[i] += data;
     }
 
     ti_Close(appvar);
 
-    data = (unsigned int)vargfx_appvar[1] - (unsigned int)tileset_tiles_data[0];
+    data = (unsigned int)vargfy_appvar[1] - (unsigned int)tileset_tiles_data[0];
     for (i = 0; i < tileset_tiles_num; i++)
     {
         tileset_tiles_data[i] += data;

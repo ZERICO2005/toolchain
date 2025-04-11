@@ -9,6 +9,9 @@ converts:
   - name: sprites
     palette: global_palette
     transparent-color-index: 0
+    width-and-height: swap
+    flip-x: true
+    rotate: 90
     images:
       - oiram.png
 

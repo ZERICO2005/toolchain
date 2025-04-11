@@ -11,7 +11,7 @@ int main(void)
     /* Simply call it to load in graphics from the appvar */
     /* The common function name is <appvar name>_init */
     /* This function returns 1 on success or 0 if the appvar failed to load. */
-    if (vargfx_init() == 0)
+    if (vargfy_init() == 0)
     {
         return 1;
     }

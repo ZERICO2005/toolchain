@@ -1,17 +1,17 @@
-#ifndef vargfx_appvar_include_file
-#define vargfx_appvar_include_file
+#ifndef vargfy_appvar_include_file
+#define vargfy_appvar_include_file
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define vargfx_appvar_size 33178
+#define vargfy_appvar_size 33178
 #define sizeof_global_palette 154
-#define global_palette (vargfx_appvar[0])
+#define global_palette (vargfy_appvar[0])
 #define tileset_palette_offset 0
 #define tileset_tile_width 16
 #define tileset_tile_height 16
-#define tileset vargfx_appvar[1]
+#define tileset vargfy_appvar[1]
 #define tileset_tiles_num 128
 extern unsigned char *tileset_tiles_data[128];
 #define tileset_tiles ((gfy_sprite_t**)tileset_tiles_data)
@@ -143,9 +143,9 @@ extern unsigned char *tileset_tiles_data[128];
 #define tileset_tile_125 ((gfy_sprite_t*)tileset_tiles_data[125])
 #define tileset_tile_126 ((gfy_sprite_t*)tileset_tiles_data[126])
 #define tileset_tile_127 ((gfy_sprite_t*)tileset_tiles_data[127])
-#define vargfx_entries_num 2
-extern unsigned char *vargfx_appvar[2];
-unsigned char vargfx_init(void);
+#define vargfy_entries_num 2
+extern unsigned char *vargfy_appvar[2];
+unsigned char vargfy_init(void);
 
 #ifdef __cplusplus
 }
