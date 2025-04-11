@@ -929,26 +929,28 @@ _FillRectangle_NoClip:
     jr  z, .final
     push    af  ; save carry
 .loop:
-    dec de
-    ld  hl, ti.lcdHeight
-    add hl, de
+    ld  c, ti.lcdHeight - 1
+    ex  de, hl
+    add hl, bc
     ex  de, hl
     ld  c, a
     lddr
-    inc de
-    ld  hl, ti.lcdHeight
-    add hl, de
+    inc hl
+    ld  c, ti.lcdHeight + 1
+    ex  de, hl
+    add hl, bc
     ex  de, hl
     ld  c, a
     ldir
+    dec hl
     dec iyl
     jr  nz, .loop
     pop af  ; restore carry
 .final:
     ret nc
-    dec de
-    ld  hl, ti.lcdHeight
-    add hl, de
+    ld  c, ti.lcdHeight - 1
+    ex  de, hl
+    add hl, bc
     ex  de, hl
     ld  c, a
     lddr
