@@ -22,16 +22,11 @@
 #define q2           0.946309610153821e4L
 #define q3           0.132653490878614e3L
 
-#include <stdio.h>
-// #define PRINT(x) printf("L%02d: %+.6f\n %016llX\n", __LINE__, (float)(x), (x));
-#define PRINT(...)
-#define DDD(x) printf("L%02d: %+.6f\n %016llX\n", __LINE__, (float)(x), (x));
-
 /**
  * @remarks Approximate minimum ulp:
  * ulp of +57 at +0x1.92024117109b8p+0 (|x| < pi/2)
  */
-static long double _f64_sinus(long double x, unsigned char quad)
+long double _f64_sinus(unsigned char quad, long double x)
 {
     long double x_trunc;
     long double ysq;
@@ -56,11 +51,9 @@ long double sinl(long double arg) {
     if (fabsl(arg) < 0x1.0p-27L) {
         return arg;
     }
-    return _f64_sinus(fabsl(arg), signbit(arg) ? 2 : 0);
+    return  _f64_sinus(signbit(arg) ? 2 : 0, fabsl(arg));
 }
 
 long double cosl(long double arg) {
-    /* long double returns incorrectly currently, so this is a temporary fix */
-    volatile const long double ret = _f64_sinus(fabsl(arg), 1);
-    return ret;
+    return _f64_sinus(1, fabsl(arg));
 }

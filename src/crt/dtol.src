@@ -16,11 +16,7 @@ __dtol:
 	rlca
 	ld	(hl), a	; store the sign of x in the padding byte
 	call	__dtol_c
-	pop	af
-	ld	a, e
-	pop	de
-	ld	e, a
-	pop	bc, iy, af
+	pop	af, af, bc, iy, af
 	ret
 
 	extern	__dtol_c
