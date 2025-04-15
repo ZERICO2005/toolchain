@@ -72,7 +72,10 @@ extern volatile long double f64_neg_pi;
 
 extern "C" {
 long double drem_libcall(long double x, long double y);
+long double myfmaxl(long double x, long double y);
+long double myfminl(long double x, long double y);
 }
+
 
 int comparison_test(void) {
     C((f64_pos_one  == f64_pos_one ));
@@ -96,7 +99,7 @@ int comparison_test(void) {
     C((f64_pos_pi   != f64_neg_pi  ));
     C((f64_pos_pi   >= f64_neg_pi  ));
     
-    /*  fmodl test */
+    /* fmodl test */
     long double trunc_part;
     C((std::fmod(f64_pos_pi, f64_pos_one) == std::modf(f64_pos_pi, &trunc_part)));
     C((trunc_part == 3.0L));
@@ -107,7 +110,7 @@ int comparison_test(void) {
     C((std::fmod(f64_neg_pi, f64_neg_one) == std::modf(f64_neg_pi, &trunc_part)));
     C((trunc_part == -3.0L));
 
-    /*  drem test */
+    /* drem test */
     C((drem_libcall(f64_pos_pi, f64_pos_one) == std::modf(f64_pos_pi, &trunc_part)));
     C((trunc_part == 3.0L));
     C((drem_libcall(f64_neg_pi, f64_pos_one) == std::modf(f64_neg_pi, &trunc_part)));
@@ -117,6 +120,33 @@ int comparison_test(void) {
     C((drem_libcall(f64_neg_pi, f64_neg_one) == std::modf(f64_neg_pi, &trunc_part)));
     C((trunc_part == -3.0L));
 
+    /* fmaxminl test */
+    using std::bit_cast;
+
+    C((myfmaxl(f64_pos_pi, f64_pos_pi)) == f64_pos_pi);
+    C((myfmaxl(f64_neg_pi, f64_neg_pi)) == f64_neg_pi);
+    C((myfminl(f64_pos_pi, f64_pos_pi)) == f64_pos_pi);
+    C((myfminl(f64_neg_pi, f64_neg_pi)) == f64_neg_pi);
+
+    C((myfmaxl(f64_pos_one, f64_pos_pi )) == f64_pos_pi );
+    C((myfmaxl(f64_pos_pi , f64_pos_one)) == f64_pos_pi );
+    C((myfmaxl(f64_neg_one, f64_neg_pi )) == f64_neg_one);
+    C((myfmaxl(f64_neg_pi , f64_neg_one)) == f64_neg_one);
+    C((myfminl(f64_pos_one, f64_pos_pi )) == f64_pos_one);
+    C((myfminl(f64_pos_pi , f64_pos_one)) == f64_pos_one);
+    C((myfminl(f64_neg_one, f64_neg_pi )) == f64_neg_pi );
+    C((myfminl(f64_neg_pi , f64_neg_one)) == f64_neg_pi );
+
+    C((bit_cast<uint64_t>(myfmaxl(f64_pos_zero, f64_pos_zero))) == 0x0000'0000'0000'0000);
+    C((bit_cast<uint64_t>(myfmaxl(f64_neg_zero, f64_neg_zero))) == 0x8000'0000'0000'0000);
+    C((bit_cast<uint64_t>(myfmaxl(f64_neg_zero, f64_pos_zero))) == 0x0000'0000'0000'0000);
+    C((bit_cast<uint64_t>(myfmaxl(f64_pos_zero, f64_neg_zero))) == 0x0000'0000'0000'0000);
+    C((bit_cast<uint64_t>(myfminl(f64_pos_zero, f64_pos_zero))) == 0x0000'0000'0000'0000);
+    C((bit_cast<uint64_t>(myfminl(f64_neg_zero, f64_neg_zero))) == 0x8000'0000'0000'0000);
+    C((bit_cast<uint64_t>(myfminl(f64_neg_zero, f64_pos_zero))) == 0x8000'0000'0000'0000);
+    C((bit_cast<uint64_t>(myfminl(f64_pos_zero, f64_neg_zero))) == 0x8000'0000'0000'0000);
+
+    /* fminl test */
     return 0;
 }
 

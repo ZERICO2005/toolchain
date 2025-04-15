@@ -1,0 +1,58 @@
+	assume	adl=1
+
+	section	.text
+
+	public	_fmaxl, _fminl
+
+_fminl:
+	ld	iy, 0
+	add	iy, sp
+	; load y into registers
+	ld	hl, (iy + 12)
+	ld	de, (iy + 15)
+	ld	bc, (iy + 18)
+	pop	iy
+	call	__llcmpu	; x is on the stack
+	push	iy
+	jr	nz, _fmaxl.not_equal
+	ret	; equal
+
+_fmaxl:
+	ld	iy, 0
+	add	iy, sp
+	; load y into registers
+	ld	hl, (iy + 12)
+	ld	de, (iy + 15)
+	ld	bc, (iy + 18)
+	pop	iy
+	call	__llcmpu	; x is on the stack
+	push	iy
+	ret	z	; equal
+	ccf
+
+_fmaxl.not_equal:
+	rra
+	xor	a, b	; y ^ Carry
+
+	push	af
+	push	bc, de, hl
+	call	__isnanl
+	pop	af, af, af
+	ld	l, a
+	pop	af
+
+	ld	iy, 0
+	add	iy, sp
+	bit	0, l
+	jr	nz, .ret_x
+	rla
+	jr	c, .ret_x
+	lea	iy, iy + 9
+.ret_x:
+	ld	hl, (iy + 3)
+	ld	de, (iy + 6)
+	ld	bc, (iy + 9)
+	ret
+
+	extern	__llcmpu
+	extern	__isnanl
