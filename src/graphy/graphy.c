@@ -1907,7 +1907,7 @@ void gfy_ScaledTransparentSprite_NoClip(
 
 /* gfy_Polygon (graphy.asm) */
 
-#if 1
+#if 0
 void gfy_Polygon(const int24_t *points, size_t num_points) {
     if (num_points < 2) {
         return;
@@ -1927,7 +1927,7 @@ void gfy_Polygon(const int24_t *points, size_t num_points) {
 
 /* gfy_Polygon_NoClip (graphy.asm) */
 
-#if 1
+#if 0
 void gfy_Polygon_NoClip(const int24_t *points, size_t num_points) {
     if (num_points < 2) {
         return;

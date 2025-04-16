@@ -68,7 +68,6 @@ library GRAPHY, 13
 	export gfy_TransparentTilemap_NoClip
 	export gfy_TilePtr
 	export gfy_TilePtrMapped
-;	export gfy_Reserved
 	export gfy_AllocSprite
 	export gfy_Sprite
 	export gfy_TransparentSprite
@@ -89,13 +88,12 @@ library GRAPHY, 13
 ;-------------------------------------------------------------------------------
 ; v2 functions
 ;-------------------------------------------------------------------------------
-;	export gfy_Deprecated
 	export gfy_SetTextScale
 ;-------------------------------------------------------------------------------
 ; v3 functions
 ;-------------------------------------------------------------------------------
 	export gfy_SetTransparentColor
-	export gfy_ZeroScreen
+;	export gfy_ZeroScreen
 	export gfy_SetTextConfig
 	export gfy_GetSpriteChar
 ;-------------------------------------------------------------------------------
@@ -751,7 +749,7 @@ smcByte _Color
 	ret
 
 ;-------------------------------------------------------------------------------
-if 0
+if 1
 gfy_Rectangle_NoClip:
 ; Draws an unclipped rectangle outline with the global color index
 ; Arguments:
@@ -785,7 +783,7 @@ gfy_Rectangle_NoClip:
 	jp	_HorizLine_NoClip_Draw	; draw bottom horizontal line
 end if
 ;-------------------------------------------------------------------------------
-if 0
+if 1
 gfy_Rectangle: ; COPIED_FROM_GRAPHX
 ; Draws an clipped rectangle outline with the global color index
 ; Arguments:
@@ -2903,123 +2901,71 @@ _FillTriangle:
 	ret
 
 ;-------------------------------------------------------------------------------
-; gfy_Polygon_NoClip:
-
+gfy_Polygon_NoClip: ; COPIED FROM GRAPHX
+; Draws a clipped polygon outline
+; Arguments:
+;  arg0 : Pointer to polygon points
+;  arg1 : length of polygon point array
+; Returns:
+;  None
+	ld	hl,gfx_Line_NoClip
+;	jr	_Polygon		; emulated by dummifying next instruction:
+	db	$FD			; ld hl,* -> ld iy,*
 ;-------------------------------------------------------------------------------
-; gfy_Polygon:
-
-;-------------------------------------------------------------------------------
-; gfy_Reserved: ; COPIED_FROM_GRAPHX
-; Deprecated unused function (available for use)
-;	ret
-
-;-------------------------------------------------------------------------------
-gfy_Deprecated: ; COPIED_FROM_GRAPHX
-; Decompresses a sprite that is LZ77 compressed from ConvPNG (Deprecated)
-	ld	hl,-23
-	call	ti._frameset
-	ld	hl,(ix+6)
-	ld	e,(hl)
-	inc	hl
-	ld	d,(hl)
-	ex.s	de,hl
-	inc	hl
-	inc	hl
-	ld	(ix-17),hl
-	ld	bc,3
-	ld	(ix-3),bc
+gfy_Polygon: ; COPIED FROM GRAPHX
+; Draws a clipped polygon outline
+; Arguments:
+;  arg0 : Pointer to polygon points
+;  arg1 : length of polygon point array
+; Returns:
+;  None
+	ld	hl,gfx_Line
+_Polygon:
+	ld	(.line0),hl
+	ld	(.line1),hl
+	push	ix
+	ld	ix,0
+	add	ix,sp
+	ld	sp,hl
 	ld	iy,(ix+6)
-	ld	a,(iy+2)
-	ld	(ix-8),a
-	or	a,a
-	sbc	hl,hl
-	ld	(ix-6),hl
-d_17:	ld	bc,(ix-3)
-	ld	hl,(ix+6)
-	add	hl,bc
-	inc	bc
-	ld	(ix-3),bc
-	ld	a,(hl)
-	ld	(ix-7),a
-	cp	a,(ix-8)
-	jp	nz,d_16
-	ld	bc,(ix-3)
-	ld	hl,(ix+6)
-	add	hl,bc
-	ld	(ix-14),hl
-	ld	a,(hl)
-	or	a,a
-	jr	nz,d_13
-	ld	bc,(ix-6)
-	ld	hl,(ix+9)
-	add	hl,bc
-	inc	bc
-	ld	(ix-6),bc
-	ld	a,(ix-8)
-	ld	(hl),a
-	ld	bc,(ix-3)
-	inc	bc
-	ld	(ix-3),bc
-	jr	d_18
-d_13:	ld	bc,(ix-14)
+	jr	.startloop
+.loop:
+	push	iy
+	ld	bc,(iy+9)
 	push	bc
-	pea	ix-20
-	call	_LZ_ReadVarSize
+	ld	bc,(iy+6)
+	push	bc
+	ld	bc,(iy+3)
+	push	bc
+	ld	bc,(iy+0)
+	push	bc
+	call	0
+.line0 := $-3
 	pop	bc
 	pop	bc
-	ld	bc,(ix-3)
-	add	hl,bc
-	ld	(ix-3),hl
-	ld	bc,(ix+6)
-	add	hl,bc
-	push	hl
-	pea	ix-23
-	call	_LZ_ReadVarSize
 	pop	bc
 	pop	bc
-	ld	bc,(ix-3)
-	add	hl,bc
-	ld	(ix-3),hl
-	or	a,a
-	sbc	hl,hl
-	ld	(ix-11),hl
-	jr	d_11
-d_9:	ld	bc,(ix-23)
-	ld	hl,(ix-6)
-	or	a,a
-	sbc	hl,bc
-	ld	bc,(ix+9)
-	add	hl,bc
-	push	hl
 	pop	iy
-	ld	bc,(ix-6)
+	lea	iy,iy+6
+.startloop:
 	ld	hl,(ix+9)
+	dec	hl
+	ld	(ix+9),hl
 	add	hl,bc
-	inc	bc
-	ld	(ix-6),bc
-	ld	a,(iy)
-	ld	(hl),a
-	ld	bc,(ix-11)
-	inc	bc
-	ld	(ix-11),bc
-d_11:	ld	bc,(ix-20)
-	ld	hl,(ix-11)
 	or	a,a
 	sbc	hl,bc
-	jr	c,d_9
-	jr	d_18
-d_16:	ld	bc,(ix-6)
-	ld	hl,(ix+9)
-	add	hl,bc
-	inc	bc
-	ld	(ix-6),bc
-	ld	a,(ix-7)
-	ld	(hl),a
-d_18:	ld	bc,(ix-17)
-	ld	hl,(ix-3)
-	or	a,a
-	sbc	hl,bc
-	jp	c,d_17
+	jr	nz,.loop
+	ld	bc,(iy+3)
+	push	bc
+	ld	bc,(iy+0)
+	push	bc
+	ld	iy,(ix+6)
+	ld	bc,(iy+3)
+	push	bc
+	ld	bc,(iy+0)
+	push	bc
+	call	0
+.line1 := $-3
 	ld	sp,ix
 	pop	ix
 	ret
@@ -4568,7 +4514,7 @@ __indcallhl:
 ; graphy_lcddrvce.asm
 ;-------------------------------------------------------------------------------
 
-include 'graphy_lcddrvce.asm'
+; include 'graphy_lcddrvce.asm'
 
 ;-------------------------------------------------------------------------------
 ; graphy.c.src
