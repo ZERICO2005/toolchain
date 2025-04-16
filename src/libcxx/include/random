@@ -10,7 +10,6 @@
 
 namespace std {
 
-
 template<
 	class UIntType,
 	UIntType a,
@@ -31,9 +30,9 @@ private:
 public:
 	static_assert(a < m && c < m, "linear_congruential_engine is ill-formed");
 
-    LinearCongruentialEngine() : state(default_seed) {}
+    linear_congruential_engine() : state(default_seed) {}
 	
-	explicit LinearCongruentialEngine(UIntType value) {
+	explicit linear_congruential_engine(UIntType value) {
 		if (c % m != 0u || value % m != 0u) {
 			state = value % m;
 		} else {
