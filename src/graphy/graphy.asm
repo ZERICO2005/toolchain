@@ -749,7 +749,7 @@ smcByte _Color
 	ret
 
 ;-------------------------------------------------------------------------------
-if 1
+if 0
 gfy_Rectangle_NoClip:
 ; Draws an unclipped rectangle outline with the global color index
 ; Arguments:
@@ -2908,7 +2908,7 @@ gfy_Polygon_NoClip: ; COPIED FROM GRAPHX
 ;  arg1 : length of polygon point array
 ; Returns:
 ;  None
-	ld	hl,gfx_Line_NoClip
+	ld	hl,gfy_Line_NoClip
 ;	jr	_Polygon		; emulated by dummifying next instruction:
 	db	$FD			; ld hl,* -> ld iy,*
 ;-------------------------------------------------------------------------------
@@ -2919,7 +2919,7 @@ gfy_Polygon: ; COPIED FROM GRAPHX
 ;  arg1 : length of polygon point array
 ; Returns:
 ;  None
-	ld	hl,gfx_Line
+	ld	hl,gfy_Line
 _Polygon:
 	ld	(.line0),hl
 	ld	(.line1),hl
@@ -4363,33 +4363,33 @@ smcByte _TextHeight
 gfy_ClipXMin := $-3
 smcWord _XMin
 
-	ld	hl, 0
-gfy_ClipYMin := $-3
+	ld	a, 0
+gfy_ClipYMin := $-1
 smcByte _YMin
 
 	ld	hl, ti.lcdWidth
 gfy_ClipXMax := $-3
 smcWord _XMax
 
-	ld	hl, ti.lcdHeight
-gfy_ClipYMax := $-3
+	ld	a, ti.lcdHeight
+gfy_ClipYMax := $-1
 smcByte _YMax
 
 	ld	hl, ti.lcdWidth
 gfy_ClipXSpan := $-3
 smcWord _XSpan
 
-	ld	hl, ti.lcdHeight
-gfy_ClipYSpan := $-3
-smcWord _YSpan
+	ld	a, ti.lcdHeight
+gfy_ClipYSpan := $-1
+smcByte _YSpan
 
 	ld	hl, ti.lcdWidth-1
 gfy_ClipXMaxMinus1 := $-3
 smcWord _XMaxMinus1
 
-	ld	hl, ti.lcdHeight-1
-gfy_ClipYMaxMinus1 := $-3
-smcWord _YMaxMinus1
+	ld	a, ti.lcdHeight-1
+gfy_ClipYMaxMinus1 := $-1
+smcByte _YMaxMinus1
 
 ;-------------------------------------------------------------------------------
 

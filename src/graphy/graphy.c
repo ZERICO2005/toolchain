@@ -1158,7 +1158,7 @@ void gfy_Rectangle_NoClip(uint24_t x, uint8_t y, uint24_t width, uint8_t height)
 
 /* gfy_FillRectangle_NoClip */
 
-#if 1
+#if 0
 void gfy_FillRectangle_NoClip(uint24_t x, uint8_t y, uint24_t width, uint8_t height) {
     test_printf("%s: %02X (%d, %d) %dx%d\n", __func__, gfy_Color, x, y, width, height);
     if (width == 0 || height == 0) {
@@ -1171,8 +1171,7 @@ void gfy_FillRectangle_NoClip(uint24_t x, uint8_t y, uint24_t width, uint8_t hei
         fill += GFY_LCD_HEIGHT;
     }
 }
-#elif 1
-#include <ti/sprintf.h>
+#elif 0
 
 void gfy_FillRectangle_NoClip(uint24_t x, uint8_t y, uint24_t width, uint8_t height) {
     volatile char* print_out = (volatile char*)0xFB0000;
@@ -1227,8 +1226,8 @@ bool gfy_GetClipRegion(gfy_region_t *region) {
 void gfy_ShiftDown(uint8_t pixels) {
     if (pixels == 0) { return; }
     const uint8_t* src_buf = (const uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer) + gfy_ClipYMin + (gfy_ClipXMin * GFY_LCD_HEIGHT);
-    uint8_t* dst_buf = (uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer) + (gfy_ClipYMin + (int8_t)pixels) + (gfy_ClipXMin * GFY_LCD_HEIGHT);
-    const int24_t copySize = gfy_ClipXMax - gfy_ClipXMin - (int24_t)pixels;
+    uint8_t* dst_buf = (uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer) + (gfy_ClipYMin + (int24_t)pixels) + (gfy_ClipXMin * GFY_LCD_HEIGHT);
+    const int24_t copySize = gfy_ClipYMax - gfy_ClipYMin - (int24_t)pixels;
     if (copySize <= 0) { return; }
     int24_t x0 = gfy_ClipXMin;
     int24_t x1 = gfy_ClipXMax;
@@ -1244,8 +1243,8 @@ void gfy_ShiftDown(uint8_t pixels) {
 void gfy_ShiftUp(uint8_t pixels) {
     if (pixels == 0) { return; }
     const uint8_t* src_buf = (const uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer) + gfy_ClipYMin + (gfy_ClipXMin * GFY_LCD_HEIGHT);
-    uint8_t* dst_buf = (uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer) + (gfy_ClipYMin - (int8_t)pixels) + (gfy_ClipXMin * GFY_LCD_HEIGHT);
-    const int24_t copySize = gfy_ClipXMax - gfy_ClipXMin - (int24_t)pixels;
+    uint8_t* dst_buf = (uint8_t*)RAM_ADDRESS(gfy_CurrentBuffer) + (gfy_ClipYMin - (int24_t)pixels) + (gfy_ClipXMin * GFY_LCD_HEIGHT);
+    const int24_t copySize = gfy_ClipYMax - gfy_ClipYMin - (int24_t)pixels;
     if (copySize <= 0) { return; }
     int24_t x0 = gfy_ClipXMin;
     int24_t x1 = gfy_ClipXMax;
@@ -1660,11 +1659,11 @@ gfy_sprite_t *gfy_AllocSprite(
 /* gfy_Sprite */
 
 void gfy_Sprite(const gfy_sprite_t *restrict sprite, int24_t x, int24_t y) {
-    test_printf(
-        "%s: %02X (%d, %d) %dx%d [%d,%d:%d,%d]\n",
-        __func__, gfy_Color, x, y, sprite->width, sprite->height,
-        gfy_ClipXMin, gfy_ClipYMin, gfy_ClipXMax, gfy_ClipYMax
-    );
+    // test_printf(
+    //     "%s: %02X (%d, %d) %dx%d [%d,%d:%d,%d]\n",
+    //     __func__, gfy_Color, x, y, sprite->width, sprite->height,
+    //     gfy_ClipXMin, gfy_ClipYMin, gfy_ClipXMax, gfy_ClipYMax
+    // );
     if (
         x >= gfy_ClipXMax || y >= gfy_ClipYMax ||
         sprite->width == 0 || sprite->height == 0 ||
