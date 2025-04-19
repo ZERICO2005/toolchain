@@ -749,8 +749,7 @@ smcByte _Color
 	ret
 
 ;-------------------------------------------------------------------------------
-if 0
-gfy_Rectangle_NoClip:
+gfy_Rectangle_NoClip: ; optimize this
 ; Draws an unclipped rectangle outline with the global color index
 ; Arguments:
 ;  arg0 : X coordinate
@@ -759,31 +758,47 @@ gfy_Rectangle_NoClip:
 ;  arg3 : Height
 ; Returns:
 ;  None
-	ld	iy,0
-	add	iy,sp
-	ld	a,(iy+12)		; a = height
-	or	a,a
-	ret	z			; abort if height == 0
-	ld	bc,(iy+9)		; bc = width
-	sbc	hl,hl
-	adc	hl,bc
-	ret	z			; abort if width == 0
+	push	ix			; need to use ix because lines use iy
+	ld	ix,0
+	add	ix,sp
+	ld	hl,(ix+6)
+	ld	de,(ix+9)
+	ld	bc,(ix+12)
 	push	bc
-	call	_HorizLine_NoClip_NotDegen_StackXY ; draw top horizontal line
-						   ; hl = &buf[y][x+width-1]
-	ld	b,a			; b = height
-	call	_VertLine_NoClip_Draw	; draw right vertical line
-	ld	b,(iy+12)		; b = height
-	ld	e,(iy+6)		; e = y
-	call	_VertLine_NoClip_NotDegen_StackX ; draw left vertical line
-						 ; hl = &buf[y+height][x]
-						 ; de = ti.lcdWidth
-	sbc	hl,de			; hl = &buf[y+height-1][x]
-	pop	bc			; bc = width
-	jp	_HorizLine_NoClip_Draw	; draw bottom horizontal line
-end if
+	push	de
+	push	hl
+	call	gfy_HorizLine_NoClip	; top horizontal line
+	ld	hl,(ix+6)
+	ld	de,(ix+9)
+	ld	bc,(ix+15)
+	push	bc
+	push	de
+	push	hl
+	call	gfy_VertLine_NoClip	; left vertical line
+	ld	hl,(ix+6)
+	ld	de,(ix+9)
+	ld	bc,(ix+12)
+	add	hl,bc			; add x and width
+	dec	hl
+	ld	bc,(ix+15)
+	push	bc
+	push	de
+	push	hl
+	call	gfy_VertLine_NoClip	; right vertical line
+	ld	de,(ix+6)
+	ld	hl,(ix+9)
+	ld	bc,(ix+15)
+	add	hl,bc
+	dec	hl			; add y and height
+	ld	bc,(ix+12)
+	push	bc
+	push	hl
+	push	de
+	call	gfy_HorizLine_NoClip	; bottom horizontal line
+	ld	sp,ix
+	pop	ix
+	ret
 ;-------------------------------------------------------------------------------
-if 1
 gfy_Rectangle: ; COPIED_FROM_GRAPHX
 ; Draws an clipped rectangle outline with the global color index
 ; Arguments:
@@ -833,10 +848,8 @@ gfy_Rectangle: ; COPIED_FROM_GRAPHX
 	ld	sp,ix
 	pop	ix
 	ret
-end if
 
 ;-------------------------------------------------------------------------------
-if 1
 gfy_FillRectangle: ; COPIED_FROM_GRAPHX
 ; Draws a clipped rectangle with the global color index
 ; Arguments:
@@ -954,33 +967,7 @@ _FillRectangle_NoClip:
     lddr
     ret
 
-end if
-
 ;-------------------------------------------------------------------------------
-if 0
-; gfy_HorizLine_NoClip:
-
-; ...
-
-	ld	de,ti.lcdHeight
-smcWord _YMax
-
-; ...
-
-	ld	de,ti.lcdHeight		; add y bounds span
-smcWord _YSpan
-
-; ...
-
-	ld	hl,0
-smcWord _XMin
-
-; ...
-
-	ld	de,ti.lcdWidth
-smcWord _XMax
-
-else
 gfy_HorizLine:
 ; Draws an clipped horizontal line with the global color index
 ; Arguments:
@@ -1019,20 +1006,7 @@ smcWord _XMax
 	pop	bc			; bc = length
 	ex	de,hl
 	jr	_HorizLine_NoClip_NotDegen_StackY
-
-end if
-
 ;-------------------------------------------------------------------------------
-if 0
-; gfy_HorizLine_NoClip:
-
-; ...
-
-	ld	a, 0
-smcByte _Color
-
-else
-
 gfy_HorizLine_NoClip:
 ; Draws an unclipped vertical line with the global color index
 ; Arguments:
@@ -1086,33 +1060,7 @@ smcByte _Color
 	ld	b, 0
 	jr	.loop
 
-end if
-
 ;-------------------------------------------------------------------------------
-if 0
-; gfy_VertLine:
-
-; ...
-
-	ld	de,ti.lcdWidth
-smcWord _XMax
-
-; ...
-
-	ld	de,ti.lcdWidth
-smcWord _XSpan
-
-; ...
-
-	ld	hl,0
-smcWord _YMin
-
-; ...
-
-	ld	de,ti.lcdHeight
-smcWord _YMax
-
-else
 gfy_VertLine:
 ; Draws an clipped vertical line with the global color index
 ; Arguments:
@@ -1149,20 +1097,7 @@ smcWord _YMax
 	ld	bc, 0
 	ld	c, a
 	jr	_VertLine_NoClip_MaybeDegen_StackX	; from GraphX
-
-end if
-
 ;-------------------------------------------------------------------------------
-if 0
-; gfy_VertLine_NoClip:
-
-; ...
-
-	ld	(hl), 0
-smcByte _Color
-
-else
-
 gfy_VertLine_NoClip:
 ; Draws an unclipped horizontal line with the global color index
 ; Arguments:
@@ -1211,7 +1146,6 @@ smcByte _Color
 	ret	po
 	ldir
 	ret
-end if
 
 ;-------------------------------------------------------------------------------
 gfy_SetDraw: ; COPIED_FROM_GRAPHX
@@ -2306,10 +2240,93 @@ smcByte _TextTPColor
 smcByte _TextHeight
 
 ;-------------------------------------------------------------------------------
-; gfy_PrintInt:
+gfy_PrintInt: ; COPIED FROM GRAPHX
+; Places an int at the current cursor position
+; Arguments:
+;  arg0 : Number to print
+;  arg1 : Number of characters to print
+; Returns:
+;  None
+	pop	de
+	pop	hl
+	push	hl
+	push	de
+	add	hl,hl
+	db	$3E			; xor a,a -> ld a,*
 
 ;-------------------------------------------------------------------------------
-; gfy_PrintUInt:
+gfy_PrintUInt: ; COPIED FROM GRAPHX
+; Places an unsigned int at the current cursor position
+; Arguments:
+;  arg0 : Number to print
+;  arg1 : Minimum number of characters to print
+; Returns:
+;  None
+	xor	a,a
+	pop	de
+	pop	hl			; hl = uint
+	pop	bc			; c = min num chars
+	push	bc
+	push	hl
+	push	de
+	jr	nc,.begin		; c ==> actually a negative int
+	ex	de,hl
+	or	a,a
+	sbc	hl,hl
+	sbc	hl,de			; hl = -int
+	ld	a,'-'
+	call	.printchar
+	dec	c
+	jr	nz,.begin
+	inc	c
+.begin:
+	ld	de,-10000000
+	call	.num1
+	ld	de,-1000000
+	call	.num1
+	ld	de,-100000
+	call	.num1
+	ld	de,-10000
+	call	.num1
+	ld	de,-1000
+	call	.num1
+	ld	de,-100
+	call	.num1
+	ld	de,-10
+	call	.num1
+	ld	de,-1
+.num1:
+	xor	a,a
+.num2:
+	inc	a
+	add	hl,de
+	jr	c,.num2
+	sbc	hl,de
+	dec	a			; a = next digit
+	jr	nz,.printdigit		; z ==> digit is zero, maybe don't print
+	ld	a,c
+	inc	c
+	cp	a,8
+	ret	c			; nc ==> a digit has already been
+					;        printed, or must start printing
+					;        to satisfy min num chars
+	xor	a,a
+.printdigit:
+	add	a,'0'
+	ld	c,a			; mark that a digit has been printed
+.printchar:
+;	push	bc
+;
+;	call	_PrintChar
+;PrintChar_1 := $-3
+;	pop	bc
+
+	; preserve all registers?
+	push	hl, bc
+	call	gfy_PrintChar	; _PrintChar is unimplemented
+	pop	bc, hl
+
+	ret
 
 ;-------------------------------------------------------------------------------
 gfy_GetStringWidth: ; COPIED_FROM_GRAPHX
