@@ -1,28 +1,60 @@
 	assume	adl=1
 
 	section	.text
+
 	public	__sshrs
+	public	__sshru
 
 if PREFER_OS_CRT
 
 __sshrs := 000248h
+__sshru := 000250h
 
 else
 
 __sshrs:
-; Suboptimal for large shift amounts
-; CC: if C!=0: C*(7*r(PC)+1)+7*r(PC)+(ADL?6*r(SPL)+3*w(SPL):4*r(SPS)+2*w(SPS))+1
-;     if C==0: 4*r(PC)+(ADL?3*r(SPL):2*r(SPS))+2
-	inc	c
-	dec	c
+	; sign extend
+	add.s	hl, hl
+	push	de
+	ex	de, hl
+	sbc	hl, hl
+	ld	h, d
+	ld	l, e
+	pop	de
+	jr	__sshru.hijack
+
+__sshru:
+	; zero extend
+	inc	hl
+	dec.s	hl
+	add	hl, hl
+.hijack:
+	bit	0, c
+	jr	nz, .bit0
+	add	hl, hl
+.bit0:
+	bit	1, c
+	jr	nz, .bit1
+	add	hl, hl
+	add	hl, hl
+.bit1:
+	bit	2, c
+	jr	nz, .bit2
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+.bit2:
+	dec	sp
+	push	hl
+	inc	sp
+	pop	hl
+	bit	3, c
 	ret	z
-	push	bc
-	ld	b, c
-.loop:
-	sra	h
-	rr	l
-	djnz	.loop
-	pop	bc
+	ld	l, h
+	ld	h, 0
+	ret	nc
+	dec	h	; sign extend
 	ret
 
 end if

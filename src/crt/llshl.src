@@ -5,11 +5,14 @@
 __llshl:
 ; Suboptimal for large shift amounts
 	push	af
-	ld	a, b
 
 	push	hl
 	ld	hl, 9
 	add	hl, sp
+	ld	a, (hl)
+	sub	a, 48
+	jr	nc, .large_shift
+	ld	a, b
 	ld	b, (hl)
 	pop	hl
 
@@ -29,3 +32,18 @@ __llshl:
 	ld	b, a
 	pop	af
 	ret
+
+.large_shift:
+	pop	hl
+	ld	c, a	; C = shift
+	call	__sshl
+	ld	b, h
+	ld	c, l
+	or	a, a
+	sbc	hl, hl
+	ex	de, hl
+	sbc	hl, hl
+	pop	af
+	ret
+
+	extern	__sshl

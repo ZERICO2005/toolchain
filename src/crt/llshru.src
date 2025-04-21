@@ -9,12 +9,33 @@ __llshru:
 	ld	iy, 0
 	add	iy, sp
 	ld	a, (iy + 9)
+	cp	a, 48
+	jr	nc, .large_shift
 	or	a, a
 	jp	z, __llshrs.finish
 	push	de
 	push	hl
+	
 	srl	b
 	jp	__llshrs.hijack_llshru
 
+.large_shift:
+	sub	a, 48
+	ld	h, b
+	ld	l, c
+	ld	c, a	; C = shift
+	call	__sshru
+	; zero extend
+	or	a, a
+	ex	de, hl
+	sbc	hl, hl
+	ex.s	de, hl
+	ld	b, e	; ld b, 0
+	ld	c, e	; ld c, 0
+	pop	iy
+	pop	af
+	ret
+
+	extern	__sshru
 	extern	__llshrs.finish
 	extern	__llshrs.hijack_llshru
