@@ -11,40 +11,12 @@ __llshrs:
 	ld	iy, 0
 	add	iy, sp
 	ld	a, (iy + 9)
-	cp	a, 48
-	jr	nc, .large_shift
 	or	a, a
 	jr	z, .finish
-	push	de
-	push	hl
-.loop:
-	sra	b
-	public	__llshrs.hijack_llshru
-.hijack_llshru:
-	rr	c
-	rr	(iy - 1)
-	rr	d
-	rr	e
-	rr	(iy - 4)
-	rr	h
-	rr	l
-	dec	a
-	jr	nz, .loop
+	cp	a, 48
+	jp	c, __llshru.hijack_llshrs
 
-	ld	(iy - 3), e
-	ld	(iy - 2), d
-	ex	de, hl
-	pop	hl
-	ld	l, e
-	ld	h, d
-	pop	de
-	public	__llshrs.finish
-.finish:
-	pop	iy
-	pop	af
-	ret
-
-.large_shift:
+; .large_shift:
 	sub	a, 48
 	ld	h, b
 	ld	l, c
@@ -61,6 +33,10 @@ __llshrs:
 	ex	de, hl
 	ld	b, e	; ld b, sign_extend
 	ld	c, e	; ld c, sign_extend
+.finish:
 	pop	iy
 	pop	af
 	ret
+
+	extern	__llshru.hijack_llshrs
+	extern	__sshrs

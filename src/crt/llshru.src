@@ -1,6 +1,7 @@
 	assume	adl=1
 
 	section	.text
+
 	public	__llshru
 __llshru:
 ; Suboptimal for large shift amounts
@@ -12,12 +13,40 @@ __llshru:
 	cp	a, 48
 	jr	nc, .large_shift
 	or	a, a
-	jp	z, __llshrs.finish
+	jr	z, .finish
 	push	de
 	push	hl
-	
 	srl	b
-	jp	__llshrs.hijack_llshru
+	jr	.begin
+
+	public	__llshru.hijack_llshrs
+.hijack_llshrs:
+	push	de
+	push	hl
+.loop:
+	sra	b
+.begin:
+	rr	c
+	rr	(iy - 1)
+	rr	d
+	rr	e
+	rr	(iy - 4)
+	rr	h
+	rr	l
+	dec	a
+	jr	nz, .loop
+
+	ld	(iy - 3), e
+	ld	(iy - 2), d
+	ex	de, hl
+	pop	hl
+	ld	l, e
+	ld	h, d
+	pop	de
+.finish:
+	pop	iy
+	pop	af
+	ret
 
 .large_shift:
 	sub	a, 48
@@ -27,9 +56,9 @@ __llshru:
 	call	__sshru
 	; zero extend
 	or	a, a
-	ex	de, hl
-	sbc	hl, hl
 	ex.s	de, hl
+	sbc	hl, hl
+	ex	de, hl
 	ld	b, e	; ld b, 0
 	ld	c, e	; ld c, 0
 	pop	iy
@@ -37,5 +66,3 @@ __llshru:
 	ret
 
 	extern	__sshru
-	extern	__llshrs.finish
-	extern	__llshrs.hijack_llshru
