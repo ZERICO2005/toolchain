@@ -23,6 +23,8 @@ __sshrs:
 	pop	de
 	jr	__sshru.hijack
 
+	section	.text
+
 __sshru:
 	; zero extend
 	inc	hl
