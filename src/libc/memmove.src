@@ -1,0 +1,45 @@
+	assume	adl=1
+
+	section	.text
+
+	public	_memmove
+
+if PREFER_OS_LIBC
+
+_memmove := 0000A8h
+
+else
+
+_memmove:
+	ld	iy, -1
+	add	iy, sp
+	ld	bc, (iy + 10)	; size
+	sbc	hl, hl
+	add	hl, bc
+	ld	de, (iy + 4)	; dst
+	jr	z, .zero
+	ld	hl, (iy + 7)	; src
+	or	a, a
+	sbc	hl, de
+	add	hl, de
+	jr	nc, .forward_copy
+	; reverse_copy
+	add	hl, bc
+	dec	hl
+	ex	de, hl
+	add	hl, bc
+	dec	hl
+	ex	de, hl
+	; src < dst
+	lddr
+	inc	de
+.zero:
+	ex	de, hl
+	ret
+.forward_copy:
+	; src >= dst
+	ldir
+	ld	hl, (iy + 4)	; dst
+	ret
+
+end if

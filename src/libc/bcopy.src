@@ -1,0 +1,39 @@
+	assume	adl=1
+
+	section	.text
+
+	public	_bcopy
+
+; void bcopy(const void* src, void* dst, size_t n)
+_bcopy:
+	; very similar to memmove
+	ld	hl, 9
+	add	hl, sp
+	ld	bc, (hl)	; size
+	inc	bc
+	cpd	; dec hl
+	ret	po	; zero size
+	dec	hl
+	dec	hl
+	ld	de, (hl)	; dst
+	dec	hl
+	dec	hl
+	dec	hl
+	ld	hl, (hl)	; src
+	sbc	hl, de
+	add	hl, de
+	jr	nc, .forward_copy
+	; reverse_copy
+	add	hl, bc
+	dec	hl
+	ex	de, hl
+	add	hl, bc
+	dec	hl
+	ex	de, hl
+	; src < dst
+	lddr
+	ret
+.forward_copy:
+	; src >= dst
+	ldir
+	ret
