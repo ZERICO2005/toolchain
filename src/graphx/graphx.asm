@@ -6462,6 +6462,7 @@ _MultiplyHLDE:
 	pop	bc
 
 ;-------------------------------------------------------------------------------
+; identical to __imulu, but doesn't preserve AF
 _MultiplyHLBC:
 ; Performs (un)signed integer multiplication
 ; Inputs:
@@ -6469,48 +6470,47 @@ _MultiplyHLBC:
 ;  BC : Operand 2
 ; Outputs:
 ;  HL = HL*BC
-	push	iy
+;	push	af	; optional
+	push	de
+	ld	d, b
+	ld	e, h
+	mlt	de
+	ld	a, e
+	dec	sp
 	push	hl
 	push	bc
-	push	hl
-	ld	iy,0
-	ld	d,l
-	ld	e,b
-	mlt	de
-	add	iy,de
-	ld	d,c
-	ld	e,h
-	mlt	de
-	add	iy,de
-	ld	d,c
-	ld	e,l
-	mlt	de
-	ld	c,h
-	mlt	bc
-	ld	a,c
 	inc	sp
-	inc	sp
-	pop	hl
+	pop	de
+	ld	e, l
+	mlt	de
+	add	a, e
+	pop	de
+	ld	e, c
+	mlt	de
+	add	a, e
+	ld	e, l
+	ld	l, c
 	mlt	hl
-	add	a,l
-	pop	hl
-	inc	sp
-	mlt	hl
-	add	a,l
-	ld	b,a
-	ld	c,0
-	lea	hl,iy+0
-	add	hl,bc
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,de
-	pop	iy
+	add	a, h
+	ld	h, a
+	ld	a, e
+	ld	d, b
+	mlt	de
+	add	hl, de
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	ld	d, a
+	ld	e, c
+	mlt	de
+	add	hl, de
+	pop	de
+;	pop	af	; optional
 	ret
 
 ;-------------------------------------------------------------------------------
