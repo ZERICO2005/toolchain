@@ -1,9 +1,8 @@
 	assume	adl=1
 
-	section	.text
-
 	public	__dcmp
 
+if 0
 ; int _dcmp_c(f64_cmp_arg const *__restrict const arg)
 __dcmp:
 	; f64_cmp_arg*_ret_i24
@@ -24,3 +23,300 @@ __dcmp:
 	ret
 
 	extern	__dcmp_c
+
+end if
+
+if 0
+__dcmp:
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	hl
+	ld	hl, (iy + 12)	; y.hi
+	rlc	h	; Carry = signbit y
+	bit	7, b	; signbit x
+	jr	z, .positve_x
+	ccf
+.positve_x:
+	jr	c, .different_sign
+	; same_sign
+if 0
+	push	bc
+	rlc	b ; now bit 0 of H and B are the same
+	or	a, a
+	; llcmpu
+;	push	iy
+;	ld	iy, 0
+;	add	iy, sp
+;	push	hl
+;	ld	hl, (iy + 12)
+	sbc.s	hl, bc
+	pop	bc
+	jr	nz, .ne
+	ld	hl, (iy + 9)	; y.md
+	sbc	hl, de
+	jr	nz, .ne
+	pop	hl
+	push	bc
+	ld	bc, (iy + 6)	; y.lo
+	sbc	hl, bc
+	add	hl, bc
+	pop	bc
+	pop	iy
+	ret
+.ne:
+	ccf
+	pop	hl
+	pop	iy
+	ret
+else
+	push	bc
+	rlc	b ; now bit 0 of H and B are the same
+	or	a, a
+	; llcmpu
+;	push	iy
+;	ld	iy, 0
+;	add	iy, sp
+;	push	hl
+;	ld	hl, (iy + 12)
+	sbc.s	hl, bc
+	pop	bc
+	jr	nz, .ne
+	ld	hl, (iy + 9)	; y.md
+	sbc	hl, de
+	jr	nz, .ne
+	pop	hl
+	push	bc
+	ld	bc, (iy + 6)	; y.lo
+	sbc	hl, bc
+	add	hl, bc
+	pop	bc
+	jr	.finish_llcmpu
+.ne:
+	ccf
+	pop	hl
+.finish_llcmpu:
+	pop	iy
+	ret	z
+	push	hl
+	push	bc
+	bit	7, b
+	jr	z, .positve_xx
+	ccf
+.positve_xx:
+	ld	bc, 2 ; non zero value
+	sbc	hl, hl
+	set	0, h	; hl is now -1 or +1
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	pop	bc
+	pop	hl
+	ret
+end if
+	
+.different_sign:
+	; test for zero
+	push	bc
+	res	7, b
+	srl	h	; undo rlc
+	call	.zero_test	; returns if x and y are not zero
+
+	ld	b, (iy - 5)
+	rlc	b
+	sbc	hl, hl
+	set	0, h	; hl is now -1 or +1
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+
+	pop	bc
+	pop	hl
+.finish_zero:
+	pop	iy
+	ret
+
+.zero_test:
+	; x[hi-md-lo]
+	; y[hi-md-lo]
+	add.s	hl, bc
+	adc	hl, de
+	ret	nz
+	ret	c
+	; x[00-00-lo]
+	; y[00-md-lo]
+	; HL is zero, Carry is reset
+	ld	hl, (iy + 6)	; y.lo
+	ld	bc, (iy + 9)	; y.md
+	add	hl, bc
+	ld	bc, (iy - 3)	; x.lo
+	adc	hl, bc
+	ret	nz
+	ret	c
+	; Z, NC, and P
+	pop	bc	; zero_test return address
+	pop	bc
+	pop	hl
+	pop	iy
+	ret
+
+else if 0
+
+	assume	adl=1
+
+	section	.text
+
+	public	__dcmp
+__dcmp:
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	bc
+	push	hl
+	ld	hl, (iy + 12)	; y.hi
+	rlc	h	; Carry = signbit y
+	bit	7, b	; signbit x
+	jr	z, .positve_x
+	ccf
+.positve_x:
+	jr	c, .different_sign
+	; same_sign
+	rlc	b ; now bit 0 of H and B are the same
+	or	a, a
+	sbc.s	hl, bc	; x.hi - y.hi
+	jr	nz, .not_equal
+	ld	hl, (iy + 9)	; y.md
+	sbc	hl, de	; x.md - y.md
+	jr	nz, .not_equal
+	ld	bc, (iy + 6)	; y.lo
+	ld	hl, (iy - 6)	; x.lo
+	sbc	hl, bc	; x.lo - y.lo
+	jr	z, .equal
+.not_equal:
+	ld	c, a
+	rra	; bit 7 of A = Carry
+	cpl
+	xor	a, (iy - 2)	; bit 7 of B = sign of x
+	or	a, 2	; set S flag, ensure that A cannot be zero
+	add	a, 0	; reset PE
+	ld	c, a
+.equal:
+	pop	hl
+	pop	bc
+	pop	iy
+	ret
+
+.different_sign:
+	res	7, b
+	srl	h	; undo rlc and clear signbit
+; test for zero
+	; x[hi-md-lo]
+	; y[hi-md-lo]
+	add.s	hl, bc
+	adc	hl, de
+	jr	nz, .non_zero	; path taken by normal, inf, and NaN
+	jr	c, .non_zero
+	; both x and y are subnormal or zero
+	; x[00-00-lo]
+	; y[00-md-lo]
+	; HL is zero, Carry is reset
+	ld	hl, (iy + 6)	; y.lo
+	ld	bc, (iy + 9)	; y.md
+	add	hl, bc
+	ld	bc, (iy - 6)	; x.lo
+	adc	hl, bc
+	jr	nz, .non_zero
+	jr	nc, .finish_zero	; Z, NC, and P
+.non_zero:
+	ld	c, a
+	ld	b, (iy - 2)	; bit 7 of b = sign of x
+	ld	a, 2	; non zero
+	or	a, b
+	add	a, 0	; reset PE
+	ld	a, c
+.finish_zero:
+	pop	hl
+	pop	bc
+	pop	iy
+	ret
+
+else
+
+
+__dcmp:
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	bc
+	push	hl
+	ld	hl, (iy + 12)	; y.hi
+	rlc	h	; Carry = signbit y
+	bit	7, b	; signbit x
+	jr	z, .positve_x
+	ccf
+.positve_x:
+	jr	c, .different_sign
+	; same_sign
+	rlc	b ; now bit 0 of H and B are the same
+	srl	h
+	srl	b
+	or	a, a
+	sbc.s	hl, bc	; y.hi - x.hi
+	jr	nz, .not_equal
+	ld	hl, (iy + 9)	; y.md
+	sbc	hl, de	; y.md - x.md
+	jr	nz, .not_equal
+	ld	bc, (iy - 6)	; x.lo
+	ld	hl, (iy + 6)	; y.lo
+	sbc	hl, bc	; y.lo - x.lo
+	jr	z, .equal
+.not_equal:
+	ld	c, a
+	rra	; bit 7 of A = Carry
+	cpl
+	xor	a, (iy - 2)	; bit 7 of B = sign of x
+	or	a, 2	; set S flag, ensure that A cannot be zero
+	add	a, 0	; reset PE
+	ld	c, a
+.equal:
+	pop	hl
+	pop	bc
+	pop	iy
+	ret
+
+.different_sign:
+	res	7, b
+	srl	h	; undo rlc and clear signbit
+; test for zero
+	; x[hi-md-lo]
+	; y[hi-md-lo]
+	add.s	hl, bc
+	adc	hl, de
+	jr	nz, .non_zero	; path taken by normal, inf, and NaN
+	jr	c, .non_zero
+	; both x and y are subnormal or zero
+	; x[00-00-lo]
+	; y[00-md-lo]
+	; HL is zero, Carry is reset
+	ld	hl, (iy + 6)	; y.lo
+	ld	bc, (iy + 9)	; y.md
+	add	hl, bc
+	ld	bc, (iy - 6)	; x.lo
+	adc	hl, bc
+	jr	nz, .non_zero
+	jr	nc, .finish_zero	; Z, NC, and P
+.non_zero:
+	ld	c, a
+	ld	b, (iy - 2)	; bit 7 of b = sign of x
+	ld	a, 2	; non zero
+	or	a, b
+	add	a, 0	; reset PE
+	ld	a, c
+.finish_zero:
+	pop	hl
+	pop	bc
+	pop	iy
+	ret
+
+
+end if
