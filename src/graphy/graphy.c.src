@@ -574,697 +574,697 @@ BB4_3:
 
 ;	section	.text,"ax",@progbits
 ;	public	gfy_Line
-gfy_Line:
-	push	ix
-	ld	ix, 0
-	add	ix, sp
-	lea	hl, ix - 27
-	ld	sp, hl
-	ld	de, (ix + 9)
-	ld	bc, (ix + 15)
-	ld	hl, 1
-	ld	(ix - 6), hl
-	push	bc
-	pop	hl
-	sbc	hl, de
-	push	hl
-	pop	de
-	push	de
-	pop	iy
-	add	iy, iy
-	sbc	hl, hl
-	push	hl
-	pop	bc
-	ld	(ix - 15), de
-	ex	de, hl
-	add	hl, bc
-	call	__ixor
-	ld	(ix - 12), hl
-	ld	hl, (ix + 12)
-	ld	de, (ix + 6)
-	or	a, a
-	sbc	hl, de
-	ld	(ix - 18), hl
-	push	hl
-	pop	de
-	push	de
-	pop	iy
-	add	iy, iy
-	sbc	hl, hl
-	push	hl
-	pop	bc
-	ex	de, hl
-	add	hl, bc
-	call	__ixor
-	ld	bc, (ix - 12)
-	push	hl
-	pop	de
-	push	bc
-	pop	hl
-	or	a, a
-	sbc	hl, de
-	ld	hl, (ix + 15)
-	ld	(ix - 3), hl
-	jp	nc, BB5_16
-	ld	hl, (-1900524)
-	ld	(ix - 9), hl
-	ld	bc, -8388608
-	ld	hl, (ix + 6)
-	add	hl, bc
-	ex	de, hl
-	ld	iy, (ix + 12)
-	lea	hl, iy
-	add	hl, bc
-	push	de
-	pop	iy
-	or	a, a
-	sbc	hl, de
-	ld	de, (ix + 12)
-	ld	hl, (ix + 6)
-	jp	nc, BB5_32
-	or	a, a
-	sbc	hl, de
-	ld	(ix - 12), hl
-	ld	hl, (ix + 9)
-	ld	de, (ix + 15)
-	or	a, a
-	sbc	hl, de
-	push	hl
-	pop	de
-	add	hl, bc
-	or	a, a
-	sbc	hl, bc
-	jr	nc, BB5_4
-	scf
-	sbc	hl, hl
-	ld	(ix - 6), hl
-BB5_4:
-	push	de
-	pop	hl
-	push	de
-	pop	iy
-	add	iy, iy
-	sbc	hl, hl
-	push	hl
-	pop	bc
-	ex	de, hl
-	add	hl, bc
-	call	__ixor
-	push	hl
-	pop	de
-	ld	c, 1
-	add	hl, hl
-	push	hl
-	pop	iy
-	ex	de, hl
-	ld	de, (ix - 12)
-	or	a, a
-	sbc	hl, de
-	call	__ishl
-	ld	(ix - 18), hl
-	ld	(ix - 27), iy
-	lea	hl, iy
-	or	a, a
-	sbc	hl, de
-	ld	(ix - 12), hl
-	ld	hl, (gfy_ClipXMin)
-	ld	(ix - 15), hl
-	ld	hl, (gfy_ClipXMax)
-	ld	(ix - 24), hl
-	ld	de, (ix + 12)
-	push	de
-	pop	hl
-	call	__set_bc_and_mul_hl_by_240
-	push	hl
-	pop	bc
-	ld	hl, (ix - 9)
-	add	hl, bc
-	ld	(ix - 9), hl
-	push	de
-	pop	bc
-BB5_5:
-	ld	iy, (ix - 15)
-	ld	hl, -8388608
-	ex	de, hl
-	add	iy, de
-	push	bc
-	pop	hl
-	add	hl, de
-	ld	(ix - 21), hl
-	lea	de, iy
-	or	a, a
-	sbc	hl, de
-	jr	c, BB5_8
-	ld	iy, (ix - 24)
-	ld	de, -8388608
-	add	iy, de
-	ld	hl, (ix - 21)
-	lea	de, iy
-	or	a, a
-	sbc	hl, de
-	jr	nc, BB5_8
-	ld	a, (gfy_ClipYMin)
-	ld	iy, 0
-	ld	iyl, a
-	ld	hl, -8388608
-	ex	de, hl
-	add	iy, de
-	ld	hl, (ix - 3)
-	add	hl, de
-	lea	de, iy
-	or	a, a
-	sbc	hl, de
-	jp	nc, BB5_14
-BB5_8:
-	ld	de, (ix - 3)
-BB5_9:
-	ld	(ix - 3), de
-	ld	hl, (ix - 12)
-	ld	de, -8388608
-	add	hl, de
-	inc	de
-	or	a, a
-	sbc	hl, de
-	ccf
-	sbc	a, a
-	bit	0, a
-	ld	hl, (ix - 18)
-	jr	nz, BB5_11
-	ld	hl, (ix - 27)
-BB5_11:
-	bit	0, a
-	ld	iy, (ix - 6)
-	ld	de, (ix - 3)
-	jr	nz, BB5_13
-	ld	iy, 0
-BB5_13:
-	add	iy, de
-	ld	de, (ix - 12)
-	add	hl, de
-	ld	(ix - 12), hl
-	inc	bc
-	ld	de, 240
-	ld	hl, (ix - 9)
-	add	hl, de
-	ld	(ix - 9), hl
-	ld	hl, (ix + 6)
-	or	a, a
-	sbc	hl, bc
-	ld	(ix - 3), iy
-	jp	nz, BB5_5
-	jp	BB5_60
-BB5_14:
-	ld	a, (gfy_ClipYMax)
-	ld	iy, 0
-	ld	iyl, a
-	ld	hl, -8388608
-	ex	de, hl
-	add	iy, de
-	ld	hl, (ix - 3)
-	add	hl, de
-	lea	de, iy
-	or	a, a
-	sbc	hl, de
-	ld	de, (ix - 3)
-	jp	nc, BB5_9
-	ld	a, (gfy_Color)
-	ld	hl, (ix - 9)
-	add	hl, de
-	ld	(hl), a
-	ld	hl, (gfy_ClipXMin)
-	ld	(ix - 15), hl
-	ld	hl, (gfy_ClipXMax)
-	ld	(ix - 24), hl
-	jp	BB5_9
-BB5_16:
-	ld	hl, (-1900524)
-	ld	(ix - 21), hl
-	ld	bc, -8388608
-	ld	iy, (ix + 9)
-	add	iy, bc
-	ld	hl, (ix + 15)
-	add	hl, bc
-	lea	bc, iy
-	or	a, a
-	sbc	hl, bc
-	ld	hl, (ix + 9)
-	jp	nc, BB5_46
-	push	hl
-	pop	iy
-	ld	hl, (ix + 6)
-	ld	de, (ix + 12)
-	or	a, a
-	sbc	hl, de
-	push	hl
-	pop	bc
-	lea	hl, iy
-	ld	de, (ix + 15)
-	or	a, a
-	sbc	hl, de
-	ld	(ix - 9), hl
-	push	bc
-	pop	hl
-	ld	de, -8388608
-	add	hl, de
-	or	a, a
-	sbc	hl, de
-	jr	nc, BB5_19
-	scf
-	sbc	hl, hl
-	ld	(ix - 6), hl
-BB5_19:
-	push	bc
-	pop	hl
-	push	bc
-	pop	de
-	push	de
-	pop	iy
-	add	iy, iy
-	sbc	hl, hl
-	push	hl
-	pop	bc
-	ex	de, hl
-	add	hl, bc
-	call	__ixor
-	push	hl
-	pop	de
-	ld	c, 1
-	add	hl, hl
-	push	hl
-	pop	iy
-	ex	de, hl
-	ld	de, (ix - 9)
-	or	a, a
-	sbc	hl, de
-	call	__ishl
-	ld	(ix - 15), hl
-	ld	(ix - 27), iy
-	lea	hl, iy
-	or	a, a
-	sbc	hl, de
-	ld	(ix - 9), hl
-	ld	hl, (gfy_ClipXMin)
-	ld	(ix - 12), hl
-	ld	hl, (gfy_ClipXMax)
-	ld	(ix - 18), hl
-	ld	bc, (ix + 12)
-BB5_20:
-	ld	iy, (ix - 12)
-	ld	hl, -8388608
-	ex	de, hl
-	add	iy, de
-	push	bc
-	pop	hl
-	add	hl, de
-	push	bc
-	pop	de
-	lea	bc, iy
-	or	a, a
-	sbc	hl, bc
-	jr	c, BB5_24
-	ld	iy, (ix - 18)
-	ld	hl, -8388608
-	push	hl
-	pop	bc
-	add	iy, bc
-	ld	(ix - 24), de
-	ex	de, hl
-	add	hl, bc
-	push	bc
-	pop	de
-	lea	bc, iy
-	or	a, a
-	sbc	hl, bc
-	jr	nc, BB5_23
-	ld	a, (gfy_ClipYMin)
-	ld	iy, 0
-	ld	iyl, a
-	add	iy, de
-	ld	hl, (ix - 3)
-	add	hl, de
-	lea	bc, iy
-	or	a, a
-	sbc	hl, bc
-	jp	nc, BB5_30
-BB5_23:
-	ld	bc, (ix - 24)
-	jr	BB5_25
-BB5_24:
-	push	de
-	pop	bc
-	ld	de, -8388608
-BB5_25:
-	ld	hl, (ix - 9)
-	add	hl, de
-	ld	de, -8388607
-	or	a, a
-	sbc	hl, de
-	ccf
-	sbc	a, a
-	bit	0, a
-	ld	hl, (ix - 15)
-	jr	nz, BB5_27
-	ld	hl, (ix - 27)
-BB5_27:
-	bit	0, a
-	ld	iy, (ix - 6)
-	jr	nz, BB5_29
-	ld	iy, 0
-BB5_29:
-	add	iy, bc
-	ld	de, (ix - 9)
-	add	hl, de
-	ld	(ix - 9), hl
-	ld	de, (ix - 3)
-	inc	de
-	ld	hl, (ix + 9)
-	ld	(ix - 3), de
-	or	a, a
-	sbc	hl, de
-	lea	bc, iy
-	jp	nz, BB5_20
-	jp	BB5_60
-BB5_30:
-	ld	a, (gfy_ClipYMax)
-	ld	iy, 0
-	ld	iyl, a
-	add	iy, de
-	ld	hl, (ix - 3)
-	add	hl, de
-	lea	bc, iy
-	or	a, a
-	sbc	hl, bc
-	ld	bc, (ix - 24)
-	jp	nc, BB5_25
-	ld	a, (gfy_Color)
-	push	bc
-	pop	hl
-	call	__set_bc_and_mul_hl_by_240
-	push	hl
-	pop	bc
-	ld	hl, (ix - 21)
-	add	hl, bc
-	ld	bc, (ix - 3)
-	add	hl, bc
-	ld	bc, (ix - 24)
-	ld	(hl), a
-	ld	hl, (gfy_ClipXMin)
-	ld	(ix - 12), hl
-	ld	hl, (gfy_ClipXMax)
-	ld	(ix - 18), hl
-	jp	BB5_25
-BB5_32:
-	ld	(ix - 21), iy
-	ld	(ix - 3), hl
-	ld	hl, (ix - 15)
-	add	hl, bc
-	or	a, a
-	sbc	hl, bc
-	jr	nc, BB5_34
-	scf
-	sbc	hl, hl
-	ld	(ix - 6), hl
-BB5_34:
-	ld	c, 1
-	ld	de, (ix - 12)
-	push	de
-	pop	hl
-	call	__ishl
-	ld	(ix - 24), hl
-	ex	de, hl
-	ld	de, (ix - 18)
-	or	a, a
-	sbc	hl, de
-	call	__ishl
-	ld	(ix - 15), hl
-	ld	iy, (ix + 12)
-	ld	de, -8388608
-	add	iy, de
-	ld	hl, (ix - 21)
-	lea	de, iy
-	or	a, a
-	sbc	hl, de
-	jp	nc, BB5_60
-	ld	hl, (ix - 24)
-	ld	de, (ix - 18)
-	or	a, a
-	sbc	hl, de
-	push	hl
-	pop	de
-	ld	hl, (gfy_ClipXMin)
-	ld	(ix - 18), hl
-	ld	hl, (gfy_ClipXMax)
-	ld	(ix - 27), hl
-	ld	hl, (ix + 6)
-	call	__set_bc_and_mul_hl_by_240
-	push	hl
-	pop	bc
-	ld	hl, (ix - 9)
-	add	hl, bc
-	ld	(ix - 9), hl
-	ld	iy, (ix + 9)
-BB5_36:
-	ld	(ix - 12), iy
-	ld	iy, (ix - 18)
-	ld	hl, -8388608
-	push	hl
-	pop	bc
-	add	iy, bc
-	ld	hl, (ix - 3)
-	add	hl, bc
-	ld	(ix - 21), hl
-	lea	bc, iy
-	or	a, a
-	sbc	hl, bc
-	jr	c, BB5_41
-	ld	iy, (ix - 27)
-	ld	bc, -8388608
-	add	iy, bc
-	ld	hl, (ix - 21)
-	lea	bc, iy
-	or	a, a
-	sbc	hl, bc
-	jr	nc, BB5_41
-	ld	a, (gfy_ClipYMin)
-	ld	iy, 0
-	ld	iyl, a
-	ld	hl, -8388608
-	push	hl
-	pop	bc
-	add	iy, bc
-	ld	hl, (ix - 12)
-	add	hl, bc
-	lea	bc, iy
-	or	a, a
-	sbc	hl, bc
-	jr	c, BB5_41
-	ld	a, (gfy_ClipYMax)
-	ld	iy, 0
-	ld	iyl, a
-	ld	hl, -8388608
-	push	hl
-	pop	bc
-	add	iy, bc
-	ld	hl, (ix - 12)
-	add	hl, bc
-	lea	bc, iy
-	or	a, a
-	sbc	hl, bc
-	jr	nc, BB5_41
-	ld	a, (gfy_Color)
-	ld	hl, (ix - 9)
-	ld	bc, (ix - 12)
-	add	hl, bc
-	ld	(hl), a
-	ld	hl, (gfy_ClipXMin)
-	ld	(ix - 18), hl
-	ld	hl, (gfy_ClipXMax)
-	ld	(ix - 27), hl
-BB5_41:
-	push	de
-	pop	hl
-	ld	bc, -8388608
-	add	hl, bc
-	inc	bc
-	or	a, a
-	sbc	hl, bc
-	ccf
-	sbc	a, a
-	bit	0, a
-	ld	hl, (ix - 15)
-	jr	nz, BB5_43
-	ld	hl, (ix - 24)
-BB5_43:
-	bit	0, a
-	ld	iy, (ix - 6)
-	ld	bc, (ix - 12)
-	jr	nz, BB5_45
-	ld	iy, 0
-BB5_45:
-	add	iy, bc
-	add	hl, de
-	ld	(ix - 12), hl
-	ld	de, (ix - 3)
-	inc	de
-	ld	bc, 240
-	ld	hl, (ix - 9)
-	add	hl, bc
-	ld	(ix - 9), hl
-	ld	hl, (ix + 12)
-	or	a, a
-	sbc	hl, de
-	ld	(ix - 3), de
-	ld	de, (ix - 12)
-	jp	nz, BB5_36
-	jp	BB5_60
-BB5_46:
-	ld	(ix - 3), iy
-	ld	hl, (ix - 18)
-	ld	bc, -8388608
-	add	hl, bc
-	or	a, a
-	sbc	hl, bc
-	jr	nc, BB5_48
-	scf
-	sbc	hl, hl
-	ld	(ix - 6), hl
-BB5_48:
-	ld	c, 1
-	push	de
-	pop	hl
-	add	hl, hl
-	ld	(ix - 24), hl
-	ex	de, hl
-	ld	de, (ix - 15)
-	or	a, a
-	sbc	hl, de
-	call	__ishl
-	ld	(ix - 18), hl
-	ld	iy, (ix + 15)
-	ld	de, -8388608
-	add	iy, de
-	ld	hl, (ix - 3)
-	lea	de, iy
-	or	a, a
-	sbc	hl, de
-	jp	nc, BB5_60
-	ld	hl, (ix - 24)
-	ld	de, (ix - 15)
-	or	a, a
-	sbc	hl, de
-	ld	(ix - 3), hl
-	ld	hl, (gfy_ClipXMin)
-	ld	(ix - 15), hl
-	ld	hl, (gfy_ClipXMax)
-	ld	(ix - 27), hl
-	ld	de, (ix + 9)
-	ld	hl, (ix + 6)
-	push	hl
-	pop	bc
-BB5_50:
-	ld	(ix - 9), de
-	ld	iy, (ix - 15)
-	ld	hl, -8388608
-	ex	de, hl
-	add	iy, de
-	push	bc
-	pop	hl
-	add	hl, de
-	push	bc
-	pop	de
-	lea	bc, iy
-	or	a, a
-	sbc	hl, bc
-	ld	(ix - 12), de
-	jr	c, BB5_55
-	ld	iy, (ix - 27)
-	ld	hl, -8388608
-	push	hl
-	pop	bc
-	add	iy, bc
-	ex	de, hl
-	add	hl, bc
-	lea	bc, iy
-	or	a, a
-	sbc	hl, bc
-	jr	nc, BB5_55
-	ld	a, (gfy_ClipYMin)
-	ld	iy, 0
-	ld	iyl, a
-	ld	hl, -8388608
-	push	hl
-	pop	bc
-	add	iy, bc
-	ld	de, (ix - 9)
-	push	de
-	pop	hl
-	add	hl, bc
-	lea	bc, iy
-	or	a, a
-	sbc	hl, bc
-	jr	c, BB5_55
-	ld	a, (gfy_ClipYMax)
-	ld	iy, 0
-	ld	iyl, a
-	ld	hl, -8388608
-	push	hl
-	pop	bc
-	add	iy, bc
-	ex	de, hl
-	add	hl, bc
-	lea	bc, iy
-	or	a, a
-	sbc	hl, bc
-	jr	nc, BB5_55
-	ld	a, (gfy_Color)
-	ld	hl, (ix - 12)
-	call	__set_bc_and_mul_hl_by_240
-	push	hl
-	pop	bc
-	ld	hl, (ix - 21)
-	add	hl, bc
-	ld	de, (ix - 9)
-	add	hl, de
-	ld	(hl), a
-	ld	hl, (gfy_ClipXMin)
-	ld	(ix - 15), hl
-	ld	hl, (gfy_ClipXMax)
-	ld	(ix - 27), hl
-BB5_55:
-	ld	hl, (ix - 3)
-	ld	bc, -8388608
-	add	hl, bc
-	inc	bc
-	or	a, a
-	sbc	hl, bc
-	ccf
-	sbc	a, a
-	bit	0, a
-	ld	hl, (ix - 18)
-	jr	nz, BB5_57
-	ld	hl, (ix - 24)
-BB5_57:
-	bit	0, a
-	ld	iy, (ix - 6)
-	ld	de, (ix - 12)
-	jr	nz, BB5_59
-	ld	iy, 0
-BB5_59:
-	add	iy, de
-	ld	bc, (ix - 3)
-	add	hl, bc
-	ld	(ix - 3), hl
-	ld	de, (ix - 9)
-	inc	de
-	ld	hl, (ix + 15)
-	or	a, a
-	sbc	hl, de
-	lea	bc, iy
-	jp	nz, BB5_50
-BB5_60:
-	ld	sp, ix
-	pop	ix
-	ret
+; gfy_Line:
+; 	push	ix
+; 	ld	ix, 0
+; 	add	ix, sp
+; 	lea	hl, ix - 27
+; 	ld	sp, hl
+; 	ld	de, (ix + 9)
+; 	ld	bc, (ix + 15)
+; 	ld	hl, 1
+; 	ld	(ix - 6), hl
+; 	push	bc
+; 	pop	hl
+; 	sbc	hl, de
+; 	push	hl
+; 	pop	de
+; 	push	de
+; 	pop	iy
+; 	add	iy, iy
+; 	sbc	hl, hl
+; 	push	hl
+; 	pop	bc
+; 	ld	(ix - 15), de
+; 	ex	de, hl
+; 	add	hl, bc
+; 	call	__ixor
+; 	ld	(ix - 12), hl
+; 	ld	hl, (ix + 12)
+; 	ld	de, (ix + 6)
+; 	or	a, a
+; 	sbc	hl, de
+; 	ld	(ix - 18), hl
+; 	push	hl
+; 	pop	de
+; 	push	de
+; 	pop	iy
+; 	add	iy, iy
+; 	sbc	hl, hl
+; 	push	hl
+; 	pop	bc
+; 	ex	de, hl
+; 	add	hl, bc
+; 	call	__ixor
+; 	ld	bc, (ix - 12)
+; 	push	hl
+; 	pop	de
+; 	push	bc
+; 	pop	hl
+; 	or	a, a
+; 	sbc	hl, de
+; 	ld	hl, (ix + 15)
+; 	ld	(ix - 3), hl
+; 	jp	nc, BB5_16
+; 	ld	hl, (-1900524)
+; 	ld	(ix - 9), hl
+; 	ld	bc, -8388608
+; 	ld	hl, (ix + 6)
+; 	add	hl, bc
+; 	ex	de, hl
+; 	ld	iy, (ix + 12)
+; 	lea	hl, iy
+; 	add	hl, bc
+; 	push	de
+; 	pop	iy
+; 	or	a, a
+; 	sbc	hl, de
+; 	ld	de, (ix + 12)
+; 	ld	hl, (ix + 6)
+; 	jp	nc, BB5_32
+; 	or	a, a
+; 	sbc	hl, de
+; 	ld	(ix - 12), hl
+; 	ld	hl, (ix + 9)
+; 	ld	de, (ix + 15)
+; 	or	a, a
+; 	sbc	hl, de
+; 	push	hl
+; 	pop	de
+; 	add	hl, bc
+; 	or	a, a
+; 	sbc	hl, bc
+; 	jr	nc, BB5_4
+; 	scf
+; 	sbc	hl, hl
+; 	ld	(ix - 6), hl
+; BB5_4:
+; 	push	de
+; 	pop	hl
+; 	push	de
+; 	pop	iy
+; 	add	iy, iy
+; 	sbc	hl, hl
+; 	push	hl
+; 	pop	bc
+; 	ex	de, hl
+; 	add	hl, bc
+; 	call	__ixor
+; 	push	hl
+; 	pop	de
+; 	ld	c, 1
+; 	add	hl, hl
+; 	push	hl
+; 	pop	iy
+; 	ex	de, hl
+; 	ld	de, (ix - 12)
+; 	or	a, a
+; 	sbc	hl, de
+; 	call	__ishl
+; 	ld	(ix - 18), hl
+; 	ld	(ix - 27), iy
+; 	lea	hl, iy
+; 	or	a, a
+; 	sbc	hl, de
+; 	ld	(ix - 12), hl
+; 	ld	hl, (gfy_ClipXMin)
+; 	ld	(ix - 15), hl
+; 	ld	hl, (gfy_ClipXMax)
+; 	ld	(ix - 24), hl
+; 	ld	de, (ix + 12)
+; 	push	de
+; 	pop	hl
+; 	call	__set_bc_and_mul_hl_by_240
+; 	push	hl
+; 	pop	bc
+; 	ld	hl, (ix - 9)
+; 	add	hl, bc
+; 	ld	(ix - 9), hl
+; 	push	de
+; 	pop	bc
+; BB5_5:
+; 	ld	iy, (ix - 15)
+; 	ld	hl, -8388608
+; 	ex	de, hl
+; 	add	iy, de
+; 	push	bc
+; 	pop	hl
+; 	add	hl, de
+; 	ld	(ix - 21), hl
+; 	lea	de, iy
+; 	or	a, a
+; 	sbc	hl, de
+; 	jr	c, BB5_8
+; 	ld	iy, (ix - 24)
+; 	ld	de, -8388608
+; 	add	iy, de
+; 	ld	hl, (ix - 21)
+; 	lea	de, iy
+; 	or	a, a
+; 	sbc	hl, de
+; 	jr	nc, BB5_8
+; 	ld	a, (gfy_ClipYMin)
+; 	ld	iy, 0
+; 	ld	iyl, a
+; 	ld	hl, -8388608
+; 	ex	de, hl
+; 	add	iy, de
+; 	ld	hl, (ix - 3)
+; 	add	hl, de
+; 	lea	de, iy
+; 	or	a, a
+; 	sbc	hl, de
+; 	jp	nc, BB5_14
+; BB5_8:
+; 	ld	de, (ix - 3)
+; BB5_9:
+; 	ld	(ix - 3), de
+; 	ld	hl, (ix - 12)
+; 	ld	de, -8388608
+; 	add	hl, de
+; 	inc	de
+; 	or	a, a
+; 	sbc	hl, de
+; 	ccf
+; 	sbc	a, a
+; 	bit	0, a
+; 	ld	hl, (ix - 18)
+; 	jr	nz, BB5_11
+; 	ld	hl, (ix - 27)
+; BB5_11:
+; 	bit	0, a
+; 	ld	iy, (ix - 6)
+; 	ld	de, (ix - 3)
+; 	jr	nz, BB5_13
+; 	ld	iy, 0
+; BB5_13:
+; 	add	iy, de
+; 	ld	de, (ix - 12)
+; 	add	hl, de
+; 	ld	(ix - 12), hl
+; 	inc	bc
+; 	ld	de, 240
+; 	ld	hl, (ix - 9)
+; 	add	hl, de
+; 	ld	(ix - 9), hl
+; 	ld	hl, (ix + 6)
+; 	or	a, a
+; 	sbc	hl, bc
+; 	ld	(ix - 3), iy
+; 	jp	nz, BB5_5
+; 	jp	BB5_60
+; BB5_14:
+; 	ld	a, (gfy_ClipYMax)
+; 	ld	iy, 0
+; 	ld	iyl, a
+; 	ld	hl, -8388608
+; 	ex	de, hl
+; 	add	iy, de
+; 	ld	hl, (ix - 3)
+; 	add	hl, de
+; 	lea	de, iy
+; 	or	a, a
+; 	sbc	hl, de
+; 	ld	de, (ix - 3)
+; 	jp	nc, BB5_9
+; 	ld	a, (gfy_Color)
+; 	ld	hl, (ix - 9)
+; 	add	hl, de
+; 	ld	(hl), a
+; 	ld	hl, (gfy_ClipXMin)
+; 	ld	(ix - 15), hl
+; 	ld	hl, (gfy_ClipXMax)
+; 	ld	(ix - 24), hl
+; 	jp	BB5_9
+; BB5_16:
+; 	ld	hl, (-1900524)
+; 	ld	(ix - 21), hl
+; 	ld	bc, -8388608
+; 	ld	iy, (ix + 9)
+; 	add	iy, bc
+; 	ld	hl, (ix + 15)
+; 	add	hl, bc
+; 	lea	bc, iy
+; 	or	a, a
+; 	sbc	hl, bc
+; 	ld	hl, (ix + 9)
+; 	jp	nc, BB5_46
+; 	push	hl
+; 	pop	iy
+; 	ld	hl, (ix + 6)
+; 	ld	de, (ix + 12)
+; 	or	a, a
+; 	sbc	hl, de
+; 	push	hl
+; 	pop	bc
+; 	lea	hl, iy
+; 	ld	de, (ix + 15)
+; 	or	a, a
+; 	sbc	hl, de
+; 	ld	(ix - 9), hl
+; 	push	bc
+; 	pop	hl
+; 	ld	de, -8388608
+; 	add	hl, de
+; 	or	a, a
+; 	sbc	hl, de
+; 	jr	nc, BB5_19
+; 	scf
+; 	sbc	hl, hl
+; 	ld	(ix - 6), hl
+; BB5_19:
+; 	push	bc
+; 	pop	hl
+; 	push	bc
+; 	pop	de
+; 	push	de
+; 	pop	iy
+; 	add	iy, iy
+; 	sbc	hl, hl
+; 	push	hl
+; 	pop	bc
+; 	ex	de, hl
+; 	add	hl, bc
+; 	call	__ixor
+; 	push	hl
+; 	pop	de
+; 	ld	c, 1
+; 	add	hl, hl
+; 	push	hl
+; 	pop	iy
+; 	ex	de, hl
+; 	ld	de, (ix - 9)
+; 	or	a, a
+; 	sbc	hl, de
+; 	call	__ishl
+; 	ld	(ix - 15), hl
+; 	ld	(ix - 27), iy
+; 	lea	hl, iy
+; 	or	a, a
+; 	sbc	hl, de
+; 	ld	(ix - 9), hl
+; 	ld	hl, (gfy_ClipXMin)
+; 	ld	(ix - 12), hl
+; 	ld	hl, (gfy_ClipXMax)
+; 	ld	(ix - 18), hl
+; 	ld	bc, (ix + 12)
+; BB5_20:
+; 	ld	iy, (ix - 12)
+; 	ld	hl, -8388608
+; 	ex	de, hl
+; 	add	iy, de
+; 	push	bc
+; 	pop	hl
+; 	add	hl, de
+; 	push	bc
+; 	pop	de
+; 	lea	bc, iy
+; 	or	a, a
+; 	sbc	hl, bc
+; 	jr	c, BB5_24
+; 	ld	iy, (ix - 18)
+; 	ld	hl, -8388608
+; 	push	hl
+; 	pop	bc
+; 	add	iy, bc
+; 	ld	(ix - 24), de
+; 	ex	de, hl
+; 	add	hl, bc
+; 	push	bc
+; 	pop	de
+; 	lea	bc, iy
+; 	or	a, a
+; 	sbc	hl, bc
+; 	jr	nc, BB5_23
+; 	ld	a, (gfy_ClipYMin)
+; 	ld	iy, 0
+; 	ld	iyl, a
+; 	add	iy, de
+; 	ld	hl, (ix - 3)
+; 	add	hl, de
+; 	lea	bc, iy
+; 	or	a, a
+; 	sbc	hl, bc
+; 	jp	nc, BB5_30
+; BB5_23:
+; 	ld	bc, (ix - 24)
+; 	jr	BB5_25
+; BB5_24:
+; 	push	de
+; 	pop	bc
+; 	ld	de, -8388608
+; BB5_25:
+; 	ld	hl, (ix - 9)
+; 	add	hl, de
+; 	ld	de, -8388607
+; 	or	a, a
+; 	sbc	hl, de
+; 	ccf
+; 	sbc	a, a
+; 	bit	0, a
+; 	ld	hl, (ix - 15)
+; 	jr	nz, BB5_27
+; 	ld	hl, (ix - 27)
+; BB5_27:
+; 	bit	0, a
+; 	ld	iy, (ix - 6)
+; 	jr	nz, BB5_29
+; 	ld	iy, 0
+; BB5_29:
+; 	add	iy, bc
+; 	ld	de, (ix - 9)
+; 	add	hl, de
+; 	ld	(ix - 9), hl
+; 	ld	de, (ix - 3)
+; 	inc	de
+; 	ld	hl, (ix + 9)
+; 	ld	(ix - 3), de
+; 	or	a, a
+; 	sbc	hl, de
+; 	lea	bc, iy
+; 	jp	nz, BB5_20
+; 	jp	BB5_60
+; BB5_30:
+; 	ld	a, (gfy_ClipYMax)
+; 	ld	iy, 0
+; 	ld	iyl, a
+; 	add	iy, de
+; 	ld	hl, (ix - 3)
+; 	add	hl, de
+; 	lea	bc, iy
+; 	or	a, a
+; 	sbc	hl, bc
+; 	ld	bc, (ix - 24)
+; 	jp	nc, BB5_25
+; 	ld	a, (gfy_Color)
+; 	push	bc
+; 	pop	hl
+; 	call	__set_bc_and_mul_hl_by_240
+; 	push	hl
+; 	pop	bc
+; 	ld	hl, (ix - 21)
+; 	add	hl, bc
+; 	ld	bc, (ix - 3)
+; 	add	hl, bc
+; 	ld	bc, (ix - 24)
+; 	ld	(hl), a
+; 	ld	hl, (gfy_ClipXMin)
+; 	ld	(ix - 12), hl
+; 	ld	hl, (gfy_ClipXMax)
+; 	ld	(ix - 18), hl
+; 	jp	BB5_25
+; BB5_32:
+; 	ld	(ix - 21), iy
+; 	ld	(ix - 3), hl
+; 	ld	hl, (ix - 15)
+; 	add	hl, bc
+; 	or	a, a
+; 	sbc	hl, bc
+; 	jr	nc, BB5_34
+; 	scf
+; 	sbc	hl, hl
+; 	ld	(ix - 6), hl
+; BB5_34:
+; 	ld	c, 1
+; 	ld	de, (ix - 12)
+; 	push	de
+; 	pop	hl
+; 	call	__ishl
+; 	ld	(ix - 24), hl
+; 	ex	de, hl
+; 	ld	de, (ix - 18)
+; 	or	a, a
+; 	sbc	hl, de
+; 	call	__ishl
+; 	ld	(ix - 15), hl
+; 	ld	iy, (ix + 12)
+; 	ld	de, -8388608
+; 	add	iy, de
+; 	ld	hl, (ix - 21)
+; 	lea	de, iy
+; 	or	a, a
+; 	sbc	hl, de
+; 	jp	nc, BB5_60
+; 	ld	hl, (ix - 24)
+; 	ld	de, (ix - 18)
+; 	or	a, a
+; 	sbc	hl, de
+; 	push	hl
+; 	pop	de
+; 	ld	hl, (gfy_ClipXMin)
+; 	ld	(ix - 18), hl
+; 	ld	hl, (gfy_ClipXMax)
+; 	ld	(ix - 27), hl
+; 	ld	hl, (ix + 6)
+; 	call	__set_bc_and_mul_hl_by_240
+; 	push	hl
+; 	pop	bc
+; 	ld	hl, (ix - 9)
+; 	add	hl, bc
+; 	ld	(ix - 9), hl
+; 	ld	iy, (ix + 9)
+; BB5_36:
+; 	ld	(ix - 12), iy
+; 	ld	iy, (ix - 18)
+; 	ld	hl, -8388608
+; 	push	hl
+; 	pop	bc
+; 	add	iy, bc
+; 	ld	hl, (ix - 3)
+; 	add	hl, bc
+; 	ld	(ix - 21), hl
+; 	lea	bc, iy
+; 	or	a, a
+; 	sbc	hl, bc
+; 	jr	c, BB5_41
+; 	ld	iy, (ix - 27)
+; 	ld	bc, -8388608
+; 	add	iy, bc
+; 	ld	hl, (ix - 21)
+; 	lea	bc, iy
+; 	or	a, a
+; 	sbc	hl, bc
+; 	jr	nc, BB5_41
+; 	ld	a, (gfy_ClipYMin)
+; 	ld	iy, 0
+; 	ld	iyl, a
+; 	ld	hl, -8388608
+; 	push	hl
+; 	pop	bc
+; 	add	iy, bc
+; 	ld	hl, (ix - 12)
+; 	add	hl, bc
+; 	lea	bc, iy
+; 	or	a, a
+; 	sbc	hl, bc
+; 	jr	c, BB5_41
+; 	ld	a, (gfy_ClipYMax)
+; 	ld	iy, 0
+; 	ld	iyl, a
+; 	ld	hl, -8388608
+; 	push	hl
+; 	pop	bc
+; 	add	iy, bc
+; 	ld	hl, (ix - 12)
+; 	add	hl, bc
+; 	lea	bc, iy
+; 	or	a, a
+; 	sbc	hl, bc
+; 	jr	nc, BB5_41
+; 	ld	a, (gfy_Color)
+; 	ld	hl, (ix - 9)
+; 	ld	bc, (ix - 12)
+; 	add	hl, bc
+; 	ld	(hl), a
+; 	ld	hl, (gfy_ClipXMin)
+; 	ld	(ix - 18), hl
+; 	ld	hl, (gfy_ClipXMax)
+; 	ld	(ix - 27), hl
+; BB5_41:
+; 	push	de
+; 	pop	hl
+; 	ld	bc, -8388608
+; 	add	hl, bc
+; 	inc	bc
+; 	or	a, a
+; 	sbc	hl, bc
+; 	ccf
+; 	sbc	a, a
+; 	bit	0, a
+; 	ld	hl, (ix - 15)
+; 	jr	nz, BB5_43
+; 	ld	hl, (ix - 24)
+; BB5_43:
+; 	bit	0, a
+; 	ld	iy, (ix - 6)
+; 	ld	bc, (ix - 12)
+; 	jr	nz, BB5_45
+; 	ld	iy, 0
+; BB5_45:
+; 	add	iy, bc
+; 	add	hl, de
+; 	ld	(ix - 12), hl
+; 	ld	de, (ix - 3)
+; 	inc	de
+; 	ld	bc, 240
+; 	ld	hl, (ix - 9)
+; 	add	hl, bc
+; 	ld	(ix - 9), hl
+; 	ld	hl, (ix + 12)
+; 	or	a, a
+; 	sbc	hl, de
+; 	ld	(ix - 3), de
+; 	ld	de, (ix - 12)
+; 	jp	nz, BB5_36
+; 	jp	BB5_60
+; BB5_46:
+; 	ld	(ix - 3), iy
+; 	ld	hl, (ix - 18)
+; 	ld	bc, -8388608
+; 	add	hl, bc
+; 	or	a, a
+; 	sbc	hl, bc
+; 	jr	nc, BB5_48
+; 	scf
+; 	sbc	hl, hl
+; 	ld	(ix - 6), hl
+; BB5_48:
+; 	ld	c, 1
+; 	push	de
+; 	pop	hl
+; 	add	hl, hl
+; 	ld	(ix - 24), hl
+; 	ex	de, hl
+; 	ld	de, (ix - 15)
+; 	or	a, a
+; 	sbc	hl, de
+; 	call	__ishl
+; 	ld	(ix - 18), hl
+; 	ld	iy, (ix + 15)
+; 	ld	de, -8388608
+; 	add	iy, de
+; 	ld	hl, (ix - 3)
+; 	lea	de, iy
+; 	or	a, a
+; 	sbc	hl, de
+; 	jp	nc, BB5_60
+; 	ld	hl, (ix - 24)
+; 	ld	de, (ix - 15)
+; 	or	a, a
+; 	sbc	hl, de
+; 	ld	(ix - 3), hl
+; 	ld	hl, (gfy_ClipXMin)
+; 	ld	(ix - 15), hl
+; 	ld	hl, (gfy_ClipXMax)
+; 	ld	(ix - 27), hl
+; 	ld	de, (ix + 9)
+; 	ld	hl, (ix + 6)
+; 	push	hl
+; 	pop	bc
+; BB5_50:
+; 	ld	(ix - 9), de
+; 	ld	iy, (ix - 15)
+; 	ld	hl, -8388608
+; 	ex	de, hl
+; 	add	iy, de
+; 	push	bc
+; 	pop	hl
+; 	add	hl, de
+; 	push	bc
+; 	pop	de
+; 	lea	bc, iy
+; 	or	a, a
+; 	sbc	hl, bc
+; 	ld	(ix - 12), de
+; 	jr	c, BB5_55
+; 	ld	iy, (ix - 27)
+; 	ld	hl, -8388608
+; 	push	hl
+; 	pop	bc
+; 	add	iy, bc
+; 	ex	de, hl
+; 	add	hl, bc
+; 	lea	bc, iy
+; 	or	a, a
+; 	sbc	hl, bc
+; 	jr	nc, BB5_55
+; 	ld	a, (gfy_ClipYMin)
+; 	ld	iy, 0
+; 	ld	iyl, a
+; 	ld	hl, -8388608
+; 	push	hl
+; 	pop	bc
+; 	add	iy, bc
+; 	ld	de, (ix - 9)
+; 	push	de
+; 	pop	hl
+; 	add	hl, bc
+; 	lea	bc, iy
+; 	or	a, a
+; 	sbc	hl, bc
+; 	jr	c, BB5_55
+; 	ld	a, (gfy_ClipYMax)
+; 	ld	iy, 0
+; 	ld	iyl, a
+; 	ld	hl, -8388608
+; 	push	hl
+; 	pop	bc
+; 	add	iy, bc
+; 	ex	de, hl
+; 	add	hl, bc
+; 	lea	bc, iy
+; 	or	a, a
+; 	sbc	hl, bc
+; 	jr	nc, BB5_55
+; 	ld	a, (gfy_Color)
+; 	ld	hl, (ix - 12)
+; 	call	__set_bc_and_mul_hl_by_240
+; 	push	hl
+; 	pop	bc
+; 	ld	hl, (ix - 21)
+; 	add	hl, bc
+; 	ld	de, (ix - 9)
+; 	add	hl, de
+; 	ld	(hl), a
+; 	ld	hl, (gfy_ClipXMin)
+; 	ld	(ix - 15), hl
+; 	ld	hl, (gfy_ClipXMax)
+; 	ld	(ix - 27), hl
+; BB5_55:
+; 	ld	hl, (ix - 3)
+; 	ld	bc, -8388608
+; 	add	hl, bc
+; 	inc	bc
+; 	or	a, a
+; 	sbc	hl, bc
+; 	ccf
+; 	sbc	a, a
+; 	bit	0, a
+; 	ld	hl, (ix - 18)
+; 	jr	nz, BB5_57
+; 	ld	hl, (ix - 24)
+; BB5_57:
+; 	bit	0, a
+; 	ld	iy, (ix - 6)
+; 	ld	de, (ix - 12)
+; 	jr	nz, BB5_59
+; 	ld	iy, 0
+; BB5_59:
+; 	add	iy, de
+; 	ld	bc, (ix - 3)
+; 	add	hl, bc
+; 	ld	(ix - 3), hl
+; 	ld	de, (ix - 9)
+; 	inc	de
+; 	ld	hl, (ix + 15)
+; 	or	a, a
+; 	sbc	hl, de
+; 	lea	bc, iy
+; 	jp	nz, BB5_50
+; BB5_60:
+; 	ld	sp, ix
+; 	pop	ix
+; 	ret
 ;	section	.text,"ax",@progbits
 
 ;	section	.text,"ax",@progbits

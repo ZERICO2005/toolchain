@@ -364,6 +364,8 @@ static const int8_t gfy_SineTable[65] = {
 // internal routines
 //------------------------------------------------------------------------------
 
+#if 0
+
 /**
  * @brief Calculates sin(x) from a lookup table.
  * 
@@ -392,6 +394,8 @@ __attribute__((unused)) static uint8_t gfy_Sin(uint8_t theta) {
 __attribute__((unused)) static uint8_t gfy_Cos(uint8_t theta) {
     return gfy_Sin(theta + 64);
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 // v1 functions
@@ -424,8 +428,6 @@ void gfy_End(void) {
 }
 
 /* gfy_SetColor (graphy.asm) */
-
-
 
 /* gfy_SetDefaultPalette (graphy.asm) */
 
@@ -729,7 +731,9 @@ uint24_t gfy_GetStringWidth(const char *string) {
 
 /* gfy_GetTextY (graphy.asm) */
 
-/* gfy_Line */
+/* gfy_Line (graphy.asm) */
+
+#if 0
 
 // Unoptimized routine
 static void gfy_internal_Line0(int24_t x0, int24_t y0, int24_t x1, int24_t y1) {
@@ -798,6 +802,8 @@ void gfy_Line(int24_t x0, int24_t y0, int24_t x1, int24_t y1) {
         }
     }
 }
+
+#end if
 
 /* gfy_HorizLine (graphy.asm) */
 
