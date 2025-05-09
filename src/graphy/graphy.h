@@ -1119,6 +1119,7 @@ void gfy_FillTriangle_NoClip(
  */
 void gfy_SetDraw(uint8_t location);
 
+#if 0
 /**
  * Gets the current drawing buffer.
  *
@@ -1126,6 +1127,16 @@ void gfy_SetDraw(uint8_t location);
  * @see gfy_location_t.
  */
 uint8_t gfy_GetDraw(void) GRAPHY_PURE;
+#endif
+/**
+ * Gets the current drawing buffer.
+ *
+ * @returns Location type enumeration.
+ * @see gfy_location_t.
+ */
+static inline uint8_t gfy_GetDraw(void) {
+    return (*(volatile uint8_t*)0xE30012 ^ *(volatile uint8_t*)0xE30016);
+}
 
 /**
  * Swaps the roles of the screen and drawing buffers.
