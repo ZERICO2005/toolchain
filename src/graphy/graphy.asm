@@ -5,7 +5,8 @@ include '../include/include_library.inc'
 
 ;-------------------------------------------------------------------------------
 
-library GRAPHY, 13
+; version number
+library GRAPHY, 0
 
 include_library '../lcddrvce/lcddrvce.asm'
 
