@@ -1,8 +1,12 @@
 	assume	adl=1
 
 	section	.text
+
 	public	__llshru
+	public	__llshru.non_zero
+	
 __llshru:
+.non_zero:
 ; Suboptimal for large shift amounts
 	push	af
 	push	iy

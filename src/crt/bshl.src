@@ -1,11 +1,14 @@
 	assume	adl=1
 
 	section	.text
+
 	public	__bshl
+	public	__bshl.non_zero
 
 if PREFER_OS_CRT
 
 __bshl := 000100h
+__bshl.non_zero := __bshl
 
 else
 
@@ -15,6 +18,7 @@ __bshl:
 	inc	b
 	dec	b
 	ret	z
+.non_zero:
 	push	bc
 .loop:
 	add	a, a

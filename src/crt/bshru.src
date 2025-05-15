@@ -1,11 +1,14 @@
 	assume	adl=1
 
 	section	.text
+
 	public	__bshru
+	public	__bshru.non_zero
 
 if PREFER_OS_CRT
 
 __bshru := 000104h
+__bshru.non_zero := __bshru
 
 else
 
@@ -15,6 +18,7 @@ __bshru:
 	inc	b
 	dec	b
 	ret	z
+.non_zero:
 	push	bc
 .loop:
 	srl	a

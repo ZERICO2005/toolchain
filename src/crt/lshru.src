@@ -1,11 +1,14 @@
 	assume	adl=1
 
 	section	.text
+
 	public	__lshru
+	public	__lshru.non_zero
 
 if PREFER_OS_CRT
 
 __lshru := 0001ECh
+__lshru.non_zero := __lshru
 
 else
 
@@ -16,6 +19,7 @@ __lshru:
 	inc	l
 	dec	l
 	ret	z
+.non_zero:
 	push	hl
 	push	bc
 	ld	b, l

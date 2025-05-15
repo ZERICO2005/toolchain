@@ -1,15 +1,19 @@
 	assume	adl=1
 
 	section	.text
+
 	public	__sshl
+	public	__sshl.non_zero
 
 if PREFER_OS_CRT
 
 __sshl := 000240h
+__sshl.non_zero := __sshl
 
 else
 
 __sshl := __ishl
+__sshl.non_zero := __sshl
 
 	extern	__ishl
 

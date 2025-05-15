@@ -1,23 +1,30 @@
 	assume	adl=1
 
 	section	.text
+
 	public	__ishrs
+	public	__ishrs.non_zero
 	public	__ishru
+	public	__ishru.non_zero
 
 if PREFER_OS_CRT
 
 __ishrs := 00017Ch
+__ishrs.non_zero := __ishrs
 __ishru := 000184h
+__ishru.non_zero := __ishru
 
 else
 
 __ishru:
+.non_zero:
 	push	af
 	xor	a, a
 	add	hl, hl
 	rla
 	db	$DA	; push af \ add hl,hl \ sbc a,a -> jp c,*
 __ishrs:
+.non_zero:
 ; CC: if 0<=C<8:   35*r(PC)+9*r(SPL)+9*w(SPL)+4+(C&1==0)*(1*r(PC)-1)+(C&2==0)*(3*r(PC)-1)+(C&4==0)*(7*r(PC)-1)
 ;     if 8<=C<16:  34*r(PC)+9*r(SPL)+6*w(SPL)+5+(C&1==0)*(1*r(PC)-1)+(C&2==0)*(3*r(PC)-1)+(C&4==0)*(7*r(PC)-1)
 ;     if 16<=C<24: 33*r(PC)+6*r(SPL)+3*w(SPL)+5+(C&1==0)*(1*r(PC)-1)+(C&2==0)*(3*r(PC)-1)+(C&4==0)*(7*r(PC)-1)

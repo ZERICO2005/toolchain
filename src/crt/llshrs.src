@@ -3,8 +3,10 @@
 	section	.text
 
 	public	__llshrs
+	public	__llshrs.non_zero
 
 __llshrs:
+.non_zero:
 ; Suboptimal for large shift amounts
 	push	af
 	push	iy

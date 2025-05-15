@@ -1,11 +1,14 @@
 	assume	adl=1
 
 	section	.text
+
 	public	__sshrs
+	public	__sshrs.non_zero
 
 if PREFER_OS_CRT
 
 __sshrs := 000248h
+__sshrs.non_zero := __sshrs
 
 else
 
@@ -16,6 +19,7 @@ __sshrs:
 	inc	c
 	dec	c
 	ret	z
+.non_zero:
 	push	bc
 	ld	b, c
 .loop:

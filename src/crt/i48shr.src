@@ -6,21 +6,29 @@
 	assume	adl=1
 
 	section	.text
+
 	public	__i48shrs
+	public	__i48shrs.non_zero
+
 __i48shrs:
 	inc c
 	dec c
 	ret z
+.non_zero:
 	cp a, a ; Set Z flag
 	db $C2 ; inc c \ dec c \ ret z -> jp nz,*
 	require	__i48shru
 
 	section	.text
+
 	public	__i48shru
+	public	__i48shru.non_zero
+
 __i48shru:
 	inc c
 	dec c
 	ret z
+.non_zero:
 	; NZ for unsigned shift, Z for signed shift
 	push bc
 	ld b, c

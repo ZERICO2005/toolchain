@@ -1,11 +1,14 @@
 	assume	adl=1
 
 	section	.text
+
 	public	__lshrs
+	public	__lshrs.non_zero
 
 if PREFER_OS_CRT
 
 __lshrs := 0001E8h
+__lshrs.non_zero := __lshrs
 
 else
 
@@ -16,6 +19,7 @@ __lshrs:
 	inc	l
 	dec	l
 	ret	z
+.non_zero:
 	push	hl
 	push	bc
 	ld	b, l
