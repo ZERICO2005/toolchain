@@ -803,7 +803,7 @@ void gfy_Line(int24_t x0, int24_t y0, int24_t x1, int24_t y1) {
     }
 }
 
-#end if
+#endif
 
 /* gfy_HorizLine (graphy.asm) */
 
@@ -1723,8 +1723,9 @@ void gfy_Sprite_NoClip(const gfy_sprite_t *restrict sprite, uint24_t x, uint8_t 
 }
 #endif
 
-/* gfy_TransparentSprite_NoClip */
+/* gfy_TransparentSprite_NoClip (graphy.asm) */
 
+#if 0
 void gfy_TransparentSprite_NoClip(const gfy_sprite_t *restrict sprite, uint24_t x, uint8_t y) {
     gfy_Wait();
     const uint8_t* src_buf = sprite->data;
@@ -1740,6 +1741,7 @@ void gfy_TransparentSprite_NoClip(const gfy_sprite_t *restrict sprite, uint24_t 
         dst_buf += dst_jump;
     }
 }
+#endif
 
 /* gfy_GetSprite */
 
@@ -2924,7 +2926,7 @@ void gfy_CopyRectangle(
     const uint24_t jump = GFY_LCD_HEIGHT - height;
     if (src_buf == dst_buf) {
         // copy forwards
-        if (src_buf > dst_buf)
+        if (src_buf > dst_buf) {
             for (uint24_t x_cord = 0; x_cord < width; x_cord++) {
                 memmove(dst_buf, src_buf, height);
                 src_buf += jump;
