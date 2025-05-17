@@ -37,7 +37,7 @@ static int64_t calc_ULP(long double guess, long double truth) {
     ) * (std::signbit(guess) ? -1 : 1);
 }
 
-static size_t run_test(int64_t* fail_ulp) {
+static size_t run_test(int64_t* fail_ulp, uint64_t* fail_guess) {
     typedef long double input_t;
     typedef long double output_t;
 
@@ -52,6 +52,7 @@ static size_t run_test(int64_t* fail_ulp) {
             int64_t ulp = calc_ULP(result, output[i]);
             if (std::abs(ulp) > 32) {
                 *fail_ulp = ulp;
+                *fail_guess = std::bit_cast<uint64_t>(result);
                 return i;
             }
         }
@@ -127,11 +128,12 @@ int main(void) {
         printf("Failed test L%d\n", comparison_result);
     } else {
         int64_t fail_ulp = 0;
-        size_t fail_index = run_test(&fail_ulp);
+        uint64_t fail_guess = 0;
+        size_t fail_index = run_test(&fail_ulp, &fail_guess);
         if (fail_index == SIZE_MAX) {
             printf("All tests passed");
         } else {
-            printf("Failed test: %zu\nULP: %lld", fail_index, fail_ulp);
+            printf("Failed test: %zu\nULP: %lld\n%016llX", fail_index, fail_ulp, fail_guess);
         }
     }
     while (!os_GetCSC());

@@ -17,10 +17,120 @@ __dmul:
 	rla
 	push	af	; Carry = (signbit(x) != signbit(y))
 	
-	call	___f64_mul
+;	call	___f64_mul
+	call	__dmul_c
 	
 	pop	af, af, af, af, af
 	pop	iy, af	; restore
 	ret
 
-	extern	___f64_mul
+;-------------------------------------------------------------------------------
+
+	public	__i112_shru_to_even
+
+; C calling convention
+; long double __i112_shru_to_even(struct { uint64_t lo; uint48_t hi; } arg*, uint8_t shift_m48, bool sign, int expon)
+; returns true if the result was rounded up
+__i112_shru_to_even:
+	push	ix
+	ld	ix, 0
+	add	ix, sp
+	ld	b, (ix + 9)	; shift - 48
+	inc	b
+	dec	b
+	ret	z	; zero shift
+	ld	iy, (ix + 6)	; arg
+	xor	a, a
+	; A = sticky bits
+
+	ld	hl, (iy + 0)
+	ld	de, (iy + 3)
+	adc	hl, de
+	ld	de, (iy + 14)
+	jr	z, .low_47_non_zero
+	cpl	; set A to non-zero
+.low_47_non_zero:
+
+; everything is now preshifted by 48
+.loop:
+	rrca	; also grabs the carry from bit 48
+	; start from the msb
+	srl	d	; iy + 15
+	rr	e	; iy + 14
+	rr	b	; iy + 13 ; B
+	rr	c	; iy + 12 ; C
+	lea	hl, iy + 11
+	rr	(hl)	; iy + 11 ; UDE
+	dec	hl
+	rr	(hl)	; iy + 10 ; D
+	dec	hl
+	rr	(hl)	; iy + 9 ; E
+	dec	hl
+	rr	(hl)	; iy + 8 ; UHL
+	dec	hl
+	rr	(hl)	; iy + 7 ; H
+	dec	hl
+	rr	(hl)	; iy + 6 ; L
+	djnz	.loop
+
+	; A = sticky bits
+	; Carry = round bit
+	; bit 0, (HL) = guard bit
+
+	ld	hl, (hl)	; ld hl, (iy + 6)
+	ld	hl, (iy + 11)
+	ld	iy, (ix + 15)
+
+	; round up if (round && (sticky || guard))
+	jr	nc, .round_down
+	or	a, a
+	jr	nz, .round_up
+	bit	0, l
+	jr	z, .round_down
+.round_up:
+	inc	iy	; expon++	
+	call	__lladd_1
+.round_down:
+	ld	a, (ix + 12)
+	rrca	; move signbit to the right spot
+
+	push	hl, de
+	
+	lea	de, iy
+	ld	hl, -2047
+	add	hl, de
+	jr	c, .infinite
+	lea	hl, iy
+	bit	7, h
+	jr	z, .normal	; positive expon
+	or	a, a
+	sbc	hl, hl
+.normal:
+	; HL <<= 4
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	and	a, $80
+	or	a, h
+	ld	b, a
+	ld	a, c
+	and	a, $0F
+	or	a, l	; low 4 bits of L are zero
+.finish:
+	pop	de, hl
+	pop	ix
+	ret
+
+.infinite:
+	or	a, $7F
+	ld	b, a
+	ld	c, e
+	sbc	hl, hl
+	ex	de, hl
+	sbc	hl, hl
+	; raise signal here I guess
+	jr	.finish
+
+	extern	__lladd_1
+	extern	__dmul_c

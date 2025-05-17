@@ -1,0 +1,57 @@
+	assume	adl=1
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+
+	public	__i112_shl
+
+; C calling convention
+; void __i112_shl(struct { uint64_t lo; uint48_t hi; } arg*, uint8_t shift)
+__i112_shl:
+	ld	iy, 0
+	add	iy, sp
+	ld	b, (iy + 6)	; shift amount
+	inc	b
+	dec	b
+	ret	z	; zero shift
+	ld	iy, (iy + 3)	; arg
+.loop:
+	lea	hl, iy + 0	; start from the lsb
+	sla	(hl)
+	repeat 13
+	inc	hl
+	rl	(hl)
+	end repeat
+
+	djnz	.loop
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+
+	public	__i112_shru
+
+; C calling convention
+; void __i112_shru(struct { uint64_t lo; uint48_t hi; } arg*, uint8_t shift)
+__i112_shru:
+	ld	iy, 0
+	add	iy, sp
+	ld	b, (iy + 6)	; shift amount
+	inc	b
+	dec	b
+	ret	z	; zero shift
+	ld	iy, (iy + 3)	; arg
+.loop:
+	lea	hl, iy + 15	; start from the msb
+	srl	(hl)
+	repeat 13
+	dec	hl
+	rr	(hl)
+	end repeat
+	djnz	.loop
+
+	ret
+
+	section	.text

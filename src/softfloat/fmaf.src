@@ -1,0 +1,36 @@
+	assume	adl=1
+
+	section	.text
+
+_fmaf:
+	ld	hl, -30
+	call	__frameset
+	; load X
+	ld	hl, (ix + 6)
+	ld	a, (ix + 9)
+	add	hl, hl
+	adc	a, a
+	ld	(ix - 3), hl
+	ld	(ix - 4), a
+	; load Y
+	ld	hl, (ix + 6)
+	ld	a, (ix + 9)
+	add	hl, hl
+	adc	a, a
+	ld	(ix - 7), hl
+	ld	(ix - 8), a
+	; load Z
+	ld	hl, (ix + 6)
+	ld	a, (ix + 9)
+	add	hl, hl
+	adc	a, a
+	ld	(ix - 11), hl
+	ld	(ix - 12), a
+
+	
+
+
+.finish:
+	ld	sp, ix
+	pop	ix
+	ret
