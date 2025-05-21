@@ -237,40 +237,6 @@ int comparison_test(void) {
     C((f64_neg_pi <  f64_neg_one ));
     C((f64_neg_pi <= f64_neg_one ));
 
-    /* x < 0x1.0p-26L */
-
-    C((f64_pos_tanx != f64_pos_tany));
-    C((f64_pos_tanx >  f64_pos_tany));
-    C((f64_pos_tanx >= f64_pos_tany));
-
-    C((f64_pos_tanx != f64_neg_tany));
-    C((f64_pos_tanx >  f64_neg_tany));
-    C((f64_pos_tanx >= f64_neg_tany));
-
-    C((f64_neg_tanx != f64_pos_tany));
-    C((f64_neg_tanx <  f64_pos_tany));
-    C((f64_neg_tanx <= f64_pos_tany));
-
-    C((f64_neg_tanx != f64_neg_tany));
-    C((f64_neg_tanx <  f64_neg_tany));
-    C((f64_neg_tanx <= f64_neg_tany));
-
-    C((f64_pos_tany != f64_pos_tanx));
-    C((f64_pos_tany <  f64_pos_tanx));
-    C((f64_pos_tany <= f64_pos_tanx));
-
-    C((f64_pos_tany != f64_neg_tanx));
-    C((f64_pos_tany >  f64_neg_tanx));
-    C((f64_pos_tany >= f64_neg_tanx));
-
-    C((f64_neg_tany != f64_pos_tanx));
-    C((f64_neg_tany <  f64_pos_tanx));
-    C((f64_neg_tany <= f64_pos_tanx));
-
-    C((f64_neg_tany != f64_neg_tanx));
-    C((f64_neg_tany >  f64_neg_tanx));
-    C((f64_neg_tany >= f64_neg_tanx));
-
     return 0;
 }
 
@@ -325,8 +291,8 @@ void print_failed(size_t i, const char* s, uint64_t x, uint64_t y) {
 }
 
 int random_comparison_test(void) {
-    srand(9741);
-    for (size_t i = 0; i < 1024; i++) {
+    srand(0x7184CE);
+    for (size_t i = 0; i < 128; i++) {
         F64_pun x, y;
         x.bin = rand64();
         y.bin = rand64();

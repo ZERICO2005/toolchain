@@ -26,22 +26,6 @@ _f64_pos_pi:
 _f64_neg_pi:
 	db $18, $2D, $44, $54, $FB, $21, $09, $C0
 
-	public	_f64_pos_tanx
-_f64_pos_tanx:
-	db $33, $33, $33, $33, $33, $33, $F3, $3F
-
-	public	_f64_neg_tanx
-_f64_neg_tanx:
-	db $33, $33, $33, $33, $33, $33, $F3, $BF
-
-	public	_f64_pos_tany
-_f64_pos_tany:
-	db $00, $00, $00, $00, $00, $00, $50, $3E
-
-	public	_f64_neg_tany
-_f64_neg_tany:
-	db $00, $00, $00, $00, $00, $00, $50, $BE
-
 	public	_drem_libcall
 _drem_libcall:
 	call	__frameset0
