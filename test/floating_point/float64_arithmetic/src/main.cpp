@@ -14,6 +14,12 @@
 #include <cmath>
 #include <numbers>
 
+#define AUTOTEST_DEBUG 0
+
+#ifndef AUTOTEST_DEBUG
+#define AUTOTEST_DEBUG 0
+#endif
+
 #include "f64_arithmetic_LUT.h"
 
 #define ARRAY_LENGTH(x) (sizeof(x) / sizeof(x[0]))
@@ -283,12 +289,16 @@ static uint64_t rand64(void) {
     return split.u64;
 }
 
+#if AUTOTEST_DEBUG
 void print_failed(size_t i, const char* s, uint64_t x, uint64_t y) {
     printf(
         "%zu: %s\nX: %016llX\nY: %016llX\n",
         i, s, x, y
     );
 }
+#else
+#define print_failed(...)
+#endif
 
 int random_comparison_test(void) {
     srand(0x7184CE);
