@@ -31,7 +31,7 @@ __dcmp:
 	sbc	hl, bc	; y.lo - x.lo
 	jr	z, .equal
 .not_equal:
-	ld	c, a	; preserve A
+	ld	l, a	; preserve A
 	rra	; bit 7 of A = Carry
 	cpl
 .ret_flags:
