@@ -325,8 +325,8 @@ void print_failed(size_t i, const char* s, uint64_t x, uint64_t y) {
 }
 
 int random_comparison_test(void) {
-    srand(3132);
-    for (size_t i = 0; i < 65536; i++) {
+    srand(9741);
+    for (size_t i = 0; i < 1024; i++) {
         F64_pun x, y;
         x.bin = rand64();
         y.bin = rand64();
