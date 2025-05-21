@@ -20,7 +20,7 @@ gfy_Begin:
 	push	hl
 	ld	hl, 554
 	push	hl
-	call	lcd_SendCommandWords
+	call	lcd_SendSizedCommandWords
 	ld	hl, 9
 	add	hl, sp
 	ld	sp, hl
@@ -31,7 +31,7 @@ gfy_Begin:
 	push	hl
 	ld	hl, 555
 	push	hl
-	call	lcd_SendCommandWords
+	call	lcd_SendSizedCommandWords
 	ld	hl, 9
 	add	hl, sp
 	ld	sp, hl
@@ -57,7 +57,7 @@ gfy_End:
 	push	hl
 	ld	hl, 554
 	push	hl
-	call	lcd_SendCommandWords
+	call	lcd_SendSizedCommandWords
 	ld	hl, 9
 	add	hl, sp
 	ld	sp, hl
@@ -68,7 +68,7 @@ gfy_End:
 	push	hl
 	ld	hl, 555
 	push	hl
-	call	lcd_SendCommandWords
+	call	lcd_SendSizedCommandWords
 	ld	hl, 9
 	add	hl, sp
 	ld	sp, hl
@@ -5045,6 +5045,7 @@ BB24_12:
 ;	extern	_memcpy
 ;	extern	gfy_internal_End
 ;	extern	__idivu
+;	extern	lcd_SendSizedCommandWords
 ;	extern	__iand
 ;	extern	__ixor
 ;	extern	gfy_Sprite_NoClip
@@ -5055,7 +5056,6 @@ BB24_12:
 ;	extern	_memset
 ;	extern	gfy_TextXPos
 ;	extern	gfy_SetTextXY
-;	extern	lcd_SendCommandWords
 ;	extern	_memmove
 ;	extern	gfy_Color
 ;	extern	lcd_Init
