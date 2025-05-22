@@ -535,7 +535,9 @@ void gfy_BlitRectangle(
 
 #endif
 
-/* gfy_internal_PrintCharXY_NoClip */
+/* gfy_PrintChar */
+
+#if 0
 
 static void gfy_internal_PrintChar_NoClip(const char c, const uint8_t charWidth) {
     const uint8_t *bitImage = gfy_TextData + GFY_MAXIMUM_FONT_HEIGHT * (uint24_t)((unsigned char)c);
@@ -564,8 +566,6 @@ static void gfy_internal_PrintChar_NoClip(const char c, const uint8_t charWidth)
         b >>= 1;
     }
 }
-
-/* gfy_PrintChar */
 
 void gfy_PrintChar(const char c) {
     if (gfy_TextWidthScale == 0 || gfy_TextHeightScale == 0) {
@@ -603,7 +603,7 @@ void gfy_PrintChar(const char c) {
                     continue;
                 }
                 for (uint8_t v = 0; v < gfy_TextHeightScale; v++) {
-                    if (fillPtr >= lo_addr &&fillPtr < hi_addr) {
+                    if (fillPtr >= lo_addr && fillPtr < hi_addr) {
                         *fillPtr = fillColor;   
                     }
                     fillPtr++;
@@ -615,6 +615,8 @@ void gfy_PrintChar(const char c) {
         b >>= 1;
     }
 }
+
+#endif
 
 /* gfy_PrintInt (graphy.asm) */
 

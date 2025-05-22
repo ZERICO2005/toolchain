@@ -6,7 +6,7 @@ include '../include/include_library.inc'
 ;-------------------------------------------------------------------------------
 
 ; version number
-library GRAPHY, 0
+library GRAPHY, 13
 
 include_library '../lcddrvce/lcddrvce.asm'
 
@@ -2284,6 +2284,7 @@ gfy_TransparentSprite_NoClip:
 
 	ld	a,TRASPARENT_COLOR
 smcByte _TransparentColor
+.transparent_color := $-1
 	wait_quick
 .loop:
 	ld	c,0
@@ -2706,90 +2707,285 @@ gfy_SetTextScale: ; COPIED_FROM_GRAPHX
 
 ;-------------------------------------------------------------------------------
 gfy_SetTextConfig:
+
 	pop	de
 	ex	(sp),hl			; hl = config
 	push	de
 	ld	a, l
 	ld	(gfy_PrintChar_Clip), a
+
+;	ld	hl,_PrintChar_Clip
+	ld	hl,_PrintChar
+	jr	z,.writesmc		; z ==> config == gfy_text_clip
+; config == gfy_text_noclip
+	ld	hl,_PrintChar
+.writesmc:				; hl = PrintChar routine
+	ld	(PrintChar_0),hl
+	; ld	(PrintChar_1),hl
+	; ld	(PrintChar_2),hl
 	ret
+
 
 gfy_PrintChar_Clip:
 	db $00
 
 ;-------------------------------------------------------------------------------
-; gfy_PrintChar:
-
-; ...
-
+gfy_PrintChar:
+; Places a character at the current cursor position
+; Arguments:
+;  arg0 : Character to draw
+; Returns:
+;  None
+if 0
+	pop	hl
+	pop	de
+	push	de
+	push	hl
+	ld	a,e			; a = char
+end if
+	jp	_PrintChar		; this is SMC'd to use as a grappling hook into the clipped version
+PrintChar_0 := $-3
+_PrintChar:
+if 1
+	pop	hl
+	pop	de
+	push	de
+	push	hl
+	ld	a,e			; a = char
+end if
+	push	ix			; save stack pointer
+	push	hl			; save hl pointer if string
+	ld	e,a			; e = char
 	ld	a,0
 _TextFixedWidth = $-1
-
-; ...
-
+	or	a,a
+	jr	nz,.fixed
+	sbc	hl,hl
+	ld	l,e			; hl = character
+	ld	bc,(_CharSpacing)
+	add	hl,bc
+	ld	a,(hl)			; a = char width
+.fixed:
 	ld	bc,0
 _TextXPos := $-3
+	push	bc	; preserve the old _TextXPos
+	sbc	hl,hl
+	ld	l,a
+	ld	ixh,a			; ixh = char width
+	ld	a,(_TextWidthScale)
+	ld	h,a
+	mlt	hl
+	add	hl,bc
+	ld	(_TextXPos),hl
 
-; ...
+	ld	c, e	; preserve character
 
-	ld	hl,0
+	pop	hl	; restore the old _TextXPos
+	ld	de,0
 _TextYPos := $-3
+	ld	d, h		; maybe ld d, 0
+	dec	h		; tests if x >= 256
+	ld	h, ti.lcdHeight
+	jr	nz, .x_lt_256
+	ld	d, h		; ld d, ti.lcdHeight * 256
+.x_lt_256:
+	mlt	hl
+	ex.s	de, hl		; clear upper byte of DE
+	add	hl, de		; add y cord
+	ld	de, (CurrentBuffer)
+	add	hl, de		; add buffer offset	
+	; IY = draw location		
+	push	hl
+	pop	iy
 
-; ...
+
+	ld	a, c			; C = character
+	or	a, a
+	sbc	hl, hl
+	ld	l, a			; hl = character
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	ld	bc, (_TextData)		; get text data array
+	add	hl, bc
+
+	ld	de,ti.lcdHeight
 
 	ld	ixl,8
 smcByte _TextHeight
-
-; ...
-
-	ld	a,TEXT_BG_COLOR
+	wait_quick
+	jr	_PrintLargeFont		; SMC the jump
+_TextScaleJump := $ - 1
+	; (SP) = char data pointer 
+	; IY = draw row
+	; HL = draw location
+	; DE = $0000F0 ti.lcdHeight
+	; IXL = char height
+	; B = char width counter
+	; C = char data
+	; IXH = char width
+_PrintNormalFont:
+.loop:
+	ld	c, (hl)
+	push	hl
+	lea	hl, iy	; load row
+	ld	b, ixh
+.nextpixel:
+	ld	a, TEXT_BG_COLOR
 smcByte _TextBGColor
-
-; ...
-
-	ld	a,TEXT_FG_COLOR
+	rlc	c
+	jr	nc, .bgcolor
+	ld	a, TEXT_FG_COLOR
 smcByte _TextFGColor
-
-; ...
-
-	cp	a,TEXT_TP_COLOR		; check if transparent
-; gfy_PrintChar.transparent_color := $-1
+.bgcolor:
+	cp	a, TEXT_TP_COLOR		; check if transparent
+gfy_PrintChar.transparent_color := $-1
 smcByte _TextTPColor
+	jr	z, .transparent
+	ld	(hl), a
+.transparent:
+	add	hl, de	; move to next pixel		
+	djnz	.nextpixel
+	inc	iy	; next column
+	pop	hl
+	inc	hl	; next pixel
+	dec	ixl
+	jr	nz, .loop
+	pop	hl			; restore hl and stack pointer
+	pop	ix
+	ret
 
 ;-------------------------------------------------------------------------------
-; _PrintLargeFont:
-
-; ...
-
+_PrintLargeFont:
+	ld	a, ixh
+	ld	(_LargeFontHeight), a
+	ld	a, ixl
+	ld	(_LargeFontHeight), a
+; Prints in scaled font for prosperity
+; This is so that way unscaled font can still be reasonably fast
+; Returns:
+;  None
+	ld	de,ti.lcdHeight
+.loop:
 	ld	b,1
 _TextHeightScale := $-1
+	ld	c, (hl)
+	push	hl
+.hscale:
+	push	bc		
+	lea	hl,iy	; get draw location
+	ld	b, 8
+_LargeFontHeight := $-1
 
-; ...
-
+.inner:
 	ld	a,TEXT_BG_COLOR
 smcByte _TextBGColor
-
-; ...
-
-	ld	l,1
+	ld	ixh,1
 _TextWidthScale := $-1
-
-; ...
-
+	rlc	c
+	jr	nc,.bgcolor
 	ld	a,TEXT_FG_COLOR
 smcByte _TextFGColor
-
-; ...
-
+.bgcolor:
 	cp	a,TEXT_TP_COLOR		; check if transparent
 smcByte _TextTPColor
+	jr	z,.fgcolor
+
+.wscale0:
+	ld	(hl), a
+	add	hl, de
+	dec	ixh
+	jr	nz,.wscale0
+	djnz	.inner
+	jr	.done
+
+.fgcolor:
+.wscale1:
+	add	hl, de
+	dec	ixh
+	jr	nz,.wscale1		; move to next pixel
+	djnz	.inner
+
+.done:
+	inc	iy	; next column
+	pop	bc
+	djnz	.hscale
+
+	pop	hl
+	inc	hl	; next pixel
+
+	dec	ixl
+	jr	nz,.loop
+
+	pop	hl			; restore hl and stack pointer
+	pop	ix
+	ret
 
 ;-------------------------------------------------------------------------------
-; _PrintChar_Clip:
+_PrintChar_Clip:
+; Clipped text for characters printing routine
+; Arguments:
+;  arg0 : Character to draw
+; Returns:
+;  None
+	push	hl			; save hl pointer if string
 
-; ...
+	ld	e,a			; e = char
 
+	ld	a,(_TextFixedWidth)
+	or	a,a
+	jr	nz,.fixedwidth
+	sbc	hl,hl
+	ld	l,e			; hl = character
+	ld	bc,(_CharSpacing)
+	add	hl,bc
+	ld	a,(hl)			; a = char width
+.fixedwidth:
+	or	a,a
+	sbc	hl,hl
+	ld	l,e			; hl = character
+	add	hl,hl
+	add	hl,hl
+	add	hl,hl
+	ld	bc,(_TextData)		; get text data array
+	add	hl,bc			; de = draw location
+	ld	de,_TmpCharData		; store pixel data into temporary sprite
 	ld	iyl,8
 smcByte _TextHeight
+	ld	iyh,a			; ixh = char width
+	ld	(_TmpCharSprite),a	; store width of character we are drawing
+	call	_GetChar		; store the character data
+
+;	ld	hl, (gfy_TransparentSprite.transparent_color)
+	ld	hl, (gfy_TransparentSprite_NoClip.transparent_color)
+	ld	a,(hl)
+	push	af
+	ld	a,(gfy_PrintChar.transparent_color)
+	ld	(hl),a
+
+	ld	bc,(_TextYPos)
+	push	bc
+	ld	bc,(_TextXPos)		; compute the new locations
+	push	bc
+	or	a,a
+	sbc	hl,hl
+	ld	a,iyh
+	ld	l,a
+	add	hl,bc
+	ld	(_TextXPos),hl		; move the text x posisition by the character width
+	ld	bc,_TmpCharSprite
+	push	bc
+	call	gfy_TransparentSprite	; use the actual routine
+	pop	bc
+	pop	bc
+	pop	bc
+
+	pop	af
+;	ld	(gfy_TransparentSprite.transparent_color),a
+	ld	(gfy_TransparentSprite_NoClip.transparent_color),a
+
+	pop	hl			; restore hl and stack pointer
+	ret
 
 ;-------------------------------------------------------------------------------
 gfy_PrintInt: ; COPIED FROM GRAPHX
@@ -2979,19 +3175,9 @@ smcByte _TextHeight
 	pop	hl
 	ret
 
-if 0
-
-; gfy_GetSpriteChar:
-
-; ...
-
-smcByte _TextHeight
-	ld	iyh,a			; ixh = char width
-
-end if
-
 ;-------------------------------------------------------------------------------
-_GetChar: ; COPIED_FROM_GRAPHX
+; unoptimized routine
+_GetChar:
 ; Places a character data into a nice buffer
 ; Inputs:
 ;  HL : Points to character pixmap
@@ -2999,6 +3185,15 @@ _GetChar: ; COPIED_FROM_GRAPHX
 ; Outputs:
 ;  Stored pixmap image
 ;  Uses IY
+	ld	a, 8
+smcByte _TextHeight
+	ld	(_GetChar_Jump1), a
+	ld	(_GetChar_Jump2), a
+	
+	push	ix
+	push	de
+	pop	ix
+
 .loop:
 	ld	c,(hl)			; c = 8 pixels (or width based)
 	ld	b,iyh
@@ -3014,43 +3209,53 @@ smcByte _TextFGColor
 smcByte _TextTPColor
 	jr	z,.transparent
 	ld	(de),a
-	inc	de
+
+;	inc	de
+	ex	de, hl
+	push	bc
+	ld	bc, 0
+_GetChar_Jump1 := $-3
+	add	hl, bc
+	pop	bc
+	ex	de, hl
+
 	djnz	.nextpixel
+
+	inc	ix
+	lea	de, ix
+
 	inc	hl
 	dec	iyl
 	jr	nz,.loop
+
+	pop	ix
 	ret
+
 .transparent:
 	ld	a,0
 smcByte _TextTPColor
 	ld	(de),a
-	inc	de			; move to next pixel
+
+;	inc	de			; move to next pixel
+	ex	de, hl
+	push	bc
+	ld	bc, 0
+_GetChar_Jump2 := $-3
+	add	hl, bc
+	pop	bc
+	ex	de, hl
+
 	djnz	.nextpixel
+
+	inc	ix
+	lea	de, ix
+
 	inc	hl
 	dec	iyl
 	jr	nz,.loop		; okay we stored the character sprite now draw it
+	
+	pop	ix
 	ret
-
-if 0
-
-; _GetChar:
-
-; ...
-
-	ld	a,TEXT_BG_COLOR
-smcByte _TextBGColor
-
-; ...
-
-	ld	a,TEXT_FG_COLOR
-smcByte _TextFGColor
-
-; ...
-
-	cp	a,TEXT_TP_COLOR		; check if transparent
-smcByte _TextTPColor
-
-end if
 
 ;-------------------------------------------------------------------------------
 gfy_SetFontData: ; COPIED_FROM_GRAPHX
