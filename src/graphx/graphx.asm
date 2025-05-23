@@ -1344,8 +1344,8 @@ _Ellipse:
 	ld	(ix - el_comp_a),hl
 	inc	hl
 	sbc	hl,bc
-	ld	bc,(ix - el_a2)
-	call	_MultiplyHLBC
+	ld	de,(ix - el_a2)
+	call	_MultiplyHLDE
 	ld	bc,(ix - el_b2)
 	add	hl,bc
 	add	hl,bc
@@ -1358,13 +1358,13 @@ _Ellipse:
 	sbc	hl,hl
 	inc	hl
 	sbc	hl,de
-	ld	bc,(ix - el_fb2)
-	call	_MultiplyHLBC
+	ld	de,(ix - el_fb2)
+	call	_MultiplyHLDE
 	ld	(ix - el_sigma_2),hl	; int sigma_add_2 = fb2 * (1 - a);
 
 	ld	hl,(ix - el_a2)
-	ld	bc,(ix - el_y)
-	call	_MultiplyHLBC
+	ld	de,(ix - el_y)
+	call	_MultiplyHLDE
 	ld	(ix - el_comp_b),hl
 	
 	wait_quick
@@ -1437,16 +1437,16 @@ _ellipse_loop_draw_2 := $-3
 	mlt	de
 	inc	hl
 	sbc	hl,de
-	ld	bc,(ix - el_b2)
-	call	_MultiplyHLBC
+	ld	de,(ix - el_b2)
+	call	_MultiplyHLDE
 	ld	de,(ix - el_a2)
 	add	hl,de
 	add	hl,de
 	ld	(ix - el_sigma), hl
 
 	ld	hl,(ix - el_b2)
-	ld	bc,(ix - el_temp1)
-	call	_MultiplyHLBC
+	ld	de,(ix - el_temp1)
+	call	_MultiplyHLDE
 	ld	(ix - el_comp_b),hl
 
 .main_loop2:
@@ -1584,32 +1584,9 @@ _ellipse_line_routine_2 := $-3
 	pop	hl
 	pop	hl
 	ret
-	
 
 ;-------------------------------------------------------------------------------
-gfx_Circle:
-; Draws a clipped circle outline
-; Arguments:
-;  arg0 : X coordinate
-;  arg1 : Y coordinate
-;  arg2 : Radius
-; Returns:
-;  None
-	ld	iy,0
-	add	iy,sp
-	lea	hl,iy-9
-	ld	sp,hl
-	ld	bc,(iy+9)
-	ld	(iy-6),bc
-	sbc	hl,hl
-	ld	(iy-3),hl
-	adc	hl,bc
-	jp	z,.exit
-	ld	hl,1
-	or	a,a
-	sbc	hl,bc
-	call	gfx_Wait
-	jp	.next
+_Circle:
 .sectors:
 	ld	bc,(iy+3)
 	ld	hl,(iy-6)
@@ -1718,31 +1695,32 @@ gfx_Circle:
 .exit:
 	ld	sp,iy
 	ret
-
-;-------------------------------------------------------------------------------
-gfx_FillCircle:
-; Draws an clipped circle
+gfx_Circle:
+; Draws a clipped circle outline
 ; Arguments:
 ;  arg0 : X coordinate
 ;  arg1 : Y coordinate
 ;  arg2 : Radius
 ; Returns:
 ;  None
-	push	ix
-	ld	ix,0
-	add	ix,sp
-	lea	hl,ix-9
-	ld	sp,hl
-	ld	bc,(ix+12)
-	ld	(ix-6),bc
-	sbc	hl,hl
-	ld	(ix-3),hl
-	adc	hl,bc
-	jp	z,_ResetStack
-	ld	hl,1
-	or	a,a
-	sbc	hl,bc
-	jp	.cmp3
+	ld	iy, 0
+	add	iy, sp
+	lea	hl, iy - 9
+	ld	sp, hl
+	ld	bc, (iy + 9)
+	sbc	hl, hl
+	adc	hl, bc	; carry won't be set since HL is zero here
+	jr	z, _Circle.exit
+	ld	(iy - 6), bc
+	sbc	hl, hl
+	ld	(iy - 3), hl
+	inc	hl
+	sbc	hl, bc	; HL = 1 - BC
+	call	gfx_Wait
+	jr	_Circle.next
+
+;-------------------------------------------------------------------------------
+_FillCircle:
 .fillsectors:
 	ld	hl,(ix-3)
 	add	hl,hl
@@ -1844,13 +1822,12 @@ gfx_FillCircle:
 	ret
 .check:
 	jp	po,.fillsectors
+.ResetStack:
 	ld	sp,ix
 	pop	ix
 	ret
-
-;-------------------------------------------------------------------------------
-gfx_FillCircle_NoClip:
-; Draws an unclipped circle
+gfx_FillCircle:
+; Draws an clipped circle
 ; Arguments:
 ;  arg0 : X coordinate
 ;  arg1 : Y coordinate
@@ -1858,21 +1835,23 @@ gfx_FillCircle_NoClip:
 ; Returns:
 ;  None
 	push	ix
-	ld	ix,0
-	add	ix,sp
-	lea	hl,ix-9
-	ld	sp,hl
-	ld	bc,(ix+12)
-	ld	(ix-6),bc
-	sbc	hl,hl
-	ld	(ix-3),hl
-	adc	hl,bc
-	jp	z,_ResetStack
-	ld	hl,1
-	or	a,a
-	sbc	hl,bc
-	call	gfx_Wait
-	jp	.loop
+	ld	ix, 0
+	add	ix, sp
+	lea	hl, ix - 9
+	ld	sp, hl
+	ld	bc, (ix + 12)
+	sbc	hl, hl
+	adc	hl, bc	; carry won't be set since HL is zero here
+	jr	z, _FillCircle.ResetStack
+	ld	(ix - 6), bc
+	sbc	hl, hl
+	ld	(ix - 3), hl
+	inc	hl
+	sbc	hl, bc	; HL = 1 - BC
+	jr	_FillCircle.cmp3
+
+;-------------------------------------------------------------------------------
+_FillCircle_NoClip:
 .fillsectors:
 	ld	hl,(ix-3)
 	add	hl,hl
@@ -1962,10 +1941,34 @@ gfx_FillCircle_NoClip:
 	or	a,a
 	sbc	hl,bc
 	jp	nc,.fillsectors
-_ResetStack:
+.ResetStack:
 	ld	sp,ix
 	pop	ix
 	ret
+gfx_FillCircle_NoClip:
+; Draws an unclipped circle
+; Arguments:
+;  arg0 : X coordinate
+;  arg1 : Y coordinate
+;  arg2 : Radius
+; Returns:
+;  None
+	push	ix
+	ld	ix, 0
+	add	ix, sp
+	lea	hl, ix - 9
+	ld	sp, hl
+	ld	bc, (ix + 12)
+	sbc	hl, hl
+	adc	hl, bc	; carry won't be set since HL is zero here
+	jr	z, _FillCircle_NoClip.ResetStack
+	ld	(ix - 6), bc
+	sbc	hl, hl
+	ld	(ix - 3), hl
+	inc	hl
+	sbc	hl, bc	; HL = 1 - BC
+	call	gfx_Wait
+	jr	_FillCircle_NoClip.loop
 
 ;-------------------------------------------------------------------------------
 gfx_Line:
@@ -4324,15 +4327,15 @@ _FillTriangle:
 	ld	hl,(ix-12)
 	or	a,a
 	sbc	hl,bc
-	ld	bc,(ix-30)
-	call	_MultiplyHLBC		; sa = dx12 * (y - y1);
+	ld	de,(ix-30)
+	call	_MultiplyHLDE		; sa = dx12 * (y - y1);
 	ld	(ix-15),hl
 	ld	bc,(ix+9)
 	ld	hl,(ix-12)
 	or	a,a
 	sbc	hl,bc
-	ld	bc,(ix-21)
-	call	_MultiplyHLBC		; sb = dx02 * (y - y0);
+	ld	de,(ix-21)
+	call	_MultiplyHLDE		; sb = dx02 * (y - y0);
 	ld	(ix-18),hl
 	jp	.secondloopstart	; for(; y <= y2; y++)
 .secondloop:
@@ -6401,33 +6404,39 @@ _UCDivA:
 
 ;-------------------------------------------------------------------------------
 _DivideHLBC:
-; Performs signed integer division
+; Performs signed integer division, rounding towards negative
 ; Inputs:
 ;  HL : Operand 1
 ;  BC : Operand 2
 ; Outputs:
-;  HL = HL/BC
+;  HL = floor(HL/BC)
+	ld	a,23
 	ex	de,hl
-	xor	a,a
 	sbc	hl,hl
+	ccf
 	sbc	hl,bc
-	jp	p,.next0
+	jp	m,.positive
+	add	hl,bc
+	inc	hl
+	sbc	hl,de
+	jp	po,.signcheck
+	inc	a
+	jr	.overflowed
+.positive:
+	inc	hl
 	push	hl
 	pop	bc
-	inc	a
-.next0:
-	or	a,a
-	sbc	hl,hl
-	sbc	hl,de
-	jp	m,.next1
 	ex	de,hl
-	inc	a
-.next1:
-	add	hl,de
-	rra
-	ld	a,24
+.signcheck:
+	add	hl,hl
+	ex	de,hl
+	sbc	hl,hl
+	jr	nc,.loop
+	inc	hl
+	sbc	hl,bc
 .loop:
 	ex	de,hl
+.overflowed:
 	adc	hl,hl
 	ex	de,hl
 	adc	hl,hl
@@ -6437,31 +6446,12 @@ _DivideHLBC:
 .spill:
 	dec	a
 	jr	nz,.loop
-
 	ex	de,hl
 	adc	hl,hl
-	ret	c
-	dec	de		; ude=UDE-1
-	add	hl, de		; uhl=UHL+UDE-1
-	add	hl, bc		; uhl=UHL+UDE+UBC-1
-	ex	de, hl		; uhl=UDE-1, ude=UHL+UDE+UBC-1
-	add	hl, bc		; uhl=UDE+UBC-1, carry set if UDE==0
-	ccf			; carry set if UDE!=0
-	sbc	hl, de		; uhl=-UHL-(UDE!=0)
 	ret
 
 ;-------------------------------------------------------------------------------
-_MultiplyHLDE:
-; Performs (un)signed integer multiplication
-; Inputs:
-;  HL : Operand 1
-;  DE : Operand 2
-; Outputs:
-;  HL = HL*DE
-	push	de
-	pop	bc
-
-;-------------------------------------------------------------------------------
+if 0
 _MultiplyHLBC:
 ; Performs (un)signed integer multiplication
 ; Inputs:
@@ -6469,48 +6459,54 @@ _MultiplyHLBC:
 ;  BC : Operand 2
 ; Outputs:
 ;  HL = HL*BC
-	push	iy
-	push	hl
 	push	bc
-	push	hl
-	ld	iy,0
-	ld	d,l
-	ld	e,b
-	mlt	de
-	add	iy,de
-	ld	d,c
-	ld	e,h
-	mlt	de
-	add	iy,de
-	ld	d,c
-	ld	e,l
-	mlt	de
-	ld	c,h
+	pop	de
+end if
+
+;-------------------------------------------------------------------------------
+; identical to __imulu_fast, but BC and DE are swapped
+_MultiplyHLDE:
+; Performs (un)signed integer multiplication
+; Inputs:
+;  HL : Operand 1
+;  DE : Operand 2
+; Outputs:
+;  HL = HL*DE
+	ld	b, d
+	ld	c, h
 	mlt	bc
-	ld	a,c
+	ld	a, c
+	dec	sp
+	push	hl
+	push	de
 	inc	sp
-	inc	sp
-	pop	hl
+	pop	bc
+	ld	c, l
+	mlt	bc
+	add	a, c
+	pop	bc
+	ld	c, e
+	mlt	bc
+	add	a, c
+	ld	b, e
+	ld	c, l
+	ld	l, b
+	ld	e, c
+	mlt	de
+	mlt	bc
 	mlt	hl
-	add	a,l
-	pop	hl
-	inc	sp
-	mlt	hl
-	add	a,l
-	ld	b,a
-	ld	c,0
-	lea	hl,iy+0
-	add	hl,bc
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,de
-	pop	iy
+	add	hl, de
+	add	a, h
+	ld	h, a
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, bc
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -6762,7 +6758,7 @@ _DefaultTextData:
 	db	$C0,$C0,$C0,$00,$C0,$C0,$C0,$00 ; |
 	db	$E0,$30,$30,$1C,$30,$30,$E0,$00 ; }
 	db	$76,$DC,$00,$00,$00,$00,$00,$00 ; ~
-	db	$00,$10,$38,$6C,$C6,$C6,$FE,$00 ; Δ
+	db	$00,$10,$38,$6C,$C6,$C6,$FE,$00 ; △
 
 _LcdTiming:
 ;	db	14 shl 2		; PPL shl 2
