@@ -3134,8 +3134,6 @@ smcByte _TextTPColor
 _PrintLargeFont:
 	ld	a, ixh
 	ld	(_LargeFontHeight), a
-	ld	a, ixl
-	ld	(_LargeFontHeight), a
 ; Prints in scaled font for prosperity
 ; This is so that way unscaled font can still be reasonably fast
 ; Returns:
