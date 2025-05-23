@@ -892,8 +892,9 @@ void gfy_Circle(
 }
 #endif
 
-/* gfy_FillCircle */
+/* gfy_FillCircle (graphy.asm) */
 
+#if 0
 // https://zingl.github.io/bresenham.html
 /** @todo make function pixel perfect */
 void gfy_FillCircle(
@@ -918,6 +919,7 @@ void gfy_FillCircle(
         }
     } while (x_pos < 0);
 }
+#endif
 
 /* gfy_Rectangle (graphy.asm) */
 
