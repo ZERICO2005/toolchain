@@ -3185,7 +3185,6 @@ smcByte _TextHeight
 	ret
 
 ;-------------------------------------------------------------------------------
-; unoptimized routine
 _GetChar:
 ; Places a character data into a nice buffer
 ; Inputs:
@@ -3194,46 +3193,39 @@ _GetChar:
 ; Outputs:
 ;  Stored pixmap image
 ;  Uses IY
-	ld	a, 8
-smcByte _TextHeight
-	ld	(_GetChar_Jump1), a
-	ld	(_GetChar_Jump2), a
-	
-	push	ix
+
 	push	de
-	pop	ix
+	ex	(sp), ix
+;	ld	de, 8
+	db	$11
+	db	$08
+smcByte _TextHeight
+	db	$00
+	db	$00
 
 .loop:
-	ld	c,(hl)			; c = 8 pixels (or width based)
-	ld	b,iyh
+	ld	c, (hl)			; c = 8 pixels (or width based)
+	push	hl
+	lea	hl, ix
+	inc	ix	; next column
+	ld	b, iyh
 .nextpixel:
-	ld	a,TEXT_BG_COLOR
+	ld	a, TEXT_BG_COLOR
 smcByte _TextBGColor
 	rlc	c
-	jr	nc,.bgcolor
-	ld	a,TEXT_FG_COLOR
+	jr	nc, .bgcolor
+	ld	a, TEXT_FG_COLOR
 smcByte _TextFGColor
 .bgcolor:
-	cp	a,TEXT_TP_COLOR		; check if transparent
+	cp	a, TEXT_TP_COLOR	; check if transparent
 smcByte _TextTPColor
-	jr	z,.transparent
-	ld	(de),a
-
-;	inc	de
-	ex	de, hl
-	push	bc
-	ld	bc, 0
-_GetChar_Jump1 := $-3
-	add	hl, bc
-	pop	bc
-	ex	de, hl
-
+	jr	z, .transparent
+	ld	(hl), a
+	add	hl, de	; move to next pixel
 	djnz	.nextpixel
 
-	inc	ix
-	lea	de, ix
-
-	inc	hl
+	pop	hl
+	inc	hl	; next pixel
 	dec	iyl
 	jr	nz,.loop
 
@@ -3241,25 +3233,14 @@ _GetChar_Jump1 := $-3
 	ret
 
 .transparent:
-	ld	a,0
+	ld	a, 0
 smcByte _TextTPColor
-	ld	(de),a
-
-;	inc	de			; move to next pixel
-	ex	de, hl
-	push	bc
-	ld	bc, 0
-_GetChar_Jump2 := $-3
-	add	hl, bc
-	pop	bc
-	ex	de, hl
-
+	ld	(hl), a
+	add	hl, de	; move to next pixel
 	djnz	.nextpixel
 
-	inc	ix
-	lea	de, ix
-
-	inc	hl
+	pop	hl
+	inc	hl	; next pixel
 	dec	iyl
 	jr	nz,.loop		; okay we stored the character sprite now draw it
 	
