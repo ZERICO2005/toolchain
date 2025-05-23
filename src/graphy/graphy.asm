@@ -2181,7 +2181,8 @@ smcByte _TransparentColor
 
 ; ...
 
-	cp	a,TRASPARENT_COLOR
+gfy_TransparentSprite.transparent_color := $+1
+	ld	a,TRASPARENT_COLOR
 smcByte _TransparentColor
 
 ;-------------------------------------------------------------------------------
@@ -2284,7 +2285,6 @@ gfy_TransparentSprite_NoClip:
 
 	ld	a,TRASPARENT_COLOR
 smcByte _TransparentColor
-.transparent_color := $-1
 	wait_quick
 .loop:
 	ld	c,0
@@ -2659,10 +2659,41 @@ gfy_SetFontHeight: ; COPIED_FROM_GRAPHX
 	setSmcBytes _TextHeight
 
 ;-------------------------------------------------------------------------------
-; gfy_PrintStringXY:
+gfy_PrintStringXY: ; COPIED_FROM_GRAPHX
+; Places a string at the given coordinates
+; Arguments:
+;  arg0 : Pointer to string
+;  arg1 : Text X Pos
+;  arg2 : Text Y Pos
+; Returns:
+;  None
+	pop	iy			; iy = return vector
+	pop	bc			; bc = str
+	call	gfy_SetTextXY
+	push	bc
+	ex	(sp),hl			; hl = str
+	push	iy
+;	jr	_DrawCharacters		; emulated by dummifying next instructions:
+	db	$01			; pop de \ ex (sp),hl \ push de -> ld bc,*
 
 ;-------------------------------------------------------------------------------
-; gfy_PrintString:
+gfy_PrintString: ; COPIED_FROM_GRAPHX
+; Places a string at the current cursor position
+; Arguments:
+;  arg0 : Pointer to string
+; Returns:
+;  None
+	pop	de
+	ex	(sp),hl
+	push	de
+_DrawCharacters:
+	ld	a,(hl)			; get the current character
+	or	a,a
+	ret	z
+	call	_PrintChar
+PrintChar_2 = $-3
+	inc	hl			; move to the next one
+	jr	_DrawCharacters
 
 ;-------------------------------------------------------------------------------
 gfy_SetTextScale: ; COPIED_FROM_GRAPHX
@@ -2680,7 +2711,7 @@ gfy_SetTextScale: ; COPIED_FROM_GRAPHX
 	push	de
 	ld	a,l
 	ld	de,_TextWidthScale
-;	ld	hl,_TextScaleJump
+	ld	hl,_TextScaleJump
 	cp	a,c
 	jr	z,.match
 	jr	.nomatch
@@ -2696,38 +2727,34 @@ gfy_SetTextScale: ; COPIED_FROM_GRAPHX
 	or	a,a
 	ret	z			; null check
 	ld	(_TextHeightScale),a
-;	ld	(hl),_PrintLargeFont - _PrintNormalFont
+	ld	(hl),_PrintLargeFont - _PrintNormalFont
 	ret
 .bothone:
-;	ld	(hl),a			; store a 0, which means no (literal) jump
+	ld	(hl),a			; store a 0, which means no (literal) jump
 	inc	a
-	ld	(_TextHeightScale),a
 	ld	(de),a
 	ret
 
 ;-------------------------------------------------------------------------------
-gfy_SetTextConfig:
-
+gfy_SetTextConfig: ; COPIED_FROM_GRAPHX
+; Configures text depending on the arguments
+; Arguments:
+;  arg0 : Configuration numbers
+; Returns:
+;  None
 	pop	de
 	ex	(sp),hl			; hl = config
 	push	de
-	ld	a, l
-	ld	(gfy_PrintChar_Clip), a
-
-;	ld	hl,_PrintChar_Clip
-	ld	hl,_PrintChar
+	dec	l			; l = config - 1
+	ld	hl,_PrintChar_Clip
 	jr	z,.writesmc		; z ==> config == gfy_text_clip
 ; config == gfy_text_noclip
 	ld	hl,_PrintChar
 .writesmc:				; hl = PrintChar routine
 	ld	(PrintChar_0),hl
-	; ld	(PrintChar_1),hl
-	; ld	(PrintChar_2),hl
+	ld	(PrintChar_1),hl
+	ld	(PrintChar_2),hl
 	ret
-
-
-gfy_PrintChar_Clip:
-	db $00
 
 ;-------------------------------------------------------------------------------
 gfy_PrintChar:
@@ -2736,23 +2763,14 @@ gfy_PrintChar:
 ;  arg0 : Character to draw
 ; Returns:
 ;  None
-if 0
 	pop	hl
 	pop	de
 	push	de
 	push	hl
 	ld	a,e			; a = char
-end if
 	jp	_PrintChar		; this is SMC'd to use as a grappling hook into the clipped version
 PrintChar_0 := $-3
 _PrintChar:
-if 1
-	pop	hl
-	pop	de
-	push	de
-	push	hl
-	ld	a,e			; a = char
-end if
 	push	ix			; save stack pointer
 	push	hl			; save hl pointer if string
 	ld	e,a			; e = char
@@ -2956,8 +2974,7 @@ smcByte _TextHeight
 	ld	(_TmpCharSprite),a	; store width of character we are drawing
 	call	_GetChar		; store the character data
 
-;	ld	hl, (gfy_TransparentSprite.transparent_color)
-	ld	hl, (gfy_TransparentSprite_NoClip.transparent_color)
+	ld	hl, gfy_TransparentSprite.transparent_color
 	ld	a,(hl)
 	push	af
 	ld	a,(gfy_PrintChar.transparent_color)
@@ -2981,8 +2998,7 @@ smcByte _TextHeight
 	pop	bc
 
 	pop	af
-;	ld	(gfy_TransparentSprite.transparent_color),a
-	ld	(gfy_TransparentSprite_NoClip.transparent_color),a
+	ld	(gfy_TransparentSprite.transparent_color),a
 
 	pop	hl			; restore hl and stack pointer
 	ret
@@ -3063,17 +3079,10 @@ gfy_PrintUInt: ; COPIED FROM GRAPHX
 	add	a,'0'
 	ld	c,a			; mark that a digit has been printed
 .printchar:
-;	push	bc
-;
-;	call	_PrintChar
-;PrintChar_1 := $-3
-;	pop	bc
-
-	; preserve all registers?
-	push	hl, bc
-	call	gfy_PrintChar	; _PrintChar is unimplemented
-	pop	bc, hl
-
+	push	bc
+	call	_PrintChar
+PrintChar_1 := $-3
+	pop	bc
 	ret
 
 ;-------------------------------------------------------------------------------

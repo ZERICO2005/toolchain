@@ -535,7 +535,7 @@ void gfy_BlitRectangle(
 
 #endif
 
-/* gfy_PrintChar */
+/* gfy_PrintChar (graphy.asm) */
 
 #if 0
 
@@ -681,7 +681,9 @@ void gfy_PrintUInt(uint24_t n, uint8_t length) {
 }
 #endif
 
-/* gfy_PrintString */
+/* gfy_PrintString (graphy.asm) */
+
+#if 0
 
 void gfy_PrintString(const char *string) {
     while (*string != '\0') {
@@ -690,8 +692,11 @@ void gfy_PrintString(const char *string) {
     }
 }
 
-/* gfy_PrintStringXY */
+#endif
 
+/* gfy_PrintStringXY (graphy.asm) */
+
+#if 0
 void gfy_PrintStringXY(const char *string, int24_t x, int24_t y) {
     gfy_SetTextXY(x,y);
     while (*string != '\0') {
@@ -699,6 +704,7 @@ void gfy_PrintStringXY(const char *string, int24_t x, int24_t y) {
         string++;
     }
 }
+#endif
 
 /* gfy_SetTextXY (graphy.asm) */
 

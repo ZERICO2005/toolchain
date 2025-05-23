@@ -506,70 +506,70 @@ gfy_End:
 
 ;	section	.text,"ax",@progbits
 ;	public	gfy_PrintString
-gfy_PrintString:
-	push	ix
-	ld	ix, 0
-	add	ix, sp
-	push	hl
-	ld	iy, (ix + 6)
-	ld	l, (iy)
-	ld	a, l
-	or	a, a
-	jp	z, BB3_3
-	inc	iy
-BB3_2:
-	ld	(ix - 3), iy
-	push	hl
-	call	gfy_PrintChar
-	ld	iy, (ix - 3)
-	pop	hl
-	ld	a, (iy)
-	ld	l, a
-	inc	iy
-	or	a, a
-	jr	nz, BB3_2
-BB3_3:
-	ld	sp, ix
-	pop	ix
-	ret
+; gfy_PrintString:
+; 	push	ix
+; 	ld	ix, 0
+; 	add	ix, sp
+; 	push	hl
+; 	ld	iy, (ix + 6)
+; 	ld	l, (iy)
+; 	ld	a, l
+; 	or	a, a
+; 	jp	z, BB3_3
+; 	inc	iy
+; BB3_2:
+; 	ld	(ix - 3), iy
+; 	push	hl
+; 	call	gfy_PrintChar
+; 	ld	iy, (ix - 3)
+; 	pop	hl
+; 	ld	a, (iy)
+; 	ld	l, a
+; 	inc	iy
+; 	or	a, a
+; 	jr	nz, BB3_2
+; BB3_3:
+; 	ld	sp, ix
+; 	pop	ix
+; 	ret
 ;	section	.text,"ax",@progbits
 
 ;	section	.text,"ax",@progbits
 ;	public	gfy_PrintStringXY
-gfy_PrintStringXY:
-	push	ix
-	ld	ix, 0
-	add	ix, sp
-	push	hl
-	ld	hl, (ix + 9)
-	ld	de, (ix + 12)
-	push	de
-	push	hl
-	call	gfy_SetTextXY
-	ld	iy, (ix + 6)
-	ld	hl, 6
-	add	hl, sp
-	ld	sp, hl
-	ld	l, (iy)
-	ld	a, l
-	or	a, a
-	jp	z, BB4_3
-	inc	iy
-BB4_2:
-	ld	(ix - 3), iy
-	push	hl
-	call	gfy_PrintChar
-	ld	iy, (ix - 3)
-	pop	hl
-	ld	a, (iy)
-	ld	l, a
-	inc	iy
-	or	a, a
-	jr	nz, BB4_2
-BB4_3:
-	ld	sp, ix
-	pop	ix
-	ret
+; gfy_PrintStringXY:
+; 	push	ix
+; 	ld	ix, 0
+; 	add	ix, sp
+; 	push	hl
+; 	ld	hl, (ix + 9)
+; 	ld	de, (ix + 12)
+; 	push	de
+; 	push	hl
+; 	call	gfy_SetTextXY
+; 	ld	iy, (ix + 6)
+; 	ld	hl, 6
+; 	add	hl, sp
+; 	ld	sp, hl
+; 	ld	l, (iy)
+; 	ld	a, l
+; 	or	a, a
+; 	jp	z, BB4_3
+; 	inc	iy
+; BB4_2:
+; 	ld	(ix - 3), iy
+; 	push	hl
+; 	call	gfy_PrintChar
+; 	ld	iy, (ix - 3)
+; 	pop	hl
+; 	ld	a, (iy)
+; 	ld	l, a
+; 	inc	iy
+; 	or	a, a
+; 	jr	nz, BB4_2
+; BB4_3:
+; 	ld	sp, ix
+; 	pop	ix
+; 	ret
 ;	section	.text,"ax",@progbits
 
 ;	section	.text,"ax",@progbits
