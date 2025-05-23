@@ -1432,8 +1432,8 @@ _Ellipse:
 	ld	(ix - el_comp_a),hl
 	inc	hl
 	sbc	hl,bc
-	ld	bc,(ix - el_a2)
-	call	_MultiplyHLBC
+	ld	de,(ix - el_a2)
+	call	_MultiplyHLDE
 	ld	bc,(ix - el_b2)
 	add	hl,bc
 	add	hl,bc
@@ -1446,13 +1446,13 @@ _Ellipse:
 	sbc	hl,hl
 	inc	hl
 	sbc	hl,de
-	ld	bc,(ix - el_fb2)
-	call	_MultiplyHLBC
+	ld	de,(ix - el_fb2)
+	call	_MultiplyHLDE
 	ld	(ix - el_sigma_2),hl	; int sigma_add_2 = fb2 * (1 - a);
 
 	ld	hl,(ix - el_a2)
-	ld	bc,(ix - el_y)
-	call	_MultiplyHLBC
+	ld	de,(ix - el_y)
+	call	_MultiplyHLDE
 	ld	(ix - el_comp_b),hl
 	
 	wait_quick
@@ -1525,16 +1525,16 @@ _ellipse_loop_draw_2 := $-3
 	mlt	de
 	inc	hl
 	sbc	hl,de
-	ld	bc,(ix - el_b2)
-	call	_MultiplyHLBC
+	ld	de,(ix - el_b2)
+	call	_MultiplyHLDE
 	ld	de,(ix - el_a2)
 	add	hl,de
 	add	hl,de
 	ld	(ix - el_sigma), hl
 
 	ld	hl,(ix - el_b2)
-	ld	bc,(ix - el_temp1)
-	call	_MultiplyHLBC
+	ld	de,(ix - el_temp1)
+	call	_MultiplyHLDE
 	ld	(ix - el_comp_b),hl
 
 .main_loop2:
@@ -1944,6 +1944,7 @@ gfy_FillCircle: ; MODIFIED_FROM_GRAPHX
 ;-------------------------------------------------------------------------------
 ; not working at the moment
 if 0
+
 fcnc_x := 6
 fcnc_y := 9
 _FillCircle_NoClip:
@@ -2074,6 +2075,139 @@ gfy_FillCircle_NoClip: ; MODIFIED_FROM_GRAPHX
 	sbc	hl, bc	; HL = 1 - BC
 	call	gfy_Wait
 	jr	_FillCircle_NoClip.loop
+
+else
+
+_FillCircle_NoClip:
+.fillsectors:
+	ld	hl,(ix-3)
+	add	hl,hl
+	inc	hl
+	ld	(.circle0),hl
+	push	hl	; len
+	ld	bc,(ix-3)
+	ld	hl, (ix + fc_x)
+	or	a,a
+	sbc	hl,bc
+	ld	(.circle1),hl
+	push	hl	; x
+	ld	bc,(ix-6)
+	ld	hl, (ix + fc_y)
+	add	hl,bc
+	push	hl	; y
+	call	gfy_VertLine_NoClip
+	ld	hl,0
+.circle0 := $-3
+	push	hl	; len
+	ld	hl,0
+.circle1 := $-3
+	push	hl	; x
+	ld	bc,(ix-6)
+	ld	hl, (ix + fc_y)
+	or	a,a
+	sbc	hl,bc
+	push	hl	; y
+	call	gfy_VertLine_NoClip
+	ld	hl,(ix-6)
+	add	hl,hl
+	inc	hl
+	ld	(.circle2),hl
+	push	hl	; len
+	ld	bc,(ix-6)
+	ld	hl, (ix + fc_x)
+	or	a,a
+	sbc	hl,bc
+	ld	(.circle3),hl
+	push	hl	; x
+	ld	bc,(ix-3)
+	ld	hl, (ix + fc_y)
+	add	hl,bc
+	push	hl	; y
+	call	gfy_VertLine_NoClip
+	ld	hl,0
+.circle2 := $-3
+	push	hl	; len
+	ld	hl,0
+.circle3 := $-3
+	push	hl	; x
+	ld	bc,(ix-3)
+	ld	hl, (ix + fc_y)
+	or	a,a
+	sbc	hl,bc
+	push	hl	; y
+	call	gfy_VertLine_NoClip
+	lea	hl,ix-9
+	ld	sp,hl
+	ld	bc,(ix-3)
+	inc	bc
+	ld	(ix-3),bc
+	ld	bc,(ix-9)
+	or	a,a
+	sbc	hl,hl
+	sbc	hl,bc
+	jp	m,.cmp0
+	jp	pe,.cmp2
+	jr	.cmp1
+.cmp0:
+	jp	po,.cmp2
+.cmp1:
+	ld	hl,(ix-3)
+	add	hl,hl
+	inc	hl
+	add	hl,bc
+	jr	.cmp3
+.cmp2:
+	ld	bc,(ix-6)
+	dec	bc
+	ld	(ix-6),bc
+	ld	hl,(ix-3)
+	ld	de,(ix-9)
+	or	a,a
+	sbc	hl,bc
+	add	hl,hl
+	inc	hl
+	add	hl,de
+.cmp3:
+	ld	(ix-9),hl
+	ld	bc,(ix-3)
+	ld	hl,(ix-6)
+	or	a,a
+	sbc	hl,bc
+	jp	p,.check
+	jp	pe,.fillsectors
+	ld	sp,ix
+	pop	ix
+	ret
+.check:
+	jp	po,.fillsectors
+.ResetStack:
+	ld	sp,ix
+	pop	ix
+	ret
+; reuse the implementation from gfy_FillCircle for now
+gfy_FillCircle_NoClip: ; MODIFIED_FROM_GRAPHX
+; Draws an clipped circle
+; Arguments:
+;  arg0 : X coordinate
+;  arg1 : Y coordinate
+;  arg2 : Radius
+; Returns:
+;  None
+	push	ix
+	ld	ix, 0
+	add	ix, sp
+	lea	hl, ix - 9
+	ld	sp, hl
+	ld	bc, (ix + 12)
+	sbc	hl, hl
+	adc	hl, bc	; carry won't be set since HL is zero here
+	jr	z, _FillCircle_NoClip.ResetStack
+	ld	(ix - 6), bc
+	sbc	hl, hl
+	ld	(ix - 3), hl
+	inc	hl
+	sbc	hl, bc	; HL = 1 - BC
+	jr	_FillCircle_NoClip.cmp3
 end if
 
 ;-------------------------------------------------------------------------------
@@ -3872,15 +4006,15 @@ end if
 	ld	hl, (ix - 12)
 	or	a, a
 	sbc	hl, bc
-	ld	bc, (ix - 30)
-	call	_MultiplyHLBC		; sa = dx12 * (y - y1);
+	ld	de, (ix - 30)
+	call	_MultiplyHLDE		; sa = dx12 * (y - y1);
 	ld	(ix - 15), hl
 	ld	bc, (ix + ft_y0)
 	ld	hl, (ix - 12)
 	or	a, a
 	sbc	hl, bc
-	ld	bc, (ix - 21)
-	call	_MultiplyHLBC		; sb = dx02 * (y - y0);
+	ld	de, (ix - 21)
+	call	_MultiplyHLDE		; sb = dx02 * (y - y0);
 	ld	(ix - 18), hl
 	jp	.secondloopstart	; for(; y <= y2; y++)
 .secondloop:
@@ -4785,21 +4919,23 @@ _smc_dsrs_sinf_1:			; smc = sinf
 
 getSinCos:
 	; returns a = sin/cos(a) * 128
-	ld	c,a
-	bit	7,a
-	jr	z,$+4
-	sub	a,128
-	bit	6,a
-	jr	z,$+6
-	ld	e,a
-	ld	a,128
-	sub	a,e
-	ld	de,0
-	ld	e,a
-	ld	hl,_SineTable
-	add	hl,de
-	ld	a,(hl)
-	bit	7,c
+	ld	de, $80
+	ld	c, a
+	bit	7, a
+	jr	z, .bit7
+	sub	a, e	; sub a, 128
+.bit7:
+	bit	6, a
+	jr	z, .bit6
+	;	A = 128 - A
+	neg
+	add	a, e	; add a, 128
+.bit6:
+	ld	e, a
+	ld	hl, _SineTable
+	add	hl, de
+	ld	a, (hl)
+	bit	7, c
 	ret	z
 	neg
 	ret
@@ -5201,33 +5337,39 @@ _UCDivA: ; COPIED_FROM_GRAPHX
 
 ;-------------------------------------------------------------------------------
 _DivideHLBC: ; COPIED_FROM_GRAPHX
-; Performs signed integer division
+; Performs signed integer division, rounding towards negative
 ; Inputs:
 ;  HL : Operand 1
 ;  BC : Operand 2
 ; Outputs:
-;  HL = HL/BC
+;  HL = floor(HL/BC)
+	ld	a,23
 	ex	de,hl
-	xor	a,a
 	sbc	hl,hl
+	ccf
 	sbc	hl,bc
-	jp	p,.next0
+	jp	m,.positive
+	add	hl,bc
+	inc	hl
+	sbc	hl,de
+	jp	po,.signcheck
+	inc	a
+	jr	.overflowed
+.positive:
+	inc	hl
 	push	hl
 	pop	bc
-	inc	a
-.next0:
-	or	a,a
-	sbc	hl,hl
-	sbc	hl,de
-	jp	m,.next1
 	ex	de,hl
-	inc	a
-.next1:
-	add	hl,de
-	rra
-	ld	a,24
+.signcheck:
+	add	hl,hl
+	ex	de,hl
+	sbc	hl,hl
+	jr	nc,.loop
+	inc	hl
+	sbc	hl,bc
 .loop:
 	ex	de,hl
+.overflowed:
 	adc	hl,hl
 	ex	de,hl
 	adc	hl,hl
@@ -5237,13 +5379,8 @@ _DivideHLBC: ; COPIED_FROM_GRAPHX
 .spill:
 	dec	a
 	jr	nz,.loop
-
 	ex	de,hl
 	adc	hl,hl
-	ret	c
-	ex	de,hl
-	sbc	hl,hl
-	sbc	hl,de
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -5454,8 +5591,6 @@ _SetSmcBytes: ; COPIED_FROM_GRAPHX
 	ex	de,hl
 	djnz	.loop
 	ret
-
-
 
 ;-------------------------------------------------------------------------------
 ; Internal library data
@@ -5798,39 +5933,7 @@ __lshru     := $0001EC
 ; for debugging
 _boot_sprintf := $0000BC
 
-__bremu:
-; I: A=dividend, C=divisor
-; O: a=A%C
-	push	bc
-	push	hl
-	ld	b, a
-	call	__bdvrmu
-	ld	a, h
-	pop	hl
-	pop	bc
-	ret
-
-__bdvrmu:
-; I: B=dividend, C=divisor
-; O: a=?, b=0, h=B%C, l=B/C
-	ld	l, b
-.hijack_l_dividend:
-	ld	h, 0
-	ld	b, 8
-.loop:
-	add	hl, hl
-	ld	a, h
-	sub	a, c
-	jr	c, .bit_skip
-	ld	h, a
-	inc	l
-.bit_skip:
-	djnz	.loop
-	ret
-
-
-__indcallhl:
-	jp	(hl)
+__indcallhl := _indcallHL
 
 ;-------------------------------------------------------------------------------
 ; inlined routines
@@ -5864,16 +5967,6 @@ __set_bc_and_mul_hl_by_240:
 	add	hl, hl	; 120
 	add	hl, hl	; 240
 	ld	bc, 240
-	ret
-
-__set_bc_and_mul_hl_by_minus2:
-	add	hl, hl
-	push	hl
-	pop	bc
-	or	a, a
-	sbc	hl, hl
-	sbc	hl, bc
-	ld	bc, -2
 	ret
 
 _memset:
