@@ -1,0 +1,91 @@
+	assume	adl=1
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+
+	public	_cos, _cosf
+
+if PREFER_OS_LIBC
+
+_cosf := 02211Ch
+_cos := _cosf
+
+else
+
+; float _f32_sinus(int quad, float arg)
+_cos:
+_cosf:
+	call	__frameset0
+	ld	e, (ix + 9) ; exponent
+	ld	hl, (ix + 6) ; mantissa
+	res	7, e	; fabsf(x)
+	push	de
+	push	hl
+	scf	; quad 1, N reset, C set
+	push	af
+	jq	__sincosf_common
+
+end if
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+
+	public	_sin, _sinf
+
+if PREFER_OS_LIBC
+
+_sinf := 022118h
+_sin := _sinf
+
+else
+
+; float _f32_sinus(int quad, float arg)
+_sin:
+_sinf:
+	call	__frameset0
+	ld	e, (ix + 9) ; exponent
+	ld	hl, (ix + 6) ; mantissa
+	ld	a, e
+	add	a, a	; clear signbit
+	sub	a, 117	; |x| < 2^-10 or 0x3affffff
+	jr	c, __sincosf_common.small_arg
+	ld	a, e
+	res	7, e	; x = fabsf(x)
+	push	de	; exponent
+	push	hl	; mantissa
+	rlca
+	add	a, a
+	ld	e, a
+	push	de
+
+end if
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+
+	private	__sincosf_common
+__sincosf_common:
+	call	__f32_sinus
+.small_arg:
+	ld	sp, ix
+	pop	ix
+	; you can ret here if clamping is not needed
+	; clamp the result to [-1.0, +1.0]
+	ld	a, e
+	add	a, a
+	sub	a, 126
+	ret	nz	; |y| < 0.5f
+	push	hl
+	add	hl, hl
+	pop	hl
+	ret	nc	; |y| < 1.0f
+	ld	l, h	; zero out the lower 8 bits of the mantissa
+	ret
+
+;-------------------------------------------------------------------------------
+
+	extern	__frameset0
+	extern	__f32_sinus

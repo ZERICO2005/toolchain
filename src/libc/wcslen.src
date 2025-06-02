@@ -1,0 +1,31 @@
+	assume	adl=1
+
+	section	.text
+
+	public	_wcslen
+_wcslen:
+	pop	iy
+	ex	(sp), hl
+	xor	a, a
+	ld	bc, 0
+.loop:
+	cpir
+	bit	0, c
+	; we stopped at an even index, meaning the previous byte was non-zero
+	jr	z, .loop
+	; we stopped at an odd index, so we just need to check the byte after
+	cpi
+	jr	nz, .loop
+
+	sbc	hl, hl
+	scf
+	sbc	hl, bc
+	; ishru_1_fast
+	push	hl
+	ld	hl, 2
+	add	hl, sp
+	srl	(hl)
+	pop	hl
+	rr	h
+	rr	l
+	jp	(iy)
