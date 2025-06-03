@@ -2510,9 +2510,7 @@ gfx_GetClipRegion:
 	ld	hl,3
 	add	hl,sp
 	ld	iy,(hl)
-	dec	iy
-	dec	iy
-	dec	iy
+	lea	iy, iy - 3
 	call	_ClipRegion		; get the clipping region
 	sbc	a,a			; return false if offscreen (0)
 	inc	a
@@ -2711,18 +2709,15 @@ gfx_TransparentSprite:
 	push	ix			; save ix sp
 	call	_ClipCoordinates
 	jr	nc,.culled
+	;	ixl = new width (next)
+	;	ixh = new height
 	ld	(.amount),a
-	ld	a,c			; new width
-	ld	(.next),a
-	ld	ixh,b			; new height
-	ld	b,0
 .transparent_color := $+1
 	ld	a,TRASPARENT_COLOR
 smcByte _TransparentColor
 	wait_quick
 .loop:
-	ld	c,0
-.next := $-1
+	ld	c,ixl	; next
 	lea	de,iy
 	call	_TransparentPlot	; call the transparent routine
 	ld	c,0
@@ -2792,26 +2787,22 @@ gfx_Sprite:
 ;  None
 	push	ix			; save ix sp
 	call	_ClipCoordinates
-	pop	ix			; restore ix sp
-	ret	nc
-	ld	(.amount),a
-	ld	a,c			; new width
-	ld	(.next),a
-	ld	a,b			; new height
-	ld	b,0
+	jr	nc,.culled
+	;	ixl = new width (next)
+	;	ixh = new height
 	wait_quick
 .loop:
-	ld	c,0
-.next := $-1
+	ld	c,ixl	; next
 	lea	de,iy
 	ldir
 	ld	de,ti.lcdWidth
 	add	iy,de
-	ld	c,0
-.amount := $-1
+	ld	c,a	; amount
 	add	hl,bc			; move to next line
-	dec	a
+	dec	ixh
 	jr	nz,.loop
+.culled:
+	pop	ix			; restore ix sp
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -2971,24 +2962,25 @@ _ClipCoordinates:
 ; Returns:
 ;  A  : How much to add to the sprite per iteration
 ;  BCU: 0
-;  B  : New sprite height
-;  C  : New sprite width
+;  B  : 0
+;  IXH: New sprite height
+;  IXL: New sprite width
 ;  HL : Sprite pixel pointer
 ;  IY : Buffer pixel pointer
 ;  NC : If offscreen
-	ld	ix,6			; get pointer to arguments
-	add	ix,sp
-	ld	hl,(ix+3)		; hl -> sprite data
-	ld	iy,(hl)			; iyl = width, iyh = height
+	ld	iy,6			; get pointer to arguments
+	add	iy,sp
+	ld	hl,(iy+3)		; hl -> sprite data
+	ld	ix,(hl)			; ixl = width, ixh = height
 
 	ld	bc,0
 smcWord _YMin
-	ld	hl,(ix+9)		; hl = y coordinate
+	ld	hl,(iy+9)		; hl = y coordinate
 	sbc	hl,bc
 	ex	de,hl			; de = y coordinate relative to min y
 	ld	a,ti.lcdHeight		; a = clip_height
 smcByte _YSpan
-	ld	c,iyh			; bc = height
+	ld	c,ixh			; bc = height
 	sub	a,c			; get difference between clip_height and height
 	sbc	hl,hl
 	ld	l,a
@@ -3014,21 +3006,21 @@ smcByte _YSpan
 	ret	nc
 	ex	de,hl			; e = new height - 1
 	ld	c,a			; c = negated relative y
-	ld	b,iyl			; b = width
+	ld	b,ixl			; b = width
 	mlt	bc			; bc = amount of bytes clipped off
-	ld	hl,(ix+3)		; hl -> sprite data
+	ld	hl,(iy+3)		; hl -> sprite data
 	add	hl,bc
-	ld	(ix+3),hl		; store new ptr
-	ld	(ix+9),0		; save min y coordinate
+	ld	(iy+3),hl		; store new ptr
+	ld	(iy+9),0		; save min y coordinate
 smcByte _YMin
 .clipbottom:
 	inc	e
-	ld	iyh,e			; save new height
+	ld	ixh,e			; save new height
 .yclipped:
 
 	ld	bc,0
 smcWord _XMin
-	ld	hl,(ix+6)		; hl = x coordinate
+	ld	hl,(iy+6)		; hl = x coordinate
 	or	a,a
 	sbc	hl,bc
 	ex	de,hl			; de = x coordinate relative to min x
@@ -3036,7 +3028,7 @@ smcWord _XMin
 smcWord _XSpan
 	xor	a,a
 	ld	b,a
-	ld	c,iyl			; bc = width
+	ld	c,ixl			; bc = width
 	sbc	hl,bc			; get difference between clip_width and width
 	dec	c			; bc = width - 1
 	jr	nc,.notwider
@@ -3059,32 +3051,32 @@ smcWord _XSpan
 	ret	nc			; return if offscreen
 	ex	de,hl			; e = new width - 1
 	ld	c,a			; bc = negated relative x
-	ld	hl,(ix+3)		; hl -> sprite data
+	ld	hl,(iy+3)		; hl -> sprite data
 	add	hl,bc
-	ld	(ix+3),hl
+	ld	(iy+3),hl
 	ld	hl,0
 smcWord _XMin
-	ld	(ix+6),hl		; save min x coordinate
+	ld	(iy+6),hl		; save min x coordinate
 .clipright:
 	inc	e
-	ld	a,iyl			; get old width
-	ld	iyl,e			; save new width
+	ld	a,ixl			; get old width
+	ld	ixl,e			; save new width
 	sub	a,e			; calculate bytes to add per iteration
 .xclipped:
 
-	lea.s	bc,iy
-	ld	l,(ix+9)		; l = y coordinate
+	ld	l,(iy+9)		; l = y coordinate
 	ld	h,ti.lcdWidth / 2
 	mlt	hl
 	add	hl,hl
-	ld	de,(ix+6)		; de = x coordinate
+	ld	de,(iy+6)		; de = x coordinate
 	add	hl,de
 	ex	de,hl
+	ld	hl,(iy+3)		; hl -> sprite data
+	inc	hl
+	inc	hl
 	ld	iy,(CurrentBuffer)
 	add	iy,de
-	ld	hl,(ix+3)		; hl -> sprite data
-	inc	hl
-	inc	hl
+	ld	b,0
 	scf				; set carry for success
 	ret
 
@@ -6304,6 +6296,7 @@ _Maximum:
 ; Oututs:
 ;  HL=max number
 	or	a,a
+.no_carry:
 	sbc	hl,de
 	add	hl,de
 	jp	p,.skip
@@ -6322,6 +6315,7 @@ _Minimum:
 ; Oututs:
 ;  HL=min number
 	or	a,a
+.no_carry:
 	sbc	hl,de
 	ex	de,hl
 	jp	p,.skip
@@ -6359,7 +6353,7 @@ smcWord _XMax
 smcWord _YMin
 .YMin := $-3
 	ld	de,(iy+6)
-	call	_Maximum
+	call	_Maximum.no_carry
 	ld	(iy+6),hl
 	ld	hl,ti.lcdHeight
 smcWord _YMax
