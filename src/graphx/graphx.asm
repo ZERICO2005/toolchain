@@ -4676,11 +4676,10 @@ _Polygon:
 	push	ix
 	ld	ix,0
 	add	ix,sp
-	ld	sp,hl
 	ld	iy,(ix+6)
 	jr	.startloop
 .loop:
-	push	iy
+	pea	iy + 6
 	ld	bc,(iy+9)
 	push	bc
 	ld	bc,(iy+6)
@@ -4691,12 +4690,9 @@ _Polygon:
 	push	bc
 	call	0
 .line0 := $-3
-	pop	bc
-	pop	bc
-	pop	bc
-	pop	bc
-	pop	iy
-	lea	iy,iy+6
+	lea	hl, ix - 3
+	ld	sp, hl
+	pop	iy	; iy += 6
 .startloop:
 	ld	hl,(ix+9)
 	dec	hl
@@ -5354,7 +5350,7 @@ smcByte _TransparentColor
 	add	ix,bc			; y++
 
 	dec	iyh
-	jp	nz,.outer		; y loop
+	jr	nz,.outer		; y loop
 	pop	af			; sprite out ptr
 	pop	de
 	pop	ix
@@ -5556,7 +5552,7 @@ _smc_dsrs_sinf_1:			; smc = sinf
 	add	hl,bc			; dxs += sinf
 
 	dec	iyh
-	jp	nz,_yloop		; y loop
+	jr	nz,_yloop		; y loop
 	pop	hl			; sprite out ptr
 	pop	de
 	pop	ix
@@ -6236,10 +6232,10 @@ _LZ_ReadVarSize:
 	ld	ix,0
 	lea	de,ix
 	add	ix,sp
+	push	de	; ld (ix-3),de
+	push	de	; ld (ix-6),de
 	lea	hl,ix-12
 	ld	sp,hl
-	ld	(ix-3),de
-	ld	(ix-6),de
 .loop:
 	or	a,a
 	sbc	hl,hl
