@@ -5523,47 +5523,36 @@ calcSinCosSMC:
 	ld	e, a
 	ld	hl, _SineTable
 	add	hl, de
-	ld	a, (hl)
-	bit	7, b
-	jr	z, .positive_angle
-	neg
-.positive_angle:
-
-	ld	l,0
-	ld	h,a
-	; (int16_t)HL >>= 1
-	sra	h			; hl = _SineTable[angle + 64] * 128
+	ld	h, (hl)
+	ld	l, d	; ld l, 0
+	; (uint16_t)HL >>= 1
+	srl	h			; hl = _SineTable[angle + 64] * 128
 	rr	l
 
 	; _16Div8Signed:
 	; hl = _SineTable[angle + 64] * 128 / scale (cos)
-	xor	a,c	; signbit(HL) ^ signbit(C)
+	ld	a, b
+	xor	a, c	; signbit(B) ^ signbit(C)
 	push	af
-	bit	7,h
-	jr	z,.next0
-	ex	de,hl
-	sbc	hl,hl
-	sbc	hl,de
-.next0:
-	xor	a,a
-	sub	a,c
-	jp	m,.next1
-	ld	c,a
+	xor	a, a
+	sub	a, c
+	jp	m, .next1
+	ld	c, a
 .next1:
 	; HL <<= 8 (although low 8 bits will be random)
 	push	hl
 	dec	sp
 	pop	hl
 	inc	sp
-	ld	b,16
-	xor	a,a
-	ld	l,a	; ld l, 0
+	ld	b, 16
+	xor	a, a
+	ld	l, a	; ld l, 0
 .div:
-	add	hl,hl
+	add	hl, hl
 	rla
-	cp	a,c
-	jr	c,.check
-	sub	a,c
+	cp	a, c
+	jr	c, .check
+	sub	a, c
 	inc	l
 .check:
 	djnz	.div
@@ -5571,9 +5560,10 @@ calcSinCosSMC:
 	; UHL is zero here
 	ret	p
 	; negate
-	ex	de,hl
-	sbc	hl,hl
-	sbc	hl,de
+	; carry is reset here
+	ex	de, hl
+	sbc	hl, hl
+	sbc	hl, de
 	ret
 
 _SineTable:
