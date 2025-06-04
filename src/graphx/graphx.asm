@@ -5531,14 +5531,13 @@ calcSinCosSMC:
 
 	ld	l,0
 	ld	h,a
-	rlca
-	rr	h			; hl = _SineTable[angle + 64] * 128
-	ld	b,l	; ld b, 0
-		
+	; (int16_t)HL >>= 1
+	sra	h			; hl = _SineTable[angle + 64] * 128
+	rr	l
+
 	; _16Div8Signed:
 	; hl = _SineTable[angle + 64] * 128 / scale (cos)
-	ld	a,h
-	xor	a,c
+	xor	a,c	; signbit(HL) ^ signbit(C)
 	push	af
 	bit	7,h
 	jr	z,.next0
@@ -5551,12 +5550,14 @@ calcSinCosSMC:
 	jp	m,.next1
 	ld	c,a
 .next1:
+	; HL <<= 8 (although low 8 bits will be random)
 	push	hl
 	dec	sp
 	pop	hl
 	inc	sp
 	ld	b,16
 	xor	a,a
+	ld	l,a	; ld l, 0
 .div:
 	add	hl,hl
 	rla
@@ -5567,17 +5568,12 @@ calcSinCosSMC:
 .check:
 	djnz	.div
 	pop	af
-	jp	p, .skip
+	; UHL is zero here
+	ret	p
+	; negate
 	ex	de,hl
 	sbc	hl,hl
 	sbc	hl,de
-.skip:
-	ex	de,hl
-	ld	a,d
-	rlca
-	sbc	hl,hl
-	ld	l,e
-	ld	h,d
 	ret
 
 _SineTable:
