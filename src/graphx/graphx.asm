@@ -6243,8 +6243,8 @@ _LZ_ReadVarSize:
 	ld	ix,0
 	lea	de,ix
 	add	ix,sp
-	push	de	; ld (ix-3),de
-	push	de	; ld (ix-6),de
+	ld	(ix-3),de
+	ld	(ix-6),de
 	lea	hl,ix-12
 	ld	sp,hl
 .loop:
