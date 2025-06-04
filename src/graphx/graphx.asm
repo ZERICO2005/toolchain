@@ -5176,19 +5176,6 @@ _RotatedScaledSprite:
 	ld	a,(ix+15)		; angle
 	ld	c,(ix+18)
 	call	calcSinCosSMC
-	; call	getSinCos
-	; ld	l,0
-	; ld	h,a
-	; rlca
-	; rr	h			; hl = _SineTable[angle] * 128
-	; ld	b,0
-	; call	_16Div8Signed		; hl = _SineTable[angle] * 128 / scale (sin)
-	; ex	de,hl
-	; ld	a,d
-	; rlca
-	; sbc	hl,hl
-	; ld	l,e
-	; ld	h,d
 	ld	(.dsrs_sinf_1),hl	; write smc
 	push	hl
 	ex	de,hl
@@ -5200,18 +5187,8 @@ _RotatedScaledSprite:
 
 	; dxs = sinf * -(size * scale / 128);
 	ld	c,(ix+18)
-	ld	b,(iy)
-	mlt	bc			; size * scale
-	rl	c
-	rl	b
-	ld	c,b			; (size * scale / 128)
-	xor	a,a
-	sub	a,c
-	ld	c,a
-	sbc	a,a
-	ld	b,a			; -(size * scale / 128)
-	ld	(ix-3),bc
-	call	_16Mul16SignedNeg	; sinf * -(size * scale / 128)
+	call	_CalcDXS
+
 	ld	(.dsrs_dys_0),hl	; write smc
 	push	hl
 
@@ -5220,19 +5197,6 @@ _RotatedScaledSprite:
 	add	a,(ix+15)		; angle + 64
 	ld	c,(ix+18)
 	call	calcSinCosSMC
-	; call	getSinCos
-	; ld	l,0
-	; ld	h,a
-	; rlca
-	; rr	h			; hl = _SineTable[angle + 64] * 128
-	; ld	b,0
-	; call	_16Div8Signed		; hl = _SineTable[angle + 64] * 128 / scale (cos)
-	; ex	de,hl
-	; ld	a,d
-	; rlca
-	; sbc	hl,hl
-	; ld	l,e
-	; ld	h,d
 	ld	(.dsrs_cosf_0),hl	; write smc
 	ld	(.dsrs_cosf_1),hl	; write smc
 
@@ -5385,49 +5349,25 @@ gfx_RotateScaleSprite:
 	push	hl
 	ld	iy,(ix+6)		; sprite pointer
 	lea	hl,iy+2
-	ld	(_smc_dsrs_sprptr_0 + 1),hl ; write smc
-
+	ld	(_smc_dsrs_sprptr_0),hl ; write smc
 	; sinf = _SineTable[angle] * 128 / scale;
 	ld	a,(ix+12)		; angle
 	ld	c,(ix+15)
 	call	calcSinCosSMC
-	; call	getSinCos
-	; ld	l,0
-	; ld	h,a
-	; rlca
-	; rr	h			; hl = _SineTable[angle] * 128
-	; ld	b,0
-	; call	_16Div8Signed		; hl = _SineTable[angle] * 128 / scale (sin)
-	; ex	de,hl
-	; ld	a,d
-	; rlca
-	; sbc	hl,hl
-	; ld	l,e
-	; ld	h,d
-	ld	(_smc_dsrs_sinf_1 + 1),hl ; write smc
+	ld	(_smc_dsrs_sinf_1),hl ; write smc
 	push	hl
 	ex	de,hl
 	sbc	hl,hl
 	ccf
 	sbc	hl,de
-	ld	(_smc_dsrs_sinf_0 + 1),hl ; write smc
+	ld	(_smc_dsrs_sinf_0),hl ; write smc
 	pop	hl
 
 	; dxs = sinf * -(size * scale / 128);
 	ld	c,(ix+15)
-	ld	b,(iy)
-	mlt	bc			; size * scale
-	rl	c
-	rl	b
-	ld	c,b			; (size * scale / 128)
-	xor	a,a
-	sub	a,c
-	ld	c,a
-	sbc	a,a
-	ld	b,a			; -(size * scale / 128)
-	ld	(ix-3),bc
-	call	_16Mul16SignedNeg	; sinf * -(size * scale / 128)
-	ld	(_smc_dsrs_dys_0 + 1),hl ; write smc
+	call	_CalcDXS
+
+	ld	(_smc_dsrs_dys_0),hl ; write smc
 	push	hl
 
 	; cosf = _SineTable[angle + 64] * 128 / scale
@@ -5435,32 +5375,19 @@ gfx_RotateScaleSprite:
 	add	a,(ix+12)		; angle + 64
 	ld	c,(ix+15)
 	call	calcSinCosSMC
-	; call	getSinCos
-	; ld	l,0
-	; ld	h,a
-	; rlca
-	; rr	h			; hl = _SineTable[angle + 64] * 128
-	; ld	b,0
-	; call	_16Div8Signed		; hl = _SineTable[angle + 64] * 128 / scale (cos)
-	; ex	de,hl
-	; ld	a,d
-	; rlca
-	; sbc	hl,hl
-	; ld	l,e
-	; ld	h,d
-	ld	(_smcdsrs_cosf_0 + 1),hl ; write smc
-	ld	(_smc_dsrs_cosf_1 + 1),hl ; write smc
+	ld	(_smcdsrs_cosf_0),hl ; write smc
+	ld	(_smc_dsrs_cosf_1),hl ; write smc
 
 	; dxc = cosf * -(size * scale / 128);
 	ld	bc,(ix-3)		; -(size * scale / 128)
 	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
-	ld	(_smcdsrs_dyc_0 + 1),hl ; write smc
+	ld	(_smcdsrs_dyc_0),hl ; write smc
 	push	hl
 
 	ld	a,(iy)			; size
-	ld	(_smcdsrs_ssize_1 + 1),a ; write smc
+	ld	(_smcdsrs_ssize_1),a ; write smc
 	dec	a
-	ld	(_smcdsrs_ssize_0 + 1),a ; write smc
+	ld	(_smcdsrs_ssize_0),a ; write smc
 	inc	a
 	ld	b,a
 	ld	c,(ix+15)
@@ -5469,17 +5396,17 @@ gfx_RotateScaleSprite:
 	or	a,a
 	sbc	hl,hl
 	ld	h,a
-	ld	(_smc_dsrs_size128_0 + 1),hl ; write smc
-	ld	(_smc_dsrs_size128_1 + 1),hl ; write smc
+	ld	(_smc_dsrs_size128_0),hl ; write smc
+	ld	(_smc_dsrs_size128_1),hl ; write smc
 	ld	a,b
 	rl	c
 	adc	a,a
 	rl	c
 	adc	a,a			; size * scale / 64
-	jr	nz,.skip
+	jr	nz,.hax
 	inc	a			; hax for scale = 1?
-.skip:
-	ld	(_smc_dsrs_size_1 + 2),a ; write smc
+.hax:
+	ld	(_smc_dsrs_size_1),a ; write smc
 
 	pop	de			; smc = dxc start
 	pop	hl			; smc = dxs start
@@ -5496,23 +5423,23 @@ _yloop:
 	push	de			; dxc
 
 	; xs = (dxs + dyc) + (size * 128);
-_smcdsrs_dyc_0:
 	ld	bc,$000000
+_smcdsrs_dyc_0 := $-3
 	add	hl,bc
-_smc_dsrs_size128_0:
 	ld	bc,$000000
+_smc_dsrs_size128_0 := $-3
 	add	hl,bc
 	ex	de,hl			; de = (dxs + dyc) + (size * 128)
 	; ys = (dxc - dys) + (size * 128);
-_smc_dsrs_dys_0:
 	ld	bc,$000000
+_smc_dsrs_dys_0 := $-3
 	or	a,a
 	sbc	hl,bc
-_smc_dsrs_size128_1:
 	ld	bc,$000000
+_smc_dsrs_size128_1 := $-3
 	add	hl,bc			; hl = (dxc - dys) + (size * 128)
 
-_smc_dsrs_size_1:			; smc = size * scale / 64
+_smc_dsrs_size_1 := $+2			; smc = size * scale / 64
 	ld	iyl,$00
 _xloop:
 	push	hl			; xs
@@ -5523,47 +5450,47 @@ _xloop:
 	ld	c,TRASPARENT_COLOR
 smcByte _TransparentColor
 	jr	c,drawSpriteRotateScale_SkipPixel
-_smcdsrs_ssize_0:
 	ld	a,0
+_smcdsrs_ssize_0 := $-1
 	cp	a,d
 	jr	c,drawSpriteRotateScale_SkipPixel
 	cp	a,h
 	jr	c,drawSpriteRotateScale_SkipPixel
 
 	; get pixel and draw to buffer
-_smcdsrs_ssize_1:
 	ld	c,0
+_smcdsrs_ssize_1 := $-1
 	ld	b,h
 	mlt	bc
 	sbc	hl,hl
 	ld	l,d
 	add	hl,bc			; y * size + x
-_smc_dsrs_sprptr_0:
 	ld	bc,0
+_smc_dsrs_sprptr_0 := $-3
 	add	hl,bc
 	ld	c,(hl)
 drawSpriteRotateScale_SkipPixel:
 	ld	(ix),c			; write pixel
 	inc	ix			; x++s
-_smcdsrs_cosf_0:			; smc = cosf
-	ld	hl,0
+	ld	hl,0			; smc = cosf
+_smcdsrs_cosf_0 := $-3
 	add	hl,de			; xs += cosf
 	ex	de,hl
 	pop	hl			; ys
-_smc_dsrs_sinf_0:			; smc = -sinf
-	ld	bc,0
+	ld	bc,0			; smc = -sinf
+_smc_dsrs_sinf_0 := $-3
 	add	hl,bc			; ys += -sinf
 	dec	iyl
 	jr	nz,_xloop		; x loop
 
 	pop	hl			; dxc
-_smc_dsrs_cosf_1:			; smc = cosf
-	ld	bc,0
+	ld	bc,0			; smc = cosf
+_smc_dsrs_cosf_1 := $-3
 	add	hl,bc			; dxc += cosf
 	ex	de,hl
 	pop	hl			; dxs
-_smc_dsrs_sinf_1:			; smc = sinf
-	ld	bc,0
+	ld	bc,0			; smc = sinf
+_smc_dsrs_sinf_1 := $-3
 	add	hl,bc			; dxs += sinf
 
 	dec	iyh
@@ -5573,11 +5500,13 @@ _smc_dsrs_sinf_1:			; smc = sinf
 	pop	ix
 	ret
 
-
-
 calcSinCosSMC:
-;	call	getSinCos
-; getSinCos:
+; inputs:
+; A = angle
+; C = scale
+; outputs:
+; HL = value
+	; getSinCos:
 	; returns a = sin/cos(a) * 128
 	ld	de, $80
 	ld	b, a
@@ -5596,9 +5525,6 @@ calcSinCosSMC:
 	add	hl, de
 	ld	a, (hl)
 	bit	7, b
-;	ret	z
-;	neg
-;	ret
 	jr	z, .positive_angle
 	neg
 .positive_angle:
@@ -5607,10 +5533,10 @@ calcSinCosSMC:
 	ld	h,a
 	rlca
 	rr	h			; hl = _SineTable[angle + 64] * 128
-	ld	b,0
-	
-;	call	_16Div8Signed		; hl = _SineTable[angle + 64] * 128 / scale (cos)
-; _16Div8Signed:
+	ld	b,l	; ld b, 0
+		
+	; _16Div8Signed:
+	; hl = _SineTable[angle + 64] * 128 / scale (cos)
 	ld	a,h
 	xor	a,c
 	push	af
@@ -5631,7 +5557,8 @@ calcSinCosSMC:
 	inc	sp
 	ld	b,16
 	xor	a,a
-.div:	add	hl,hl
+.div:
+	add	hl,hl
 	rla
 	cp	a,c
 	jr	c,.check
@@ -5640,12 +5567,11 @@ calcSinCosSMC:
 .check:
 	djnz	.div
 	pop	af
-	ret	p
+	jp	p, .skip
 	ex	de,hl
 	sbc	hl,hl
 	sbc	hl,de
-;	ret
-
+.skip:
 	ex	de,hl
 	ld	a,d
 	rlca
@@ -5661,6 +5587,23 @@ _SineTable:
 	db 91,93,95,97,99,101,103,105,106,108,110,111,113,114,116,117
 	db 118,119,121,122,122,123,124,125,126,126,127,127,127,127,127,127,127
 
+_CalcDXS:
+	; inputs:
+	; (iy + 0) = size
+	; C = scale
+	; sinf * -(size * scale / 128)
+	ld	b,(iy)
+	mlt	bc			; size * scale
+	rl	c
+	rl	b
+	ld	c,b			; (size * scale / 128)
+	xor	a,a
+	sub	a,c
+	ld	c,a
+	sbc	a,a
+	ld	b,a			; -(size * scale / 128)
+	ld	(ix-3),bc
+	; sinf * -(size * scale / 128)
 _16Mul16SignedNeg:
 	ld	d,b
 	ld	e,l
