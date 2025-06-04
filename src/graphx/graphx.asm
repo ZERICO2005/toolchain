@@ -5174,20 +5174,21 @@ _RotatedScaledSprite:
 
 	; sinf = _SineTable[angle] * 128 / scale;
 	ld	a,(ix+15)		; angle
-	call	getSinCos
-	ld	l,0
-	ld	h,a
-	rlca
-	rr	h			; hl = _SineTable[angle] * 128
 	ld	c,(ix+18)
-	ld	b,0
-	call	_16Div8Signed		; hl = _SineTable[angle] * 128 / scale (sin)
-	ex	de,hl
-	ld	a,d
-	rlca
-	sbc	hl,hl
-	ld	l,e
-	ld	h,d
+	call	calcSinCosSMC
+	; call	getSinCos
+	; ld	l,0
+	; ld	h,a
+	; rlca
+	; rr	h			; hl = _SineTable[angle] * 128
+	; ld	b,0
+	; call	_16Div8Signed		; hl = _SineTable[angle] * 128 / scale (sin)
+	; ex	de,hl
+	; ld	a,d
+	; rlca
+	; sbc	hl,hl
+	; ld	l,e
+	; ld	h,d
 	ld	(.dsrs_sinf_1),hl	; write smc
 	push	hl
 	ex	de,hl
@@ -5217,20 +5218,21 @@ _RotatedScaledSprite:
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	ld	a,64
 	add	a,(ix+15)		; angle + 64
-	call	getSinCos
-	ld	l,0
-	ld	h,a
-	rlca
-	rr	h			; hl = _SineTable[angle + 64] * 128
 	ld	c,(ix+18)
-	ld	b,0
-	call	_16Div8Signed		; hl = _SineTable[angle + 64] * 128 / scale (cos)
-	ex	de,hl
-	ld	a,d
-	rlca
-	sbc	hl,hl
-	ld	l,e
-	ld	h,d
+	call	calcSinCosSMC
+	; call	getSinCos
+	; ld	l,0
+	; ld	h,a
+	; rlca
+	; rr	h			; hl = _SineTable[angle + 64] * 128
+	; ld	b,0
+	; call	_16Div8Signed		; hl = _SineTable[angle + 64] * 128 / scale (cos)
+	; ex	de,hl
+	; ld	a,d
+	; rlca
+	; sbc	hl,hl
+	; ld	l,e
+	; ld	h,d
 	ld	(.dsrs_cosf_0),hl	; write smc
 	ld	(.dsrs_cosf_1),hl	; write smc
 
@@ -5387,20 +5389,21 @@ gfx_RotateScaleSprite:
 
 	; sinf = _SineTable[angle] * 128 / scale;
 	ld	a,(ix+12)		; angle
-	call	getSinCos
-	ld	l,0
-	ld	h,a
-	rlca
-	rr	h			; hl = _SineTable[angle] * 128
 	ld	c,(ix+15)
-	ld	b,0
-	call	_16Div8Signed		; hl = _SineTable[angle] * 128 / scale (sin)
-	ex	de,hl
-	ld	a,d
-	rlca
-	sbc	hl,hl
-	ld	l,e
-	ld	h,d
+	call	calcSinCosSMC
+	; call	getSinCos
+	; ld	l,0
+	; ld	h,a
+	; rlca
+	; rr	h			; hl = _SineTable[angle] * 128
+	; ld	b,0
+	; call	_16Div8Signed		; hl = _SineTable[angle] * 128 / scale (sin)
+	; ex	de,hl
+	; ld	a,d
+	; rlca
+	; sbc	hl,hl
+	; ld	l,e
+	; ld	h,d
 	ld	(_smc_dsrs_sinf_1 + 1),hl ; write smc
 	push	hl
 	ex	de,hl
@@ -5430,20 +5433,21 @@ gfx_RotateScaleSprite:
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	ld	a,64
 	add	a,(ix+12)		; angle + 64
-	call	getSinCos
-	ld	l,0
-	ld	h,a
-	rlca
-	rr	h			; hl = _SineTable[angle + 64] * 128
 	ld	c,(ix+15)
-	ld	b,0
-	call	_16Div8Signed		; hl = _SineTable[angle + 64] * 128 / scale (cos)
-	ex	de,hl
-	ld	a,d
-	rlca
-	sbc	hl,hl
-	ld	l,e
-	ld	h,d
+	call	calcSinCosSMC
+	; call	getSinCos
+	; ld	l,0
+	; ld	h,a
+	; rlca
+	; rr	h			; hl = _SineTable[angle + 64] * 128
+	; ld	b,0
+	; call	_16Div8Signed		; hl = _SineTable[angle + 64] * 128 / scale (cos)
+	; ex	de,hl
+	; ld	a,d
+	; rlca
+	; sbc	hl,hl
+	; ld	l,e
+	; ld	h,d
 	ld	(_smcdsrs_cosf_0 + 1),hl ; write smc
 	ld	(_smc_dsrs_cosf_1 + 1),hl ; write smc
 
@@ -5569,10 +5573,14 @@ _smc_dsrs_sinf_1:			; smc = sinf
 	pop	ix
 	ret
 
-getSinCos:
+
+
+calcSinCosSMC:
+;	call	getSinCos
+; getSinCos:
 	; returns a = sin/cos(a) * 128
 	ld	de, $80
-	ld	c, a
+	ld	b, a
 	bit	7, a
 	jr	z, .bit7
 	sub	a, e	; sub a, 128
@@ -5587,19 +5595,22 @@ getSinCos:
 	ld	hl, _SineTable
 	add	hl, de
 	ld	a, (hl)
-	bit	7, c
-	ret	z
+	bit	7, b
+;	ret	z
+;	neg
+;	ret
+	jr	z, .positive_angle
 	neg
-	ret
+.positive_angle:
 
-_SineTable:
-	; sin(x) * 128
-	db 0,3,6,9,13,16,19,22,25,28,31,34,37,40,43,46
-	db 49,52,55,58,60,63,66,68,71,74,76,79,81,84,86,88
-	db 91,93,95,97,99,101,103,105,106,108,110,111,113,114,116,117
-	db 118,119,121,122,122,123,124,125,126,126,127,127,127,127,127,127,127
-
-_16Div8Signed:
+	ld	l,0
+	ld	h,a
+	rlca
+	rr	h			; hl = _SineTable[angle + 64] * 128
+	ld	b,0
+	
+;	call	_16Div8Signed		; hl = _SineTable[angle + 64] * 128 / scale (cos)
+; _16Div8Signed:
 	ld	a,h
 	xor	a,c
 	push	af
@@ -5633,7 +5644,22 @@ _16Div8Signed:
 	ex	de,hl
 	sbc	hl,hl
 	sbc	hl,de
+;	ret
+
+	ex	de,hl
+	ld	a,d
+	rlca
+	sbc	hl,hl
+	ld	l,e
+	ld	h,d
 	ret
+
+_SineTable:
+	; sin(x) * 128
+	db 0,3,6,9,13,16,19,22,25,28,31,34,37,40,43,46
+	db 49,52,55,58,60,63,66,68,71,74,76,79,81,84,86,88
+	db 91,93,95,97,99,101,103,105,106,108,110,111,113,114,116,117
+	db 118,119,121,122,122,123,124,125,126,126,127,127,127,127,127,127,127
 
 _16Mul16SignedNeg:
 	ld	d,b
