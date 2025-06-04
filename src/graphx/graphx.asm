@@ -2921,7 +2921,6 @@ gfx_TransparentSprite_NoClip:
 	add	iy,sp
 	ld	hl,(iy+6)		; hl = x coordinate
 	ld	c,(iy+9)		; c = y coordinate
-	ld	iy,(iy+3)		; iy -> sprite struct
 	ld	de,(CurrentBuffer)
 	add	hl,de
 	ld	b,ti.lcdWidth / 2
@@ -2929,13 +2928,14 @@ gfx_TransparentSprite_NoClip:
 	add	hl,bc
 	add	hl,bc			; hl -> place to draw
 	push	hl
-	ld	a,(iy+0)
+	ld	hl,(iy+3)		; hl -> sprite struct
+	ld	a,(hl)
+	inc	hl
 	ld	(.next),a
-	ld	a,(iy+1)
-	lea	hl,iy+2
-	pop	iy
-	push	ix
-	ld	ixh,a			; ixh = height of sprite
+	ld	a,(hl)
+	inc	hl
+	ex	(sp), ix		; preserve ix and load it with (sp)
+	ld	iyh,a			; ixh = height of sprite
 	ld	b,0			; zero mid byte
 	ld	a,TRASPARENT_COLOR
 smcByte _TransparentColor
@@ -2943,11 +2943,11 @@ smcByte _TransparentColor
 .loop:
 	ld	c,0
 .next := $-1
-	lea	de,iy
+	lea	de,ix
 	call	_TransparentPlot	; call the plotter
 	ld	de,ti.lcdWidth
-	add	iy,de
-	dec	ixh			; loop for height
+	add	ix,de
+	dec	iyh			; loop for height
 	jr	nz,.loop
 	pop	ix			; restore stack pointer
 	ret
@@ -4061,12 +4061,12 @@ gfx_SetMonospaceFont:
 ;  arg0 : Monospace spacing amount
 ; Returns:
 ;  None
+	pop	hl
 	pop	de
-	ex	(sp), hl
 	push	de
-	ld	a,l			; a = width
+	ld	a,e			; a = width
 	ld	(_TextFixedWidth),a	; store the value of the monospace width
-	ret
+	jp	(hl)
 
 ;-------------------------------------------------------------------------------
 gfx_FillTriangle_NoClip:
@@ -4248,7 +4248,7 @@ _FillTriangle:
 .sublast:
 	ld	bc,(ix+9)
 	ld	(ix-12),bc		; for (y = y0; y <= last; y++)
-	jp	.firstloopstart
+	jr	.firstloopstart
 .firstloop:
 	ld	hl,(ix-15)
 	ld	bc,(ix-33)
@@ -4674,9 +4674,9 @@ _Polygon:
 	ld	(.line0),hl
 	ld	(.line1),hl
 	push	ix
-	ld	ix,0
+	ld	ix,-3
 	add	ix,sp
-	ld	iy,(ix+6)
+	ld	iy,(ix+9)
 	jr	.startloop
 .loop:
 	pea	iy + 6
@@ -4690,13 +4690,12 @@ _Polygon:
 	push	bc
 	call	0
 .line0 := $-3
-	lea	hl, ix - 3
-	ld	sp, hl
+	ld	sp, ix
 	pop	iy	; iy += 6
 .startloop:
-	ld	hl,(ix+9)
+	ld	hl,(ix+12)
 	dec	hl
-	ld	(ix+9),hl
+	ld	(ix+12),hl
 	add	hl,bc
 	or	a,a
 	sbc	hl,bc
@@ -4705,14 +4704,15 @@ _Polygon:
 	push	bc
 	ld	bc,(iy+0)
 	push	bc
-	ld	iy,(ix+6)
+	ld	iy,(ix+9)
 	ld	bc,(iy+3)
 	push	bc
 	ld	bc,(iy+0)
 	push	bc
 	call	0
 .line1 := $-3
-	ld	sp,ix
+	lea	hl, ix + 3
+	ld	sp, hl
 	pop	ix
 	ret
 
@@ -4842,42 +4842,48 @@ gfx_FlipSpriteY:
 ;  arg1 : Pointer to sprite struct output
 	ld	iy,0
 	add	iy,sp
-	push	ix
-	ld	ix,(iy+3)
-	ld	a,(ix+0)		; a = width of sprite
+	ld	de,(iy+3)
+	ld	a,(de)		; a = width of sprite
+	inc.s	bc		; clear UBC
+
 	sbc	hl,hl
 	ld	l,a
 	ld	c,a
-	push	hl
-	ld	(.width),a
-	add	hl,hl
-	ld	(.delta),hl		; width*2
-	ld	a,(ix+1)		; a = height of sprite
-	pop	hl
-	lea	de,ix+2
+
+	inc	de
+	ld	a,(de)		; a = height of sprite
+
+	inc	de
 	add	hl,de
-	ld	ix,(iy+6)
-	ld	(ix+1),a		; store height to width
-	ld	(ix+0),c		; store width to height
-	lea	de,ix+2			; de -> sprite data
-	ex	(sp),ix			; restore stack frame
+	ld	de,(iy+6)	; de -> sprite data
+	push	de
+;	ld	iyl, c
+;	ex	de, hl
+;	ld	(hl),c		; store width to height
+;	ex	de, hl
+	inc	de
+	ld	(de),a		; store height to width
+	ld	iyh, a
+;	inc	de		; use the inc de inside the loop instead
 .loop:
-	ld	b,0
-.width := $-1
-	ld	c,a
+	ld	b,c	; width
+;	ld	c,a
 .pixelloop:
 	dec	hl
+	inc	de
 	ld	a,(hl)
 	ld	(de),a			; store the new pixel data
-	inc	de
 	djnz	.pixelloop
-	ld	a,c
-	ld	bc,0
-.delta := $-3
+;	ld	a,c
+;	ld	c,iyl	; delta
+	; hl += delta * 2
 	add	hl,bc
-	dec	a
+	add	hl,bc
+;	dec	a
+	dec	iyh
 	jr	nz,.loop
 	pop	hl
+	ld	(hl),c		; store width to height (the loop preserves c)
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -4890,37 +4896,41 @@ gfx_FlipSpriteX:
 ;  arg1 : Pointer to sprite struct output
 	ld	iy,0
 	add	iy,sp
-	push	ix
-	ld	ix,(iy+3)
+	ld	hl,(iy+3)
 	xor	a,a
-	sub	a,(ix+0)
+	sub	a,(hl)
+	inc	hl
 	ld	(.delta),a
 	neg
 	ld	(.width),a
-	ld	l,(ix+1)
-	ld	c,l
-	dec	l
-	ld	h,a
-	mlt	hl
-	lea	de,ix+2
+
+	ld	e,(hl)
+	inc	hl
+	ld	c,e
+	dec	e
+	ld	d,a
+	mlt	de
 	add	hl,de
-	ld	ix,(iy+6)
-	ld	(ix+0),a
-	ld	(ix+1),c
-	lea	de,ix+2
-	push	ix
+	ld	de,(iy+6)	; de -> sprite data
+	push	de
+	ex	de, hl
+	ld	(hl),c		; store width to height
+	ex	de, hl
+	inc	de
+	ld	(de),a		; store height to width
+	inc	de
 .loop:
 	ld	bc,0
 .width := $-3
 	ldir
-	ld	bc,-1
-.delta := $-3
+	dec	bc	; ld bc, -1
+	ld	c,-1
+.delta := $-1
 	add	hl,bc
 	add	hl,bc
 	dec	a
 	jr	nz,.loop
 	pop	hl
-	pop	ix
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -5018,11 +5028,12 @@ gfx_RotateSpriteHalf:
 	ld	c,(hl)			; c = width
 	inc	hl
 	ld	b,(hl)			; b = height
-	ld	iy,(iy+6)
-	ld	(iy+0),bc
+	ld	de,(iy+6)
+	ex	de, hl
+	ld	(hl),bc
+	ex	de, hl
 	mlt	bc
 	add	hl,bc
-	lea	de,iy
 	push	de
 .loop:
 	inc	de
