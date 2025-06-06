@@ -5541,18 +5541,15 @@ calcSinCosSMC:
 	ld	a, b
 	or	a, a
 	push	af
-	xor	a, a
-	sub	a, c
-	jp	m, .next1
-	ld	c, a
-.next1:
 	ld	b, 16
 	xor	a, a
 .div:
 	add	hl, hl
 	rla
+	jr	c, .overflow	; this path is only used when C >= 128
 	cp	a, c
 	jr	c, .check
+.overflow:
 	sub	a, c
 	inc	l
 .check:
