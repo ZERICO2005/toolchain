@@ -5153,10 +5153,10 @@ gfx_RotatedScaledTransparentSprite_NoClip:
 
 _RotatedScaledSprite:
 	ld	(.rotatescale),a
-	push	ix	; sp - 0
+	push	ix
 	ld	ix,0
 	add	ix,sp
-	push	hl	; sp - 3
+	push	hl	; frameset(-3)
 	ld	iy,(ix+6)		; sprite pointer
 	lea	hl,iy+2
 	ld	(.dsrs_sprptr_0),hl	; write smc
@@ -5170,27 +5170,26 @@ _RotatedScaledSprite:
 	ex	de,hl
 	ld	hl,(CurrentBuffer)
 	add	hl,de			; offset buffer
-	push	hl	; sp - 6
+	push	hl
 
 	; sinf = _SineTable[angle] * 128 / scale;
 	ld	a,(ix+15)		; angle
 	ld	e,(ix+18)
 	call	calcSinCosSMC
 	ld	(.dsrs_sinf_1),hl	; write smc
-	push	hl	; sp - 9
+	push	hl
 	ex	de,hl
 	sbc	hl,hl
 	ccf
 	sbc	hl,de
 	ld	(.dsrs_sinf_0),hl	; write smc
-	pop	hl	; sp - 9
+	pop	hl
 
 	; dxs = sinf * -(size * scale / 128);
 	ld	c,(ix+18)
 	call	_CalcDXS
 
-;	ld	(.dsrs_dys_0),hl	; write smc
-	push	hl	; sp - 9
+	push	hl	; ld (ix - 9), dsrs_dys_0
 
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	ld	a,64
@@ -5203,8 +5202,7 @@ _RotatedScaledSprite:
 	; dxc = cosf * -(size * scale / 128);
 	ld	bc,(ix-3)		; -(size * scale / 128)
 	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
-;	ld	(.dsrs_dyc_0),hl	; write smc
-	push	hl	; sp - 12
+	push	hl	; ld (ix - 12), dsrs_dyc_0
 
 	ld	a,(iy)			; size
 	ld	(.dsrs_ssize_1),a	; write smc
@@ -5219,17 +5217,6 @@ _RotatedScaledSprite:
 	sbc	hl,hl
 	ld	h,a
 
-if 0
-	ld	de, (ix - 12)	; dsrs_dyc_0
-	add	hl, de
-	ld	(.dsrs_size128_0_plus_dyc_0),hl	; write smc
-	or	a, a
-	sbc	hl, de
-	
-	ld	de, (ix - 9)	; dsrs_dys_0
-	sbc	hl, de
-	ld	(.dsrs_size128_1_minus_dys_0),hl	; write smc
-else
 	; carry is cleared here
 	ld	de, (ix - 9)	; dsrs_dys_0
 	sbc	hl, de
@@ -5239,7 +5226,6 @@ else
 	add	hl, de
 	ld	(.dsrs_size128_0_plus_dyc_0),hl	; write smc
 	; carry might be set, but that shouldn't matter for rl c
-end if
 
 	ld	a,b
 	rl	c
@@ -5268,30 +5254,12 @@ end if
 	call	gfx_Wait
 .outer:
 	push	hl			; dxs
-	push	de			; dxc
-
+	push	de			; dxc		
 	
-; 	ld	bc,0
-; .dsrs_dyc_0 := $-3
-; 	add	hl,bc
-; 	ld	bc,0
-; .dsrs_size128_0 := $-3
-; 	add	hl,bc
-; 	ex	de,hl			
-	
-
 	ld	bc, 0	; xs = (dxs + dyc) + (size * 128);
 .dsrs_size128_0_plus_dyc_0 := $-3	
 	add	hl, bc
 	ex	de, hl	; de = (dxs + dyc) + (size * 128)
-
-; 	ld	bc,0
-; .dsrs_dys_0 := $-3
-; 	or	a,a
-; 	sbc	hl,bc
-; 	ld	bc,0
-; .dsrs_size128_1 := $-3
-; 	add	hl,bc			; hl = (dxc - dys) + (size * 128)
 
 	ld	bc, 0	; ys = (dxc - dys) + (size * 128);
 .dsrs_size128_1_minus_dys_0 := $-3
@@ -5374,10 +5342,10 @@ gfx_RotateScaleSprite:
 ;  arg3 : Scale factor (64 = 100%)
 ; Returns:
 ;  arg1 : Pointer to sprite struct output
-	push	ix	; sp - 0
+	push	ix
 	ld	ix,0
 	add	ix,sp
-	push	hl	; sp - 3
+	push	hl	; frameset(-3)
 	ld	iy,(ix+6)		; sprite pointer
 	lea	hl,iy+2
 	ld	(_smc_dsrs_sprptr_0),hl ; write smc
@@ -5386,20 +5354,19 @@ gfx_RotateScaleSprite:
 	ld	e,(ix+15)
 	call	calcSinCosSMC
 	ld	(_smc_dsrs_sinf_1),hl ; write smc
-	push	hl	; sp - 6
+	push	hl
 	ex	de,hl
 	sbc	hl,hl
 	ccf
 	sbc	hl,de
 	ld	(_smc_dsrs_sinf_0),hl ; write smc
-	pop	hl	; sp - 6
+	pop	hl
 
 	; dxs = sinf * -(size * scale / 128);
 	ld	c,(ix+15)
 	call	_CalcDXS
 
-;	ld	(_smc_dsrs_dys_0),hl ; write smc
-	push	hl	; sp - 6
+	push	hl	; ld (ix - 6), _smc_dsrs_dys_0
 
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	ld	a,64
@@ -5412,8 +5379,7 @@ gfx_RotateScaleSprite:
 	; dxc = cosf * -(size * scale / 128);
 	ld	bc,(ix-3)		; -(size * scale / 128)
 	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
-;	ld	(_smc_dsrs_dyc_0),hl ; write smc
-	push	hl	; sp - 9
+	push	hl	; ld (ix - 9), _smc_dsrs_dyc_0
 
 	ld	a,(iy)			; size
 	ld	(_smc_dsrs_ssize_1),a ; write smc
@@ -5428,8 +5394,6 @@ gfx_RotateScaleSprite:
 	sbc	hl,hl
 	ld	h,a
 
-	; ld	(_smc_dsrs_size128_0),hl ; write smc
-	; ld	(_smc_dsrs_size128_1),hl ; write smc
 	; carry is cleared here
 	ld	de, (ix - 6)	; dsrs_dys_0
 	sbc	hl, de
@@ -5464,26 +5428,10 @@ _yloop:
 	push	hl			; dxs
 	push	de			; dxc
 
-; 	ld	bc,$000000
-; _smcdsrs_dyc_0 := $-3
-; 	add	hl,bc
-; 	ld	bc,$000000
-; _smc_dsrs_size128_0 := $-3
-; 	add	hl,bc
-; 	ex	de,hl
-
 	ld	bc, $000000	; xs = (dxs + dyc) + (size * 128);
 _smc_dsrs_size128_0_plus_dyc_0 := $-3	
 	add	hl, bc
 	ex	de, hl	; de = (dxs + dyc) + (size * 128)
-
-; 	ld	bc,$000000
-; _smc_dsrs_dys_0 := $-3
-; 	or	a,a
-; 	sbc	hl,bc
-; 	ld	bc,$000000
-; _smc_dsrs_size128_1 := $-3
-; 	add	hl,bc
 
 	ld	bc, $000000	; ys = (dxc - dys) + (size * 128);
 _smc_dsrs_size128_1_minus_dys_0 := $-3
