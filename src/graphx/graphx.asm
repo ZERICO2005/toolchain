@@ -5149,7 +5149,7 @@ gfx_RotatedScaledTransparentSprite_NoClip:
 ;  arg3 : Scale factor (64 = 100%)
 ; Returns:
 ;  arg1 : Pointer to sprite struct output
-	ld	a,3
+	ld	a,1
 
 _RotatedScaledSprite:
 	ld	(.rotatescale),a
@@ -5252,6 +5252,7 @@ _RotatedScaledSprite:
 	push	af
 	ld	iyh,a			; size * scale / 64
 	call	gfx_Wait
+if 0
 .outer:
 	push	hl			; dxs
 	push	de			; dxc		
@@ -5331,6 +5332,200 @@ smcByte _TransparentColor
 	pop	de
 	pop	ix
 	ret
+else if 0
+; 	; debug: swap DE and IX
+; 	push	de
+; 	lea	de, ix
+; 	pop	ix
+
+; .outer:
+; 	PUSH	IX			; dxc		
+; 	push	hl			; dxs
+
+; 	ld	bc, 0	; xs = (dxs + dyc) + (size * 128);
+; .dsrs_size128_0_plus_dyc_0 := $-3	
+; 	add	hl, bc
+; 	; de = (dxs + dyc) + (size * 128)
+; 	PUSH	HL
+; 	LEA	HL, IX
+; 	POP	IX
+
+; 	ld	bc, 0	; ys = (dxc - dys) + (size * 128);
+; .dsrs_size128_1_minus_dys_0 := $-3
+; 	add	hl, bc	; hl = (dxc - dys) + (size * 128)
+
+; .dsrs_size_1 := $+2			; smc = size * scale / 64
+; 	ld	iyl,0
+; .inner:
+; 	push	hl			; xs
+; 	ld	c, IXH
+; 	ld	a,c
+; 	or	a,h
+; 	rlca
+; 	jr	c,.skip
+; 	ld	a,0
+; .dsrs_ssize_0 := $-1
+; 	cp	a,c
+; 	jr	c,.skip
+; 	cp	a,h
+; 	jr	c,.skip
+
+; 	; get pixel and draw to buffer
+; ; 	ld	c,0
+; ; .dsrs_ssize_1 := $-1
+; ; 	ld	b,h
+; ; 	mlt	bc
+; ; 	sbc	hl,hl
+; ; 	; ld	l,d
+; ; 	LD	A, IXH
+; ; 	LD	L, A
+; ; 	add	hl,bc			; y * size + x
+
+; 	; get pixel and draw to buffer
+; 	ld	l,0
+; .dsrs_ssize_1 := $-1
+; 	mlt	hl
+; 	ld	b, 0
+; 	; result is at most 255 * 255 + 256 or 65280
+; 	add.s	hl,bc			; y * size + x
+
+; 	ld	bc,0
+; .dsrs_sprptr_0 := $-3
+; 	add	hl,bc
+; 	ld	a,(hl)
+; 	cp	a,TRASPARENT_COLOR
+; smcByte _TransparentColor
+; 	jr	z,$+1
+; .rotatescale := $-1
+; 	ld	(DE),a			; write pixel
+; .skip:
+; 	inc	DE			; x++s
+; 	LD	BC,0			; smc = cosf
+; .dsrs_cosf_0 := $-3
+; 	ADD	IX,BC			; xs += cosf
+; 	pop	hl			; ys
+; 	ld	bc,0			; smc = -sinf
+; .dsrs_sinf_0 := $-3
+; 	add	hl,bc			; ys += -sinf
+; 	dec	iyl
+; 	jr	nz,.inner		; x loop
+
+; 	pop	hl			; dxs
+; 	ld	bc,0			; smc = sinf
+; .dsrs_sinf_1 := $-3
+; 	add	hl,bc			; dxs += sinf
+
+; 	pop	ix			; dxc
+; 	ld	bc,0			; smc = cosf
+; .dsrs_cosf_1 := $-3
+; 	add	ix,bc			; dxc += cosf
+; 	; PUSH	HL
+; 	; LEA	HL, IX
+; 	; POP	IX
+
+; 	ld	bc,0
+; .line_add := $-3
+; 	; y++
+; 	EX	DE, HL
+; 	ADD	HL, BC			
+; 	EX	DE, HL
+
+; 	dec	iyh
+; 	jr	nz,.outer		; y loop
+; 	pop	af			; sprite out ptr
+; 	pop	de
+; 	pop	ix
+; 	ret
+else
+	; debug: swap DE and IX
+	push	de
+	lea	de, ix
+	pop	ix
+
+	; debug: swap HL and IX
+	push	hl
+	lea	hl, ix
+	pop	ix
+
+.outer:
+	push	hl			; dxs
+	push	ix			; dxc		
+
+	ld	bc, 0	; xs = (dxs + dyc) + (size * 128);
+.dsrs_size128_0_plus_dyc_0 := $-3	
+	add	ix, bc	; de = (dxs + dyc) + (size * 128)
+
+	ld	bc, 0	; ys = (dxc - dys) + (size * 128);
+.dsrs_size128_1_minus_dys_0 := $-3
+	add	hl, bc	; hl = (dxc - dys) + (size * 128)
+
+.dsrs_size_1 := $+2			; smc = size * scale / 64
+	ld	iyl,0
+.inner:
+	push	hl			; xs
+	ld	c, ixh
+	ld	a,c
+	or	a,h
+	rlca
+	jr	c,.skip
+	ld	a,0
+.dsrs_ssize_0 := $-1
+	cp	a,c
+	jr	c,.skip
+	cp	a,h
+	jr	c,.skip
+	; get pixel and draw to buffer
+	ld	l,0
+.dsrs_ssize_1 := $-1
+	mlt	hl
+	ld	b, 0
+	; result is at most 255 * 255 + 256 or 65280
+	add.s	hl,bc			; y * size + x
+
+	ld	bc,0
+.dsrs_sprptr_0 := $-3
+	add	hl,bc
+	ld	a,(hl)
+	cp	a,TRASPARENT_COLOR
+smcByte _TransparentColor
+	jr	z,$+1
+.rotatescale := $-1
+	ld	(de),a			; write pixel
+.skip:
+	inc	de			; x++s
+	ld	bc,0			; smc = cosf
+.dsrs_cosf_0 := $-3
+	add	ix,bc			; xs += cosf
+	pop	hl			; ys
+	ld	bc,0			; smc = -sinf
+.dsrs_sinf_0 := $-3
+	add	hl,bc			; ys += -sinf
+	dec	iyl
+	jr	nz,.inner		; x loop
+
+	pop	ix			; dxs
+	ld	bc,0			; smc = sinf
+.dsrs_sinf_1 := $-3
+	add	ix,bc			; dxs += sinf
+
+	pop	hl			; dxc
+	ld	bc,0			; smc = cosf
+.dsrs_cosf_1 := $-3
+	add	hl,bc			; dxc += cosf
+
+	ld	bc,0
+.line_add := $-3
+	; y++
+	ex	de, hl
+	add	hl, bc
+	ex	de, hl
+	dec	iyh
+	jr	nz,.outer		; y loop
+	pop	af			; sprite out ptr
+	pop	de
+	pop	ix
+	ret
+end if
 
 ;-------------------------------------------------------------------------------
 gfx_RotateScaleSprite:
@@ -5359,7 +5554,8 @@ gfx_RotateScaleSprite:
 	sbc	hl,hl
 	ccf
 	sbc	hl,de
-	ld	(_smc_dsrs_sinf_0),hl ; write smc
+	ld	(_smc_dsrs_sinf_0A),hl ; write smc
+	ld	(_smc_dsrs_sinf_0B),hl ; write smc
 	pop	hl
 
 	; dxs = sinf * -(size * scale / 128);
@@ -5373,7 +5569,8 @@ gfx_RotateScaleSprite:
 	add	a,(ix+12)		; angle + 64
 	ld	e,(ix+15)
 	call	calcSinCosSMC
-	ld	(_smc_dsrs_cosf_0),hl ; write smc
+	ld	(_smc_dsrs_cosf_0A),hl ; write smc
+	ld	(_smc_dsrs_cosf_0B),hl ; write smc
 	ld	(_smc_dsrs_cosf_1),hl ; write smc
 
 	; dxc = cosf * -(size * scale / 128);
@@ -5424,6 +5621,7 @@ gfx_RotateScaleSprite:
 	lea	ix,iy+2
 
 	ld	iyh,a			; size * scale / 64
+if 0
 _yloop:
 	push	hl			; dxs
 	push	de			; dxc
@@ -5441,12 +5639,9 @@ _smc_dsrs_size_1 := $+2			; smc = size * scale / 64
 	ld	iyl,$00
 _xloop:
 	push	hl			; xs
-
 	ld	a,d
 	or	a,h
 	rlca
-	ld	c,TRASPARENT_COLOR
-smcByte _TransparentColor
 	jr	c,drawSpriteRotateScale_SkipPixel
 	ld	a,0
 _smc_dsrs_ssize_0 := $-1
@@ -5454,7 +5649,6 @@ _smc_dsrs_ssize_0 := $-1
 	jr	c,drawSpriteRotateScale_SkipPixel
 	cp	a,h
 	jr	c,drawSpriteRotateScale_SkipPixel
-
 	; get pixel and draw to buffer
 	ld	c,0
 _smc_dsrs_ssize_1 := $-1
@@ -5466,20 +5660,20 @@ _smc_dsrs_ssize_1 := $-1
 	ld	bc,0
 _smc_dsrs_sprptr_0 := $-3
 	add	hl,bc
-	ld	c,(hl)
-drawSpriteRotateScale_SkipPixel:
-	ld	(ix),c			; write pixel
+	ld	a,(hl)
+	ld	(ix),a			; write pixel
 	inc	ix			; x++s
 	ld	hl,0			; smc = cosf
-_smc_dsrs_cosf_0 := $-3
+_smc_dsrs_cosf_0A := $-3
 	add	hl,de			; xs += cosf
 	ex	de,hl
 	pop	hl			; ys
 	ld	bc,0			; smc = -sinf
-_smc_dsrs_sinf_0 := $-3
+_smc_dsrs_sinf_0A := $-3
 	add	hl,bc			; ys += -sinf
 	dec	iyl
 	jr	nz,_xloop		; x loop
+_end_x_loop:
 
 	pop	hl			; dxc
 	ld	bc,0			; smc = cosf
@@ -5497,6 +5691,129 @@ _smc_dsrs_sinf_1 := $-3
 	pop	de
 	pop	ix
 	ret
+
+drawSpriteRotateScale_SkipPixel:
+	ld	a,TRASPARENT_COLOR
+smcByte _TransparentColor
+	ld	(ix),a			; write pixel
+	inc	ix			; x++s
+	ld	hl,0			; smc = cosf
+_smc_dsrs_cosf_0B := $-3
+	add	hl,de			; xs += cosf
+	ex	de,hl
+	pop	hl			; ys
+	ld	bc,0			; smc = -sinf
+_smc_dsrs_sinf_0B := $-3
+	add	hl,bc			; ys += -sinf
+	dec	iyl
+	jr	nz,_xloop		; x loop
+	jr	_end_x_loop
+
+;-------------------------------------------------------------------------------
+else
+;-------------------------------------------------------------------------------
+
+	; ; debug: swap DE and IX
+	push	de
+	lea	de, ix
+	pop	ix
+
+	; ; debug: swap HL and IX
+	push	hl
+	lea	hl, ix
+	pop	ix
+
+_yloop:
+	push	hl			; dxs
+	push	ix			; dxc
+
+	ld	bc, $000000	; xs = (dxs + dyc) + (size * 128);
+_smc_dsrs_size128_0_plus_dyc_0 := $-3	
+	add	ix, bc	; de = (dxs + dyc) + (size * 128)
+
+	ld	bc, $000000	; ys = (dxc - dys) + (size * 128);
+_smc_dsrs_size128_1_minus_dys_0 := $-3
+	add	hl, bc	; hl = (dxc - dys) + (size * 128)
+
+_smc_dsrs_size_1 := $+2			; smc = size * scale / 64
+	ld	iyl,$00
+_xloop:
+	push	hl			; xs
+	ld	c, ixh
+	ld	a,c
+	or	a,h
+	rlca
+	jr	c,drawSpriteRotateScale_SkipPixel
+	ld	a,0
+_smc_dsrs_ssize_0 := $-1
+	cp	a,c
+	jr	c,drawSpriteRotateScale_SkipPixel
+	cp	a,h
+	jr	c,drawSpriteRotateScale_SkipPixel
+	; get pixel and draw to buffer
+	ld	l,0
+_smc_dsrs_ssize_1 := $-1
+	mlt	hl
+	ld	b, 0
+	; result is at most 255 * 255 + 256 or 65280
+	add.s	hl,bc			; y * size + x
+
+	ld	bc,0
+_smc_dsrs_sprptr_0 := $-3
+	add	hl,bc
+	; ld	a,(hl)
+	; ld	(de),a			; write pixel
+	; inc	de			; x++s
+	ldi
+
+	ld	bc,0			; smc = cosf
+_smc_dsrs_cosf_0A := $-3
+	add	ix,bc			; xs += cosf
+
+	pop	hl			; ys
+	ld	bc,0			; smc = -sinf
+_smc_dsrs_sinf_0A := $-3
+	add	hl,bc			; ys += -sinf
+	dec	iyl
+	jr	nz,_xloop		; x loop
+_end_x_loop:
+
+	pop	ix			; dxs
+	ld	bc,0			; smc = sinf
+_smc_dsrs_sinf_1 := $-3
+	add	ix,bc			; dxs += sinf
+
+
+	pop	hl			; dxc
+	ld	bc,0			; smc = cosf
+_smc_dsrs_cosf_1 := $-3
+	add	hl,bc			; dxc += cosf
+
+	dec	iyh
+	jr	nz,_yloop		; y loop
+	pop	hl			; sprite out ptr
+	pop	de
+	pop	ix
+	ret
+
+drawSpriteRotateScale_SkipPixel:
+	ld	a,TRASPARENT_COLOR
+smcByte _TransparentColor
+	ld	(de),a			; write pixel
+	inc	de			; x++s
+
+	ld	bc,0			; smc = cosf
+_smc_dsrs_cosf_0B := $-3
+	add	ix,bc			; xs += cosf
+
+	pop	hl			; ys
+	ld	bc,0			; smc = -sinf
+_smc_dsrs_sinf_0B := $-3
+	add	hl,bc			; ys += -sinf
+	dec	iyl
+	jr	nz,_xloop		; x loop
+	jr	_end_x_loop
+end if
 
 calcSinCosSMC:
 ; inputs:
