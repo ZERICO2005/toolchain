@@ -4896,35 +4896,42 @@ gfx_RotatedScaledTransparentSprite_NoClip:
 _RotatedScaledSprite:
 	ld	(.rotatescale),a
 	push	ix
-	ld	ix,0
+	ld	ix,3
 	add	ix,sp
-	ld	iy,(ix+6)		; sprite pointer
+	ld	iy,(ix+3)		; sprite pointer
 	lea	hl,iy+2
 	ld	(.dsrs_sprptr_0),hl	; write smc
 
-	; sinf = _SineTable[angle] * 128 / scale;
-	ld	a,(ix+15)		; angle
-	ld	e,(ix+18)
-	call	calcSinCosSMC
-	ld	(.dsrs_sinf_1),hl	; write smc
+	ld	l, (ix + 9)		; y
+	ld	h, 160
+	mlt	hl
+	add	hl, hl
+	ld	de, (ix + 6)		; x
+	add	hl, de
+	ld	de, (CurrentBuffer)
+	add	hl, de			; offset buffer
 	push	hl
+
+	; sinf = _SineTable[angle] * 128 / scale;
+	call	calcSinCosSMC_loadAngle
+	ld	(.dsrs_sinf_1),hl	; write smc
+
+	; The previous code does ~HL instead of -HL. Unsure if intentional.
 	ex	de,hl
 	sbc	hl,hl
 	ccf
 	sbc	hl,de
 	ld	(.dsrs_sinf_0),hl	; write smc
-	pop	hl
 
 	; dxs = sinf * -(size * scale / 128);
-	ld	c,(ix+18)
-	call	_CalcDXS
 
-	push	hl	; ld (ix - 3), dsrs_dys_0
+	call	_CalcDXS	; destroys (ix + 6)
+
+	push	hl	; ld (ix - 9), dsrs_dys_0
 
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	ld	a,64
-	add	a,(ix+15)		; angle + 64
-	ld	e,(ix+18)
+	add	a,(ix+12)		; angle + 64
 	call	calcSinCosSMC
 	ld	(.dsrs_cosf_0), hl	; write smc
 	; ld	(.dsrs_cosf_1), hl	; write smc
@@ -4932,14 +4939,14 @@ _RotatedScaledSprite:
 	; dxc = cosf * -(size * scale / 128);
 	ld	bc,(ix+6)		; -(size * scale / 128)
 	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
-	push	hl	; ld (ix - 6), dsrs_dyc_0
+	push	hl	; ld (ix - 12), dsrs_dyc_0
 
 	ld	a,(iy)			; size
 	dec	a
 	ld	(.dsrs_ssize),a	; write smc
 	inc	a
 	ld	b,a
-	ld	c,(ix+18)
+	ld	c,(ix+15)
 	mlt	bc			; size * scale
 	srl	a			; size / 2
 	or	a,a
@@ -4947,11 +4954,11 @@ _RotatedScaledSprite:
 	ld	h,a
 
 	; carry is cleared here
-	ld	de, (ix - 3)	; dsrs_dys_0
+	ld	de, (ix - 9)	; dsrs_dys_0
 	sbc.s	hl, de		; make sure UHL is zero
 	ld	(.dsrs_size128_1_minus_dys_0), hl	; write smc
 	add	hl, de		; restore HL
-	ld	de, (ix - 6)	; dsrs_dyc_0
+	ld	de, (ix - 12)	; dsrs_dyc_0
 	add	hl, de
 	ld	(.dsrs_size128_0_plus_dyc_0), hl	; write smc
 	; carry might be set, but that shouldn't matter for rl c
@@ -4974,18 +4981,9 @@ _RotatedScaledSprite:
 	sbc	hl,de
 	ld	(.line_add),hl
 
-	ld	l, (ix + 12)		; y
-	ld	h, 160
-	mlt	hl
-	add	hl, hl
-	ld	de, (ix + 9)		; x
-	add	hl, de
-	ld	de, (CurrentBuffer)
-	add	hl, de			; offset buffer
-	ex	de, hl			; de = buffer pointer
-
 	pop	hl			; smc = dxc start
 	pop	ix			; smc = dxs start
+	pop	de			; de = buffer pointer
 
 	push	af
 	ld	iyh,a			; size * scale / 64
@@ -5069,7 +5067,7 @@ smcByte _TransparentColor
 	ex	de, hl
 	dec	iyh
 	jr	nz, .outer		; y loop
-	pop	af			; sprite out ptr
+	pop	af			; sprite out size
 	pop	ix
 	ret
 
@@ -5101,30 +5099,25 @@ gfx_RotateScaleSprite:
 	lea	hl,iy+2
 	ld	(_smc_dsrs_sprptr_0),hl ; write smc
 	; sinf = _SineTable[angle] * 128 / scale;
-	ld	a,(ix+12)		; angle
-	ld	e,(ix+15)
-	call	calcSinCosSMC
+	call	calcSinCosSMC_loadAngle
 	ld	(_smc_dsrs_sinf_1A),hl ; write smc
 	ld	(_smc_dsrs_sinf_1B),hl ; write smc
-	push	hl
+	; The previous code does ~HL instead of -HL. Unsure if intentional.
 	ex	de,hl
 	sbc	hl,hl
 	ccf
 	sbc	hl,de
 	ld	(_smc_dsrs_sinf_0A),hl ; write smc
 	ld	(_smc_dsrs_sinf_0B),hl ; write smc
-	pop	hl
 
 	; dxs = sinf * -(size * scale / 128);
-	ld	c,(ix+15)
-	call	_CalcDXS
+	call	_CalcDXS	; destroys (ix + 6)
 
 	push	hl	; ld (ix - 3), _smc_dsrs_dys_0
 
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	ld	a,64
 	add	a,(ix+12)		; angle + 64
-	ld	e,(ix+15)
 	call	calcSinCosSMC
 	ld	(_smc_dsrs_cosf_0A),hl ; write smc
 	ld	(_smc_dsrs_cosf_0B),hl ; write smc
@@ -5288,7 +5281,10 @@ _smc_dsrs_sinf_1B := $-3
 	pop	ix
 	ret
 
+calcSinCosSMC_loadAngle:
+	ld	a,(ix+12)
 calcSinCosSMC:
+	ld	e,(ix+15)
 ; inputs:
 ; A = angle
 ; E = scale
@@ -5360,10 +5356,13 @@ _SineTable:
 	db 118,119,121,122,122,123,124,125,126,126,127,127,127,127,127,127,127
 
 _CalcDXS:
+	ex	de, hl
+	ld	c,(ix+15)
 	; inputs:
-	; HL = sinf
+	; DE = sinf
 	; (iy + 0) = size
 	; C = scale
+	; destroys (ix + 6)
 	; sinf * -(size * scale / 128)
 	ld	b,(iy)
 	mlt	bc			; size * scale
