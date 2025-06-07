@@ -5122,14 +5122,14 @@ gfx_RotateScaleSprite:
 	; sinf = _SineTable[angle] * 128 / scale;
 	call	calcSinCosSMC_loadAngle
 	ld	(_smc_dsrs_sinf_1A_plus_offset_ix),hl ; write smc
-	ld	(_smc_dsrs_sinf_1B_plus_offset_ix),hl ; write smc
+	; ld	(_smc_dsrs_sinf_1B_plus_offset_ix),hl ; write smc
 	; The previous code does ~HL instead of -HL. Unsure if intentional.
 	ex	de,hl
 	sbc	hl,hl
 	ccf
 	sbc	hl,de
 	ld	(_smc_dsrs_sinf_0A),hl ; write smc
-	ld	(_smc_dsrs_sinf_0B),hl ; write smc
+	; ld	(_smc_dsrs_sinf_0B),hl ; write smc
 
 	; dxs = sinf * -(size * scale / 128);
 	call	_CalcDXS	; destroys (ix + 6)
@@ -5141,9 +5141,9 @@ gfx_RotateScaleSprite:
 	add	a,(ix+12)		; angle + 64
 	call	calcSinCosSMC
 	ld	(_smc_dsrs_cosf_0A),hl ; write smc
-	ld	(_smc_dsrs_cosf_0B),hl ; write smc
+	; ld	(_smc_dsrs_cosf_0B),hl ; write smc
 	ld	(_smc_dsrs_cosf_1A_plus_offset_hl),hl ; write smc
-	ld	(_smc_dsrs_cosf_1B_plus_offset_hl),hl ; write smc
+	; ld	(_smc_dsrs_cosf_1B_plus_offset_hl),hl ; write smc
 
 	; dxc = cosf * -(size * scale / 128);
 	ld	bc,(ix+6)		; -(size * scale / 128)
@@ -5195,7 +5195,6 @@ gfx_RotateScaleSprite:
 	or	a, a
 	sbc	hl, de
 	ld	(_smc_dsrs_sinf_1A_plus_offset_ix), hl
-	ld	(_smc_dsrs_sinf_1B_plus_offset_ix), hl
 
 	; calculate stuff for HL
 	ld	hl, (_smc_dsrs_sinf_0A)
@@ -5208,7 +5207,6 @@ gfx_RotateScaleSprite:
 	or	a, a
 	sbc	hl, de
 	ld	(_smc_dsrs_cosf_1A_plus_offset_hl), hl
-	ld	(_smc_dsrs_cosf_1B_plus_offset_hl), hl
 
 	pop	af	; temp
 
@@ -5267,6 +5265,7 @@ _smc_dsrs_sprptr_0 := $-3
 	; ld	(de), a			; write pixel
 	; inc	de			; x++s
 	ldi
+_drawSpriteRotateScale_hijack:
 
 	pop	hl			; ys
 	ld	bc, 0			; smc = -sinf
@@ -5301,37 +5300,38 @@ drawSpriteRotateScale_SkipPixel:
 smcByte _TransparentColor
 	ld	(de), a			; write pixel
 	inc	de			; x++s
+	jr	_drawSpriteRotateScale_hijack
 
-	pop	hl			; ys
-	ld	bc, 0			; smc = -sinf
-_smc_dsrs_sinf_0B := $-3
-	add	hl, bc			; ys += -sinf
+; 	pop	hl			; ys
+; 	ld	bc, 0			; smc = -sinf
+; _smc_dsrs_sinf_0B := $-3
+; 	add	hl, bc			; ys += -sinf
 
-	ld	bc, 0			; smc = cosf
-_smc_dsrs_cosf_0B := $-3
-	add	ix, bc			; xs += cosf
+; 	ld	bc, 0			; smc = cosf
+; _smc_dsrs_cosf_0B := $-3
+; 	add	ix, bc			; xs += cosf
 
-	dec	iyl
-	jr	nz,_xloop		; x loop
-; We are here because the right edge of the sprite was transparent.
-; This branch costs 3F + 9W to setup the SMC, but is paid off if at
-; least 4 pixels on the right edge of a sprite are transparent.
-; However, most circles have transparpent pixels at the edge anyways.
-	; restore and increment dxc
- 	ld	bc, 0			; smc = cosf
-_smc_dsrs_cosf_1B_plus_offset_hl := $-3
-	add	hl, bc			; dxc += cosf
+; 	dec	iyl
+; 	jr	nz,_xloop		; x loop
+; ; We are here because the right edge of the sprite was transparent.
+; ; This branch costs 3F + 9W to setup the SMC, but is paid off if at
+; ; least 4 pixels on the right edge of a sprite are transparent.
+; ; However, most circles have transparpent pixels at the edge anyways.
+; 	; restore and increment dxc
+;  	ld	bc, 0			; smc = cosf
+; _smc_dsrs_cosf_1B_plus_offset_hl := $-3
+; 	add	hl, bc			; dxc += cosf
 
-	; restore and increment dxs
-	ld	bc, 0			; smc = sinf
-_smc_dsrs_sinf_1B_plus_offset_ix := $-3
-	add	ix, bc			; dxs += sinf
+; 	; restore and increment dxs
+; 	ld	bc, 0			; smc = sinf
+; _smc_dsrs_sinf_1B_plus_offset_ix := $-3
+; 	add	ix, bc			; dxs += sinf
 
-	dec	iyh
-	jr	nz, _yloop		; y loop
-	pop	hl			; sprite out ptr
-	pop	ix
-	ret
+; 	dec	iyh
+; 	jr	nz, _yloop		; y loop
+; 	pop	hl			; sprite out ptr
+; 	pop	ix
+; 	ret
 
 calcSinCosSMC_loadAngle:
 	ld	a,(ix+12)
