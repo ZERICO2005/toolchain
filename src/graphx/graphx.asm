@@ -5153,10 +5153,10 @@ gfx_RotatedScaledTransparentSprite_NoClip:
 
 _RotatedScaledSprite:
 	ld	(.rotatescale),a
-	push	ix
+	push	ix	; sp - 0
 	ld	ix,0
 	add	ix,sp
-	push	hl
+	push	hl	; sp - 3
 	ld	iy,(ix+6)		; sprite pointer
 	lea	hl,iy+2
 	ld	(.dsrs_sprptr_0),hl	; write smc
@@ -5170,32 +5170,32 @@ _RotatedScaledSprite:
 	ex	de,hl
 	ld	hl,(CurrentBuffer)
 	add	hl,de			; offset buffer
-	push	hl
+	push	hl	; sp - 6
 
 	; sinf = _SineTable[angle] * 128 / scale;
 	ld	a,(ix+15)		; angle
-	ld	c,(ix+18)
+	ld	e,(ix+18)
 	call	calcSinCosSMC
 	ld	(.dsrs_sinf_1),hl	; write smc
-	push	hl
+	push	hl	; sp - 9
 	ex	de,hl
 	sbc	hl,hl
 	ccf
 	sbc	hl,de
 	ld	(.dsrs_sinf_0),hl	; write smc
-	pop	hl
+	pop	hl	; sp - 9
 
 	; dxs = sinf * -(size * scale / 128);
 	ld	c,(ix+18)
 	call	_CalcDXS
 
-	ld	(.dsrs_dys_0),hl	; write smc
-	push	hl
+;	ld	(.dsrs_dys_0),hl	; write smc
+	push	hl	; sp - 9
 
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	ld	a,64
 	add	a,(ix+15)		; angle + 64
-	ld	c,(ix+18)
+	ld	e,(ix+18)
 	call	calcSinCosSMC
 	ld	(.dsrs_cosf_0),hl	; write smc
 	ld	(.dsrs_cosf_1),hl	; write smc
@@ -5203,8 +5203,8 @@ _RotatedScaledSprite:
 	; dxc = cosf * -(size * scale / 128);
 	ld	bc,(ix-3)		; -(size * scale / 128)
 	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
-	ld	(.dsrs_dyc_0),hl	; write smc
-	push	hl
+;	ld	(.dsrs_dyc_0),hl	; write smc
+	push	hl	; sp - 12
 
 	ld	a,(iy)			; size
 	ld	(.dsrs_ssize_1),a	; write smc
@@ -5218,8 +5218,29 @@ _RotatedScaledSprite:
 	or	a,a
 	sbc	hl,hl
 	ld	h,a
-	ld	(.dsrs_size128_0),hl	; write smc
-	ld	(.dsrs_size128_1),hl	; write smc
+
+if 0
+	ld	de, (ix - 12)	; dsrs_dyc_0
+	add	hl, de
+	ld	(.dsrs_size128_0_plus_dyc_0),hl	; write smc
+	or	a, a
+	sbc	hl, de
+	
+	ld	de, (ix - 9)	; dsrs_dys_0
+	sbc	hl, de
+	ld	(.dsrs_size128_1_minus_dys_0),hl	; write smc
+else
+	; carry is cleared here
+	ld	de, (ix - 9)	; dsrs_dys_0
+	sbc	hl, de
+	ld	(.dsrs_size128_1_minus_dys_0),hl	; write smc
+	add	hl, de	; restore HL
+	ld	de, (ix - 12)	; dsrs_dyc_0
+	add	hl, de
+	ld	(.dsrs_size128_0_plus_dyc_0),hl	; write smc
+	; carry might be set, but that shouldn't matter for rl c
+end if
+
 	ld	a,b
 	rl	c
 	adc	a,a
@@ -5249,22 +5270,32 @@ _RotatedScaledSprite:
 	push	hl			; dxs
 	push	de			; dxc
 
-	; xs = (dxs + dyc) + (size * 128);
-	ld	bc,0
-.dsrs_dyc_0 := $-3
-	add	hl,bc
-	ld	bc,0
-.dsrs_size128_0 := $-3
-	add	hl,bc
-	ex	de,hl			; de = (dxs + dyc) + (size * 128)
-	; ys = (dxc - dys) + (size * 128);
-	ld	bc,0
-.dsrs_dys_0 := $-3
-	or	a,a
-	sbc	hl,bc
-	ld	bc,0
-.dsrs_size128_1 := $-3
-	add	hl,bc			; hl = (dxc - dys) + (size * 128)
+	
+; 	ld	bc,0
+; .dsrs_dyc_0 := $-3
+; 	add	hl,bc
+; 	ld	bc,0
+; .dsrs_size128_0 := $-3
+; 	add	hl,bc
+; 	ex	de,hl			
+	
+
+	ld	bc, 0	; xs = (dxs + dyc) + (size * 128);
+.dsrs_size128_0_plus_dyc_0 := $-3	
+	add	hl, bc
+	ex	de, hl	; de = (dxs + dyc) + (size * 128)
+
+; 	ld	bc,0
+; .dsrs_dys_0 := $-3
+; 	or	a,a
+; 	sbc	hl,bc
+; 	ld	bc,0
+; .dsrs_size128_1 := $-3
+; 	add	hl,bc			; hl = (dxc - dys) + (size * 128)
+
+	ld	bc, 0	; ys = (dxc - dys) + (size * 128);
+.dsrs_size128_1_minus_dys_0 := $-3
+	add	hl, bc	; hl = (dxc - dys) + (size * 128)
 
 .dsrs_size_1 := $+2			; smc = size * scale / 64
 	ld	iyl,0
@@ -5343,51 +5374,51 @@ gfx_RotateScaleSprite:
 ;  arg3 : Scale factor (64 = 100%)
 ; Returns:
 ;  arg1 : Pointer to sprite struct output
-	push	ix
+	push	ix	; sp - 0
 	ld	ix,0
 	add	ix,sp
-	push	hl
+	push	hl	; sp - 3
 	ld	iy,(ix+6)		; sprite pointer
 	lea	hl,iy+2
 	ld	(_smc_dsrs_sprptr_0),hl ; write smc
 	; sinf = _SineTable[angle] * 128 / scale;
 	ld	a,(ix+12)		; angle
-	ld	c,(ix+15)
+	ld	e,(ix+15)
 	call	calcSinCosSMC
 	ld	(_smc_dsrs_sinf_1),hl ; write smc
-	push	hl
+	push	hl	; sp - 6
 	ex	de,hl
 	sbc	hl,hl
 	ccf
 	sbc	hl,de
 	ld	(_smc_dsrs_sinf_0),hl ; write smc
-	pop	hl
+	pop	hl	; sp - 6
 
 	; dxs = sinf * -(size * scale / 128);
 	ld	c,(ix+15)
 	call	_CalcDXS
 
-	ld	(_smc_dsrs_dys_0),hl ; write smc
-	push	hl
+;	ld	(_smc_dsrs_dys_0),hl ; write smc
+	push	hl	; sp - 6
 
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	ld	a,64
 	add	a,(ix+12)		; angle + 64
-	ld	c,(ix+15)
+	ld	e,(ix+15)
 	call	calcSinCosSMC
-	ld	(_smcdsrs_cosf_0),hl ; write smc
+	ld	(_smc_dsrs_cosf_0),hl ; write smc
 	ld	(_smc_dsrs_cosf_1),hl ; write smc
 
 	; dxc = cosf * -(size * scale / 128);
 	ld	bc,(ix-3)		; -(size * scale / 128)
 	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
-	ld	(_smcdsrs_dyc_0),hl ; write smc
-	push	hl
+;	ld	(_smc_dsrs_dyc_0),hl ; write smc
+	push	hl	; sp - 9
 
 	ld	a,(iy)			; size
-	ld	(_smcdsrs_ssize_1),a ; write smc
+	ld	(_smc_dsrs_ssize_1),a ; write smc
 	dec	a
-	ld	(_smcdsrs_ssize_0),a ; write smc
+	ld	(_smc_dsrs_ssize_0),a ; write smc
 	inc	a
 	ld	b,a
 	ld	c,(ix+15)
@@ -5396,8 +5427,19 @@ gfx_RotateScaleSprite:
 	or	a,a
 	sbc	hl,hl
 	ld	h,a
-	ld	(_smc_dsrs_size128_0),hl ; write smc
-	ld	(_smc_dsrs_size128_1),hl ; write smc
+
+	; ld	(_smc_dsrs_size128_0),hl ; write smc
+	; ld	(_smc_dsrs_size128_1),hl ; write smc
+	; carry is cleared here
+	ld	de, (ix - 6)	; dsrs_dys_0
+	sbc	hl, de
+	ld	(_smc_dsrs_size128_1_minus_dys_0),hl	; write smc
+	add	hl, de	; restore HL
+	ld	de, (ix - 9)	; dsrs_dyc_0
+	add	hl, de
+	ld	(_smc_dsrs_size128_0_plus_dyc_0),hl	; write smc
+	; carry might be set, but that shouldn't matter for rl c
+
 	ld	a,b
 	rl	c
 	adc	a,a
@@ -5422,22 +5464,30 @@ _yloop:
 	push	hl			; dxs
 	push	de			; dxc
 
-	; xs = (dxs + dyc) + (size * 128);
-	ld	bc,$000000
-_smcdsrs_dyc_0 := $-3
-	add	hl,bc
-	ld	bc,$000000
-_smc_dsrs_size128_0 := $-3
-	add	hl,bc
-	ex	de,hl			; de = (dxs + dyc) + (size * 128)
-	; ys = (dxc - dys) + (size * 128);
-	ld	bc,$000000
-_smc_dsrs_dys_0 := $-3
-	or	a,a
-	sbc	hl,bc
-	ld	bc,$000000
-_smc_dsrs_size128_1 := $-3
-	add	hl,bc			; hl = (dxc - dys) + (size * 128)
+; 	ld	bc,$000000
+; _smcdsrs_dyc_0 := $-3
+; 	add	hl,bc
+; 	ld	bc,$000000
+; _smc_dsrs_size128_0 := $-3
+; 	add	hl,bc
+; 	ex	de,hl
+
+	ld	bc, $000000	; xs = (dxs + dyc) + (size * 128);
+_smc_dsrs_size128_0_plus_dyc_0 := $-3	
+	add	hl, bc
+	ex	de, hl	; de = (dxs + dyc) + (size * 128)
+
+; 	ld	bc,$000000
+; _smc_dsrs_dys_0 := $-3
+; 	or	a,a
+; 	sbc	hl,bc
+; 	ld	bc,$000000
+; _smc_dsrs_size128_1 := $-3
+; 	add	hl,bc
+
+	ld	bc, $000000	; ys = (dxc - dys) + (size * 128);
+_smc_dsrs_size128_1_minus_dys_0 := $-3
+	add	hl, bc	; hl = (dxc - dys) + (size * 128)
 
 _smc_dsrs_size_1 := $+2			; smc = size * scale / 64
 	ld	iyl,$00
@@ -5451,7 +5501,7 @@ _xloop:
 smcByte _TransparentColor
 	jr	c,drawSpriteRotateScale_SkipPixel
 	ld	a,0
-_smcdsrs_ssize_0 := $-1
+_smc_dsrs_ssize_0 := $-1
 	cp	a,d
 	jr	c,drawSpriteRotateScale_SkipPixel
 	cp	a,h
@@ -5459,7 +5509,7 @@ _smcdsrs_ssize_0 := $-1
 
 	; get pixel and draw to buffer
 	ld	c,0
-_smcdsrs_ssize_1 := $-1
+_smc_dsrs_ssize_1 := $-1
 	ld	b,h
 	mlt	bc
 	sbc	hl,hl
@@ -5473,7 +5523,7 @@ drawSpriteRotateScale_SkipPixel:
 	ld	(ix),c			; write pixel
 	inc	ix			; x++s
 	ld	hl,0			; smc = cosf
-_smcdsrs_cosf_0 := $-3
+_smc_dsrs_cosf_0 := $-3
 	add	hl,de			; xs += cosf
 	ex	de,hl
 	pop	hl			; ys
@@ -5503,28 +5553,28 @@ _smc_dsrs_sinf_1 := $-3
 calcSinCosSMC:
 ; inputs:
 ; A = angle
-; C = scale
+; E = scale
 ; outputs:
 ; HL = value
 	; getSinCos:
 	; returns a = sin/cos(a) * 128
-	ld	de, $80
-	ld	b, a
+	ld	bc, $80
+	ld	d, a
 	bit	7, a
 	jr	z, .bit7
-	sub	a, e	; sub a, 128
+	sub	a, c	; sub a, 128
 .bit7:
 	bit	6, a
 	jr	z, .bit6
 	;	A = 128 - A
 	neg
-	add	a, e	; add a, 128
+	add	a, c	; add a, 128
 .bit6:
-	ld	e, a
+	ld	c, a
 	ld	hl, _SineTable
-	add	hl, de
+	add	hl, bc
 	ld	h, (hl)
-	ld	l, d	; ld l, 0
+	ld	l, b	; ld l, 0
 	; hl = _SineTable[angle + 64] * 128
 	; H is [0, 127]
 	; HL <<= 7
@@ -5538,25 +5588,22 @@ calcSinCosSMC:
 
 	; _16Div8Signed:
 	; hl = _SineTable[angle + 64] * 128 / scale (cos)
-	ld	a, b
-	or	a, a
-	push	af
 	ld	b, 16
 	xor	a, a
 .div:
 	add	hl, hl
 	rla
-	jr	c, .overflow	; this path is only used when C >= 128
-	cp	a, c
+	jr	c, .overflow	; this path is only used when E >= 128
+	cp	a, e
 	jr	c, .check
 .overflow:
-	sub	a, c
+	sub	a, e
 	inc	l
 .check:
 	djnz	.div
-	pop	af
+	bit	7, d
 	; UHL is zero here
-	ret	p
+	ret	z
 	; negate
 	; carry is reset here
 ;	ld	e, d	; UDE and D are still zero here
