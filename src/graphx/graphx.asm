@@ -4895,7 +4895,7 @@ gfx_RotatedScaledTransparentSprite_NoClip:
 	ld	a,1
 _RotatedScaledSprite:
 	ld	(.rotatescale),a
-	push	ix	; ix - 0
+	push	ix
 	ld	ix,0
 	add	ix,sp
 	ld	iy,(ix+6)		; sprite pointer
@@ -4907,19 +4907,19 @@ _RotatedScaledSprite:
 	ld	e,(ix+18)
 	call	calcSinCosSMC
 	ld	(.dsrs_sinf_1),hl	; write smc
-	push	hl	; ix - 3
+	push	hl
 	ex	de,hl
 	sbc	hl,hl
 	ccf
 	sbc	hl,de
 	ld	(.dsrs_sinf_0),hl	; write smc
-	pop	hl	; ix - 3
+	pop	hl
 
 	; dxs = sinf * -(size * scale / 128);
 	ld	c,(ix+18)
 	call	_CalcDXS
 
-	push	hl	; ld (ix - 6), dsrs_dys_0
+	push	hl	; ld (ix - 3), dsrs_dys_0
 
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	ld	a,64
@@ -4932,7 +4932,7 @@ _RotatedScaledSprite:
 	; dxc = cosf * -(size * scale / 128);
 	ld	bc,(ix+6)		; -(size * scale / 128)
 	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
-	push	hl	; ld (ix - 9), dsrs_dyc_0
+	push	hl	; ld (ix - 6), dsrs_dyc_0
 
 	ld	a,(iy)			; size
 	dec	a
@@ -5094,7 +5094,7 @@ gfx_RotateScaleSprite:
 ;  arg3 : Scale factor (64 = 100%)
 ; Returns:
 ;  arg1 : Pointer to sprite struct output
-	push	ix	; ix - 0
+	push	ix
 	ld	ix,0
 	add	ix,sp
 	ld	iy,(ix+6)		; sprite pointer
@@ -5106,20 +5106,20 @@ gfx_RotateScaleSprite:
 	call	calcSinCosSMC
 	ld	(_smc_dsrs_sinf_1A),hl ; write smc
 	ld	(_smc_dsrs_sinf_1B),hl ; write smc
-	push	hl	; ix - 3
+	push	hl
 	ex	de,hl
 	sbc	hl,hl
 	ccf
 	sbc	hl,de
 	ld	(_smc_dsrs_sinf_0A),hl ; write smc
 	ld	(_smc_dsrs_sinf_0B),hl ; write smc
-	pop	hl	; ix - 3
+	pop	hl
 
 	; dxs = sinf * -(size * scale / 128);
 	ld	c,(ix+15)
 	call	_CalcDXS
 
-	push	hl	; ld (ix - 6), _smc_dsrs_dys_0
+	push	hl	; ld (ix - 3), _smc_dsrs_dys_0
 
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	ld	a,64
@@ -5134,7 +5134,7 @@ gfx_RotateScaleSprite:
 	; dxc = cosf * -(size * scale / 128);
 	ld	bc,(ix+6)		; -(size * scale / 128)
 	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
-	push	hl	; ld (ix - 9), _smc_dsrs_dyc_0
+	push	hl	; ld (ix - 6), _smc_dsrs_dyc_0
 
 	ld	a,(iy)			; size
 	dec	a
@@ -5361,6 +5361,7 @@ _SineTable:
 
 _CalcDXS:
 	; inputs:
+	; HL = sinf
 	; (iy + 0) = size
 	; C = scale
 	; sinf * -(size * scale / 128)
@@ -5375,9 +5376,9 @@ _CalcDXS:
 	sbc	a,a
 	ld	b,a			; -(size * scale / 128)
 	ld	(ix+6),bc
-	; sinf * -(size * scale / 128)
 _16Mul16SignedNeg:
 	; outputs to HL
+	; UHL = 0
 	ld	d,b
 	ld	e,l
 	ld	b,h
