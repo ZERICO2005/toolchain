@@ -5003,7 +5003,7 @@ _RotatedScaledSprite:
 	ex	de, hl
 	ld	hl, (.dsrs_cosf_0)
 	or	a, a
-	sbc	hl, de
+	sbc.s	hl, de	; make sure UHL is zero
 	ld	(.dsrs_cosf_1_plus_offset_hl), hl
 
 	pop	hl			; smc = dxc start
@@ -5193,7 +5193,7 @@ gfx_RotateScaleSprite:
 	ex	de, hl
 	ld	hl, (_smc_dsrs_sinf_1A_plus_offset_ix)
 	or	a, a
-	sbc	hl, de
+	sbc.s	hl, de	; make sure UHL is zero
 	ld	(_smc_dsrs_sinf_1A_plus_offset_ix), hl
 
 	; calculate stuff for HL
@@ -5228,7 +5228,6 @@ _smc_dsrs_size128_0_plus_dyc_0 := $-3
 	ld	bc, $000000	; ys = (dxc - dys) + (size * 128)
 _smc_dsrs_size128_1_minus_dys_0 := $-3
 	add	hl, bc		; hl = (dxc - dys) + (size * 128)
-
 
 _yloop:
 	; push	ix			; dxc
@@ -5441,11 +5440,11 @@ _16Mul16SignedNeg:
 	add	a,c
 	add	a,e
 	ld	h,a
-	ex	de,hl
-	rlca
-	sbc	hl,hl
-	ld	l,e
-	ld	h,d
+	; ex	de,hl
+	; rlca
+	; sbc	hl,hl
+	; ld	l,e
+	; ld	h,d
 	ret
 
 ;-------------------------------------------------------------------------------
