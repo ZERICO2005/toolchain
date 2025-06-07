@@ -5161,17 +5161,6 @@ _RotatedScaledSprite:
 	lea	hl,iy+2
 	ld	(.dsrs_sprptr_0),hl	; write smc
 
-	ld	l,(ix+12)		; y
-	ld	h,160
-	mlt	hl
-	add	hl,hl
-	ld	de,(ix+9)		; x
-	add	hl,de
-	ex	de,hl
-	ld	hl,(CurrentBuffer)
-	add	hl,de			; offset buffer
-	push	hl
-
 	; sinf = _SineTable[angle] * 128 / scale;
 	ld	a,(ix+15)		; angle
 	ld	e,(ix+18)
@@ -5189,7 +5178,7 @@ _RotatedScaledSprite:
 	ld	c,(ix+18)
 	call	_CalcDXS
 
-	push	hl	; ld (ix - 9), dsrs_dys_0
+	push	hl	; ld (ix - 6), dsrs_dys_0
 
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	ld	a,64
@@ -5202,7 +5191,7 @@ _RotatedScaledSprite:
 	; dxc = cosf * -(size * scale / 128);
 	ld	bc,(ix-3)		; -(size * scale / 128)
 	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
-	push	hl	; ld (ix - 12), dsrs_dyc_0
+	push	hl	; ld (ix - 9), dsrs_dyc_0
 
 	ld	a,(iy)			; size
 	dec	a
@@ -5217,13 +5206,13 @@ _RotatedScaledSprite:
 	ld	h,a
 
 	; carry is cleared here
-	ld	de, (ix - 9)	; dsrs_dys_0
-	sbc	hl, de
-	ld	(.dsrs_size128_1_minus_dys_0),hl	; write smc
-	add	hl, de	; restore HL
-	ld	de, (ix - 12)	; dsrs_dyc_0
+	ld	de, (ix - 6)	; dsrs_dys_0
+	sbc.s	hl, de		; make sure UHL is zero
+	ld	(.dsrs_size128_1_minus_dys_0), hl	; write smc
+	add	hl, de		; restore HL
+	ld	de, (ix - 9)	; dsrs_dyc_0
 	add	hl, de
-	ld	(.dsrs_size128_0_plus_dyc_0),hl	; write smc
+	ld	(.dsrs_size128_0_plus_dyc_0), hl	; write smc
 	; carry might be set, but that shouldn't matter for rl c
 
 	ld	a,b
@@ -5244,9 +5233,18 @@ _RotatedScaledSprite:
 	sbc	hl,de
 	ld	(.line_add),hl
 
+	ld	l, (ix + 12)		; y
+	ld	h, 160
+	mlt	hl
+	add	hl, hl
+	ld	de, (ix + 9)		; x
+	add	hl, de
+	ld	de, (CurrentBuffer)
+	add	hl, de			; offset buffer
+	ex	de, hl			; de = buffer pointer
+
 	pop	hl			; smc = dxc start
 	pop	ix			; smc = dxs start
-	pop	de
 
 	push	af
 	ld	iyh,a			; size * scale / 64
@@ -5284,8 +5282,8 @@ _RotatedScaledSprite:
 	ld	l, a
 	mlt	hl
 	ld	b, 0
-	; result is at most 255 * 255 + 256 or 65280
-	add.s	hl, bc			; y * size + x
+	; result is at most 255 * 255 + 256 or 65280. Make sure UBC is zero
+	add	hl, bc			; y * size + x
 
 	ld	bc, 0
 .dsrs_sprptr_0 := $-3
@@ -5402,9 +5400,9 @@ gfx_RotateScaleSprite:
 
 	; carry is cleared here
 	ld	de, (ix - 6)	; dsrs_dys_0
-	sbc	hl, de
+	sbc.s	hl, de		; make sure UHL is zero
 	ld	(_smc_dsrs_size128_1_minus_dys_0),hl	; write smc
-	add	hl, de	; restore HL
+	add	hl, de		; restore HL
 	ld	de, (ix - 9)	; dsrs_dyc_0
 	add	hl, de
 	ld	(_smc_dsrs_size128_0_plus_dyc_0),hl	; write smc
@@ -5463,8 +5461,8 @@ _smc_dsrs_ssize := $-1
 	ld	l, a
 	mlt	hl
 	ld	b, 0
-	; result is at most 255 * 255 + 256 or 65280
-	add.s	hl, bc			; y * size + x
+	; result is at most 255 * 255 + 256 or 65280. Make sure UBC is zero
+	add	hl, bc			; y * size + x
 
 	ld	bc, 0
 _smc_dsrs_sprptr_0 := $-3
@@ -5546,7 +5544,8 @@ calcSinCosSMC:
 ; A = angle
 ; E = scale
 ; outputs:
-; HL = value
+; HL = 16bit quotient
+; UHL = 0
 	; getSinCos:
 	; returns a = sin/cos(a) * 128
 	ld	bc, $80
@@ -5600,14 +5599,15 @@ calcSinCosSMC:
 ;	ld	e, d	; UDE and D are still zero here
 	ex	de, hl
 	sbc	hl, hl
-	sbc	hl, de
+	sbc.s	hl, de	; set UHL to zero
 	ret
 
 _SineTable:
 	; sin(x) * 128
-	db 0,3,6,9,13,16,19,22,25,28,31,34,37,40,43,46
-	db 49,52,55,58,60,63,66,68,71,74,76,79,81,84,86,88
-	db 91,93,95,97,99,101,103,105,106,108,110,111,113,114,116,117
+	;    0|  1|  2|  3|  4|  5|  6|  7|  8|  9|  A|  B|  C|  D|  E|  F
+	db   0,  3,  6,  9, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46
+	db  49, 52, 55, 58, 60, 63, 66, 68, 71, 74, 76, 79, 81, 84, 86, 88
+	db  91, 93, 95, 97, 99,101,103,105,106,108,110,111,113,114,116,117
 	db 118,119,121,122,122,123,124,125,126,126,127,127,127,127,127,127,127
 
 _CalcDXS:
