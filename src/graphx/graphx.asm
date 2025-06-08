@@ -5041,24 +5041,20 @@ _RotatedScaledSprite:
 .dsrs_size_1 := $+2			; smc = size * scale / 64
 	ld	iyl, 0
 .inner:
-	push	hl			; xs
-	ld	c, ixh
-	ld	a, c
-	or	a, h
-	rlca
-	jr	c, .skip
 	ld	a, 0
 .dsrs_ssize := $-1
-	cp	a, c
-	jr	c, .skip
 	cp	a, h
 	jr	c, .skip
+	ld	c, ixh
+	cp	a, c
+	jr	c, .skip
 	; get pixel and draw to buffer
+	push	hl			; xs
 	inc	a
 	ld	l, a
 	mlt	hl
 	ld	b, 0
-	; result is at most 255 * 255 + 256 or 65280. Make sure UBC is zero
+	; result is at most 255 * 255 + 255 or 65279. Make sure UBC is zero
 	add	hl, bc			; y * size + x
 
 	ld	bc, 0
@@ -5070,10 +5066,10 @@ smcByte _TransparentColor
 	jr	z, $+1
 .rotatescale := $-1
 	ld	(de), a			; write pixel
+	pop	hl			; ys
 .skip:
 	inc	de			; x++s
 	
-	pop	hl			; ys
 	ld	bc, 0			; smc = -sinf
 .dsrs_sinf_0 := $-3
 	add	hl, bc			; ys += -sinf
@@ -5108,17 +5104,6 @@ smcByte _TransparentColor
 	ret
 
 ;-------------------------------------------------------------------------------
-
-; uint8_t gfx_RotatedScaledSprite_NoClip(const gfx_sprite_t *sprite,
-;                                        uint24_t x,
-;                                        uint8_t y,
-;                                        uint8_t angle,
-;                                        uint8_t scale);
-; gfx_sprite_t *gfx_RotateScaleSprite(const gfx_sprite_t *__restrict sprite_in,
-;                                     gfx_sprite_t *__restrict sprite_out,
-;                                     uint8_t angle,
-;                                     uint8_t scale);
-
 gfx_RotateScaleSprite:
 ; Rotate and scale an image using an output buffer
 ; Arguments:
@@ -5266,24 +5251,21 @@ drawSpriteRotateScale_Begin:
 _smc_dsrs_size_1 := $+2			; smc = size * scale / 64
 	ld	iyl, $00
 _xloop:
-	push	hl			; xs
-	ld	c, ixh
-	ld	a, c
-	or	a, h
-	rlca
-	jr	c, drawSpriteRotateScale_SkipPixel
+
 	ld	a, 0
 _smc_dsrs_ssize := $-1
-	cp	a, c
-	jr	c, drawSpriteRotateScale_SkipPixel
 	cp	a, h
 	jr	c, drawSpriteRotateScale_SkipPixel
+	ld	c, ixh
+	cp	a, c
+	jr	c, drawSpriteRotateScale_SkipPixel
 	; get pixel and draw to buffer
+	push	hl			; xs
 	inc	a
 	ld	l, a
 	mlt	hl
 	ld	b, 0
-	; result is at most 255 * 255 + 256 or 65280. Make sure UBC is zero
+	; result is at most 255 * 255 + 255 or 65279. Make sure UBC is zero
 	add	hl, bc			; y * size + x
 
 	ld	bc, 0
@@ -5318,7 +5300,6 @@ smcByte _TransparentColor
 	ld	(de), a			; write pixel
 	inc	de			; x++s
 
-	pop	hl			; ys
 	ld	bc, 0			; smc = -sinf
 _smc_dsrs_sinf_0B := $-3
 	add	hl, bc			; ys += -sinf
@@ -5329,7 +5310,7 @@ _smc_dsrs_cosf_0B := $-3
 
 	dec	iyl
 	jr	nz,_xloop		; x loop
-; We are here because the right edge of the sprite was transparent.
+	; We are here because the right edge of the sprite was transparent.
 	dec	iyh
 	jr	nz, _yloop		; y loop
 	pop	hl			; sprite out ptr
