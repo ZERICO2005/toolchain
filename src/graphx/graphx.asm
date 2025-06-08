@@ -907,7 +907,7 @@ gfx_Rectangle_NoClip:
 						 ; de = ti.lcdWidth
 	sbc	hl,de			; hl = &buf[y+height-1][x]
 	pop	bc			; bc = width
-	jp	_HorizLine_NoClip_Draw	; draw bottom horizontal line
+	jr	_HorizLine_NoClip_Draw	; draw bottom horizontal line
 
 ;-------------------------------------------------------------------------------
 gfx_HorizLine:
@@ -2512,9 +2512,7 @@ gfx_GetClipRegion:
 	ld	hl,3
 	add	hl,sp
 	ld	iy,(hl)
-	dec	iy
-	dec	iy
-	dec	iy
+	lea	iy, iy - 3
 	call	_ClipRegion		; get the clipping region
 	sbc	a,a			; return false if offscreen (0)
 	inc	a
@@ -3221,20 +3219,7 @@ _Tilemap:
 	ld	(ix-3),h
 	sbc	hl,bc
 	ld	(ix-12),hl
-	jp	.yloop
-
-.xres := $+3
-.loop:
-	ld	(ix-1),0
-	ld	hl,0
-.xoffset := $-3
-	ld	(ix-7),hl
-	ld	l,(iy+t_width)
-	ld	h,(ix-4)
-	mlt	hl
-	ld	(.ynext),hl
-	xor	a,a
-	jr	.xloop
+	jr	.yloop
 
 .xloopinner:
 	or	a,a
@@ -3290,7 +3275,20 @@ _Tilemap:
 .yloop:
 	ld	a,(iy+t_draw_height)
 	cp	a,(ix-3)
-	jp	nz,.loop
+	jr	z,.finish_loop
+.xres := $+3
+; .loop:
+	ld	(ix-1),0
+	ld	hl,0
+.xoffset := $-3
+	ld	(ix-7),hl
+	ld	l,(iy+t_width)
+	ld	h,(ix-4)
+	mlt	hl
+	ld	(.ynext),hl
+	xor	a,a
+	jr	.xloop
+.finish_loop:
 	ld	sp,ix
 	pop	ix
 	ret
@@ -3857,8 +3855,7 @@ gfx_GetStringWidth:
 ; Returns:
 ;  Width of string in pixels
 	pop	de
-	pop	hl
-	push	hl			; hl -> string
+	ex	(sp), hl		; hl -> string		
 	push	de
 	ld	de,0
 .loop:
@@ -3882,10 +3879,11 @@ gfx_GetCharWidth:
 ;  arg0 : Character
 ; Returns:
 ;  Width of character in pixels
-	ld	iy,0
-	lea	de,iy
-	add	iy,sp
-	ld	a,(iy+3)		; a = character
+	ld	hl, 3
+	add	hl, sp
+	ld	a, (hl)			; a = character
+	sbc	hl, hl
+	ex	de, hl
 _GetCharWidth:
 	sbc	hl,hl
 	ld	l,a
@@ -3998,8 +3996,7 @@ gfx_SetFontData:
 ; Returns:
 ;  Pointer to previous font data
 	pop	de
-	pop	hl
-	push	hl			; hl -> custom font data
+	ex	(sp), hl		; hl -> custom font data
 	push	de
 	add	hl,de
 	or	a,a
@@ -4050,8 +4047,7 @@ gfx_SetFontSpacing:
 ; Returns:
 ;  None
 	pop	de
-	pop	hl
-	push	hl			; hl -> custom font width
+	ex	(sp), hl		; hl -> custom font width
 	push	de
 	add	hl,de
 	or	a,a
@@ -4072,10 +4068,9 @@ gfx_SetMonospaceFont:
 	pop	hl
 	pop	de
 	push	de
-	push	hl
 	ld	a,e			; a = width
 	ld	(_TextFixedWidth),a	; store the value of the monospace width
-	ret
+	jp	(hl)
 
 ;-------------------------------------------------------------------------------
 gfx_FillTriangle_NoClip:
@@ -4147,7 +4142,7 @@ _FillTriangle:
 	ld	hl,(ix+9)
 	or	a,a
 	sbc	hl,de
-	jp	nz,.notflat
+	jr	nz,.notflat
 	ld	bc,(ix+6)		; x0
 	ld	(ix-6),bc		; a = x0
 	ld	(ix-3),bc		; b = x0;
@@ -4198,29 +4193,6 @@ _FillTriangle:
 	jp	p,.cmp30
 	jp	pe,.cmp31
 	jr	.cmp32
-.cmp30:
-	jp	po,.cmp31
-.cmp32:
-	ld	bc,(ix+18)
-	ld	(ix-6),bc
-.cmp31:
-	ld	de,(ix-3)
-	ld	hl,(ix-6)
-	or	a,a
-	sbc	hl,de
-	inc	hl
-	push	hl
-	ld	bc,(ix+9)
-	push	bc
-	push	de
-	call	0			; horizline(a, y0, b-a+1);
-.line0 := $-3
-	pop	bc
-	pop	bc
-	pop	bc
-	ld	sp,ix
-	pop	ix
-	ret				; return;
 .notflat:
 	ld	bc,(ix+6)		; x0
 	ld	hl,(ix+12)
@@ -4253,6 +4225,26 @@ _FillTriangle:
 	jr	nz,.elselast		; if (y1 == y2) { last = y1; }
 	ld	(ix-24),bc
 	jr	.sublast
+.cmp30:
+	jp	po,.cmp31
+.cmp32:
+	ld	bc,(ix+18)
+	ld	(ix-6),bc
+.cmp31:
+	ld	de,(ix-3)
+	ld	hl,(ix-6)
+	or	a,a
+	sbc	hl,de
+	inc	hl
+	push	hl
+	ld	bc,(ix+9)
+	push	bc
+	push	de
+	call	0			; horizline(a, y0, b-a+1);
+.line0 := $-3
+	ld	sp,ix
+	pop	ix
+	ret				; return;
 .elselast:
 	ld	bc,(ix+15)		; else { last = y1-1; }
 	dec	bc
@@ -4260,7 +4252,7 @@ _FillTriangle:
 .sublast:
 	ld	bc,(ix+9)
 	ld	(ix-12),bc		; for (y = y0; y <= last; y++)
-	jp	.firstloopstart
+	jr	.firstloopstart
 .firstloop:
 	ld	hl,(ix-15)
 	ld	bc,(ix-33)
@@ -4337,7 +4329,7 @@ _FillTriangle:
 	ld	de,(ix-21)
 	call	_MultiplyHLDE		; sb = dx02 * (y - y0);
 	ld	(ix-18),hl
-	jp	.secondloopstart	; for(; y <= y2; y++)
+	jr	.secondloopstart	; for(; y <= y2; y++)
 .secondloop:
 	ld	hl,(ix-15)
 	ld	bc,(ix-39)
@@ -4838,8 +4830,7 @@ gfx_ScaleSprite:
 	pop	de			; de->tgt_data
 	ld	iy,0
 	ld	iyl,a
-	ld	a,c			; du = bc:iyl
-	ld	(du),a			; ixl = target_height
+	ld	ixh,c			; (.du) = bc:iyl, ixl = target_height
 
 ; b = out_loop_times
 ; de = target buffer adress
@@ -4849,9 +4840,9 @@ ScaleWidth := $+2
 	ld	iyh, 0
 	xor	a,a
 	ld	b,a
-	ld	c,0
-du := $-1
-.loop:	ldi
+	ld	c,ixh	; (.du)
+.loop:
+	ldi
 	add	a,iyl
 	adc	hl,bc			; xu += du
 	inc	bc			; bc:iyl is du
@@ -6398,6 +6389,7 @@ _Maximum:
 ; Oututs:
 ;  HL=max number
 	or	a,a
+.no_carry:
 	sbc	hl,de
 	add	hl,de
 	jp	p,.skip
@@ -6416,6 +6408,7 @@ _Minimum:
 ; Oututs:
 ;  HL=min number
 	or	a,a
+.no_carry:
 	sbc	hl,de
 	ex	de,hl
 	jp	p,.skip
@@ -6453,7 +6446,7 @@ smcWord _XMax
 smcWord _YMin
 .YMin := $-3
 	ld	de,(iy+6)
-	call	_Maximum
+	call	_Maximum.no_carry
 	ld	(iy+6),hl
 	ld	hl,ti.lcdHeight
 smcWord _YMax
