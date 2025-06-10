@@ -2,7 +2,7 @@
 include '../include/library.inc'
 ;-------------------------------------------------------------------------------
 
-library GRAPHX, 12
+library GRAPHX, 13
 
 ;-------------------------------------------------------------------------------
 ; no dependencies
@@ -144,6 +144,11 @@ library GRAPHX, 12
 	export gfx_Ellipse_NoClip
 	export gfx_FillEllipse
 	export gfx_FillEllipse_NoClip
+;-------------------------------------------------------------------------------
+; v13 functions
+;-------------------------------------------------------------------------------
+	export gfx_RotatedScaledTransparentSprite
+	export gfx_RotatedScaledSprite
 
 ;-------------------------------------------------------------------------------
 LcdSize            := ti.lcdWidth*ti.lcdHeight
@@ -4908,6 +4913,7 @@ gfx_RotatedScaledTransparentSprite_NoClip:
 ;  arg1 : Pointer to sprite struct output
 	ld	a, 1
 _RotatedScaledSprite_NoClip:
+_RSS_NC:
 	ld	iy, .dsrs_base_address
 	ld	(iy + (.rotatescale - .dsrs_base_address)), a
 	push	ix
@@ -5020,6 +5026,7 @@ _RotatedScaledSprite_NoClip:
 	or	a, a
 	sbc	hl, de
 	ld	(iy + (.dsrs_cosf_1_plus_offset_hl - .dsrs_base_address)), hl
+.hijack:
 
 	ld	l, (ix + 9)		; y
 	ld	h, 160
@@ -5046,7 +5053,6 @@ _RotatedScaledSprite_NoClip:
 	add	hl, bc	; hl = (dxc - dys) + (size * 128)
 
 	call	gfx_Wait
-
 .outer:
 .dsrs_size_1 := $+2			; smc = size * scale / 64
 	ld	iyl, 0
@@ -5094,7 +5100,6 @@ smcByte _TransparentColor
 	; restore and increment dxc
 	ld	bc, 0			; smc = cosf
 .dsrs_cosf_1_plus_offset_hl := $-3
-.dsrs_base_address := .dsrs_cosf_1_plus_offset_hl
 	add	hl, bc			; dxc += cosf
 
 	; restore and increment dxs
@@ -5112,6 +5117,344 @@ smcByte _TransparentColor
 	jr	nz, .outer		; y loop
 	pop	af			; sprite out size
 	pop	ix
+	ret
+	ld	hl, 0
+.dsrs_base_address := $-3
+
+;-------------------------------------------------------------------------------
+gfx_RotatedScaledSprite:
+; Rotate and scale an image drawn directly to the screen buffer
+; Arguments:
+;  arg0 : Pointer to sprite struct input
+;  arg1 : Pointer to sprite struct output
+;  arg2 : Rotation angle as an integer
+;  arg3 : Scale factor (64 = 100%)
+; Returns:
+;  arg1 : Pointer to sprite struct output
+	xor	a, a
+	jr	_RotatedScaledSprite
+;-------------------------------------------------------------------------------
+gfx_RotatedScaledTransparentSprite:
+; Rotate and scale an image drawn directly to the screen buffer
+; Arguments:
+;  arg0 : Pointer to sprite struct input
+;  arg1 : Pointer to sprite struct output
+;  arg2 : Rotation angle as an integer
+;  arg3 : Scale factor (64 = 100%)
+; Returns:
+;  arg1 : Pointer to sprite struct output
+	ld	a, 1
+; _RSS_NC := _RotatedScaledSprite_NoClip
+_RotatedScaledSprite:
+	ld	iy, _RSS_NC.dsrs_base_address
+	ld	(iy + (_RSS_NC.rotatescale - _RSS_NC.dsrs_base_address)), a
+	push	ix
+	; aligning ix with gfx_RotateScaleSprite allows for code sharing
+	ld	ix, 3
+	add	ix, sp
+	ld	hl, (ix + 3)		; sprite pointer
+	ld	a, (hl)
+	ld	(ix + 16), a		; store sprite size
+	inc	hl
+	inc	hl
+
+	ld	(iy + (_RSS_NC.dsrs_sprptr_0 - _RSS_NC.dsrs_base_address)), hl	; write smc
+
+	; sinf = _SineTable[angle] * 128 / scale;
+	ld	a, (ix + 12)		; angle
+	call	calcSinCosSMC
+	ld	(iy + (_RSS_NC.dsrs_sinf_1_plus_offset_ix - _RSS_NC.dsrs_base_address)), hl	; write smc
+
+	; The previous code does ~HL instead of -HL. Unsure if intentional.
+	ex	de, hl
+	sbc	hl, hl
+	ccf
+	sbc	hl, de
+	ld	(iy + (_RSS_NC.dsrs_sinf_0 - _RSS_NC.dsrs_base_address)), hl	; write smc
+
+	; dxs = sinf * -(size * scale / 128);
+	call	_CalcDXS	; uses (iy + 0)
+	push	hl	; ld (ix - 6), dsrs_dys_0
+
+	; cosf = _SineTable[angle + 64] * 128 / scale
+	call	calcSinCosSMC_loadCosine
+	ld	(iy + (_RSS_NC.dsrs_cosf_0 - _RSS_NC.dsrs_base_address)), hl	; write smc
+	; ld	(.dsrs_cosf_1), hl	; write smc
+
+	; dxc = cosf * -(size * scale / 128);
+	ld	bc,(iy + 0)		; -(size * scale / 128)
+	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
+	push	hl	; ld (ix - 9), dsrs_dyc_0
+
+	ld	bc, (ix + 15)	; B = size, C = scale
+	ld	a, b
+	dec	a
+	ld	(iy + (_RSS_NC.dsrs_ssize - _RSS_NC.dsrs_base_address)), a	; write smc
+	inc	a
+	mlt	bc			; size * scale
+	srl	a			; size / 2
+	or	a, a
+	sbc	hl, hl
+	ld	h, a
+
+	; carry is cleared here
+	ld	de, (ix - 6)	; dsrs_dys_0
+	sbc.s	hl, de		; make sure UHL is zero
+	ld	(iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address)), hl	; write smc
+	add	hl, de		; restore HL
+	ld	de, (ix - 9)	; dsrs_dyc_0
+	add	hl, de
+	ld	(iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address)), hl	; write smc
+	; carry might be set, but that shouldn't matter for rl c
+
+	ld	a, b
+	rl	c
+	adc	a, a
+	rl	c
+	adc	a, a			; size * scale / 64
+	jr	nz, .hax
+	inc	a			; hax for scale = 1?
+.hax:
+	ld	(iy + (_RSS_NC.dsrs_size_1 - _RSS_NC.dsrs_base_address)), a	; write smc
+	
+	; CLIPPING
+	push	iy
+	ld	iyh, a
+	ld	iyl, a
+	xor	a, a
+	ld	(_rss_width_clipped), a
+	ld	(_rss_height_clipped), a
+	call	_RotatedScaledClip
+
+	jr	c, .not_culled
+	; Abort
+	lea	hl, ix - 3
+	ld	sp, hl
+	pop	ix
+	ret
+.not_culled:
+	ld	a, iyl
+	ld	(_rss_width_mul), a
+	ld	a, iyh
+	ld	(_rss_height_mul), a
+	ld	h, 0
+_rss_width_clipped := $-1
+	ld	l, 0
+_rss_height_clipped := $-1
+	ld	d, 0
+_rss_width_mul := $-1
+	ld	e, 0
+_rss_height_mul := $-1
+	call	__debug_print
+	pop	iy
+	ld	a, (_rss_width_mul)
+	ld	(iy + (_RSS_NC.dsrs_size_1 - _RSS_NC.dsrs_base_address)), a
+	
+	; CLIPPING
+	ld	a, (_rss_width_mul)
+	or	a, a
+	sbc	hl, hl
+	ld	l, a
+	ld	de, ti.lcdWidth
+	ex	de, hl
+	sbc	hl, de
+	ld	(iy + (_RSS_NC.line_add - _RSS_NC.dsrs_base_address)), hl
+
+	; Starting IX offset X
+	ld	hl, (iy + (_RSS_NC.dsrs_cosf_0 - _RSS_NC.dsrs_base_address))
+	ld	a, (_rss_width_clipped)
+	ld	c, a
+	call	_set_DE_to_HL_mul_C
+	ld	hl, (iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address))
+	or	a, a
+	adc	hl, de
+	ld	(iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address)), hl
+
+	; Starting IX offset Y
+	ld	hl, (iy + (_RSS_NC.dsrs_sinf_1_plus_offset_ix - _RSS_NC.dsrs_base_address))
+	ld	a, (_rss_height_clipped)
+	ld	c, a
+	call	_set_DE_to_HL_mul_C
+	ld	hl, (iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address))
+	or	a, a
+	adc	hl, de
+	ld	(iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address)), hl
+
+	; Starting HL offset Y
+	ld	hl, (iy + (_RSS_NC.dsrs_cosf_0 - _RSS_NC.dsrs_base_address))
+	ld	a, (_rss_height_clipped)
+	ld	c, a
+	call	_set_DE_to_HL_mul_C
+	ld	hl, (iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address))
+	or	a, a
+	adc.s	hl, de
+	ld	(iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address)), hl
+
+	; Starting HL offset X
+	ld	hl, (iy + (_RSS_NC.dsrs_sinf_0 - _RSS_NC.dsrs_base_address))
+	ld	a, (_rss_width_clipped)
+	ld	c, a
+	call	_set_DE_to_HL_mul_C
+	ld	hl, (iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address))
+	or	a, a
+	adc.s	hl, de
+	ld	(iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address)), hl
+
+
+	; calculate y-loop offset for IX
+	ld	hl, (iy + (_RSS_NC.dsrs_cosf_0 - _RSS_NC.dsrs_base_address))
+	ld	a, (_rss_width_mul)
+	ld	c, a
+	call	_set_DE_to_HL_mul_C
+	ld	hl, (iy + (_RSS_NC.dsrs_sinf_1_plus_offset_ix - _RSS_NC.dsrs_base_address))
+	or	a, a
+	sbc.s	hl, de	; make sure UHL is zero
+	ld	(iy + (_RSS_NC.dsrs_sinf_1_plus_offset_ix - _RSS_NC.dsrs_base_address)), hl
+
+	; calculate y-loop offset for HL
+	ld	hl, (iy + (_RSS_NC.dsrs_sinf_0 - _RSS_NC.dsrs_base_address))
+	ld	a, (_rss_width_mul)
+	ld	c, a
+	call	_set_DE_to_HL_mul_C
+	ld	hl, (iy + (_RSS_NC.dsrs_cosf_0 - _RSS_NC.dsrs_base_address))
+	or	a, a
+	sbc	hl, de
+	ld	(iy + (_RSS_NC.dsrs_cosf_1_plus_offset_hl - _RSS_NC.dsrs_base_address)), hl
+
+	ld	a, (_rss_height_mul)
+	ld	c, a
+
+	; jp	_RotatedScaledSprite_NoClip.hijack
+	jp	_RSS_NC.hijack
+
+_boot_sprintf := 0000BCh
+__debug_str:
+    db 'debug: %04X %04X', $0A, $00
+__debug_print:
+	; DEBUG ;
+	push	ix, iy, hl, de, bc, af
+	ld	ix, 0
+	add	ix, sp
+	ex.s	de, hl
+	ex	de, hl
+	push	de
+	push	hl
+	ld	hl, __debug_str
+	push	hl
+	ld	hl, $FB0000 ; debug console address
+	push	hl
+	call	_boot_sprintf
+
+	ld	sp, ix
+	pop	af, bc, de, hl, iy, ix
+	; DEBUG ;
+	ret
+
+_RotatedScaledClip:
+; Clipping stuff
+; Arguments:
+;  arg0 : Pointer to sprite structure
+;  arg1 : X coordinate
+;  arg2 : Y coordinate
+; Returns:
+;  A  : How much to add to the sprite per iteration
+;  IYH: New sprite height
+;  IYL: New sprite width
+;  NC : If offscreen
+	ld	bc,0
+smcWord _YMin
+	ld	hl,(ix + 9)		; hl = y coordinate
+	sbc	hl,bc
+	ex	de,hl			; de = y coordinate relative to min y
+	ld	a,ti.lcdHeight		; a = clip_height
+smcByte _YSpan
+	ld	c,iyh			; bc = height
+	sub	a,c			; get difference between clip_height and height
+	sbc	hl,hl
+	ld	l,a
+	dec	c			; bc = height - 1
+	jr	nc,.nottaller
+	xor	a,a
+	sbc	hl,de			; is partially clipped both top and bottom?
+	jr	nc,.yclip
+	sub	a,e			; a = negated relative y
+	add	hl,de			; use clip_height as the draw height, and clip top
+	jr	.cliptop
+.nottaller:
+	xor	a,a
+	sbc	hl,de			; is fully onscreen vertically?
+	jr	nc,.yclipped
+.yclip:
+	add	hl,bc			; is partially clipped bottom?
+	ex	de,hl			; e = new height - 1, hl = relative y
+	jr	c,.clipbottom
+	sub	a,l			; a = negated relative y
+.cliptop:
+	add	hl,bc			; is partially clipped top?
+	ret	nc
+	ex	de,hl			; e = new height - 1
+	ld	(_rss_height_clipped), a
+	ld	(ix + 9),0		; save min y coordinate
+smcByte _YMin
+.clipbottom:
+	inc	e
+	ld	iyh,e			; save new height
+.yclipped:
+
+	ld	bc,0
+smcWord _XMin
+	ld	hl,(ix + 6)		; hl = x coordinate
+	or	a,a
+	sbc	hl,bc
+	ex	de,hl			; de = x coordinate relative to min x
+	ld	hl,ti.lcdWidth		; hl = clip_width
+smcWord _XSpan
+	xor	a,a
+	ld	b,a
+	ld	c,iyl			; bc = width
+	sbc	hl,bc			; get difference between clip_width and width
+	dec	c			; bc = width - 1
+	jr	nc,.notwider
+	or	a,a
+	sbc	hl,de			; is partially clipped both left and right?
+	jr	nc,.xclip
+	sub	a,e			; a = negated relative x
+	add	hl,de			; use clip_width as the draw width, and clip left
+	jr	.clipleft
+.notwider:
+	sbc	hl,de			; is fully onscreen horizontally?
+	jr	nc,.xclipped		; a = 0 for bytes to add per iteration
+.xclip:
+	add	hl,bc			; is partially clipped right?
+	ex	de,hl			; e = new width - 1, hl = relative x
+	jr	c,.clipright
+	sub	a,l			; a = negated relative x
+.clipleft:
+	add	hl,bc			; is partially clipped left?
+	ret	nc			; return if offscreen
+	ld	(_rss_width_clipped), a
+	ex	de,hl			; e = new width - 1
+	ld	hl,0
+smcWord _XMin
+	ld	(ix + 6),hl		; save min x coordinate
+.clipright:
+	inc	e
+	ld	a,iyl			; get old width
+	ld	iyl,e			; save new width
+	sub	a,e			; calculate bytes to add per iteration
+.xclipped:
+	scf				; set carry for success
+	ret
+
+_set_DE_to_HL_mul_C:
+	ld	e, l
+	ld	d, c
+	ld	l, d
+	mlt	hl
+	mlt	de
+	ld	a, d
+	add	a, l
+	ld	d, a
 	ret
 
 ;-------------------------------------------------------------------------------
