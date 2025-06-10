@@ -4889,6 +4889,7 @@ dv_shr_8_times_width_plus_width := $-3
 	pop	ix
 	ret
 
+
 ;-------------------------------------------------------------------------------
 gfx_RotatedScaledSprite_NoClip:
 ; Rotate and scale an image drawn directly to the screen buffer
@@ -4912,10 +4913,39 @@ gfx_RotatedScaledTransparentSprite_NoClip:
 ; Returns:
 ;  arg1 : Pointer to sprite struct output
 	ld	a, 1
+	jr	_RotatedScaledSprite_NoClip
+;-------------------------------------------------------------------------------
+gfx_RotatedScaledSprite:
+; Rotate and scale an image drawn directly to the screen buffer
+; Arguments:
+;  arg0 : Pointer to sprite struct input
+;  arg1 : Pointer to sprite struct output
+;  arg2 : Rotation angle as an integer
+;  arg3 : Scale factor (64 = 100%)
+; Returns:
+;  arg1 : Pointer to sprite struct output
+	xor	a, a
+	jr	_RotatedScaledSprite_Clip
+;-------------------------------------------------------------------------------
+gfx_RotatedScaledTransparentSprite:
+; Rotate and scale an image drawn directly to the screen buffer
+; Arguments:
+;  arg0 : Pointer to sprite struct input
+;  arg1 : Pointer to sprite struct output
+;  arg2 : Rotation angle as an integer
+;  arg3 : Scale factor (64 = 100%)
+; Returns:
+;  arg1 : Pointer to sprite struct output
+	ld	a, 1
+_RotatedScaledSprite_Clip:
+	ld	h, $CD	; call *
+	db	$FD	; ld h, * --> ld iyh, *
 _RotatedScaledSprite_NoClip:
+	ld	h, $21	; ld hl, *
 _RSS_NC:
 	ld	iy, .dsrs_base_address
 	ld	(iy + (.rotatescale - .dsrs_base_address)), a
+	ld	(iy + (.dsrs_clip_call - .dsrs_base_address)), h
 	push	ix
 	; aligning ix with gfx_RotateScaleSprite allows for code sharing
 	ld	ix, 3
@@ -4986,6 +5016,8 @@ _RSS_NC:
 
 	ld	b, a	; render height
 	ld	c, a	; render width
+	.dsrs_clip_call := $+0
+	call	_RotatedScaled_ClipAdjust
 .hijack:
 	ld	(iy + (.dsrs_size_1 - .dsrs_base_address)), c	; write smc
 
@@ -5047,6 +5079,7 @@ _RSS_NC:
 
 	ld	bc, 0	; xs = (dxs + dyc) + (size * 128)
 .dsrs_size128_0_plus_dyc_0 := $-3
+.dsrs_base_address := $-3
 	add	ix, bc	; de = (dxs + dyc) + (size * 128)
 
 	ld	bc, 0	; ys = (dxc - dys) + (size * 128)
@@ -5119,104 +5152,9 @@ smcByte _TransparentColor
 	pop	af			; sprite out size
 	pop	ix
 	ret
-	ld	hl, 0
-.dsrs_base_address := $-3
 
 ;-------------------------------------------------------------------------------
-gfx_RotatedScaledSprite:
-; Rotate and scale an image drawn directly to the screen buffer
-; Arguments:
-;  arg0 : Pointer to sprite struct input
-;  arg1 : Pointer to sprite struct output
-;  arg2 : Rotation angle as an integer
-;  arg3 : Scale factor (64 = 100%)
-; Returns:
-;  arg1 : Pointer to sprite struct output
-	xor	a, a
-	jr	_RotatedScaledSprite
-;-------------------------------------------------------------------------------
-gfx_RotatedScaledTransparentSprite:
-; Rotate and scale an image drawn directly to the screen buffer
-; Arguments:
-;  arg0 : Pointer to sprite struct input
-;  arg1 : Pointer to sprite struct output
-;  arg2 : Rotation angle as an integer
-;  arg3 : Scale factor (64 = 100%)
-; Returns:
-;  arg1 : Pointer to sprite struct output
-	ld	a, 1
-; _RSS_NC := _RotatedScaledSprite_NoClip
-_RotatedScaledSprite:
-	ld	iy, _RSS_NC.dsrs_base_address
-	ld	(iy + (_RSS_NC.rotatescale - _RSS_NC.dsrs_base_address)), a
-	push	ix
-	; aligning ix with gfx_RotateScaleSprite allows for code sharing
-	ld	ix, 3
-	add	ix, sp
-	ld	hl, (ix + 3)		; sprite pointer
-	ld	a, (hl)
-	ld	(ix + 16), a		; store sprite size
-	inc	hl
-	inc	hl
-
-	ld	(iy + (_RSS_NC.dsrs_sprptr_0 - _RSS_NC.dsrs_base_address)), hl	; write smc
-
-	; sinf = _SineTable[angle] * 128 / scale;
-	ld	a, (ix + 12)		; angle
-	call	calcSinCosSMC
-	ld	(iy + (_RSS_NC.dsrs_sinf_1_plus_offset_ix - _RSS_NC.dsrs_base_address)), hl	; write smc
-
-	; The previous code does ~HL instead of -HL. Unsure if intentional.
-	ex	de, hl
-	sbc	hl, hl
-	ccf
-	sbc	hl, de
-	ld	(iy + (_RSS_NC.dsrs_sinf_0 - _RSS_NC.dsrs_base_address)), hl	; write smc
-
-	; dxs = sinf * -(size * scale / 128);
-	call	_CalcDXS	; uses (iy + 0)
-	push	hl	; ld (ix - 6), dsrs_dys_0
-
-	; cosf = _SineTable[angle + 64] * 128 / scale
-	call	calcSinCosSMC_loadCosine
-	ld	(iy + (_RSS_NC.dsrs_cosf_0 - _RSS_NC.dsrs_base_address)), hl	; write smc
-	; ld	(.dsrs_cosf_1), hl	; write smc
-
-	; dxc = cosf * -(size * scale / 128);
-	ld	bc,(iy + 0)		; -(size * scale / 128)
-	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
-	push	hl	; ld (ix - 9), dsrs_dyc_0
-
-	ld	bc, (ix + 15)	; B = size, C = scale
-	ld	a, b
-	dec	a
-	ld	(iy + (_RSS_NC.dsrs_ssize - _RSS_NC.dsrs_base_address)), a	; write smc
-	inc	a
-	mlt	bc			; size * scale
-	srl	a			; size / 2
-	or	a, a
-	sbc	hl, hl
-	ld	h, a
-
-	; carry is cleared here
-	ld	de, (ix - 6)	; dsrs_dys_0
-	sbc.s	hl, de		; make sure UHL is zero
-	ld	(iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address)), hl	; write smc
-	add	hl, de		; restore HL
-	ld	de, (ix - 9)	; dsrs_dyc_0
-	add	hl, de
-	ld	(iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address)), hl	; write smc
-	; carry might be set, but that shouldn't matter for rl c
-
-	ld	a, b
-	rl	c
-	adc	a, a
-	rl	c
-	adc	a, a			; size * scale / 64
-	jr	nz, .hax
-	inc	a			; hax for scale = 1?
-.hax:
-
+_RotatedScaled_ClipAdjust:
 	; CLIPPING
 	push	iy
 	ld	iyh, a
@@ -5304,7 +5242,7 @@ _RotatedScaledSprite:
 	ld	(iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address)), hl
 
 	pop	bc
-	jp	_RSS_NC.hijack
+	ret
 
 _RotatedScaledClip:
 ; Clipping stuff
