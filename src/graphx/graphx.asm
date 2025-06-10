@@ -5013,12 +5013,13 @@ _RSS_NC:
 	jr	nz, .hax
 	inc	a			; hax for scale = 1?
 .hax:
-
 	ld	b, a	; render height
 	ld	c, a	; render width
+
+	; changes from call * to ld hl, *
 	.dsrs_clip_call := $+0
 	call	_RotatedScaled_ClipAdjust
-.hijack:
+
 	ld	(iy + (.dsrs_size_1 - .dsrs_base_address)), c	; write smc
 
 	or	a, a
@@ -5032,14 +5033,7 @@ _RSS_NC:
 	; calculate y-loop offset for IX
 	ld	hl, (iy + (.dsrs_cosf_0 - .dsrs_base_address))
 	; DE = HL * C(width)
-	ld	d, c
-	ld	e, l
-	ld	l, d
-	mlt	hl
-	mlt	de
-	ld	a, d
-	add	a, l
-	ld	d, a
+	call	_set_DE_to_HL_mul_C
 	ld	hl, (iy + (.dsrs_sinf_1_plus_offset_ix - .dsrs_base_address))
 	or	a, a
 	sbc.s	hl, de	; make sure UHL is zero
@@ -5048,14 +5042,7 @@ _RSS_NC:
 	; calculate y-loop offset for HL
 	ld	hl, (iy + (.dsrs_sinf_0 - .dsrs_base_address))
 	; DE = HL * C(width)
-	ld	d, c
-	ld	e, l
-	ld	l, d
-	mlt	hl
-	mlt	de
-	ld	a, d
-	add	a, l
-	ld	d, a
+	call	_set_DE_to_HL_mul_C
 	ld	hl, (iy + (.dsrs_cosf_0 - .dsrs_base_address))
 	or	a, a
 	sbc	hl, de
@@ -5154,97 +5141,21 @@ smcByte _TransparentColor
 	ret
 
 ;-------------------------------------------------------------------------------
-_RotatedScaled_ClipAdjust:
-	; CLIPPING
-	push	iy
-	ld	iyh, a
-	ld	iyl, a
-	xor	a, a
-	ld	(ix + 13), a
-	ld	(ix + 14), a
-	call	_RotatedScaledClip
-
-	jr	c, .not_culled
-	; Abort
+_rss_not_culled:
+	; offscreen
+	ld	a, (ix + 13)	; sprite out size
 	lea	hl, ix - 3
 	ld	sp, hl
 	pop	ix
 	ret
-.not_culled:
-	lea.s	bc, iy
-	; B = height
-	; C = width
-	ex	(sp), iy
-
-	ld	bc, (ix + 13)
-
-	; Starting IX offset X
-	ld	hl, (iy + (_RSS_NC.dsrs_cosf_0 - _RSS_NC.dsrs_base_address))
-	; DE = HL * C(width)
-	ld	d, c
-	ld	e, l
-	ld	l, d
-	mlt	hl
-	mlt	de
-	ld	a, d
-	add	a, l
-	ld	d, a
-	ld	hl, (iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address))
-	add	hl, de
-	ld	(iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address)), hl
-
-	; Starting IX offset Y
-	ld	hl, (iy + (_RSS_NC.dsrs_sinf_1_plus_offset_ix - _RSS_NC.dsrs_base_address))
-	; DE = HL * B(height)
-	ld	d, b
-	ld	e, l
-	ld	l, d
-	mlt	hl
-	mlt	de
-	ld	a, d
-	add	a, l
-	ld	d, a
-	ld	hl, (iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address))
-	or	a, a
-	adc	hl, de
-	ld	(iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address)), hl
-
-	; Starting HL offset Y
-	ld	hl, (iy + (_RSS_NC.dsrs_cosf_0 - _RSS_NC.dsrs_base_address))
-	; DE = HL * B(height)
-	ld	d, b
-	ld	e, l
-	ld	l, d
-	mlt	hl
-	mlt	de
-	ld	a, d
-	add	a, l
-	ld	d, a
-	ld	hl, (iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address))
-	or	a, a
-	adc.s	hl, de
-	ld	(iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address)), hl
-
-	; Starting HL offset X
-	ld	hl, (iy + (_RSS_NC.dsrs_sinf_0 - _RSS_NC.dsrs_base_address))
-	; DE = HL * C(width)
-	ld	d, c
-	ld	e, l
-	ld	l, d
-	mlt	hl
-	mlt	de
-	ld	a, d
-	add	a, l
-	ld	d, a
-	ld	hl, (iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address))
-	or	a, a
-	adc.s	hl, de
-	ld	(iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address)), hl
-
-	pop	bc
-	ret
-
-_RotatedScaledClip:
+_RotatedScaled_ClipAdjust:
+; modified version of _ClipCoordinates
+	push	iy
+	ld	iyh, b	; height
+	ld	iyl, c	; width
+	xor	a, a
+	ld	(ix + 13), a	; width that was clipped
+	ld	(ix + 14), a	; height that was clipped
 ; Clipping stuff
 ; Arguments:
 ;  arg0 : Pointer to sprite structure
@@ -5284,9 +5195,9 @@ smcByte _YSpan
 	sub	a,l			; a = negated relative y
 .cliptop:
 	add	hl,bc			; is partially clipped top?
-	ret	nc
+	jr	nc, _rss_not_culled
 	ex	de,hl			; e = new height - 1
-	ld	(ix + 14), a		; store height clipped
+	ld	(ix + 14), a		; store height that was clipped
 	ld	(ix + 9),0		; save min y coordinate
 smcByte _YMin
 .clipbottom:
@@ -5324,8 +5235,8 @@ smcWord _XSpan
 	sub	a,l			; a = negated relative x
 .clipleft:
 	add	hl,bc			; is partially clipped left?
-	ret	nc			; return if offscreen
-	ld	(ix + 13), a		; store width clipped
+	jr	nc, _rss_not_culled	; return if offscreen
+	ld	(ix + 13), a		; store width that was clipped
 	ex	de,hl			; e = new width - 1
 	ld	hl,0
 smcWord _XMin
@@ -5334,7 +5245,57 @@ smcWord _XMin
 	inc	e
 	ld	iyl,e			; save new width
 .xclipped:
-	scf				; set carry for success
+	; width and height are on the stack
+	ex	(sp), iy
+
+	ld	bc, (ix + 13)
+
+	; Starting IX offset X
+	ld	hl, (iy + (_RSS_NC.dsrs_cosf_0 - _RSS_NC.dsrs_base_address))
+	; DE = HL * C(width)
+	call	_set_DE_to_HL_mul_C
+	ld	hl, (iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address))
+	add	hl, de
+	push	hl
+
+	; Starting HL offset X
+	ld	hl, (iy + (_RSS_NC.dsrs_sinf_0 - _RSS_NC.dsrs_base_address))
+	; DE = HL * C(width)
+	call	_set_DE_to_HL_mul_C
+	ld	hl, (iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address))
+	add	hl, de
+	push	hl
+
+	ld	c, b
+
+	; Starting HL offset Y
+	ld	hl, (iy + (_RSS_NC.dsrs_cosf_0 - _RSS_NC.dsrs_base_address))
+	; DE = HL * B(height)
+	call	_set_DE_to_HL_mul_C
+	pop	hl
+	add.s	hl, de	; make sure UHL is zero
+	ld	(iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address)), hl
+
+	; Starting IX offset Y
+	ld	hl, (iy + (_RSS_NC.dsrs_sinf_1_plus_offset_ix - _RSS_NC.dsrs_base_address))
+	; DE = HL * B(height)
+	call	_set_DE_to_HL_mul_C
+	pop	hl
+	add	hl, de
+	ld	(iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address)), hl
+
+	pop	bc	; B = height, C = width
+	ret
+
+_set_DE_to_HL_mul_C:
+	ld	d, c
+	ld	e, l
+	ld	l, d
+	mlt	hl
+	mlt	de
+	ld	a, d
+	add	a, l
+	ld	d, a
 	ret
 
 ;-------------------------------------------------------------------------------
