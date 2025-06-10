@@ -4983,23 +4983,25 @@ _RSS_NC:
 	jr	nz, .hax
 	inc	a			; hax for scale = 1?
 .hax:
-	ld	(iy + (.dsrs_size_1 - .dsrs_base_address)), a	; write smc
+
+	ld	b, a	; render height
+	ld	c, a	; render width
+.hijack:
+	ld	(iy + (.dsrs_size_1 - .dsrs_base_address)), c	; write smc
 
 	or	a, a
 	sbc	hl, hl
-	ld	l, a
+	ld	l, c
 	ld	de, ti.lcdWidth
 	ex	de, hl
 	sbc	hl, de
 	ld	(iy + (.line_add - .dsrs_base_address)), hl
 
-	ld	c, a
-
 	; calculate y-loop offset for IX
 	ld	hl, (iy + (.dsrs_cosf_0 - .dsrs_base_address))
-	; DE = HL * C
-	ld	e, l
+	; DE = HL * C(width)
 	ld	d, c
+	ld	e, l
 	ld	l, d
 	mlt	hl
 	mlt	de
@@ -5013,9 +5015,9 @@ _RSS_NC:
 
 	; calculate y-loop offset for HL
 	ld	hl, (iy + (.dsrs_sinf_0 - .dsrs_base_address))
-	; DE = HL * C
-	ld	e, l
+	; DE = HL * C(width)
 	ld	d, c
+	ld	e, l
 	ld	l, d
 	mlt	hl
 	mlt	de
@@ -5026,7 +5028,6 @@ _RSS_NC:
 	or	a, a
 	sbc	hl, de
 	ld	(iy + (.dsrs_cosf_1_plus_offset_hl - .dsrs_base_address)), hl
-.hijack:
 
 	ld	l, (ix + 9)		; y
 	ld	h, 160
@@ -5042,7 +5043,7 @@ _RSS_NC:
 	ld	ixh, c
 	ex	(sp), ix		; smc = dxs start	
 
-	ld	iyh, c			; size * scale / 64
+	ld	iyh, b			; size * scale / 64
 
 	ld	bc, 0	; xs = (dxs + dyc) + (size * 128)
 .dsrs_size128_0_plus_dyc_0 := $-3
@@ -5215,15 +5216,14 @@ _RotatedScaledSprite:
 	jr	nz, .hax
 	inc	a			; hax for scale = 1?
 .hax:
-	ld	(iy + (_RSS_NC.dsrs_size_1 - _RSS_NC.dsrs_base_address)), a	; write smc
-	
+
 	; CLIPPING
 	push	iy
 	ld	iyh, a
 	ld	iyl, a
 	xor	a, a
-	ld	(_rss_width_clipped), a
-	ld	(_rss_height_clipped), a
+	ld	(ix + 13), a
+	ld	(ix + 14), a
 	call	_RotatedScaledClip
 
 	jr	c, .not_culled
@@ -5233,48 +5233,39 @@ _RotatedScaledSprite:
 	pop	ix
 	ret
 .not_culled:
-	ld	a, iyl
-	ld	(_rss_width_mul), a
-	ld	a, iyh
-	ld	(_rss_height_mul), a
-	ld	h, 0
-_rss_width_clipped := $-1
-	ld	l, 0
-_rss_height_clipped := $-1
-	ld	d, 0
-_rss_width_mul := $-1
-	ld	e, 0
-_rss_height_mul := $-1
-	call	__debug_print
-	pop	iy
-	ld	a, (_rss_width_mul)
-	ld	(iy + (_RSS_NC.dsrs_size_1 - _RSS_NC.dsrs_base_address)), a
-	
-	; CLIPPING
-	ld	a, (_rss_width_mul)
-	or	a, a
-	sbc	hl, hl
-	ld	l, a
-	ld	de, ti.lcdWidth
-	ex	de, hl
-	sbc	hl, de
-	ld	(iy + (_RSS_NC.line_add - _RSS_NC.dsrs_base_address)), hl
+	lea.s	bc, iy
+	; B = height
+	; C = width
+	ex	(sp), iy
+
+	ld	bc, (ix + 13)
 
 	; Starting IX offset X
 	ld	hl, (iy + (_RSS_NC.dsrs_cosf_0 - _RSS_NC.dsrs_base_address))
-	ld	a, (_rss_width_clipped)
-	ld	c, a
-	call	_set_DE_to_HL_mul_C
+	; DE = HL * C(width)
+	ld	d, c
+	ld	e, l
+	ld	l, d
+	mlt	hl
+	mlt	de
+	ld	a, d
+	add	a, l
+	ld	d, a
 	ld	hl, (iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address))
-	or	a, a
-	adc	hl, de
+	add	hl, de
 	ld	(iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address)), hl
 
 	; Starting IX offset Y
 	ld	hl, (iy + (_RSS_NC.dsrs_sinf_1_plus_offset_ix - _RSS_NC.dsrs_base_address))
-	ld	a, (_rss_height_clipped)
-	ld	c, a
-	call	_set_DE_to_HL_mul_C
+	; DE = HL * B(height)
+	ld	d, b
+	ld	e, l
+	ld	l, d
+	mlt	hl
+	mlt	de
+	ld	a, d
+	add	a, l
+	ld	d, a
 	ld	hl, (iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address))
 	or	a, a
 	adc	hl, de
@@ -5282,9 +5273,15 @@ _rss_height_mul := $-1
 
 	; Starting HL offset Y
 	ld	hl, (iy + (_RSS_NC.dsrs_cosf_0 - _RSS_NC.dsrs_base_address))
-	ld	a, (_rss_height_clipped)
-	ld	c, a
-	call	_set_DE_to_HL_mul_C
+	; DE = HL * B(height)
+	ld	d, b
+	ld	e, l
+	ld	l, d
+	mlt	hl
+	mlt	de
+	ld	a, d
+	add	a, l
+	ld	d, a
 	ld	hl, (iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address))
 	or	a, a
 	adc.s	hl, de
@@ -5292,63 +5289,22 @@ _rss_height_mul := $-1
 
 	; Starting HL offset X
 	ld	hl, (iy + (_RSS_NC.dsrs_sinf_0 - _RSS_NC.dsrs_base_address))
-	ld	a, (_rss_width_clipped)
-	ld	c, a
-	call	_set_DE_to_HL_mul_C
+	; DE = HL * C(width)
+	ld	d, c
+	ld	e, l
+	ld	l, d
+	mlt	hl
+	mlt	de
+	ld	a, d
+	add	a, l
+	ld	d, a
 	ld	hl, (iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address))
 	or	a, a
 	adc.s	hl, de
 	ld	(iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address)), hl
 
-
-	; calculate y-loop offset for IX
-	ld	hl, (iy + (_RSS_NC.dsrs_cosf_0 - _RSS_NC.dsrs_base_address))
-	ld	a, (_rss_width_mul)
-	ld	c, a
-	call	_set_DE_to_HL_mul_C
-	ld	hl, (iy + (_RSS_NC.dsrs_sinf_1_plus_offset_ix - _RSS_NC.dsrs_base_address))
-	or	a, a
-	sbc.s	hl, de	; make sure UHL is zero
-	ld	(iy + (_RSS_NC.dsrs_sinf_1_plus_offset_ix - _RSS_NC.dsrs_base_address)), hl
-
-	; calculate y-loop offset for HL
-	ld	hl, (iy + (_RSS_NC.dsrs_sinf_0 - _RSS_NC.dsrs_base_address))
-	ld	a, (_rss_width_mul)
-	ld	c, a
-	call	_set_DE_to_HL_mul_C
-	ld	hl, (iy + (_RSS_NC.dsrs_cosf_0 - _RSS_NC.dsrs_base_address))
-	or	a, a
-	sbc	hl, de
-	ld	(iy + (_RSS_NC.dsrs_cosf_1_plus_offset_hl - _RSS_NC.dsrs_base_address)), hl
-
-	ld	a, (_rss_height_mul)
-	ld	c, a
-
-	; jp	_RotatedScaledSprite_NoClip.hijack
+	pop	bc
 	jp	_RSS_NC.hijack
-
-_boot_sprintf := 0000BCh
-__debug_str:
-    db 'debug: %04X %04X', $0A, $00
-__debug_print:
-	; DEBUG ;
-	push	ix, iy, hl, de, bc, af
-	ld	ix, 0
-	add	ix, sp
-	ex.s	de, hl
-	ex	de, hl
-	push	de
-	push	hl
-	ld	hl, __debug_str
-	push	hl
-	ld	hl, $FB0000 ; debug console address
-	push	hl
-	call	_boot_sprintf
-
-	ld	sp, ix
-	pop	af, bc, de, hl, iy, ix
-	; DEBUG ;
-	ret
 
 _RotatedScaledClip:
 ; Clipping stuff
@@ -5357,7 +5313,6 @@ _RotatedScaledClip:
 ;  arg1 : X coordinate
 ;  arg2 : Y coordinate
 ; Returns:
-;  A  : How much to add to the sprite per iteration
 ;  IYH: New sprite height
 ;  IYL: New sprite width
 ;  NC : If offscreen
@@ -5393,7 +5348,7 @@ smcByte _YSpan
 	add	hl,bc			; is partially clipped top?
 	ret	nc
 	ex	de,hl			; e = new height - 1
-	ld	(_rss_height_clipped), a
+	ld	(ix + 14), a		; store height clipped
 	ld	(ix + 9),0		; save min y coordinate
 smcByte _YMin
 .clipbottom:
@@ -5432,29 +5387,16 @@ smcWord _XSpan
 .clipleft:
 	add	hl,bc			; is partially clipped left?
 	ret	nc			; return if offscreen
-	ld	(_rss_width_clipped), a
+	ld	(ix + 13), a		; store width clipped
 	ex	de,hl			; e = new width - 1
 	ld	hl,0
 smcWord _XMin
 	ld	(ix + 6),hl		; save min x coordinate
 .clipright:
 	inc	e
-	ld	a,iyl			; get old width
 	ld	iyl,e			; save new width
-	sub	a,e			; calculate bytes to add per iteration
 .xclipped:
 	scf				; set carry for success
-	ret
-
-_set_DE_to_HL_mul_C:
-	ld	e, l
-	ld	d, c
-	ld	l, d
-	mlt	hl
-	mlt	de
-	ld	a, d
-	add	a, l
-	ld	d, a
 	ret
 
 ;-------------------------------------------------------------------------------
