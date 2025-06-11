@@ -4892,50 +4892,54 @@ dv_shr_8_times_width_plus_width := $-3
 
 ;-------------------------------------------------------------------------------
 gfx_RotatedScaledSprite_NoClip:
-; Rotate and scale an image drawn directly to the screen buffer
+; Rotate and scale an unclipped sprite drawn directly to the screen buffer
 ; Arguments:
-;  arg0 : Pointer to sprite struct input
-;  arg1 : Pointer to sprite struct output
-;  arg2 : Rotation angle as an integer
-;  arg3 : Scale factor (64 = 100%)
+;  arg0 : Pointer to sprite
+;  arg1 : X coordinate
+;  arg2 : Y coordinate
+;  arg3 : Rotation angle as an integer
+;  arg4 : Scale factor (64 = 100%)
 ; Returns:
-;  arg1 : Pointer to sprite struct output
+;  The size of the sprite after scaling
 	xor	a, a
 	jr	_RotatedScaledSprite_NoClip
 ;-------------------------------------------------------------------------------
 gfx_RotatedScaledTransparentSprite_NoClip:
-; Rotate and scale an image drawn directly to the screen buffer
+; Rotate and scale an unclipped transparent sprite drawn directly to the screen buffer
 ; Arguments:
-;  arg0 : Pointer to sprite struct input
-;  arg1 : Pointer to sprite struct output
-;  arg2 : Rotation angle as an integer
-;  arg3 : Scale factor (64 = 100%)
+;  arg0 : Pointer to sprite
+;  arg1 : X coordinate
+;  arg2 : Y coordinate
+;  arg3 : Rotation angle as an integer
+;  arg4 : Scale factor (64 = 100%)
 ; Returns:
-;  arg1 : Pointer to sprite struct output
+;  The size of the sprite after scaling
 	ld	a, 1
 	jr	_RotatedScaledSprite_NoClip
 ;-------------------------------------------------------------------------------
 gfx_RotatedScaledSprite:
-; Rotate and scale an image drawn directly to the screen buffer
+; Rotate and scale a clipped sprite drawn directly to the screen buffer
 ; Arguments:
-;  arg0 : Pointer to sprite struct input
-;  arg1 : Pointer to sprite struct output
-;  arg2 : Rotation angle as an integer
-;  arg3 : Scale factor (64 = 100%)
+;  arg0 : Pointer to sprite
+;  arg1 : X coordinate
+;  arg2 : Y coordinate
+;  arg3 : Rotation angle as an integer
+;  arg4 : Scale factor (64 = 100%)
 ; Returns:
-;  arg1 : Pointer to sprite struct output
+;  The unclipped size of the sprite after scaling
 	xor	a, a
 	jr	_RotatedScaledSprite_Clip
 ;-------------------------------------------------------------------------------
 gfx_RotatedScaledTransparentSprite:
-; Rotate and scale an image drawn directly to the screen buffer
+; Rotate and scale a clipped transparent sprite drawn directly to the screen buffer
 ; Arguments:
-;  arg0 : Pointer to sprite struct input
-;  arg1 : Pointer to sprite struct output
-;  arg2 : Rotation angle as an integer
-;  arg3 : Scale factor (64 = 100%)
+;  arg0 : Pointer to sprite
+;  arg1 : X coordinate
+;  arg2 : Y coordinate
+;  arg3 : Rotation angle as an integer
+;  arg4 : Scale factor (64 = 100%)
 ; Returns:
-;  arg1 : Pointer to sprite struct output
+;  The unclipped size of the sprite after scaling
 	ld	a, 1
 _RotatedScaledSprite_Clip:
 	ld	h, $CD	; call *
@@ -5062,6 +5066,7 @@ _RSS_NC:
 	ld	ixh, c
 	ex	(sp), ix		; smc = dxs start	
 
+	ld	a, (iy + (.dsrs_ssize - .dsrs_base_address))
 	ld	iyh, b			; size * scale / 64
 
 	ld	bc, 0	; xs = (dxs + dyc) + (size * 128)
@@ -5078,13 +5083,11 @@ _RSS_NC:
 .dsrs_size_1 := $+2			; smc = size * scale / 64
 	ld	iyl, 0
 .inner:
-	ld	a, 0
-.dsrs_ssize := $-1
 	cp	a, h
-	jr	c, .skip
+	jr	c, .skip_pixel
 	ld	c, ixh
 	cp	a, c
-	jr	c, .skip
+	jr	c, .skip_pixel
 	; get pixel and draw to buffer
 	push	hl			; xs
 	inc	a
@@ -5104,7 +5107,9 @@ smcByte _TransparentColor
 .rotatescale := $-1
 	ld	(de), a			; write pixel
 	pop	hl			; ys
-.skip:
+	ld	a, 0
+.dsrs_ssize := $-1
+.skip_pixel:
 	inc	de			; x++s
 
 	ld	bc, 0			; smc = -sinf
