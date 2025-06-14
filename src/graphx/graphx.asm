@@ -4992,12 +4992,14 @@ _RSS_NC:
 
 	; carry is cleared here
 	ld	de, (ix - 6)	; dsrs_dys_0
-	sbc.s	hl, de		; make sure UHL is zero
-	ld	(iy + (.dsrs_size128_1_minus_dys_0 - .dsrs_base_address)), hl	; write smc
+	sbc	hl, de
+	; ld	(iy + (.dsrs_size128_1_minus_dys_0 - .dsrs_base_address)), hl	; write smc
+	push	hl	; ld (ix - 12), dsrs_size128_1_minus_dys_0
 	add	hl, de		; restore HL
 	ld	de, (ix - 9)	; dsrs_dyc_0
-	add	hl, de
+	add.s	hl, de		; make sure UHL is zero
 	ld	(iy + (.dsrs_size128_0_plus_dyc_0 - .dsrs_base_address)), hl	; write smc
+
 	; carry might be set, but that shouldn't matter for rl c
 
 	ld	a, b
@@ -5057,20 +5059,21 @@ _RSS_NC:
 	ld	a, (ix + 16)	; scale
 	dec	a		; scale - 1 for comparison flags to work correctly
 
-	pop	hl			; smc = dxc start
+	; by popping these off the stack in a werid way, we can reduce SMC useage
+
+	pop	hl			; dsrs_size128_1_minus_dys_0
 	ld	ixh, c			; store return value
+	ld	iyh, b			; size * scale / 64
+	pop	bc			; smc = dxc start
 	ex	(sp), ix		; smc = dxs start
 
-	ld	iyh, b			; size * scale / 64
+	; ys = (dxc - dys) + (size * 128)
+	add	hl, bc	; HL = (dxc - dys) + (size * 128)
 
 	ld	bc, 0	; xs = (dxs + dyc) + (size * 128)
 .dsrs_size128_0_plus_dyc_0 := $-3
-	add	ix, bc	; de = (dxs + dyc) + (size * 128)
-
-	ld	bc, 0	; ys = (dxc - dys) + (size * 128)
-.dsrs_size128_1_minus_dys_0 := $-3
-.dsrs_base_address := .dsrs_size128_1_minus_dys_0
-	add	hl, bc	; hl = (dxc - dys) + (size * 128)
+.dsrs_base_address := .dsrs_size128_0_plus_dyc_0
+	add	ix, bc	; IX = (dxs + dyc) + (size * 128)
 
 	call	gfx_Wait
 	jr	.begin_loop
@@ -5303,7 +5306,8 @@ smcWord _XMin
 	ld	hl, (iy + (_RSS_NC.dsrs_sinf_0A - _RSS_NC.dsrs_base_address))
 	; DE = HL * C(width)
 	call	_set_DE_to_HL_mul_C
-	ld	hl, (iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address))
+	; ld	hl, (iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address))
+	ld	hl, (ix - 12)	; dsrs_size128_1_minus_dys_0
 	add	hl, de
 	push	hl
 
@@ -5314,15 +5318,16 @@ smcWord _XMin
 	; DE = HL * B(height)
 	call	_set_DE_to_HL_mul_C
 	pop	hl
-	add.s	hl, de	; make sure UHL is zero
-	ld	(iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address)), hl
+	add	hl, de
+	; ld	(iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address)), hl
+	ld	(ix - 12), hl	; dsrs_size128_1_minus_dys_0
 
 	; Starting IX offset Y
 	ld	hl, (iy + (_RSS_NC.dsrs_sinf_1_plus_offset_ix - _RSS_NC.dsrs_base_address))
 	; DE = HL * B(height)
 	call	_set_DE_to_HL_mul_C
 	pop	hl
-	add	hl, de
+	add.s	hl, de	; make sure UHL is zero
 	ld	(iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address)), hl
 
 	pop	bc	; B = height, C = width
