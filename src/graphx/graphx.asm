@@ -1238,7 +1238,7 @@ gfx_FillEllipse:
 	ld	hl,_ellipse_ret
 	ld	(_ellipse_loop_draw_1),hl
 	jr	_Ellipse
-	
+
 ;-------------------------------------------------------------------------------
 gfx_Ellipse_NoClip:
 	ld	hl,_SetPixel_NoClip_NoWait
@@ -1286,7 +1286,7 @@ _Ellipse:
 	add	ix,sp
 	lea	hl,ix - 42
 	ld	sp,hl
-	
+
 ; First, setup all the variables
 	ld	a,(ix + 12)
 	or	a,a
@@ -1371,7 +1371,7 @@ _Ellipse:
 	ld	de,(ix - el_y)
 	call	_MultiplyHLDE
 	ld	(ix - el_comp_b),hl
-	
+
 	wait_quick
 
 .main_loop1:
@@ -2157,7 +2157,7 @@ _draw_left_to_right:
 	ex	de, hl
 	or	a, a
 	sbc	hl, hl
-	sbc	hl, de			; abs(dy)			
+	sbc	hl, de			; abs(dy)
 .positive_dy:
 
 	ld	a,iyl
@@ -2902,15 +2902,15 @@ gfx_GetSprite:
 	sbc	a,a
 	inc	a
 	ld	b,a			; the amount to add to get to the next line
-	ld	(.offset),bc
+	push	bc
+	pop	iy
 	ld	a,(de)
 	inc	de
 .loop:
 	ld	bc,0
 .amount := $-3
 	ldir				; copy the data into the struct data
-	ld	bc,0
-.offset := $-3
+	lea	bc,iy			; (.offset)
 	add	hl,bc
 	dec	a
 	jr	nz,.loop
@@ -2940,7 +2940,7 @@ gfx_TransparentSprite_NoClip:
 	ld	hl,(iy+3)		; hl -> sprite struct
 	ld	a,(hl)
 	inc	hl
-	ld	(.next),a
+	ld	iyl,a			; (.next)
 	ld	a,(hl)
 	inc	hl
 	ex	(sp), ix		; preserve ix and load it with (sp)
@@ -2950,8 +2950,7 @@ gfx_TransparentSprite_NoClip:
 smcByte _TransparentColor
 	wait_quick
 .loop:
-	ld	c,0
-.next := $-1
+	ld	c,iyl			; (.next)
 	lea	de,ix
 	call	_TransparentPlot	; call the plotter
 	ld	de,ti.lcdWidth
@@ -3025,18 +3024,18 @@ smcByte _YMin
 .clipbottom:
 	inc	e
 	ld	iyh,e			; save new height
-.yclipped:
+	or	a,a
+.yclipped:	; <-- carry already cleared on this path
 
 	ld	bc,0
 smcWord _XMin
 	ld	hl,(ix+6)		; hl = x coordinate
-	or	a,a
 	sbc	hl,bc
 	ex	de,hl			; de = x coordinate relative to min x
 	ld	hl,ti.lcdWidth		; hl = clip_width
 smcWord _XSpan
 	xor	a,a
-	ld	b,a
+	ld	b,a			; UBC and B are now zero from this point onwards
 	ld	c,iyl			; bc = width
 	sbc	hl,bc			; get difference between clip_width and width
 	dec	c			; bc = width - 1
@@ -3085,7 +3084,6 @@ smcWord _XMin
 	inc	hl
 	ld	ix,(CurrentBuffer)
 	add	ix,de
-	ld	b,0
 	scf				; set carry for success
 	ret
 
@@ -3860,7 +3858,7 @@ gfx_GetStringWidth:
 ; Returns:
 ;  Width of string in pixels
 	pop	de
-	ex	(sp), hl		; hl -> string		
+	ex	(sp), hl		; hl -> string
 	push	de
 	ld	de,0
 .loop:
@@ -4467,8 +4465,7 @@ _Polygon:
 	lea	hl, ix + 3
 	ld	sp, hl
 	pop	ix
-	ret
-
+	; ret
 ;-------------------------------------------------------------------------------
 gfx_Reserved:
 ; Deprecated unused function (available for use)
@@ -4495,7 +4492,8 @@ gfx_Deprecated:
 	or	a,a
 	sbc	hl,hl
 	ld	(ix-6),hl
-d_17:	ld	bc,(ix-3)
+d_17:
+	ld	bc,(ix-3)
 	ld	hl,(ix+6)
 	add	hl,bc
 	inc	bc
@@ -4503,7 +4501,7 @@ d_17:	ld	bc,(ix-3)
 	ld	a,(hl)
 	ld	(ix-7),a
 	cp	a,(ix-8)
-	jp	nz,d_16
+	jr	nz,d_16
 	ld	bc,(ix-3)
 	ld	hl,(ix+6)
 	add	hl,bc
@@ -4522,7 +4520,26 @@ d_17:	ld	bc,(ix-3)
 	inc	bc
 	ld	(ix-3),bc
 	jr	d_18
-d_13:	ld	bc,(ix-14)
+
+d_16:
+	ld	bc,(ix-6)
+	ld	hl,(ix+9)
+	add	hl,bc
+	inc	bc
+	ld	(ix-6),bc
+	ld	a,(ix-7)
+	ld	(hl),a
+d_18:
+	ld	bc,(ix-17)
+	ld	hl,(ix-3)
+	or	a,a
+	sbc	hl,bc
+	jr	c,d_17
+	ld	sp,ix
+	pop	ix
+	ret
+d_13:
+	ld	bc,(ix-14)
 	push	bc
 	pea	ix-20
 	call	_LZ_ReadVarSize
@@ -4545,7 +4562,9 @@ d_13:	ld	bc,(ix-14)
 	sbc	hl,hl
 	ld	(ix-11),hl
 	jr	d_11
-d_9:	ld	bc,(ix-23)
+
+d_9:
+	ld	bc,(ix-23)
 	ld	hl,(ix-6)
 	or	a,a
 	sbc	hl,bc
@@ -4563,27 +4582,13 @@ d_9:	ld	bc,(ix-23)
 	ld	bc,(ix-11)
 	inc	bc
 	ld	(ix-11),bc
-d_11:	ld	bc,(ix-20)
+d_11:
+	ld	bc,(ix-20)
 	ld	hl,(ix-11)
 	or	a,a
 	sbc	hl,bc
 	jr	c,d_9
 	jr	d_18
-d_16:	ld	bc,(ix-6)
-	ld	hl,(ix+9)
-	add	hl,bc
-	inc	bc
-	ld	(ix-6),bc
-	ld	a,(ix-7)
-	ld	(hl),a
-d_18:	ld	bc,(ix-17)
-	ld	hl,(ix-3)
-	or	a,a
-	sbc	hl,bc
-	jp	c,d_17
-	ld	sp,ix
-	pop	ix
-	ret
 
 ;-------------------------------------------------------------------------------
 gfx_FlipSpriteY:
@@ -4654,7 +4659,7 @@ gfx_FlipSpriteX:
 	ld	b, (hl)
 	sub	a, b
 	ld	(.delta), a
-	ld	iyl, b	; (.width) 
+	ld	iyl, b	; (.width)
 	ldi		; copy width
 
 	ld	a, (hl)
@@ -5079,11 +5084,11 @@ _RSS_NC:
 	ld	ixh, c
 	ld	iyh, b			; size * scale / 64
 	pop	bc			; smc = dxc start
-	ex	(sp), ix		; smc = dxs start	
+	ex	(sp), ix		; smc = dxs start
 
 	; ys = (dxc - dys) + (size * 128)
 	add	hl, bc	; HL = (dxc - dys) + (size * 128)
-	
+
 	ld	bc, 0	; xs = (dxs + dyc) + (size * 128)
 .dsrs_size128_0_plus_dyc_0 := $-3
 .dsrs_base_address := .dsrs_size128_0_plus_dyc_0
@@ -5127,7 +5132,7 @@ _RSS_NC:
 	dec	iyl
 	jr	nz, .inner_opaque	; x loop
 
-	dec	iyh	
+	dec	iyh
 	jr	z, .finish		; y loop
 .outer:
 	; restore and increment dxc
@@ -5331,7 +5336,7 @@ smcWord _XMin
 	; DE = HL * B(height)
 	call	_set_DE_to_HL_mul_C
 	pop	hl
-	add	hl, de	
+	add	hl, de
 	; ld	(iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address)), hl
 	ld	(ix - 9), hl	; dsrs_size128_1_minus_dys_0
 
@@ -6544,12 +6549,12 @@ _LZ_ReadVarSize:
 ; LZ Decompression Subroutine (DEPRECATED)
 	push	ix
 	ld	ix,0
-	lea	de,ix
 	add	ix,sp
+	sbc	hl,hl		; ld hl, 0
+	push	hl		; ld (ix - 3), zero
+	push	hl		; ld (ix - 6), zero
 	lea	hl,ix-12
 	ld	sp,hl
-	ld	(ix-3),de
-	ld	(ix-6),de
 .loop:
 	or	a,a
 	sbc	hl,hl
@@ -6932,7 +6937,7 @@ _DefaultCharSpacing:
 	db	8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8
 
 _DefaultTextData:
-	db	$00,$00,$00,$00,$00,$00,$00,$00 ;  
+	db	$00,$00,$00,$00,$00,$00,$00,$00 ; 0
 	db	$7E,$81,$A5,$81,$BD,$BD,$81,$7E ; ☺
 	db	$7E,$FF,$DB,$FF,$C3,$C3,$FF,$7E ; ☻
 	db	$6C,$FE,$FE,$FE,$7C,$38,$10,$00 ; ♥
@@ -6964,7 +6969,7 @@ _DefaultTextData:
 	db	$00,$24,$66,$FF,$66,$24,$00,$00 ; ↔
 	db	$00,$18,$3C,$7E,$FF,$FF,$00,$00 ; ▲
 	db	$00,$FF,$FF,$7E,$3C,$18,$00,$00 ; ▼
-	db	$00,$00,$00,$00,$00,$00,$00,$00 ;
+	db	$00,$00,$00,$00,$00,$00,$00,$00 ; _
 	db	$C0,$C0,$C0,$C0,$C0,$00,$C0,$00 ; !
 	db	$D8,$D8,$D8,$00,$00,$00,$00,$00 ; "
 	db	$6C,$6C,$FE,$6C,$FE,$6C,$6C,$00 ; #
@@ -7059,7 +7064,7 @@ _DefaultTextData:
 	db	$C0,$C0,$C0,$00,$C0,$C0,$C0,$00 ; |
 	db	$E0,$30,$30,$1C,$30,$30,$E0,$00 ; }
 	db	$76,$DC,$00,$00,$00,$00,$00,$00 ; ~
-	db	$00,$10,$38,$6C,$C6,$C6,$FE,$00 ; △
+	db	$00,$10,$38,$6C,$C6,$C6,$FE,$00 ; Δ
 
 _LcdTiming:
 ;	db	14 shl 2		; PPL shl 2
