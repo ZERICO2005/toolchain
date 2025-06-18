@@ -2709,8 +2709,7 @@ gfx_TransparentSprite:
 ; Returns:
 ;  None
 	push	ix			; save ix sp
-	call	_ClipCoordinates
-	jr	nc,.culled
+	call	_ClipCoordinates	; returns directly to the caller if the sprite is culled
 	;	iyl = new width (next)
 	;	iyh = new height
 	ld	(.amount),a
@@ -2729,7 +2728,6 @@ smcByte _TransparentColor
 	add	ix,de
 	dec	iyh
 	jr	nz,.loop
-.culled:
 	pop	ix
 	ret
 
@@ -2790,8 +2788,7 @@ gfx_Sprite:
 ; Returns:
 ;  None
 	push	ix			; save ix sp
-	call	_ClipCoordinates
-	jr	nc,.culled
+	call	_ClipCoordinates	; returns directly to the caller if the sprite is culled
 	;	iyl = new width (next)
 	;	iyh = new height
 	wait_quick
@@ -2805,7 +2802,6 @@ gfx_Sprite:
 	add	hl,bc			; move to next line
 	dec	iyh
 	jr	nz,.loop
-.culled:
 	pop	ix			; restore ix sp
 	ret
 
@@ -2953,134 +2949,6 @@ smcByte _TransparentColor
 	dec	iyh			; loop for height
 	jr	nz,.loop
 	pop	ix			; restore stack pointer
-	ret
-
-;-------------------------------------------------------------------------------
-_ClipCoordinates:
-; Clipping stuff
-; Arguments:
-;  arg0 : Pointer to sprite structure
-;  arg1 : X coordinate
-;  arg2 : Y coordinate
-; Returns:
-;  A  : How much to add to the sprite per iteration
-;  BCU: 0
-;  B  : 0
-;  IYH: New sprite height
-;  IYL: New sprite width
-;  HL : Sprite pixel pointer
-;  IX : Buffer pixel pointer
-;  NC : If offscreen
-	ld	ix,6			; get pointer to arguments
-	add	ix,sp
-	ld	hl,(ix+3)		; hl -> sprite data
-	ld	iy,(hl)			; iyl = width, iyh = height
-
-	ld	bc,0
-smcWord _YMin
-	ld	hl,(ix+9)		; hl = y coordinate
-	sbc	hl,bc
-	ex	de,hl			; de = y coordinate relative to min y
-	ld	a,ti.lcdHeight		; a = clip_height
-smcByte _YSpan
-	ld	c,iyh			; bc = height
-	sub	a,c			; get difference between clip_height and height
-	sbc	hl,hl
-	ld	l,a
-	dec	c			; bc = height - 1
-	jr	nc,.nottaller
-	xor	a,a
-	sbc	hl,de			; is partially clipped both top and bottom?
-	jr	nc,.yclip
-	sub	a,e			; a = negated relative y
-	add	hl,de			; use clip_height as the draw height, and clip top
-	jr	.cliptop
-.nottaller:
-	xor	a,a
-	sbc	hl,de			; is fully onscreen vertically?
-	jr	nc,.yclipped
-.yclip:
-	add	hl,bc			; is partially clipped bottom?
-	ex	de,hl			; e = new height - 1, hl = relative y
-	jr	c,.clipbottom
-	sub	a,l			; a = negated relative y
-.cliptop:
-	add	hl,bc			; is partially clipped top?
-	ret	nc
-	ex	de,hl			; e = new height - 1
-	ld	c,a			; c = negated relative y
-	ld	b,iyl			; b = width
-	mlt	bc			; bc = amount of bytes clipped off
-	ld	hl,(ix+3)		; hl -> sprite data
-	add	hl,bc
-	ld	(ix+3),hl		; store new ptr
-	ld	(ix+9),0		; save min y coordinate
-smcByte _YMin
-.clipbottom:
-	inc	e
-	ld	iyh,e			; save new height
-	or	a,a
-.yclipped:	; <-- carry already cleared on this path
-
-	ld	bc,0
-smcWord _XMin
-	ld	hl,(ix+6)		; hl = x coordinate
-	sbc	hl,bc
-	ex	de,hl			; de = x coordinate relative to min x
-	ld	hl,ti.lcdWidth		; hl = clip_width
-smcWord _XSpan
-	xor	a,a
-	ld	b,a
-	ld	c,iyl			; bc = width
-	sbc	hl,bc			; get difference between clip_width and width
-	dec	c			; bc = width - 1
-	jr	nc,.notwider
-	or	a,a
-	sbc	hl,de			; is partially clipped both left and right?
-	jr	nc,.xclip
-	sub	a,e			; a = negated relative x
-	add	hl,de			; use clip_width as the draw width, and clip left
-	jr	.clipleft
-.notwider:
-	sbc	hl,de			; is fully onscreen horizontally?
-	jr	nc,.xclipped		; a = 0 for bytes to add per iteration
-.xclip:
-	add	hl,bc			; is partially clipped right?
-	ex	de,hl			; e = new width - 1, hl = relative x
-	jr	c,.clipright
-	sub	a,l			; a = negated relative x
-.clipleft:
-	add	hl,bc			; is partially clipped left?
-	ret	nc			; return if offscreen
-	ex	de,hl			; e = new width - 1
-	ld	c,a			; bc = negated relative x
-	ld	hl,(ix+3)		; hl -> sprite data
-	add	hl,bc
-	ld	(ix+3),hl
-	ld	hl,0
-smcWord _XMin
-	ld	(ix+6),hl		; save min x coordinate
-.clipright:
-	inc	e
-	ld	a,iyl			; get old width
-	ld	iyl,e			; save new width
-	sub	a,e			; calculate bytes to add per iteration
-.xclipped:
-
-	ld	l,(ix+9)		; l = y coordinate
-	ld	h,ti.lcdWidth / 2
-	mlt	hl
-	add	hl,hl
-	ld	de,(ix+6)		; de = x coordinate
-	add	hl,de
-	ex	de,hl
-	ld	hl,(ix+3)		; hl -> sprite data
-	inc	hl
-	inc	hl
-	ld	ix,(CurrentBuffer)
-	add	ix,de
-	ld	b,0
-	scf				; set carry for success
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -4860,8 +4728,135 @@ dv_shr_8_times_width_plus_width := $-3
 	add	hl,bc
 	inc	ixl
 	jr	nz,.outer
+_Culled:
 	pop	hl
 	pop	ix
+	; returns directly to the caller of gfx_Sprite/gfx_TransparentSprite
+	ret
+
+;-------------------------------------------------------------------------------
+_ClipCoordinates:
+; Clipping stuff
+; Arguments:
+;  arg0 : Pointer to sprite structure
+;  arg1 : X coordinate
+;  arg2 : Y coordinate
+; Returns:
+;  A  : How much to add to the sprite per iteration
+;  BCU: 0
+;  B  : 0
+;  IYH: New sprite height
+;  IYL: New sprite width
+;  HL : Sprite pixel pointer
+;  IX : Buffer pixel pointer
+	ld	ix,6			; get pointer to arguments
+	add	ix,sp
+	ld	hl,(ix+3)		; hl -> sprite data
+	ld	iy,(hl)			; iyl = width, iyh = height
+
+	ld	bc,0
+smcWord _YMin
+	ld	hl,(ix+9)		; hl = y coordinate
+	sbc	hl,bc
+	ex	de,hl			; de = y coordinate relative to min y
+	ld	a,ti.lcdHeight		; a = clip_height
+smcByte _YSpan
+	ld	c,iyh			; bc = height
+	sub	a,c			; get difference between clip_height and height
+	sbc	hl,hl
+	ld	l,a
+	dec	c			; bc = height - 1
+	jr	nc,.nottaller
+	xor	a,a
+	sbc	hl,de			; is partially clipped both top and bottom?
+	jr	nc,.yclip
+	sub	a,e			; a = negated relative y
+	add	hl,de			; use clip_height as the draw height, and clip top
+	jr	.cliptop
+.nottaller:
+	xor	a,a
+	sbc	hl,de			; is fully onscreen vertically?
+	jr	nc,.yclipped
+.yclip:
+	add	hl,bc			; is partially clipped bottom?
+	ex	de,hl			; e = new height - 1, hl = relative y
+	jr	c,.clipbottom
+	sub	a,l			; a = negated relative y
+.cliptop:
+	add	hl,bc			; is partially clipped top?
+	jr	nc, _Culled		; return if offscreen
+	ex	de,hl			; e = new height - 1
+	ld	c,a			; c = negated relative y
+	ld	b,iyl			; b = width
+	mlt	bc			; bc = amount of bytes clipped off
+	ld	hl,(ix+3)		; hl -> sprite data
+	add	hl,bc
+	ld	(ix+3),hl		; store new ptr
+	ld	(ix+9),0		; save min y coordinate
+smcByte _YMin
+.clipbottom:
+	inc	e
+	ld	iyh,e			; save new height
+	or	a,a
+.yclipped:	; <-- carry already cleared on this path
+
+	ld	bc,0
+smcWord _XMin
+	ld	hl,(ix+6)		; hl = x coordinate
+	sbc	hl,bc
+	ex	de,hl			; de = x coordinate relative to min x
+	ld	hl,ti.lcdWidth		; hl = clip_width
+smcWord _XSpan
+	xor	a,a
+	ld	b,a			; UBC and B are zero from this point onwards
+	ld	c,iyl			; bc = width
+	sbc	hl,bc			; get difference between clip_width and width
+	dec	c			; bc = width - 1
+	jr	nc,.notwider
+	or	a,a
+	sbc	hl,de			; is partially clipped both left and right?
+	jr	nc,.xclip
+	sub	a,e			; a = negated relative x
+	add	hl,de			; use clip_width as the draw width, and clip left
+	jr	.clipleft
+.notwider:
+	sbc	hl,de			; is fully onscreen horizontally?
+	jr	nc,.xclipped		; a = 0 for bytes to add per iteration
+.xclip:
+	add	hl,bc			; is partially clipped right?
+	ex	de,hl			; e = new width - 1, hl = relative x
+	jr	c,.clipright
+	sub	a,l			; a = negated relative x
+.clipleft:
+	add	hl,bc			; is partially clipped left?
+	jr	nc, _Culled		; return if offscreen
+	ex	de,hl			; e = new width - 1
+	ld	c,a			; bc = negated relative x
+	ld	hl,(ix+3)		; hl -> sprite data
+	add	hl,bc
+	ld	(ix+3),hl
+	ld	hl,0
+smcWord _XMin
+	ld	(ix+6),hl		; save min x coordinate
+.clipright:
+	inc	e
+	ld	a,iyl			; get old width
+	ld	iyl,e			; save new width
+	sub	a,e			; calculate bytes to add per iteration
+.xclipped:
+
+	ld	l,(ix+9)		; l = y coordinate
+	ld	h,ti.lcdWidth / 2
+	mlt	hl
+	add	hl,hl
+	ld	de,(ix+6)		; de = x coordinate
+	add	hl,de
+	ex	de,hl
+	ld	hl,(ix+3)		; hl -> sprite data
+	inc	hl
+	inc	hl
+	ld	ix,(CurrentBuffer)
+	add	ix,de
 	ret
 
 ;-------------------------------------------------------------------------------
