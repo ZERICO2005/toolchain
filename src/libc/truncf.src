@@ -4,6 +4,15 @@
 
 	public	_truncf, _trunc
 
+	private	__truncf_ret_zero
+__truncf_ret_zero:
+	; return signed zero
+	ld	a, e
+	and	a, $80
+	ld	e, a
+	sbc	hl, hl
+	ret
+
 ; Warning: _modff assumes that this routine preserves IY
 _trunc:
 _truncf:
@@ -18,10 +27,17 @@ _truncf:
 	rla	; A = exponent
 
 	sub	a, 127	; exponent bias
-	jr	c, .ret_zero
+	jr	c, __truncf_ret_zero
 	dec	hl
 	dec	hl
 	ld	bc, (hl)
+
+	require	_truncf.hijack_modff
+
+	section	.text
+
+	public	_truncf.hijack_modff
+_truncf.hijack_modff:
 	sub	a, 24	; bits in the mantissa
 	sbc	hl, hl	; Carry preserved
 	jr	nc, .ret_self
@@ -37,14 +53,6 @@ _truncf:
 	; HL is 0 here
 	; already (large) integer, inf, or NaN
 	add	hl, bc
-	ret
-
-.ret_zero:
-	; return signed zero
-	ld	a, e
-	and	a, $80
-	ld	e, a
-	sbc	hl, hl
 	ret
 
 	extern	__ishl

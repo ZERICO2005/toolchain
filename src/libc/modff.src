@@ -30,11 +30,16 @@ _modf:
 	inc	a
 	jr	z, .nan_value
 .not_inf:
-	; cp	a, 127 + 1	; |x| < 1.0f
-	rla	; allows us to test cp a, 128
-	jr	nc, .less_than_one
+	sub	a, 127 + 1	; |x| < 1.0f
+	jr	c, .less_than_one
+	; rla	; allows us to test sub a, 128
+	; jr	nc, .less_than_one
 	; finite and normal
 
+if 0
+	call	_truncf.hijack_modff
+	ld	a, e	; exponent is unchanged
+else
 	; push	iy	; preserve IY in case we link to a different _truncf
 	push	de	; E has exponent
 	push	bc	; mantissa
@@ -42,9 +47,10 @@ _modf:
 	pop	af, af
 	; pop	iy
 
-	; load the original argument
+	; restore A:UBC
 	ld	bc, (iy + 3)
 	ld	a, (iy + 6)
+end if	
 	ld	iy, (iy + 9)	; float *iptr
 	; store the truncated value
 	ld	(iy + 0), hl
@@ -91,5 +97,6 @@ _modf:
 
 	extern	_truncf
 	extern	__fsub
+	extern	_truncf.hijack_modff
 
 end if
