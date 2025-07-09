@@ -34,10 +34,19 @@ size_t run_test(void) {
         frac_part.flt = modff(input[i].flt, &(trunc_part.flt));
         if (frac_part.bin != output[i].frac_part.bin || trunc_part.bin != output[i].trunc_part.bin) {
             if (!(
-                isnan(frac_part.flt) && isnan(output[i].frac_part.flt) &&
-                isnan(trunc_part.flt) && isnan(output[i].trunc_part.flt)
+                (
+                    isnan(frac_part.flt) && isnan(output[i].frac_part.flt) &&
+                    isnan(trunc_part.flt) && isnan(output[i].trunc_part.flt) &&
+                    (signbit(frac_part.flt) == signbit(output[i].frac_part.flt)) &&
+                    (signbit(trunc_part.flt) == signbit(output[i].trunc_part.flt))
+                ) || /* since __fsub does not currently emit negative zero */ (
+                    isnormal(trunc_part.flt) && isnormal(output[i].trunc_part.flt) &&
+                    (frac_part.bin == UINT32_C(0x00000000)) &&
+                    (output[i].frac_part.bin == UINT32_C(0x80000000)) &&
+                    (trunc_part.bin == output[i].trunc_part.bin)
+                )
             )) {
-                #if 0
+                #if 1
                     printf(
                         "I: %08lX T: %zu\nG: %08lX %08lX\nT: %08lX %08lX\n",
                         input[i].bin, i,

@@ -4,6 +4,7 @@
 
 	public	_truncf, _trunc
 
+; Warning: _modff assumes that this routine preserves IY
 _trunc:
 _truncf:
 	ld	hl, 6
