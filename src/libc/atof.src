@@ -18,11 +18,11 @@ _atoff:
 	push	hl
 	or	a,a
 	sbc	hl,hl
-	push	hl
-	push	bc
+	push	hl	; endptr = NULL
+	push	bc	; nptr
 	call	_strtod
-	pop	bc
-	pop	hl
+	pop	af
+	pop	af
 	ret
 
 	extern	__frameset0

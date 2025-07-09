@@ -11,23 +11,27 @@ _truncf:
 	ld	e, (hl)
 	dec	hl
 	ld	a, (hl)
-	dec	hl
-	dec	hl
-	ld	hl, (hl)
-	rla
+	rla	; extract LSB of the exponent
 	ld	a, e
-	rla
+	rla	; A = exponent
 
 	sub	a, 127	; exponent bias
 	jr	c, .ret_zero
+
+	; load the mantissa into HL and BC
+	dec	hl
+	dec	hl
+	ld	bc, (hl)
+	sbc	hl, hl
+	add	hl, bc
+
 	sub	a, 23	; bits in the mantissa
 	ret	nc	; already (large) integer, inf, or NaN
-	push	hl
+
 	sbc	hl, hl	; HL = 0xFFFFFF
 	neg
 	ld	c, a
 	call	__ishl
-	pop	bc
 	jp	__iand
 
 .ret_zero:
