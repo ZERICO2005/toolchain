@@ -11,7 +11,7 @@ _modf := _modff
 
 else
 
-; float modf(float x, float* iptr)
+; float modff(float x, float *iptr)
 ; Warning: It is assumed that _truncf preserves IY
 _modff:
 _modf:
@@ -34,6 +34,7 @@ _modf:
 	jr	c, .less_than_one
 	; rla	; allows us to test sub a, 128
 	; jr	nc, .less_than_one
+
 	; finite and normal
 
 if 0

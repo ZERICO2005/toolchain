@@ -13,6 +13,7 @@ __truncf_ret_zero:
 	sbc	hl, hl
 	ret
 
+; float truncf(float)
 ; Warning: _modff assumes that this routine preserves IY
 _trunc:
 _truncf:
@@ -38,6 +39,12 @@ _truncf:
 
 	public	_truncf.hijack_modff
 _truncf.hijack_modff:
+	; Input:
+	;  UBC = mantissa to truncate
+	;  A = exponent - 127
+	; Output:
+	;  UHL = truncated mantissa
+	;  D = destroyed
 	sub	a, 24	; bits in the mantissa
 	sbc	hl, hl	; Carry preserved
 	jr	nc, .ret_self

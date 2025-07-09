@@ -46,7 +46,7 @@ size_t run_test(void) {
                     (trunc_part.bin == output[i].trunc_part.bin)
                 )
             )) {
-                #if 1
+                #if 0
                     printf(
                         "I: %08lX T: %zu\nG: %08lX %08lX\nT: %08lX %08lX\n",
                         input[i].bin, i,
