@@ -12,89 +12,98 @@ _modf := _modff
 else
 
 ; float modf(float x, float* iptr)
+; Warning: It is assumed that _truncf preserves IY
 _modff:
 _modf:
-	call	__frameset0
+	ld	iy, 0
+	add	iy, sp
 
 	; copy the mantissa into HL and BC
 	sbc	hl, hl
-	ld	bc, (ix + 6) ; mantissa
-	add	hl, bc
+	ld	bc, (iy + 3)	; mantissa
+	add	hl, bc		; ld hl, bc
 	adc	hl, hl
-	ld	a, (ix + 9) ; exponent
+	ld	a, (iy + 6)	; exponent
 	ld	e, a
 	rla
-	ld	d, a
-	jr	z, .maybe_inf
+	jr	z, .maybe_inf	; performs inc a
 	inc	a
-	ld	a, e
 	jr	z, .ret_nan
 .not_inf:
-	ld	a, d
-	sub	a, 127	; |x| < 1.0f
-	jr	c, .less_than_one
-	; fintie and normal
-	ld	hl, (ix + 6) ; mantissa
-	; E has exponent
-	push	de
-	push	hl
+	; sub	a, 127 + 1	; |x| < 1.0f
+	rla	; equivilent to sub a, 128
+	jr	nc, .less_than_one
+	; finite and normal
+
+	; push	iy	; preserve IY in case we link to a different _truncf
+	push	de	; E has exponent
+	push	bc	; mantissa
 	call	_truncf
 	pop	af, af
+	; pop	iy
 
-	ld	a, e
-	ex	hl, de
-	ld	hl, (ix + 12)	; float *iptr
-	ld	(hl), de
-	inc	hl
-	inc	hl
-	inc	hl
-	ld	(hl), a
-	ex	hl, de
-	ld	e, a
-	ld	bc, (ix + 6)
-	ld	a, (ix + 9)
+	; load the original argument
+	ld	bc, (iy + 3)
+	ld	a, (iy + 6)
+	ld	iy, (iy + 9)	; float *iptr
+	; store the truncated value
+	ld	(iy + 0), hl
+	ld	(iy + 3), e
 
+	; A:UBC - E:UHL, the result will be exact
 	call	__fsub
+	; __fsub does not currently emit negative zero
 	push	bc
 	pop	hl
 	ld	e, a
-	pop	ix
 	ret
 
 .maybe_inf:
+	; HL is zero
 	inc	a
 	jr	nz, .not_inf
-	ld	a, e
-	ld	hl, (ix + 12)	; float *iptr
-	ld	(hl), bc
-	inc	hl
-	inc	hl
-	inc	hl
-	ld	(hl), a	; inf exp
-	xor	a, a
-	ld	e, a
-	sbc	hl, hl
-	pop	ix
+	; Signbit = Carry
+	ld	a, (iy + 6)
+	ld	iy, (iy + 9)	; float *iptr
+	ld	(iy + 0), bc
+	ld	(iy + 3), e	; inf exp
+	ld	e, b	; ld e, 0
+	rr	e	; shift the carry back in
 	ret
 
+.ret_nan:
+	ld	a, e	; A = $7F or $FF
+	jr	.return_mant
+
 .less_than_one:
+	; return signed zero
+	; Signbit = bit 0 of A
 	ld	bc, 0
+	; rrca
+	; and	a, $80
 	ld	a, e
 	and	a, $80
 	; A:UBC = copysignf(0.0f, x)
-.ret_nan:
-	ld	hl, (ix + 12)	; float *iptr
+.return_mant:
+if 0
+	ld	hl, (iy + 9)	; float *iptr
 	ld	(hl), bc
 	inc	hl
 	inc	hl
 	inc	hl
 	ld	(hl), a
-	ld	hl, (ix + 6)	; mantissa
+	ld	hl, (iy + 3)	; mantissa
 	; E has exponent
-	pop	ix
 	ret
+else
+	ld	hl, (iy + 3)	; mantissa
+	ld	iy, (iy + 9)	; float *iptr
+	ld	(iy + 0), bc
+	ld	(iy + 3), a
+	; E has exponent
+	ret
+end if
 
-	extern	__frameset0
 	extern	_truncf
 	extern	__fsub
 
