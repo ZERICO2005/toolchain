@@ -28,10 +28,10 @@ _modf:
 	rla
 	jr	z, .maybe_inf	; performs inc a
 	inc	a
-	jr	z, .ret_nan
+	jr	z, .nan_value
 .not_inf:
-	; sub	a, 127 + 1	; |x| < 1.0f
-	rla	; equivilent to sub a, 128
+	; cp	a, 127 + 1	; |x| < 1.0f
+	rla	; allows us to test cp a, 128
 	jr	nc, .less_than_one
 	; finite and normal
 
@@ -63,46 +63,31 @@ _modf:
 	inc	a
 	jr	nz, .not_inf
 	; Signbit = Carry
-	ld	a, (iy + 6)
-	ld	iy, (iy + 9)	; float *iptr
-	ld	(iy + 0), bc
-	ld	(iy + 3), e	; inf exp
+	; return +-inf and store +-0
+	ld	a, e
 	ld	e, b	; ld e, 0
 	rr	e	; shift the carry back in
-	ret
+	jr	.ret_inf
 
-.ret_nan:
-	ld	a, e	; A = $7F or $FF
-	jr	.return_mant
+.nan_value:
+	; return +-NaN and store +-NaN
+	ld	a, e
+	jr	.ret_nan
 
 .less_than_one:
-	; return signed zero
+	; return X and store +-0
 	; Signbit = bit 0 of A
 	ld	bc, 0
-	; rrca
-	; and	a, $80
 	ld	a, e
 	and	a, $80
-	; A:UBC = copysignf(0.0f, x)
-.return_mant:
-if 0
-	ld	hl, (iy + 9)	; float *iptr
-	ld	(hl), bc
-	inc	hl
-	inc	hl
-	inc	hl
-	ld	(hl), a
+.ret_nan:
 	ld	hl, (iy + 3)	; mantissa
-	; E has exponent
-	ret
-else
-	ld	hl, (iy + 3)	; mantissa
+.ret_inf:
 	ld	iy, (iy + 9)	; float *iptr
 	ld	(iy + 0), bc
 	ld	(iy + 3), a
 	; E has exponent
 	ret
-end if
 
 	extern	_truncf
 	extern	__fsub
