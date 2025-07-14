@@ -4984,12 +4984,13 @@ _RSS_NC:
 
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	call	calcSinCosSMC_loadCosine
+	; dxc = cosf * -(size * scale / 128);
+	ld	bc, (iy + 0)		; -(size * scale / 128)
+
 	ld	(iy + (.dsrs_cosf_0A - .dsrs_base_address)), hl	; write smc
 	ld	(iy + (.dsrs_cosf_0B - .dsrs_base_address)), hl	; write smc
 	; ld	(.dsrs_cosf_1), hl	; write smc
 
-	; dxc = cosf * -(size * scale / 128);
-	ld	bc,(iy + 0)		; -(size * scale / 128)
 	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
 	push	hl	; ld (ix - 6), dsrs_dyc_0
 
@@ -5012,7 +5013,8 @@ _RSS_NC:
 	add	hl, de		; restore HL
 	ld	de, (ix - 6)	; dsrs_dyc_0
 	add.s	hl, de		; make sure UHL is zero
-	ld	(iy + (.dsrs_size128_0_plus_dyc_0 - .dsrs_base_address)), hl	; write smc
+	; ld	(iy + (.dsrs_size128_0_plus_dyc_0 - .dsrs_base_address)), hl	; write smc
+	push	hl	; ld (ix - 12), dsrs_size128_0_plus_dyc_0
 
 	; carry might be set, but that shouldn't matter for rl c
 
@@ -5024,6 +5026,8 @@ _RSS_NC:
 	jr	nz, .hax
 	inc	a			; hax for scale = 1?
 .hax:
+	; store the return value before it gets modified
+	ld	(iy + (.dsrs_ret_size - .dsrs_base_address)), a
 	ld	b, a	; render height
 	ld	c, a	; render width
 
@@ -5075,18 +5079,17 @@ _RSS_NC:
 
 	; by popping these off the stack in a werid way, we can reduce SMC useage
 
-	pop	hl			; dsrs_size128_1_minus_dys_0
-	ld	ixh, c			; store return value
 	ld	iyh, b			; size * scale / 64
-	pop	bc			; smc = dxc start
-	ex	(sp), ix		; smc = dxs start
 
+	pop	ix			; dsrs_size128_0_plus_dyc_0
+	pop	hl			; dsrs_size128_1_minus_dys_0
+
+	pop	bc			; smc = dxc start
 	; ys = (dxc - dys) + (size * 128)
 	add	hl, bc	; HL = (dxc - dys) + (size * 128)
 
-	ld	bc, 0	; xs = (dxs + dyc) + (size * 128)
-.dsrs_size128_0_plus_dyc_0 := $-3
-.dsrs_base_address := .dsrs_size128_0_plus_dyc_0
+	pop	bc			; smc = dxs start
+	; xs = (dxs + dyc) + (size * 128)
 	add	ix, bc	; IX = (dxs + dyc) + (size * 128)
 
 	call	gfx_Wait
@@ -5122,6 +5125,7 @@ _RSS_NC:
 
 	ld	bc, 0			; smc = cosf
 .dsrs_cosf_0B := $-3
+.dsrs_base_address := $-3
 	add	ix, bc			; xs += cosf
 
 	dec	iyl
@@ -5195,7 +5199,8 @@ smcByte _TransparentColor
 	dec	iyh
 	jr	nz, .outer		; y loop
 .finish:
-	pop	af			; sprite out size
+	ld	a, 0	; return value should be [1, 255]
+.dsrs_ret_size := $-1
 	pop	ix
 	ret
 
@@ -5311,7 +5316,8 @@ smcWord _XMin
 	ld	hl, (iy + (_RSS_NC.dsrs_cosf_0A - _RSS_NC.dsrs_base_address))
 	; DE = HL * C(width)
 	call	_set_DE_to_HL_mul_C
-	ld	hl, (iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address))
+	; ld	hl, (iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address))
+	ld	hl, (ix - 12)	; dsrs_size128_0_plus_dyc_0
 	add	hl, de
 	push	hl
 
@@ -5341,7 +5347,8 @@ smcWord _XMin
 	call	_set_DE_to_HL_mul_C
 	pop	hl
 	add.s	hl, de	; make sure UHL is zero
-	ld	(iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address)), hl
+	; ld	(iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address)), hl
+	ld	(ix - 12), hl	; dsrs_size128_0_plus_dyc_0
 
 	pop	bc	; B = height, C = width
 	ret
@@ -5419,12 +5426,13 @@ gfx_RotateScaleSprite:
 
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	call	calcSinCosSMC_loadCosine
+	ld	bc, (iy + 0)		; -(size * scale / 128)
+
 	ld	(iy + (_smc_dsrs_cosf_0A - _smc_dsrs_base_address)), hl ; write smc
 	ld	(iy + (_smc_dsrs_cosf_0B - _smc_dsrs_base_address)), hl ; write smc
 	; ld	(_smc_dsrs_cosf_1_plus_offset_hl),hl ; write smc
 
 	; dxc = cosf * -(size * scale / 128);
-	ld	bc, (iy + 0)		; -(size * scale / 128)
 	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
 	push	hl	; ld (ix - 6), _smc_dsrs_dyc_0
 
@@ -5489,14 +5497,13 @@ gfx_RotateScaleSprite:
 	; by popping these off the stack in a werid way, we can reduce SMC useage
 
 	pop	ix	; _smc_dsrs_size128_0_plus_dyc_0
-	pop	de	; _smc_dsrs_size128_1_minus_dys_0
-	pop	hl			; smc = dxc start
+	pop	hl	; _smc_dsrs_size128_1_minus_dys_0
 
+	pop	de			; smc = dxc start
 	; ys = (dxc - dys) + (size * 128)
 	add	hl, de	; HL = (dxc - dys) + (size * 128)
 
 	pop	de			; smc = dxs start
-
 	; xs = (dxs + dyc) + (size * 128)
 	add	ix, de	; IX = (dxs + dyc) + (size * 128)
 
