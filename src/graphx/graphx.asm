@@ -3035,7 +3035,7 @@ smcWord _XMin
 	ld	hl,ti.lcdWidth		; hl = clip_width
 smcWord _XSpan
 	xor	a,a
-	ld	b,a			; UBC and B are now zero from this point onwards
+	ld	b,a			; UBC and B are zero from this point onwards
 	ld	c,iyl			; bc = width
 	sbc	hl,bc			; get difference between clip_width and width
 	dec	c			; bc = width - 1
@@ -4465,7 +4465,8 @@ _Polygon:
 	lea	hl, ix + 3
 	ld	sp, hl
 	pop	ix
-	; ret
+	ret
+
 ;-------------------------------------------------------------------------------
 gfx_Reserved:
 ; Deprecated unused function (available for use)
@@ -4492,8 +4493,7 @@ gfx_Deprecated:
 	or	a,a
 	sbc	hl,hl
 	ld	(ix-6),hl
-d_17:
-	ld	bc,(ix-3)
+d_17:	ld	bc,(ix-3)
 	ld	hl,(ix+6)
 	add	hl,bc
 	inc	bc
@@ -4501,7 +4501,7 @@ d_17:
 	ld	a,(hl)
 	ld	(ix-7),a
 	cp	a,(ix-8)
-	jr	nz,d_16
+	jp	nz,d_16
 	ld	bc,(ix-3)
 	ld	hl,(ix+6)
 	add	hl,bc
@@ -4520,26 +4520,7 @@ d_17:
 	inc	bc
 	ld	(ix-3),bc
 	jr	d_18
-
-d_16:
-	ld	bc,(ix-6)
-	ld	hl,(ix+9)
-	add	hl,bc
-	inc	bc
-	ld	(ix-6),bc
-	ld	a,(ix-7)
-	ld	(hl),a
-d_18:
-	ld	bc,(ix-17)
-	ld	hl,(ix-3)
-	or	a,a
-	sbc	hl,bc
-	jr	c,d_17
-	ld	sp,ix
-	pop	ix
-	ret
-d_13:
-	ld	bc,(ix-14)
+d_13:	ld	bc,(ix-14)
 	push	bc
 	pea	ix-20
 	call	_LZ_ReadVarSize
@@ -4562,9 +4543,7 @@ d_13:
 	sbc	hl,hl
 	ld	(ix-11),hl
 	jr	d_11
-
-d_9:
-	ld	bc,(ix-23)
+d_9:	ld	bc,(ix-23)
 	ld	hl,(ix-6)
 	or	a,a
 	sbc	hl,bc
@@ -4582,13 +4561,27 @@ d_9:
 	ld	bc,(ix-11)
 	inc	bc
 	ld	(ix-11),bc
-d_11:
-	ld	bc,(ix-20)
+d_11:	ld	bc,(ix-20)
 	ld	hl,(ix-11)
 	or	a,a
 	sbc	hl,bc
 	jr	c,d_9
 	jr	d_18
+d_16:	ld	bc,(ix-6)
+	ld	hl,(ix+9)
+	add	hl,bc
+	inc	bc
+	ld	(ix-6),bc
+	ld	a,(ix-7)
+	ld	(hl),a
+d_18:	ld	bc,(ix-17)
+	ld	hl,(ix-3)
+	or	a,a
+	sbc	hl,bc
+	jp	c,d_17
+	ld	sp,ix
+	pop	ix
+	ret
 
 ;-------------------------------------------------------------------------------
 gfx_FlipSpriteY:
@@ -4964,8 +4957,7 @@ _RSS_NC:
 	inc	hl
 
 	; or	a, a	; carry already cleared
-	dec	b
-	sbc	hl, bc	; offset the sprite pointer by (size - 1) * 256
+	sbc	hl, bc	; offset the sprite pointer by (size * 256)
 
 	ld	(iy + (.dsrs_sprptr_0A - .dsrs_base_address)), hl	; write smc
 	ld	(iy + (.dsrs_sprptr_0B - .dsrs_base_address)), hl	; write smc
@@ -4989,12 +4981,13 @@ _RSS_NC:
 
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	call	calcSinCosSMC_loadCosine
+	; dxc = cosf * -(size * scale / 128);
+	ld	bc, (iy + 0)		; -(size * scale / 128)
+
 	ld	(iy + (.dsrs_cosf_0A - .dsrs_base_address)), hl	; write smc
 	ld	(iy + (.dsrs_cosf_0B - .dsrs_base_address)), hl	; write smc
 	; ld	(.dsrs_cosf_1), hl	; write smc
 
-	; dxc = cosf * -(size * scale / 128);
-	ld	bc,(iy + 0)		; -(size * scale / 128)
 	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
 	push	hl	; ld (ix - 6), dsrs_dyc_0
 
@@ -5017,7 +5010,8 @@ _RSS_NC:
 	add	hl, de		; restore HL
 	ld	de, (ix - 6)	; dsrs_dyc_0
 	add.s	hl, de		; make sure UHL is zero
-	ld	(iy + (.dsrs_size128_0_plus_dyc_0 - .dsrs_base_address)), hl	; write smc
+	; ld	(iy + (.dsrs_size128_0_plus_dyc_0 - .dsrs_base_address)), hl	; write smc
+	push	hl	; ld (ix - 12), dsrs_size128_0_plus_dyc_0
 
 	; carry might be set, but that shouldn't matter for rl c
 
@@ -5029,6 +5023,8 @@ _RSS_NC:
 	jr	nz, .hax
 	inc	a			; hax for scale = 1?
 .hax:
+	; store the return value before it gets modified
+	ld	(iy + (.dsrs_ret_size - .dsrs_base_address)), a
 	ld	b, a	; render height
 	ld	c, a	; render width
 
@@ -5080,18 +5076,17 @@ _RSS_NC:
 
 	; by popping these off the stack in a werid way, we can reduce SMC useage
 
-	pop	hl			; dsrs_size128_1_minus_dys_0
-	ld	ixh, c
 	ld	iyh, b			; size * scale / 64
-	pop	bc			; smc = dxc start
-	ex	(sp), ix		; smc = dxs start
 
+	pop	ix			; dsrs_size128_0_plus_dyc_0
+	pop	hl			; dsrs_size128_1_minus_dys_0
+
+	pop	bc			; smc = dxc start
 	; ys = (dxc - dys) + (size * 128)
 	add	hl, bc	; HL = (dxc - dys) + (size * 128)
 
-	ld	bc, 0	; xs = (dxs + dyc) + (size * 128)
-.dsrs_size128_0_plus_dyc_0 := $-3
-.dsrs_base_address := .dsrs_size128_0_plus_dyc_0
+	pop	bc			; smc = dxs start
+	; xs = (dxs + dyc) + (size * 128)
 	add	ix, bc	; IX = (dxs + dyc) + (size * 128)
 
 	call	gfx_Wait
@@ -5107,11 +5102,11 @@ _RSS_NC:
 	jr	c, .skip_pixel
 .inner_opaque_hijack:
 	; get pixel and draw to buffer
-	push	hl			; xs
+	push	hl			; preserve ys
 	ld	l, a
 	inc	l
+	ld	b, l	; L is a known constant (A + 1) that we can compensate for
 	mlt	hl
-	ld	b, a	; A is a known constant that we can compensate for
 	; result is at most 255 * 255 + 255 or 65279. Make sure UBC is zero
 	add	hl, bc			; y * size + x
 
@@ -5119,7 +5114,7 @@ _RSS_NC:
 .dsrs_sprptr_0B := $-3
 	add	hl, bc
 	ldi
-	pop	hl
+	pop	hl			; restore ys
 
 	ld	bc, 0			; smc = -sinf
 .dsrs_sinf_0B := $-3
@@ -5127,6 +5122,7 @@ _RSS_NC:
 
 	ld	bc, 0			; smc = cosf
 .dsrs_cosf_0B := $-3
+.dsrs_base_address := $-3
 	add	ix, bc			; xs += cosf
 
 	dec	iyl
@@ -5162,12 +5158,12 @@ _RSS_NC:
 	jr	c, .skip_pixel
 	; get pixel and draw to buffer
 	; SMC: push hl \ ld l, a --> jr inner_opaque_hijack
-	push	hl			; xs
+	push	hl			; preserve ys
 	ld	l, a
 .dsrs_jump_2 := $-1
 	inc	l
+	ld	b, l	; L is a known constant (A + 1) that we can compensate for
 	mlt	hl
-	ld	b, a	; A is a known constant that we can compensate for
 	; result is at most 255 * 255 + 255 or 65279. Make sure UBC is zero
 	add	hl, bc			; y * size + x
 
@@ -5182,7 +5178,7 @@ smcByte _TransparentColor
 	ld	(de), a
 .transparent_pixel:
 	ld	a, b	; restore A
-	pop	hl			; ys
+	pop	hl			; restore ys
 .skip_pixel:
 	inc	de			; x++s
 	ld	bc, 0			; smc = -sinf
@@ -5200,7 +5196,8 @@ smcByte _TransparentColor
 	dec	iyh
 	jr	nz, .outer		; y loop
 .finish:
-	pop	af			; sprite out size
+	ld	a, 0	; return value should be [1, 255]
+.dsrs_ret_size := $-1
 	pop	ix
 	ret
 
@@ -5266,11 +5263,11 @@ smcByte _YMin
 .clipbottom:
 	inc	e
 	ld	iyh,e			; save new height
-.yclipped:
+	or	a,a
+.yclipped:	; <-- carry already cleared on this path
 	ld	bc,0
 smcWord _XMin
 	ld	hl,(ix + 9)		; hl = x coordinate
-	or	a,a
 	sbc	hl,bc
 	ex	de,hl			; de = x coordinate relative to min x
 	ld	hl,ti.lcdWidth		; hl = clip_width
@@ -5316,7 +5313,8 @@ smcWord _XMin
 	ld	hl, (iy + (_RSS_NC.dsrs_cosf_0A - _RSS_NC.dsrs_base_address))
 	; DE = HL * C(width)
 	call	_set_DE_to_HL_mul_C
-	ld	hl, (iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address))
+	; ld	hl, (iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address))
+	ld	hl, (ix - 12)	; dsrs_size128_0_plus_dyc_0
 	add	hl, de
 	push	hl
 
@@ -5346,7 +5344,8 @@ smcWord _XMin
 	call	_set_DE_to_HL_mul_C
 	pop	hl
 	add.s	hl, de	; make sure UHL is zero
-	ld	(iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address)), hl
+	; ld	(iy + (_RSS_NC.dsrs_size128_0_plus_dyc_0 - _RSS_NC.dsrs_base_address)), hl
+	ld	(ix - 12), hl	; dsrs_size128_0_plus_dyc_0
 
 	pop	bc	; B = height, C = width
 	ret
@@ -5399,8 +5398,7 @@ gfx_RotateScaleSprite:
 	inc	hl
 
 	or	a, a
-	dec	b
-	sbc	hl, bc	; offset the sprite pointer by (size - 1) * 256
+	sbc	hl, bc	; offset the sprite pointer by (size * 256)
 
 	ld	(iy + (_smc_dsrs_sprptr_0 - _smc_dsrs_base_address)), hl ; write smc
 
@@ -5424,12 +5422,13 @@ gfx_RotateScaleSprite:
 
 	; cosf = _SineTable[angle + 64] * 128 / scale
 	call	calcSinCosSMC_loadCosine
+	ld	bc, (iy + 0)		; -(size * scale / 128)
+
 	ld	(iy + (_smc_dsrs_cosf_0A - _smc_dsrs_base_address)), hl ; write smc
 	ld	(iy + (_smc_dsrs_cosf_0B - _smc_dsrs_base_address)), hl ; write smc
 	; ld	(_smc_dsrs_cosf_1_plus_offset_hl),hl ; write smc
 
 	; dxc = cosf * -(size * scale / 128);
-	ld	bc, (iy + 0)		; -(size * scale / 128)
 	call	_16Mul16SignedNeg	; cosf * -(size * scale / 128)
 	push	hl	; ld (ix - 6), _smc_dsrs_dyc_0
 
@@ -5494,14 +5493,13 @@ gfx_RotateScaleSprite:
 	; by popping these off the stack in a werid way, we can reduce SMC useage
 
 	pop	ix	; _smc_dsrs_size128_0_plus_dyc_0
-	pop	de	; _smc_dsrs_size128_1_minus_dys_0
-	pop	hl			; smc = dxc start
+	pop	hl	; _smc_dsrs_size128_1_minus_dys_0
 
+	pop	de			; smc = dxc start
 	; ys = (dxc - dys) + (size * 128)
 	add	hl, de	; HL = (dxc - dys) + (size * 128)
 
 	pop	de			; smc = dxs start
-
 	; xs = (dxs + dyc) + (size * 128)
 	add	ix, de	; IX = (dxs + dyc) + (size * 128)
 
@@ -5516,7 +5514,7 @@ gfx_RotateScaleSprite:
 
 ;-------------------------------------------------------------------------------
 _yloop:
- 	ld	bc, $000000		; smc = cosf
+	ld	bc, $000000		; smc = cosf
 _smc_dsrs_cosf_1_plus_offset_hl := $-3
 _smc_dsrs_base_address := _smc_dsrs_cosf_1_plus_offset_hl
 	add	hl, bc			; dxc += cosf
@@ -5535,11 +5533,11 @@ _xloop:
 	cp	a, c
 	jr	c, drawSpriteRotateScale_SkipPixel
 	; get pixel and draw to buffer
-	push	hl			; xs
+	push	hl			; preserve ys
 	ld	l, a
 	inc	l
+	ld	b, l	; L is a known constant (A + 1) that we can compensate for
 	mlt	hl
-	ld	b, a	; A is a known constant that we can compensate for
 	; result is at most 255 * 255 + 255 or 65279. Make sure UBC is zero
 	add	hl, bc			; y * size + x
 
@@ -5551,7 +5549,7 @@ _smc_dsrs_sprptr_0 := $-3
 	; inc	de			; x++s
 	ldi
 
-	pop	hl			; ys
+	pop	hl			; restore ys
 	ld	bc, $000000		; smc = -sinf
 _smc_dsrs_sinf_0A := $-3
 	add	hl, bc			; ys += -sinf
@@ -5570,12 +5568,11 @@ _smc_dsrs_cosf_0A := $-3
 	ret
 
 drawSpriteRotateScale_SkipPixel:
-	ld	b, a	; preserve A
-	ld	a,TRASPARENT_COLOR
+	ex	de, hl
+	ld	(hl), TRASPARENT_COLOR	; write pixel
 smcByte _TransparentColor
-	ld	(de), a			; write pixel
+	ex	de, hl
 	inc	de			; x++s
-	ld	a, b	; restore A
 
 	ld	bc, 0			; smc = -sinf
 _smc_dsrs_sinf_0B := $-3
@@ -5600,36 +5597,32 @@ calcSinCosSMC_loadCosine:
 	ld	a, 64
 	add	a, (ix + 15)
 calcSinCosSMC:
-	ld	e, (ix + 18)
 ; inputs:
 ; A = angle
-; E = scale
 ; outputs:
 ; HL = 16bit quotient
 ; UHL = 0
 	; getSinCos:
 	; returns a = sin/cos(a) * 128
-	ld	bc, $80
+	ld	bc, $107F	; b = 16, c = $7F
 	ld	d, a
-	bit	7, a
-	jr	z, .bit7
-	sub	a, c	; sub a, 128
-.bit7:
 	bit	6, a
 	jr	z, .bit6
-	;	A = 128 - A
-	neg
-	add	a, c	; add a, 128
+	cpl
+	inc	a
 .bit6:
+	and	a, c	; and a, $7F
+	; A is [0, 64]
 	ld	c, a
-	ld	hl, _SineTable
+	ld	hl, _SineTable - $1000	; since BC is offset by $1000
 	add	hl, bc
 	ld	h, (hl)
-	ld	l, b	; ld l, 0
-	; hl = _SineTable[angle + 64] * 128
+	xor	a, a
+	ld	l, a	; ld l, 0
+	; hl = _SineTable[angle] * 128
 	; H is [0, 127]
 	; HL <<= 7
-	add.s	hl, hl
+	add.s	hl, hl	; also clears UHL
 	add	hl, hl
 	add	hl, hl
 	add	hl, hl
@@ -5638,10 +5631,10 @@ calcSinCosSMC:
 	add	hl, hl
 
 	; _16Div8Signed:
-	; hl = _SineTable[angle + 64] * 128 / scale (cos)
-	ld	b, 16
-	xor	a, a
-.div:
+	; hl = _SineTable[angle] * 128 / scale (sin)
+	ld	e, (ix + 18)	; scale
+	; 16 iterations
+.div_loop:
 	add	hl, hl
 	rla
 	jr	c, .overflow	; this path is only used when E >= 128
@@ -5651,7 +5644,7 @@ calcSinCosSMC:
 	sub	a, e
 	inc	l
 .check:
-	djnz	.div
+	djnz	.div_loop
 	bit	7, d
 	; UHL is zero here
 	ret	z
@@ -6549,12 +6542,12 @@ _LZ_ReadVarSize:
 ; LZ Decompression Subroutine (DEPRECATED)
 	push	ix
 	ld	ix,0
+	lea	de,ix
 	add	ix,sp
-	sbc	hl,hl		; ld hl, 0
-	push	hl		; ld (ix - 3), zero
-	push	hl		; ld (ix - 6), zero
 	lea	hl,ix-12
 	ld	sp,hl
+	ld	(ix-3),de
+	ld	(ix-6),de
 .loop:
 	or	a,a
 	sbc	hl,hl
