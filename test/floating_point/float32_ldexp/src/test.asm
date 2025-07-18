@@ -64,28 +64,28 @@ __ldexpf_helper:
 ; .still_subnormal:
 	; DE is -1 here
 	inc	e	; ld e, 0
-	jr	.finish_subnormal
+	jr	_my_ldexpf.finish_subnormal
 .normalized:
 	inc	de
 	ex	de, hl
-	jr	.scale_up
+	jr	_my_ldexpf.scale_up
 
 .move_subnormal_down:
 	; BC is -1 here
 	; first we need to test that the result won't be zero
 	; ld	hl, (iy + 3)	; mant
 	call	__ictlz
-	; A is [0, 23]
+	; A is [1, 23]
 	; return zero if (scale < clz_result - 24) or (clz_result - 25 >= scale)
 	; return zero if (scale < clz_result - 24)
-	sub	a, 24	; A is [-24, -1]
+	sub	a, 24	; A is [-23, -1]
 	ld	c, a	; sign extend A
 	ld	hl, (iy + 9)	; scale
 	ld	a, l
 	or	a, a
 	sbc	hl, bc
 	cpl
-	jr	nc, .shru_common	; tests jr c, .underflow_to_zero
+	jr	nc, _my_ldexpf.shru_common	; tests jr c, .underflow_to_zero
 .underflow_to_zero:
 	xor	a, a
 	ld	b, a	; ld b, 0
@@ -94,14 +94,13 @@ __ldexpf_helper:
 	ld	(_errno), hl
 	ld	l, h	; ld l, 0
 	ex	de, hl
-	jr	nc, .zero_hijack
+	jr	nc, _my_ldexpf.zero_hijack
 	ld	de, $800000
 	ld	b, $7F
-	jr	.inf_nan_hijack
+	jr	_my_ldexpf.inf_nan_hijack
 
 ;-------------------------------------------------------------------------------
-.entry:
-_my_ldexpf := .entry
+_my_ldexpf:
 	ld	iy, 0
 	lea	bc, iy + 0
 	add	iy, sp
@@ -109,10 +108,10 @@ _my_ldexpf := .entry
 	add	hl, hl
 	ld	a, (iy + 6)	; expon
 	adc	a, a
-	jr	z, .maybe_subnormal
+	jr	z, __ldexpf_helper.maybe_subnormal
 	ld	c, a
 	inc	a
-	jr	z, .ret_self	; inf NaN
+	jr	z, __ldexpf_helper.ret_self	; inf NaN
 	ex	de, hl
 	ld	hl, (iy + 9)	; scale
 	add	hl, bc	; add expon
@@ -121,7 +120,7 @@ _my_ldexpf := .entry
 .scale_up:
 	ld	bc, -255	; $FFFF01
 	add	hl, bc
-	jr	c, .overflow_to_inf
+	jr	c, __ldexpf_helper.overflow_to_inf
 	; sbc	hl, bc	; restore hl
 	dec	l	; we only care about the low 8 bits
 	ex	de, hl
@@ -153,7 +152,7 @@ _my_ldexpf := .entry
 	add	hl, bc
 
 	set	7, (iy + 5)	; set implicit mantissa bit
-	jr	nc, .underflow_to_zero
+	jr	nc, __ldexpf_helper.underflow_to_zero
 .shru_common:
 	; A should be [0, 23]
 	ld	b, a
