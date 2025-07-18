@@ -65,7 +65,6 @@ __ldexpf_helper:
 	call	__ictlz
 	; A is [1, 23]
 	; return zero if (scale < clz_result - 24) or (clz_result - 25 >= scale)
-	; return zero if (scale < clz_result - 24)
 	sub	a, 24	; A is [-23, -1]
 	ld	c, a	; sign extend A
 	ld	hl, (iy + 9)	; scale
@@ -73,7 +72,7 @@ __ldexpf_helper:
 	or	a, a
 	sbc	hl, bc
 	cpl
-	jr	nc, _ldexpf.shru_common	; tests jr c, .underflow_to_zero
+	jr	nc, _ldexpf.shru_common
 .underflow_to_zero:
 	xor	a, a
 	ld	b, a	; ld b, 0
@@ -102,7 +101,7 @@ _ldexpf:
 	jr	z, __ldexpf_helper.maybe_subnormal
 	ld	c, a
 	inc	a
-	jr	z, .ret_self	; inf NaN
+	jr	z, __ldexpf_helper.ret_self	; inf NaN
 	ex	de, hl
 	ld	hl, (iy + 9)	; scale
 	add	hl, bc	; add expon
@@ -166,6 +165,7 @@ _ldexpf:
 	
 	; round upwards to even if (round && (guard || sticky))
 	jr	nc, .no_round
+	; be careful not to touch the carry flag
 	inc	a
 	dec	a
 	jr	nz, .round_up
@@ -188,11 +188,14 @@ _ldexpf:
 	ld	e, a
 	ret
 
-	extern	___fe_cur_env
-	extern	_errno
-	extern	__ictlz
-
 else
+
+; ldexpf behaviour:
+; - signed zero, infinity, and NaN inputs are returned unmodified
+; - ERRNO and FE_INEXACT are set if a finite value becomes zero or infinite
+; - if a finite value becomes zero, then positive zero is returned
+; - FE_INEXACT is set if rounding occured
+;-------------------------------------------------------------------------------
 
 	private	__ldexpf_helper
 __ldexpf_helper:
@@ -227,7 +230,7 @@ __ldexpf_helper:
 .normalized:
 	inc	de
 	ex	de, hl
-	jr	.scale_up
+	jr	_ldexpf.scale_up
 
 .move_subnormal_down:
 	; BC is -1 here
@@ -236,7 +239,6 @@ __ldexpf_helper:
 	call	__ictlz
 	; A is [0, 23]
 	; return zero if (scale < clz_result - 24) or (clz_result - 25 >= scale)
-	; return zero if (scale < clz_result - 24)
 	sub	a, 24	; A is [-24, -1]
 	ld	c, a	; sign extend A
 	ld	hl, (iy + 9)	; scale
@@ -244,7 +246,7 @@ __ldexpf_helper:
 	or	a, a
 	sbc	hl, bc
 	cpl
-	jr	nc, .shru_common	; tests jr c, .underflow_to_zero
+	jr	nc, _ldexpf.shru_common
 .underflow_to_zero:
 	ld	hl, ___fe_cur_env
 	set	5, (hl)	; FE_INEXACT
@@ -256,12 +258,6 @@ __ldexpf_helper:
 	ld	e, a
 	ret
 
-; ldexpf behaviour:
-; - signed zero, infinity, and NaN inputs are returned unmodified
-; - ERRNO and FE_INEXACT are set if a finite value becomes zero or infinite
-; - if a finite value becomes zero, then positive zero is returned
-; - FE_INEXACT is set if rounding occured
-;-------------------------------------------------------------------------------
 _scalbn:
 _scalbnf:
 _ldexp:
@@ -276,7 +272,7 @@ _ldexpf:
 	jr	z, __ldexpf_helper.maybe_subnormal
 	ld	c, a
 	inc	a
-	jr	z, .ret_self	; inf NaN
+	jr	z, __ldexpf_helper.ret_self	; inf NaN
 	ex	de, hl
 	ld	hl, (iy + 9)	; scale
 	add	hl, bc	; add expon
@@ -306,7 +302,7 @@ _ldexpf:
 	ld	hl, $800000
 	ld	a, (iy + 6)
 	or	a, $7F	; copysign
-	jr	.common_erange
+	jr	__ldexpf_helper.common_erange
 
 ;-------------------------------------------------------------------------------
 .scale_down:
@@ -346,35 +342,33 @@ _ldexpf:
 	ld	e, l
 	ld	hl, ___fe_cur_env
 	; round upwards to even if (round && (guard || sticky))
-	jr	nc, .no_round_test_sticky
-	set	5, (hl)	; FE_INEXACT
-	or	a, a	; test sticky bits
+	jr	nc, .no_round
+	; be careful not to touch the carry flag
+	inc	a
+	dec	a
 	jr	nz, .round_up
 	bit	0, e	; test guard bit
 	jr	z, .no_round
 .round_up:
 	inc	de	; round upwards to even (wont overflow)
 .no_round:
+	adc	a, a
+	jr	z, .result_is_exact
+	ld	hl, ___fe_cur_env
+	set	5, (hl)	; FE_INEXACT
+.result_is_exact:
+	ld	a, (iy + 6)	; get signbit
 	ex	de, hl
-	ld	a, (iy + 6)
 	and	a, $80	; copysign
 	ld	e, a
 	ret
 
-.no_round_test_sticky:
-	or	a, a
-	jr	z, .no_round
-	set	5, (hl)	; FE_INEXACT
-	jr	.no_round
-
 ;-------------------------------------------------------------------------------
-
-
 
 end if
 
-	extern	___fe_cur_env
 	extern	_errno
+	extern	___fe_cur_env
 	extern	__ictlz
 
 end if

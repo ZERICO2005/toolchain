@@ -46,9 +46,9 @@ size_t run_test(void) {
     const output_t *output = (const output_t*)((const void*)f32_ldexp_LUT_output);
     for (size_t i = 519; i < length; i++) {
         F32_pun result;
-        result.flt = my_ldexpf(input[i].value.flt, input[i].expon);
+        result.flt = ldexpf(input[i].value.flt, input[i].expon);
         if (result.bin != output[i].bin) {
-            #if 0
+            #if 1
             // ignore NaN's with differing payloads
             // treat signed zeros as equal for now
             if (
@@ -56,19 +56,17 @@ size_t run_test(void) {
                 (!(result.bin == 0 && iszero(output[i].flt)))
             ) {
                 /* Float multiplication does not handle subnormals yet */
-                if (!(iszero(result.flt) && (issubnormal(output[i].flt) || issubnormal(input[i].value)))) {
-                    #if 1
-                        printf(
-                            "%zu:\nI: %08lX %+d\nG: %08lX\nT: %08lX\n",
-                            i, *(uint32_t*)(void*)&(input[i].value), input[i].expon,
-                            result.bin, output[i].bin
-                        );
-                    #endif
-                    return i;
-                }
+                #if 1
+                    printf(
+                        "%zu:\nI: %08lX %+d\nG: %08lX\nT: %08lX\n",
+                        i, *(uint32_t*)(void*)&(input[i].value), input[i].expon,
+                        result.bin, output[i].bin
+                    );
+                #endif
+                return i;
             }
             #else
-            if ((!(isnan(result.flt) && isnan(output[i].flt) && (signbit(result.flt) == signbit(input[i].value.flt))))) {
+            if ((!(isnan(result.flt) && isnan(output[i].flt))))) {
                 printf(
                     "%zu:\nI: %08lX %+d\nG: %08lX\nT: %08lX\n",
                     i, input[i].value.bin, input[i].expon,
