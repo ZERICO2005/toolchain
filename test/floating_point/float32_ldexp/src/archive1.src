@@ -1,0 +1,240 @@
+	assume	adl=1
+
+	section	.data
+
+	public	_reg
+_reg:
+	;  A  L H U  E D U   C B U
+	db 0, 0,0,0, 0,0,0,  0,0,0
+	;  A  L H U  E D U   C B U
+	db 0, 0,0,0, 0,0,0,  0,0,0
+	;  A  L H U  E D U   C B U
+	db 0, 0,0,0, 0,0,0,  0,0,0
+
+	section	.text
+
+_output_reg_0:
+	ld	(_reg + 0 + (10 * 0)), a
+	ld	(_reg + 1 + (10 * 0)), hl
+	ld	(_reg + 4 + (10 * 0)), de
+	ld	(_reg + 7 + (10 * 0)), bc
+	ret
+_output_reg_1:
+	ld	(_reg + 0 + (10 * 1)), a
+	ld	(_reg + 1 + (10 * 1)), hl
+	ld	(_reg + 4 + (10 * 1)), de
+	ld	(_reg + 7 + (10 * 1)), bc
+	ret
+_output_reg_2:
+	ld	(_reg + 0 + (10 * 2)), a
+	ld	(_reg + 1 + (10 * 2)), hl
+	ld	(_reg + 4 + (10 * 2)), de
+	ld	(_reg + 7 + (10 * 2)), bc
+	ret
+
+	public	_my_ldexpf
+
+; normal inputs are handled correctly, unless the output is subnormal
+; subnormal inputs are handled correctly for positive scaling values
+; subnormal outputs return zero and set ERANGE and FE_INEXACT for negative scaling values
+; zero/infinite/NaN inputs are handled correctly
+_my_ldexpf:
+	ld	iy, 0
+	lea	bc, iy + 0
+	add	iy, sp
+	ld	hl, (iy + 3)	; mant
+	add	hl, hl
+	ld	e, (iy + 6)	; expon
+	ld	a, e
+	rl	e
+	jr	z, .maybe_subnormal
+	inc	e
+	jr	z, .ret_self	; inf NaN
+	dec	e
+	ld	c, e
+	ex	de, hl
+	ld	hl, (iy + 9)	; scale
+	add	hl, bc	; add expon
+	ld	a, l
+	bit	7, (iy + 11)	; scale sign
+	jr	z, .scale_up
+.scale_down:
+	; test signbit
+	push	hl
+	; HL is not INT_MIN here
+	dec	hl
+	add	hl, hl
+	pop	hl
+	jr	nc, .finish	; expon > 0
+	jp	.shru_to_subnormal
+	; expon <= 0 or subnormal
+;	jr	.underflow_to_zero
+.underflow_to_zero:
+	ld	hl, ___fe_cur_env
+	set	5, (hl)	; FE_INEXACT
+if 1
+	ld	a, (iy + 6)
+	and	a, $80	; copysign
+else
+	xor	a, a	; avoid returning negative zero with Ti's floats
+end if
+	sbc	hl, hl
+.common_erange:
+	ld	bc, 5	; ERANGE
+	ld	(_errno), bc
+	ld	e, a
+	ret
+.overflow_to_inf:
+	ld	hl, $800000
+	ld	a, (iy + 6)
+	or	a, $7F	; copysign
+	jr	.common_erange
+
+.scale_up:
+	ld	bc, -255
+	add	hl, bc
+	jr	c, .overflow_to_inf
+.finish:
+	ld	l, a
+	ex	de, hl
+.finish_subnormal:
+	; signbit(A) E:UHL >>= 1
+	ld	a, (iy + 6)	; expon
+	push	hl
+	rla
+	rr	e
+	rr	(iy - 1)
+	pop	hl
+	rr	h
+	rr	l
+	ret
+
+.maybe_subnormal:
+	dec	bc	; BC is now -1
+	add	hl, bc
+;	jr	c, .underflow_to_zero
+	jr	c, .subnormal
+	; return zero
+.ret_self:
+	ld	hl, (iy + 3)
+	ld	e, (iy + 6)
+	ret
+
+.subnormal:
+	; BC is -1 here
+	bit	7, (iy + 11)	; scale sign
+	jr	nz, .move_subnormal_down
+	ld	de, (iy + 9)	; scale
+	ld	hl, (iy + 3)	; mant
+.norm_loop:
+	add	hl, hl
+	jr	c, .normalized
+	ex	de, hl
+	add	hl, bc	; --scale
+	ex	de, hl
+	jr	c, .norm_loop
+; .still_subnormal:
+	ld	e, 0
+	jr	.finish_subnormal
+.normalized:
+	inc	de
+	ex	de, hl
+	ld	a, l
+	jr	.scale_up
+
+.move_subnormal_down:
+	; BC is -1 here
+	; first we need to test that the result won't be zero
+	ld	hl, (iy + 3)	; mant
+	call	__ictlz
+	; A is [0, 23]
+	; return zero if (scale < clz_result - 24) or (clz_result - 25 >= scale)
+if 1
+	; return zero if (scale < clz_result - 24)
+	sub	a, 24	; A is [-24, -1]
+	ld	c, a	; sign extend A
+	ld	hl, (iy + 9)	; scale
+	ld	a, l
+	or	a, a
+	sbc	hl, bc
+	jp	c, .underflow_to_zero
+	cpl
+	jr	shru_common
+else
+	; return zero if (clz_result - 25 >= scale)
+	sub	a, 25	; A is [-25, -2]
+	sbc	hl, hl
+	ld	l, a
+	ld	bc, (iy + 9)	; scale
+	or	a, a
+	sbc	hl, bc
+	jp	nc, .underflow_to_zero
+	ld	a, c
+	cpl
+	jr	shru_common
+end if
+
+.shru_to_subnormal:
+	call	_output_reg_0
+	call	__ineg
+	ld	a, l	; shift amount
+	ld	bc, -24
+	add	hl, bc
+	jp	c, .underflow_to_zero
+	set	7, (iy + 5)	; set implicit mantissa bit
+shru_common:
+	ld	b, a
+	ld	hl, (iy + 3)	; mantissa
+	push	hl	; ld (iy - 3), hl
+	xor	a, a
+	inc	b
+	; jr	z, .shru_start
+	; A should be [0, 23]
+.shru_loop:
+	adc	a, 0	; collect sticky bits
+	srl	(iy - 1)
+	rr	h
+	rr	l
+.shru_start:
+	djnz	.shru_loop
+	pop	de
+	ld	d, h
+	ld	e, l
+	ld	hl, ___fe_cur_env
+	; round upwards to even if (round && (guard || sticky))
+	jr	nc, .no_round_test_sticky
+	set	5, (hl)	; FE_INEXACT
+	or	a, a	; test sticky bits
+	jr	nz, .round_up
+	bit	0, e	; test guard bit
+	jr	z, .no_round
+.round_up:
+	inc	de	; round upwards to even (wont overflow)
+.no_round:
+.skip_shru:
+	ex	de, hl
+	ld	a, (iy + 6)
+	and	a, $80	; copysign
+	ld	e, a
+	; debug test if zero
+	ld	bc, 0
+	or	a, a
+	adc	hl, bc
+	jr	z, .my_debug_2
+	ret
+
+.my_debug_2:
+	; ld	hl, $123456
+	ret
+
+.no_round_test_sticky:
+	or	a, a
+	jr	z, .no_round
+	set	5, (hl)	; FE_INEXACT
+	jr	.no_round
+
+	extern	__ineg
+	extern	__inot
+	extern	___fe_cur_env
+	extern	_errno
+	extern	__ictlz

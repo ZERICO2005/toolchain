@@ -1,26 +1,38 @@
 	assume	adl=1
 
+	section	.data
+
+	public	_reg
+_reg:
+	;  A  L H U  E D U   C B U
+	db 0, 0,0,0, 0,0,0,  0,0,0
+	;  A  L H U  E D U   C B U
+	db 0, 0,0,0, 0,0,0,  0,0,0
+	;  A  L H U  E D U   C B U
+	db 0, 0,0,0, 0,0,0,  0,0,0
+
 	section	.text
-	public	_ldexpf
-	public	_ldexp
-	; when FLT_RADIX == 2, scalbn is equivilent to ldexp
-	public	_scalbnf
-	public	_scalbn
 
-if PREFER_OS_LIBC
+_output_reg_0:
+	ld	(_reg + 0 + (10 * 0)), a
+	ld	(_reg + 1 + (10 * 0)), hl
+	ld	(_reg + 4 + (10 * 0)), de
+	ld	(_reg + 7 + (10 * 0)), bc
+	ret
+_output_reg_1:
+	ld	(_reg + 0 + (10 * 1)), a
+	ld	(_reg + 1 + (10 * 1)), hl
+	ld	(_reg + 4 + (10 * 1)), de
+	ld	(_reg + 7 + (10 * 1)), bc
+	ret
+_output_reg_2:
+	ld	(_reg + 0 + (10 * 2)), a
+	ld	(_reg + 1 + (10 * 2)), hl
+	ld	(_reg + 4 + (10 * 2)), de
+	ld	(_reg + 7 + (10 * 2)), bc
+	ret
 
-_ldexpf := 0220DCh
-_ldexp := _ldexpf
-_scalbnf := _ldexpf
-_scalbn := _ldexpf
-
-else
-
-; ldexpf behaviour:
-; - signed zero, infinity, and NaN inputs are returned unmodified
-; - ERRNO and FE_INEXACT are set if a finite value becomes zero or infinite
-; - FE_INEXACT is set if rounded occured
-;-------------------------------------------------------------------------------
+	public	_my_ldexpf
 
 	private	__ldexpf_helper
 __ldexpf_helper:
@@ -52,11 +64,11 @@ __ldexpf_helper:
 ; .still_subnormal:
 	; DE is -1 here
 	inc	e	; ld e, 0
-	jr	_ldexpf.finish_subnormal
+	jr	.finish_subnormal
 .normalized:
 	inc	de
 	ex	de, hl
-	jr	_ldexpf.scale_up
+	jr	.scale_up
 
 .move_subnormal_down:
 	; BC is -1 here
@@ -73,7 +85,7 @@ __ldexpf_helper:
 	or	a, a
 	sbc	hl, bc
 	cpl
-	jr	nc, _ldexpf.shru_common	; tests jr c, .underflow_to_zero
+	jr	nc, .shru_common	; tests jr c, .underflow_to_zero
 .underflow_to_zero:
 	xor	a, a
 	ld	b, a	; ld b, 0
@@ -82,16 +94,14 @@ __ldexpf_helper:
 	ld	(_errno), hl
 	ld	l, h	; ld l, 0
 	ex	de, hl
-	jr	nc, _ldexpf.zero_hijack
+	jr	nc, .zero_hijack
 	ld	de, $800000
 	ld	b, $7F
-	jr	_ldexpf.inf_nan_hijack
+	jr	.inf_nan_hijack
 
 ;-------------------------------------------------------------------------------
-_scalbn:
-_scalbnf:
-_ldexp:
-_ldexpf:
+.entry:
+_my_ldexpf := .entry
 	ld	iy, 0
 	lea	bc, iy + 0
 	add	iy, sp
@@ -99,7 +109,7 @@ _ldexpf:
 	add	hl, hl
 	ld	a, (iy + 6)	; expon
 	adc	a, a
-	jr	z, __ldexpf_helper.maybe_subnormal
+	jr	z, .maybe_subnormal
 	ld	c, a
 	inc	a
 	jr	z, .ret_self	; inf NaN
@@ -111,7 +121,7 @@ _ldexpf:
 .scale_up:
 	ld	bc, -255	; $FFFF01
 	add	hl, bc
-	jr	c, __ldexpf_helper.overflow_to_inf
+	jr	c, .overflow_to_inf
 	; sbc	hl, bc	; restore hl
 	dec	l	; we only care about the low 8 bits
 	ex	de, hl
@@ -143,7 +153,7 @@ _ldexpf:
 	add	hl, bc
 
 	set	7, (iy + 5)	; set implicit mantissa bit
-	jr	nc, __ldexpf_helper.underflow_to_zero
+	jr	nc, .underflow_to_zero
 .shru_common:
 	; A should be [0, 23]
 	ld	b, a
@@ -188,8 +198,8 @@ _ldexpf:
 	ld	e, a
 	ret
 
+;-------------------------------------------------------------------------------
+
 	extern	___fe_cur_env
 	extern	_errno
 	extern	__ictlz
-
-end if

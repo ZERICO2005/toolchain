@@ -1,26 +1,38 @@
 	assume	adl=1
 
+	section	.data
+
+	public	_reg
+_reg:
+	;  A  L H U  E D U   C B U
+	db 0, 0,0,0, 0,0,0,  0,0,0
+	;  A  L H U  E D U   C B U
+	db 0, 0,0,0, 0,0,0,  0,0,0
+	;  A  L H U  E D U   C B U
+	db 0, 0,0,0, 0,0,0,  0,0,0
+
 	section	.text
-	public	_ldexpf
-	public	_ldexp
-	; when FLT_RADIX == 2, scalbn is equivilent to ldexp
-	public	_scalbnf
-	public	_scalbn
 
-if PREFER_OS_LIBC
+_output_reg_0:
+	ld	(_reg + 0 + (10 * 0)), a
+	ld	(_reg + 1 + (10 * 0)), hl
+	ld	(_reg + 4 + (10 * 0)), de
+	ld	(_reg + 7 + (10 * 0)), bc
+	ret
+_output_reg_1:
+	ld	(_reg + 0 + (10 * 1)), a
+	ld	(_reg + 1 + (10 * 1)), hl
+	ld	(_reg + 4 + (10 * 1)), de
+	ld	(_reg + 7 + (10 * 1)), bc
+	ret
+_output_reg_2:
+	ld	(_reg + 0 + (10 * 2)), a
+	ld	(_reg + 1 + (10 * 2)), hl
+	ld	(_reg + 4 + (10 * 2)), de
+	ld	(_reg + 7 + (10 * 2)), bc
+	ret
 
-_ldexpf := 0220DCh
-_ldexp := _ldexpf
-_scalbnf := _ldexpf
-_scalbn := _ldexpf
-
-else
-
-; ldexpf behaviour:
-; - signed zero, infinity, and NaN inputs are returned unmodified
-; - ERRNO and FE_INEXACT are set if a finite value becomes zero or infinite
-; - FE_INEXACT is set if rounded occured
-;-------------------------------------------------------------------------------
+	public	_my_ldexpf
 
 	private	__ldexpf_helper
 __ldexpf_helper:
@@ -35,6 +47,7 @@ __ldexpf_helper:
 	add	hl, bc
 	ld	hl, (iy + 3)	; mant
 	jr	nc, .ret_zero	; return zero
+	; jr	c, .subnormal_input
 ; .subnormal_input:
 	; BC is -1 here
 	bit	7, (iy + 11)	; scale sign
@@ -50,13 +63,12 @@ __ldexpf_helper:
 	ex	de, hl
 	jr	c, .norm_loop
 ; .still_subnormal:
-	; DE is -1 here
-	inc	e	; ld e, 0
-	jr	_ldexpf.finish_subnormal
+	ld	e, 0
+	jr	.finish_subnormal
 .normalized:
 	inc	de
 	ex	de, hl
-	jr	_ldexpf.scale_up
+	jr	.scale_up
 
 .move_subnormal_down:
 	; BC is -1 here
@@ -73,25 +85,11 @@ __ldexpf_helper:
 	or	a, a
 	sbc	hl, bc
 	cpl
-	jr	nc, _ldexpf.shru_common	; tests jr c, .underflow_to_zero
-.underflow_to_zero:
-	xor	a, a
-	ld	b, a	; ld b, 0
-.overflow_to_inf:	; <-- Carry is set when inf/NaN
-	ld	hl, 5	; ERANGE
-	ld	(_errno), hl
-	ld	l, h	; ld l, 0
-	ex	de, hl
-	jr	nc, _ldexpf.zero_hijack
-	ld	de, $800000
-	ld	b, $7F
-	jr	_ldexpf.inf_nan_hijack
+	jr	.shru_common	; tests jr c, .underflow_to_zero
 
 ;-------------------------------------------------------------------------------
-_scalbn:
-_scalbnf:
-_ldexp:
-_ldexpf:
+.entry:
+_my_ldexpf := .entry
 	ld	iy, 0
 	lea	bc, iy + 0
 	add	iy, sp
@@ -99,7 +97,7 @@ _ldexpf:
 	add	hl, hl
 	ld	a, (iy + 6)	; expon
 	adc	a, a
-	jr	z, __ldexpf_helper.maybe_subnormal
+	jr	z, .maybe_subnormal
 	ld	c, a
 	inc	a
 	jr	z, .ret_self	; inf NaN
@@ -108,16 +106,30 @@ _ldexpf:
 	add	hl, bc	; add expon
 	bit	7, (iy + 11)	; scale sign
 	jr	nz, .scale_down
+; 	jr	z, .scale_up
 .scale_up:
 	ld	bc, -255	; $FFFF01
 	add	hl, bc
-	jr	c, __ldexpf_helper.overflow_to_inf
+	jr	c, .overflow_to_inf
 	; sbc	hl, bc	; restore hl
 	dec	l	; we only care about the low 8 bits
+.finish:
 	ex	de, hl
 .finish_subnormal:
+	; ; 17F + 4R + 2
+	; ld	hl, (iy + 3)
+	; ld	a, (iy + 6)
+	; rla
+	; rr	e
+	; ret	nc
+	; ld	bc, $800000
+	; add	hl, bc
+	; ret	nc
+	; add	hl, bc
+	; ret
+
+	; 16F + 4W + 5R + 1
 	push	hl
-.finish:
 	ld	a, (iy + 6)	; expon
 	rla
 	rr	e
@@ -128,24 +140,35 @@ _ldexpf:
 	ret
 
 ;-------------------------------------------------------------------------------
+.overflow_to_inf:
+	ld	hl, $800000
+	ld	a, (iy + 6)
+	or	a, $7F	; copysign
+	jr	.common_erange
+
+;-------------------------------------------------------------------------------
 .scale_down:
-	push	de	; mant <<= 1
-	ld	e, l	; shift amount
+	; test signbit
+	push	hl
+	; HL is not INT_MIN here
 	dec	hl
 	add	hl, hl
+	pop	hl
 	jr	nc, .finish	; expon > 0
 ;-------------------------------------------------------------------------------
 .shru_to_subnormal:
-	xor	a, a
-	sub	a, e
-	pop	de
-	ld	c, 48	; 24 << 1
+	; inlined __ineg
+	add	hl, de
+	ex	de, hl
+	or	a, a
+	sbc	hl, de
+	; call	__ineg
+	ld	a, l	; shift amount
+	ld	bc, -24
 	add	hl, bc
-
 	set	7, (iy + 5)	; set implicit mantissa bit
-	jr	nc, __ldexpf_helper.underflow_to_zero
 .shru_common:
-	; A should be [0, 23]
+	jr	c, .underflow_to_zero
 	ld	b, a
 	ld	hl, (iy + 3)	; mantissa
 	push	hl	; ld (iy - 3), hl
@@ -153,6 +176,7 @@ _ldexpf:
 	inc	b
 	ld	c, a	; ld c, 0
 	ld	d, (iy - 1)
+	; A should be [0, 23]
 .shru_loop:
 	adc	a, c	; collect sticky bits
 	srl	d
@@ -163,33 +187,44 @@ _ldexpf:
 	pop	de
 	ld	d, h
 	ld	e, l
-	
+	ld	hl, ___fe_cur_env
 	; round upwards to even if (round && (guard || sticky))
-	jr	nc, .no_round
-	inc	a
-	dec	a
+	jr	nc, .no_round_test_sticky
+	set	5, (hl)	; FE_INEXACT
+	or	a, a	; test sticky bits
 	jr	nz, .round_up
 	bit	0, e	; test guard bit
 	jr	z, .no_round
 .round_up:
 	inc	de	; round upwards to even (wont overflow)
 .no_round:
-	adc	a, a
-	jr	z, .result_is_exact
-.zero_hijack:
-.inf_nan_hijack:
-	ld	hl, ___fe_cur_env
-	set	5, (hl)	; FE_INEXACT
-.result_is_exact:
-	ld	a, (iy + 6)	; get signbit
 	ex	de, hl
+	ld	a, (iy + 6)
 	and	a, $80	; copysign
-	or	a, b	; used for the ret infinite path
 	ld	e, a
 	ret
 
+.underflow_to_zero:
+	ld	hl, ___fe_cur_env
+	set	5, (hl)	; FE_INEXACT
+	ld	a, (iy + 6)
+	and	a, $80	; copysign
+	sbc	hl, hl
+.common_erange:
+	ld	bc, 5	; ERANGE
+	ld	(_errno), bc
+	ld	e, a
+	ret
+
+.no_round_test_sticky:
+	or	a, a
+	jr	z, .no_round
+	set	5, (hl)	; FE_INEXACT
+	jr	.no_round
+
+;-------------------------------------------------------------------------------
+
+	extern	__ineg
 	extern	___fe_cur_env
 	extern	_errno
 	extern	__ictlz
-
-end if
