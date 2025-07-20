@@ -8,6 +8,14 @@
 __dtof_helper:
 	; Moving this block of code to be behind __dtof ensures that
 	; __dtof.ret_copysign can always be reached by jr in all paths.
+.not_inf_nan:
+	; return infinity
+	ld	hl, ___fe_cur_env
+	ld	a, $28	; FE_OVERFLOW | FE_INEXACT
+	or	a, (hl)
+	ld	(hl), a
+	ld	hl, $800000
+	jr	.finish_inf_nan
 .overflow:
 	; carry is set here
 	pop	hl
@@ -37,10 +45,6 @@ __dtof_helper:
 .finish_inf_nan:
 	ld	a, $7F
 	jr	__dtof.ret_copysign
-.not_inf_nan:
-	; return infinity
-	ld	hl, $800000
-	jr	.finish_inf_nan
 
 ; Convert BC:UDE:UHL F64 to E:UHL F32
 ; Rounding: round to nearest with ties to even
@@ -52,6 +56,16 @@ __dtof_helper:
 ;  Signaling NaN: Quiet bit preserved. No signals raised.
 ;  Quiet NaN: Quiet bit preserved. No signals raised.
 ;  NaN Payloads: Copies the most significant payload bits. The LSB of mantissa is set if payload bits were discarded/truncated out.
+
+.test_bits:
+	adc	hl, hl
+	jr	nz, __dtof.raise_inexact
+	ld	a, e
+	rla
+	and	a, $1F
+	ld	a, b
+	jr	nz, __dtof.raise_inexact
+	jr	__dtof.result_is_exact
 __dtof:
 	bit	7, b
 	push	af	; preserve A and signbit
@@ -89,7 +103,7 @@ __dtof:
 	ld	b, a
 	; test round bit
 	bit	4, e
-	jr	z, .round_down
+	jr	z, __dtof_helper.test_bits
 	; test guard bit
 	ld	a, e
 	and	a, $20
@@ -102,7 +116,10 @@ __dtof:
 	rla
 	and	a, $1F
 .round_up:
-.round_down:
+.raise_inexact:
+	ld	hl, ___fe_cur_env
+	set	5, (hl)	; FE_INEXACT
+.result_is_exact:
 	call	__llshru
 	or	a, a
 	jr	z, .no_round
@@ -116,7 +133,7 @@ __dtof:
 	add	hl, bc	; the result might be rounded to infinity here
 	adc	a, c	; adc a, 0 ; wont overflow
 .even_exponent:
-.subnormal_no_round:
+; .subnormal_no_round:
 .ret_copysign:
 	pop	de
 	ld	e, a
@@ -127,8 +144,15 @@ __dtof:
 	ret
 
 .ret_zero:
-	; carry is cleared
 	pop	hl
+	xor	a, a
+	call	__llcmpzero
+	jr	z, .ret_copysign
+.underflow:
+	ld	hl, ___fe_cur_env
+	ld	a, $24	; FE_UNDERFLOW | FE_INEXACT
+	or	a, (hl)
+	ld	(hl), a
 	xor	a, a
 	sbc	hl, hl
 	jr	.ret_copysign
@@ -218,7 +242,15 @@ __dtof:
 	inc	hl	; wont overflow, but may become FLT_MIN
 ; .subnormal_no_round:
 	jr	.ret_copysign
+.subnormal_no_round:
+	add	hl, de
+	or	a, a
+	sbc	hl, de
+	jr	nz, .ret_copysign
+	jr	.underflow
 
 	extern	__lland
 	extern	__llshru
 	extern	__lshru
+	extern	___fe_cur_env
+	extern	__llcmpzero

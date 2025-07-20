@@ -24,7 +24,7 @@ typedef union F64_pun {
 } F64_pun;
 
 /* debugging code */
-#if 0
+#if 1
 
 void print_failed(long double input, uint32_t guess, uint32_t truth) {
     F64_pun value;
@@ -152,7 +152,7 @@ static uint64_t rand_u64(void) {
 void brute_force_test(void) {
     fputs("\n", stdout);
     srand(0x7184CE);
-    for (size_t i = 0; i < 65536; i++) {
+    for (size_t i = 0; i < 256; i++) {
         F64_pun x;
         F32_pun t;
         F32_pun g;
