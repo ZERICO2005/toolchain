@@ -4539,14 +4539,12 @@ d_18:
 	ret
 ;-------------------------------------------------------------------------------
 d_13:
-	ld	hl,(ix-14)
-	lea	bc, ix-20
+	ld	de,(ix-14)
 
 ; _LZ_ReadVarSize:
-	push	bc
-	ex	de, hl	; DE = src
 	ld	iy, 0
 	lea	bc, iy	; ld bc, 0
+	ld	(ix-11),bc
 .loop_20:
 	ld	a,(de)
 	inc	de
@@ -4563,23 +4561,19 @@ d_13:
 	inc	iy
 	xor	a, c	; A = A & $80
 	jr	nz,.loop_20
-	ex	de, hl
-	pop	hl
-	ld	(hl), de
+	ld	(ix - 20), hl
 	lea	hl, iy
+
+	ld	de,(ix-3)
+	add	hl,de
 	
-	ld	bc,(ix-3)
-	add	hl,bc
-	ld	(ix-3),hl
-	ld	bc,(ix+6)
-	add	hl,bc
-	lea	bc, ix-23
+	push	hl	; ld (ix - 3), hl
+	ld	de,(ix+6)
+	add	hl,de
 
 ; _LZ_ReadVarSize:
-	push	bc
 	ex	de, hl	; DE = src
 	ld	iy, 0
-	lea	bc, iy	; ld bc, 0
 .loop_23:
 	ld	a,(de)
 	inc	de
@@ -4596,17 +4590,12 @@ d_13:
 	inc	iy
 	xor	a, c	; A = A & $80
 	jr	nz,.loop_23
-	ex	de, hl
-	pop	hl
-	ld	(hl), de
+	ld	(ix - 23), hl
 	lea	hl, iy
 
-	ld	bc,(ix-3)
+	pop	bc	; ld bc, (ix - 3)
 	add	hl,bc
 	ld	(ix-3),hl
-	or	a,a
-	sbc	hl,hl
-	ld	(ix-11),hl
 	jr	d_11
 ;-------------------------------------------------------------------------------
 d_9:
