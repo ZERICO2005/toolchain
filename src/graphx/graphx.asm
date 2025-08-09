@@ -4539,22 +4539,16 @@ d_18:
 	ret
 ;-------------------------------------------------------------------------------
 d_13:
-	ld	bc,(ix-14)
-	push	bc
-	pea	ix-20
-	call	_LZ_ReadVarSize
-	pop	bc
-	pop	bc
+	ld	hl,(ix-14)
+	lea	bc, ix-20
+	call	_LZ_ReadVarSize	; HL and BC are input
 	ld	bc,(ix-3)
 	add	hl,bc
 	ld	(ix-3),hl
 	ld	bc,(ix+6)
 	add	hl,bc
-	push	hl
-	pea	ix-23
-	call	_LZ_ReadVarSize
-	pop	bc
-	pop	bc
+	lea	bc, ix-23
+	call	_LZ_ReadVarSize	; HL and BC are input
 	ld	bc,(ix-3)
 	add	hl,bc
 	ld	(ix-3),hl
@@ -6548,19 +6542,21 @@ _ConvertToRLETSprite_RowEnd:
 ;-------------------------------------------------------------------------------
 _LZ_ReadVarSize:
 ; LZ Decompression Subroutine (DEPRECATED)
-	push	ix
-	ld	ix, 0
-	lea	iy, ix
-	add	ix, sp
-	sbc	hl, hl
-	ex	de, hl
-	sbc	hl, hl
-	ld	bc,(ix+9)
+; input:
+; - HL: src
+; - BC: dst
+; output:
+; - HL: count
+; - (BC): value
+	push	bc
+	ex	de, hl	; DE = src
+	ld	iy, 0
+	lea	bc, iy	; ld bc, 0
 .loop:
-	ld	a,(bc)
-	inc	bc
-	ld	e, a
-	res	7, e	; E = A & $7F
+	ld	a,(de)
+	inc	de
+	ld	c, a
+	res	7, c	; C = A & $7F
 	add	hl, hl
 	add	hl, hl
 	add	hl, hl
@@ -6568,17 +6564,14 @@ _LZ_ReadVarSize:
 	add	hl, hl
 	add	hl, hl
 	add	hl, hl
-	add	hl, de	; OR DISJOINT
+	add	hl, bc	; OR DISJOINT
 	inc	iy
-	xor	a, e	; A = A & $80
+	xor	a, c	; A = A & $80
 	jr	nz,.loop
-	ld	(ix+9),bc
-	push	hl
-	pop	bc
-	ld	hl,(ix+6)
-	ld	(hl),bc
+	ex	de, hl
+	pop	hl
+	ld	(hl), de
 	lea	hl, iy
-	pop	ix
 	ret
 
 ;-------------------------------------------------------------------------------
