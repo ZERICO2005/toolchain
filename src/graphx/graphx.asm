@@ -6552,21 +6552,18 @@ _LZ_ReadVarSize:
 	ld	iy, 0
 	add	iy, sp
 	sbc	hl, hl	; ld hl, 0
-	push	hl
-	pop	bc	; ld bc, 0
+	inc.s	bc	; clear UBC
 	ld	de, (iy + 6)
 	push	de
+	; 39F + 1R + 7
 .loop:
 	ld	a, (de)
 	inc	de
 	; HL <<= 7
+	ld	b, 7
+.shift_loop:
 	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
+	djnz	.shift_loop
 	ld	c, a
 	res	7, c	; C = A & $7F
 	add	hl, bc	; OR DISJOINT
