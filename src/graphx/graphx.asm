@@ -6548,35 +6548,35 @@ _ConvertToRLETSprite_RowEnd:
 ;-------------------------------------------------------------------------------
 _LZ_ReadVarSize:
 ; LZ Decompression Subroutine (DEPRECATED)
-	push	ix
-	ld	ix, 0
-	lea	iy, ix
-	add	ix, sp
-	sbc	hl, hl
-	ex	de, hl
-	sbc	hl, hl
-	ld	bc,(ix+9)
-.loop:
-	ld	a,(bc)
-	inc	bc
-	ld	e, a
-	res	7, e	; E = A & $7F
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, de	; OR DISJOINT
-	inc	iy
-	xor	a, e	; A = A & $80
-	jr	nz,.loop
-	ld	(ix+9),bc
+; C calling convention
+	call	ti._frameset0
+	or	a, a
+	sbc	hl, hl	; ld hl, 0
 	push	hl
-	pop	bc
-	ld	hl,(ix+6)
-	ld	(hl),bc
+	pop	bc	; ld bc, 0
+	push	hl
+	pop	iy	; ld iy, 0
+	ld	de, (ix + 9)
+.loop:
+	ld	a, (de)
+	inc	de
+	inc	iy
+	; HL <<= 7
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	ld	c, a
+	res	7, c	; C = A & $7F
+	add	hl, bc	; OR DISJOINT
+	xor	a, c	; A &= $80
+	jr	nz, .loop
+	ex	de, hl
+	ld	hl, (ix + 6)
+	ld	(hl), de
 	lea	hl, iy
 	pop	ix
 	ret
