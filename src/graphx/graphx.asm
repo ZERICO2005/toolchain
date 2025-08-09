@@ -4541,14 +4541,66 @@ d_18:
 d_13:
 	ld	hl,(ix-14)
 	lea	bc, ix-20
-	call	_LZ_ReadVarSize	; HL and BC are input
+
+; _LZ_ReadVarSize:
+	push	bc
+	ex	de, hl	; DE = src
+	ld	iy, 0
+	lea	bc, iy	; ld bc, 0
+.loop_20:
+	ld	a,(de)
+	inc	de
+	ld	c, a
+	res	7, c	; C = A & $7F
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, bc	; OR DISJOINT
+	inc	iy
+	xor	a, c	; A = A & $80
+	jr	nz,.loop_20
+	ex	de, hl
+	pop	hl
+	ld	(hl), de
+	lea	hl, iy
+	
 	ld	bc,(ix-3)
 	add	hl,bc
 	ld	(ix-3),hl
 	ld	bc,(ix+6)
 	add	hl,bc
 	lea	bc, ix-23
-	call	_LZ_ReadVarSize	; HL and BC are input
+
+; _LZ_ReadVarSize:
+	push	bc
+	ex	de, hl	; DE = src
+	ld	iy, 0
+	lea	bc, iy	; ld bc, 0
+.loop_23:
+	ld	a,(de)
+	inc	de
+	ld	c, a
+	res	7, c	; C = A & $7F
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, bc	; OR DISJOINT
+	inc	iy
+	xor	a, c	; A = A & $80
+	jr	nz,.loop_23
+	ex	de, hl
+	pop	hl
+	ld	(hl), de
+	lea	hl, iy
+
 	ld	bc,(ix-3)
 	add	hl,bc
 	ld	(ix-3),hl
@@ -4582,7 +4634,7 @@ d_11:
 	or	a,a
 	sbc	hl,bc
 	jr	c,d_9
-	jr	d_18
+	jp	d_18
 
 ;-------------------------------------------------------------------------------
 gfx_FlipSpriteY:
@@ -6540,39 +6592,39 @@ _ConvertToRLETSprite_RowEnd:
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
-_LZ_ReadVarSize:
-; LZ Decompression Subroutine (DEPRECATED)
-; input:
-; - HL: src
-; - BC: dst
-; output:
-; - HL: count
-; - (BC): value
-	push	bc
-	ex	de, hl	; DE = src
-	ld	iy, 0
-	lea	bc, iy	; ld bc, 0
-.loop:
-	ld	a,(de)
-	inc	de
-	ld	c, a
-	res	7, c	; C = A & $7F
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, bc	; OR DISJOINT
-	inc	iy
-	xor	a, c	; A = A & $80
-	jr	nz,.loop
-	ex	de, hl
-	pop	hl
-	ld	(hl), de
-	lea	hl, iy
-	ret
+; _LZ_ReadVarSize:
+; ; LZ Decompression Subroutine (DEPRECATED)
+; ; input:
+; ; - HL: src
+; ; - BC: dst
+; ; output:
+; ; - HL: count
+; ; - (BC): value
+; 	push	bc
+; 	ex	de, hl	; DE = src
+; 	ld	iy, 0
+; 	lea	bc, iy	; ld bc, 0
+; .loop:
+; 	ld	a,(de)
+; 	inc	de
+; 	ld	c, a
+; 	res	7, c	; C = A & $7F
+; 	add	hl, hl
+; 	add	hl, hl
+; 	add	hl, hl
+; 	add	hl, hl
+; 	add	hl, hl
+; 	add	hl, hl
+; 	add	hl, hl
+; 	add	hl, bc	; OR DISJOINT
+; 	inc	iy
+; 	xor	a, c	; A = A & $80
+; 	jr	nz,.loop
+; 	ex	de, hl
+; 	pop	hl
+; 	ld	(hl), de
+; 	lea	hl, iy
+; 	ret
 
 ;-------------------------------------------------------------------------------
 _Maximum:
