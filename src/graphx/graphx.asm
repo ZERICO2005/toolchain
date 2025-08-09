@@ -337,12 +337,11 @@ gfx_SetDefaultPalette:
 	ld	a,b
 	rrca
 	xor	a,b
-	and	a,224
+	and	a,$E0
 	xor	a,b
 	ld	(de),a
+	ld	a,e	; E = B * 2, so we can remove one rla
 	inc	de
-	ld	a,b
-	rla
 	rla
 	rla
 	ld	a,b
@@ -4485,13 +4484,12 @@ gfx_Deprecated:
 	inc	hl
 	inc	hl
 	ld	(ix-17),hl
-	ld	bc,3
-	ld	(ix-3),bc
+	ld	hl,3
+	ld	(ix-3),hl
 	ld	iy,(ix+6)
 	ld	a,(iy+2)
 	ld	(ix-8),a
-	or	a,a
-	sbc	hl,hl
+	ld	l, h	; ld hl, 0
 	ld	(ix-6),hl
 d_17:
 	ld	bc,(ix-3)
@@ -6551,58 +6549,35 @@ _ConvertToRLETSprite_RowEnd:
 _LZ_ReadVarSize:
 ; LZ Decompression Subroutine (DEPRECATED)
 	push	ix
-	ld	ix,0
-	add	ix,sp
-	sbc	hl,hl
-	push	hl	; ld (ix-3), zero
-	push	hl	; ld (ix-6), zero
-	lea	hl,ix-12
-	ld	sp,hl
-.loop:
-	or	a,a
-	sbc	hl,hl
-	ex	de,hl
-	ld	hl,(ix+9)
-	ld	a,(hl)
-	or	a,a
-	sbc	hl,hl
-	ld	l,a
-	ld	(ix-9),hl
+	ld	ix, 0
+	lea	iy, ix
+	add	ix, sp
+	sbc	hl, hl
+	ex	de, hl
+	sbc	hl, hl
 	ld	bc,(ix+9)
+.loop:
+	ld	a,(bc)
 	inc	bc
+	ld	e, a
+	res	7, e	; E = A & $7F
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, de	; OR DISJOINT
+	inc	iy
+	xor	a, e	; A = A & $80
+	jr	nz,.loop
 	ld	(ix+9),bc
-	ld	a,(ix-9)
-	and	a,127
-	sbc	hl,hl
-	ld	l,a
-	ld	(ix-12),hl
-	ld	hl,(ix-3)
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
-	add	hl,hl
 	push	hl
 	pop	bc
-	ld	hl,(ix-12)
-	call	ti._ior
-	ld	(ix-3),hl
-	ld	bc,(ix-6)
-	inc	bc
-	ld	(ix-6),bc
-	ld	a,(ix-9)
-	and	a,128
-	sbc	hl,hl
-	ld	l,a
-	sbc	hl,de
-	jr	nz,.loop
 	ld	hl,(ix+6)
-	ld	bc,(ix-3)
 	ld	(hl),bc
-	ld	hl,(ix-6)
-	ld	sp,ix
+	lea	hl, iy
 	pop	ix
 	ret
 
