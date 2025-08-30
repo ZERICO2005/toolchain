@@ -24,11 +24,18 @@ size_t run_test(void) {
     for (size_t i = 0; i < length; i++) {
         int result = ilogbf(input[i]);
         if (result != output[i]) {
-            #if 0
+            #if 1
                 printf("%3zu: %08lX\n\t%d != %d\n", i, input[i], result, output[i]);
             #endif
             return i;
         }
+		if (isnormal(input[i]) || issubnormal(input[i])) {
+			int foo = (int)logbf(input[i]);
+				if (result != foo) {
+					printf("%3zu: %08lX\n\t%d != %d != %d\n", i, input[i], result, output[i], foo);
+					 return i;
+				}
+		}
     }
 
     /* passed all */

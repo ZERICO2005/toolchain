@@ -32,7 +32,7 @@ size_t run_test(void) {
         result.flt = frexpf(input[i], &expon);
         if (result.bin != output[i].frac.bin || expon != output[i].expon) {
             if (!(isnan(result.flt) && isnan(output[i].frac.flt))) {
-                #if 0
+                #if 1
                     printf("G: %08lX %d\n", result.bin, expon);
                     printf("T: %08lX %d\n", output[i].frac.bin, output[i].expon);
                 #endif

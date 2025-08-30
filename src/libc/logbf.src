@@ -1,0 +1,54 @@
+	assume	adl=1
+
+	section	.text
+
+	public	_logbf, _logb
+
+; float logbf(float)
+_logb:
+_logbf:
+	ld	hl, 6
+	add	hl, sp
+	ld	a, (hl)
+	dec	hl
+	dec	hl
+	dec	hl
+	ld	de, (hl)
+	ex	de, hl
+	adc	hl, hl
+	jr	z, .maybe_zero
+	adc	a, a
+.not_zero:
+	inc	a
+	jr	z, .inf_nan
+	call	_ilogbf
+	; result is [-149, 127], so H is either all zeros or ones
+	ld	a, h	; sign extension trick. Works when HL is [-256, 255]
+	push	hl
+	pop	bc
+	call	__ltof
+	push	bc
+	pop	hl
+	ld	e, a
+	ret
+
+.inf_nan:
+	ex	de, hl
+	ld	hl, (hl)
+	ld	e, $7F
+	ret
+
+.maybe_zero:
+	adc	a, a
+	jr	nz, .not_zero
+	; FE_DIVBYZERO
+	ld	hl, ___fe_cur_env
+	set	6, (hl)
+	; -HUGE_VALF
+	ld	hl, $800000
+	ld	e, $FF
+	ret
+
+	extern	_ilogbf
+	extern	__ltof
+	extern	___fe_cur_env

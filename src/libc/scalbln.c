@@ -1,7 +1,7 @@
 #include <math.h>
 #include <limits.h>
 
-float scalblnf(float x, long expon)
+float old_scalblnf(float x, long expon)
 {
     // saturated int32_t to int24_t conversion
     int saturated_expon = (int)expon;
@@ -13,9 +13,9 @@ float scalblnf(float x, long expon)
     return scalbnf(x, saturated_expon);
 }
 
-double scalbln(double, long) __attribute__((alias("scalblnf")));
+double old_scalbln(double, long) __attribute__((alias("old_scalblnf")));
 
-long double scalblnl(long double x, long expon)
+long double old_scalblnl(long double x, long expon)
 {
     // saturated int32_t to int24_t conversion
     int saturated_expon = (int)expon;

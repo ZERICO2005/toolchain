@@ -1,7 +1,7 @@
 #include <fenv.h>
 #include <math.h>
 
-float logbf(float x) {
+float old_logbf(float x) {
     if (isfinite(x)) {
         if (iszero(x)) {
             feraiseexcept(FE_DIVBYZERO);
@@ -13,9 +13,9 @@ float logbf(float x) {
     return fabsf(x);
 }
 
-double logb(double) __attribute__((alias("logbf")));
+double old_logb(double) __attribute__((alias("old_logbf")));
 
-long double logbl(long double x) {
+long double old_logbl(long double x) {
     if (isfinite(x)) {
         if (iszero(x)) {
             feraiseexcept(FE_DIVBYZERO);
