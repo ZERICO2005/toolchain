@@ -2,6 +2,8 @@
 
 	section	.text
 
+if 1
+
 	public	__dtol
 	public	__dtoul
 
@@ -19,3 +21,72 @@ __dtoul:
 	ret
 
 	extern	__dtoll
+
+else
+
+; correctly handles all non-UB cases for both
+; (long)long double and (unsigned long)long double
+__dtol:
+__dtoul:
+	bit	6, b	; set if |x| >= 2.0L
+	jr	z, .zero_or_one
+	push	bc
+	push	de
+;	res	7, b	; not needed since this bit is shifted out later on
+	ld	l, a	; preserve A
+	push	hl
+	; -((Float64_mant_bits + Float64_bias) << 4)
+;	ld	hl, $FFC010 ; -16368 ; -$3FF0
+
+	; extract the exponent
+	ld	h, b
+	ld	l, c
+	; HL <<= 4
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+;	inc	hl
+
+	; clears the exponent field without touching the mantissa
+	; sets the LSB of the exponent since x is normalized
+	ld	a, c
+	or	a, $10
+	and	a, $1F
+	ld	c, a
+	ld	b, 0
+	ld	a, 52 - 1	; float64 mantissa bits - inc HL
+	; H is [0, 31] when not UB
+	sub	a, h
+	; shift is [20, 51]
+	ld	l, a
+	ex	(sp), hl
+	ld	a, l	; restore A
+	call	nc, __llshru	; only call __llshru if the shift amount is [0, 63]
+.finish:
+	pop	bc	; reset SP
+	ld	c, e
+	pop	de
+	ld	e, c
+	pop	bc
+.finish_zero_or_one:
+	bit	7, b
+	jp	nz, __lneg
+	ret
+
+.zero_or_one:
+	ld	hl, 16
+	ld	e, h
+	add.s	hl, bc	; adds one to the exponent
+	bit	6, h	; if |x| was [1, 2)
+	ld	h, e
+	ld	l, e
+	ret	z	; truncates to zero
+	inc	l
+	jr	.finish_zero_or_one
+
+	extern	__lneg
+	extern	__llshl
+	extern	__llshru
+
+end if
