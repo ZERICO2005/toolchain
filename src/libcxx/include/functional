@@ -1,0 +1,10 @@
+// -*- C++ -*-
+#ifndef _EZCXX_FUNCTIONAL
+#define _EZCXX_FUNCTIONAL
+
+#include <__config>
+#include <EASTL/functional.h>
+
+#pragma clang system_header
+
+#endif // _EZCXX_FUNCTIONAL

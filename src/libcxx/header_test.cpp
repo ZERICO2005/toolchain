@@ -1,5 +1,6 @@
 #include <__config>
 #include <algorithm>
+#include <array>
 #include <bit>
 #include <cassert>
 #include <cctype>
@@ -23,18 +24,29 @@
 #include <ctime>
 #include <ctgmath>
 #include <cxxabi.h>
+#include <deque>
 #include <exception>
+#include <functional>
 #include <initializer_list>
+#include <iterator>
 #include <limits>
+#include <list>
+#include <map>
 #include <memory>
 #include <new>
 #include <numbers>
+#include <pair>
+#include <queue>
+#include <set>
 #if __cplusplus >= 201907L
 #include <source_location>
 #endif // __cplusplus >= 201907L
+#include <stack>
 #include <type_traits>
 #include <typeinfo>
+#include <tuple>
 #include <utility>
+#include <vector>
 #include <version>
 
 #include <alloca.h>

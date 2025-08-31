@@ -1,0 +1,10 @@
+// -*- C++ -*-
+#ifndef _EZCXX_LIST
+#define _EZCXX_LIST
+
+#include <__config>
+#include <EASTL/list.h>
+
+#pragma clang system_header
+
+#endif // _EZCXX_LIST

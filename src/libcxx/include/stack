@@ -1,0 +1,10 @@
+// -*- C++ -*-
+#ifndef _EZCXX_STACK
+#define _EZCXX_STACK
+
+#include <__config>
+#include <EASTL/stack.h>
+
+#pragma clang system_header
+
+#endif // _EZCXX_STACK

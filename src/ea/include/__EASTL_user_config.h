@@ -3,7 +3,8 @@
 
 
 #define EASTL_THREAD_SUPPORT_AVAILABLE 0
-
+/* breaks C++17 onwards */
+#define EA_COMPILER_NO_STRUCTURED_BINDING 1
 
 #if !defined(_SSIZE_T_) && !defined(_SSIZE_T_DEFINED) && !defined(SSIZE_T_DEFINED)
 #define _SSIZE_T_

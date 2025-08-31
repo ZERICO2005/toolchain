@@ -15,4 +15,12 @@
 #define _EZCXX_TEMPLATE_VIS __attribute__ ((__type_visibility__("default")))
 #define _EZCXX_LIFETIMEBOUND [[_Clang::__lifetimebound__]]
 
+namespace eastl {
+    
+}
+
+namespace std {
+    using namespace eastl;
+}
+
 #endif // _EZCXX_CONFIG

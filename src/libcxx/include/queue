@@ -1,0 +1,10 @@
+// -*- C++ -*-
+#ifndef _EZCXX_QUEUE
+#define _EZCXX_QUEUE
+
+#include <__config>
+#include <EASTL/queue.h>
+
+#pragma clang system_header
+
+#endif // _EZCXX_QUEUE
