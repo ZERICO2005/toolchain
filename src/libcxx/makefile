@@ -30,11 +30,11 @@ all: $(BUILD_SRC)
 
 build/%.c.src: %.c
 	$(Q)$(call MKDIR,build)
-	$(Q)$(EZCC) $(EZCFLAGS) $< -o $@
+	$(Q)$(EZCC) $(EZCFLAGS) -std=c17 $< -o $@
 
 build/%.cpp.src: %.cpp
 	$(Q)$(call MKDIR,build)
-	$(Q)$(EZCC) $(EZCXXFLAGS) $< -o $@
+	$(Q)$(EZCC) $(EZCXXFLAGS) -std=c++14 $< -o $@
 
 clean:
 	$(Q)$(call RMDIR,build)
