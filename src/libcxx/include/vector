@@ -2,7 +2,7 @@
 #ifndef _EZCXX_VECTOR
 #define _EZCXX_VECTOR
 
-#include <__config>
+#include <__eastl_config>
 #include <initializer_list>
 #include <EASTL/vector.h>
 

@@ -2,7 +2,7 @@
 #ifndef _EZCXX_IOSFWD
 #define _EZCXX_IOSFWD
 
-#include <__config>
+#include <__eastl_config>
 #include <__cxx_stream>
 
 #pragma clang system_header

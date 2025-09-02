@@ -2,7 +2,7 @@
 #ifndef _EZCXX_ARRAY
 #define _EZCXX_ARRAY
 
-#include <__config>
+#include <__eastl_config>
 #include <initializer_list>
 #include <EASTL/array.h>
 

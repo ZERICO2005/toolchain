@@ -2,7 +2,7 @@
 #ifndef _EZCXX_UTILITY
 #define _EZCXX_UTILITY
 
-#include <__config>
+#include <__eastl_config>
 #include <initializer_list>
 #include <EASTL/utility.h>
 

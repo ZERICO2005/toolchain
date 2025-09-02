@@ -10,7 +10,7 @@
 #ifndef _EZCXX_ALGORITHM
 #define _EZCXX_ALGORITHM
 
-#include <__config>
+#include <__eastl_config>
 #include <initializer_list>
 #include <EASTL/algorithm.h>
 #include <EASTL/heap.h>

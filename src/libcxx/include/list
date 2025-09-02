@@ -2,7 +2,7 @@
 #ifndef _EZCXX_LIST
 #define _EZCXX_LIST
 
-#include <__config>
+#include <__eastl_config>
 #include <initializer_list>
 #include <EASTL/list.h>
 

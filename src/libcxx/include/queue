@@ -2,7 +2,7 @@
 #ifndef _EZCXX_QUEUE
 #define _EZCXX_QUEUE
 
-#include <__config>
+#include <__eastl_config>
 #include <initializer_list>
 #include <EASTL/queue.h>
 

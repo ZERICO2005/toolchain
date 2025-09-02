@@ -2,7 +2,7 @@
 #ifndef _EZCXX_MEMORY
 #define _EZCXX_MEMORY
 
-#include <__config>
+#include <__eastl_config>
 #include <EASTL/memory.h>
 
 #pragma clang system_header

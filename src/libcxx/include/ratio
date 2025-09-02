@@ -2,7 +2,7 @@
 #ifndef _EZCXX_RATIO
 #define _EZCXX_RATIO
 
-#include <__config>
+#include <__eastl_config>
 #include <EASTL/ratio.h>
 
 #pragma clang system_header

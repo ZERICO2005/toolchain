@@ -2,7 +2,7 @@
 #ifndef _EZCXX_FSTREAM
 #define _EZCXX_FSTREAM
 
-#include <__config>
+#include <__eastl_config>
 #include <__cxx_stream>
 
 #pragma clang system_header

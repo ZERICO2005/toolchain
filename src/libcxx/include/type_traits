@@ -2,7 +2,7 @@
 #ifndef _EZCXX_TYPE_TRAITS
 #define _EZCXX_TYPE_TRAITS
 
-#include <__config>
+#include <__eastl_config>
 #include <EASTL/type_traits.h>
 
 #pragma clang system_header

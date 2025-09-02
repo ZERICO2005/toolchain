@@ -2,8 +2,7 @@
 #ifndef _EZCXX_SET
 #define _EZCXX_SET
 
-#include <__config>
-#include <set>
+#include <__eastl_config>
 #include <EASTL/set.h>
 
 #pragma clang system_header

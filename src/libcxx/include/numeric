@@ -2,7 +2,7 @@
 #ifndef _EZCXX_NUMERIC
 #define _EZCXX_NUMERIC
 
-#include <__config>
+#include <__eastl_config>
 #include <EASTL/numeric.h>
 
 #pragma clang system_header

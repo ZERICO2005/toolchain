@@ -2,13 +2,15 @@
 #ifndef _EZCXX_STRING
 #define _EZCXX_STRING
 
-#include <__config>
+#include <__eastl_config>
 #include <initializer_list>
 #include <ti/sprintf.h>
 #include <cstdio>
 #include <EASTL/string.h>
 
 #pragma clang system_header
+
+#if 0
 
 namespace eastl {
 
@@ -71,5 +73,7 @@ inline string to_string(long double value) {
 }
 
 }
+
+#endif
 
 #endif // _EZCXX_STRING

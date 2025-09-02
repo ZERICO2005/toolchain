@@ -2,7 +2,7 @@
 #ifndef _EZCXX_RANDOM
 #define _EZCXX_RANDOM
 
-#include <__config>
+#include <__eastl_config>
 #include <initializer_list>
 #include <EASTL/random.h>
 

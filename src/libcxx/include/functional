@@ -2,7 +2,7 @@
 #ifndef _EZCXX_FUNCTIONAL
 #define _EZCXX_FUNCTIONAL
 
-#include <__config>
+#include <__eastl_config>
 #include <EASTL/functional.h>
 
 #pragma clang system_header
