@@ -507,8 +507,8 @@ namespace test_is_pod {
 namespace test_is_literal_type {
     struct A { int m; };
     struct B { virtual ~B(); };
-    C((is_literal_type_v<A>));
-    C((!is_literal_type_v<B>));
+    UNSUPPORTED_IN_EASTL((is_literal_type_v<A>));
+    UNSUPPORTED_IN_EASTL((!is_literal_type_v<B>));
 }
 
 // test has_unique_object_representations

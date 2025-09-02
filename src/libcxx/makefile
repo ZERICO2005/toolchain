@@ -23,6 +23,9 @@ EZCFLAGS += -D_EZ80 -isystem ../libc/include -isystem ../ce/include -isystem ../
 EZCXXFLAGS := $(EZCFLAGS) -fno-exceptions -fno-rtti -fno-use-cxa-atexit
 EZCXXFLAGS += -isystem ../libcxx/include
 
+EZCFLAGS += -std=c17
+EZCXXFLAGS += -std=c++20
+
 WILDCARD_SRC = $(wildcard *.src) $(BUILD_SRC)
 WILDCARD_H := $(wildcard include/*)
 
@@ -30,11 +33,11 @@ all: $(BUILD_SRC)
 
 build/%.c.src: %.c
 	$(Q)$(call MKDIR,build)
-	$(Q)$(EZCC) $(EZCFLAGS) -std=c17 $< -o $@
+	$(Q)$(EZCC) $(EZCFLAGS) $< -o $@
 
 build/%.cpp.src: %.cpp
 	$(Q)$(call MKDIR,build)
-	$(Q)$(EZCC) $(EZCXXFLAGS) -std=c++20 $< -o $@
+	$(Q)$(EZCC) $(EZCXXFLAGS) $< -o $@
 
 clean:
 	$(Q)$(call RMDIR,build)
