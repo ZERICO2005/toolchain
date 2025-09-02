@@ -1,9 +1,9 @@
 #ifndef _EASTL_USER_CONFIG_H
 #define _EASTL_USER_CONFIG_H
 
+
 #define EASTL_THREAD_SUPPORT_AVAILABLE 0
-/* FIXME: remove the temp disable from one of the other config files */
-#define EASTL_DEPRECATIONS_FOR_2024_APRIL 0
+
 
 #if !defined(_SSIZE_T_) && !defined(_SSIZE_T_DEFINED) && !defined(SSIZE_T_DEFINED)
 #define _SSIZE_T_

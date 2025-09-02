@@ -1,0 +1,10 @@
+// -*- C++ -*-
+#ifndef _EZCXX_EXCEPTION
+#define _EZCXX_EXCEPTION
+
+#include <__config>
+#include <exception>
+
+#pragma clang system_header
+
+#endif // _EZCXX_EXCEPTION

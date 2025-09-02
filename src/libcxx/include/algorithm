@@ -11,7 +11,10 @@
 #define _EZCXX_ALGORITHM
 
 #include <__config>
+#include <initializer_list>
 #include <EASTL/algorithm.h>
+#include <EASTL/heap.h>
+#include <EASTL/sort.h>
 
 #pragma clang system_header
 

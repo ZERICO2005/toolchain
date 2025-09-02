@@ -3,6 +3,7 @@
 #define _EZCXX_MAP
 
 #include <__config>
+#include <initializer_list>
 #include <EASTL/map.h>
 
 #pragma clang system_header

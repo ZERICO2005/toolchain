@@ -1,0 +1,75 @@
+// -*- C++ -*-
+#ifndef _EZCXX_STRING
+#define _EZCXX_STRING
+
+#include <__config>
+#include <initializer_list>
+#include <ti/sprintf.h>
+#include <cstdio>
+#include <EASTL/string.h>
+
+#pragma clang system_header
+
+namespace eastl {
+
+inline string to_string(int value) {
+    char buf[sizeof("-8388608")];
+    boot_sprintf(buf, "%d", value);
+    return string(buf);
+}
+inline string to_string(unsigned int value) {
+    char buf[sizeof("16777216")];
+    boot_sprintf(buf, "%u", value);
+    return string(buf);
+}
+inline string to_string(long value) {
+    char buf[sizeof("-2147483648")];
+    std::sprintf(buf, "%ld", value);
+    return string(buf);
+}
+inline string to_string(unsigned long value) {
+    char buf[sizeof("4294967295")];
+    std::sprintf(buf, "%lu", value);
+    return string(buf);
+}
+inline string to_string(signed __int48 value) {
+    char buf[sizeof("-140737488355328")];
+    std::sprintf(buf, "%lld", static_cast<long long>(value));
+    return string(buf);
+}
+inline string to_string(unsigned __int48 value) {
+    char buf[sizeof("281474976710655")];
+    std::sprintf(buf, "%llu", static_cast<unsigned long long>(value));
+    return string(buf);
+}
+inline string to_string(long long value) {
+    char buf[sizeof("-9223372036854775808")];
+    std::sprintf(buf, "%lld", value);
+    return string(buf);
+}
+inline string to_string(unsigned long long value) {
+    char buf[sizeof("18446744073709551615")];
+    std::sprintf(buf, "%llu", value);
+    return string(buf);
+}
+
+inline string to_string(float value) {
+    char buf[36];
+    std::snprintf(buf, sizeof(buf), "%f", value);
+    return string(buf);
+}
+inline string to_string(double value) {
+    char buf[36];
+    std::snprintf(buf, sizeof(buf), "%f", value);
+    return string(buf);
+}
+
+inline string to_string(long double value) {
+    char buf[36];
+    std::snprintf(buf, sizeof(buf), "%Lf", value);
+    return string(buf);
+}
+
+}
+
+#endif // _EZCXX_STRING

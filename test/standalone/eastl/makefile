@@ -8,8 +8,8 @@ DESCRIPTION = "CE C Toolchain Demo"
 COMPRESSED = NO
 ARCHIVED = NO
 
-CFLAGS = -Wall -Wextra -Wno-deprecated-declarations -std=c17 -O2
-CXXFLAGS = -Wall -Wextra -Wno-deprecated-declarations -std=c++20 -O2
+CFLAGS = -Wall -Wextra -Wno-deprecated-declarations -std=c17 -Oz
+CXXFLAGS = -Wall -Wextra -Wno-deprecated-declarations -std=c++20 -Oz
 
 PREFER_OS_LIBC = NO
 

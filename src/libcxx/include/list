@@ -3,6 +3,7 @@
 #define _EZCXX_LIST
 
 #include <__config>
+#include <initializer_list>
 #include <EASTL/list.h>
 
 #pragma clang system_header

@@ -3,8 +3,15 @@
 #define _EZCXX_UTILITY
 
 #include <__config>
+#include <initializer_list>
 #include <EASTL/utility.h>
 
 #pragma clang system_header
+
+namespace std {
+
+[[noreturn]] inline void unreachable() { __builtin_unreachable(); }
+
+} // namespace std
 
 #endif // _EZCXX_UTILITY

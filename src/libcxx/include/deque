@@ -3,6 +3,7 @@
 #define _EZCXX_DEQUE
 
 #include <__config>
+#include <initializer_list>
 #include <EASTL/deque.h>
 
 #pragma clang system_header

@@ -34,7 +34,7 @@ build/%.c.src: %.c
 
 build/%.cpp.src: %.cpp
 	$(Q)$(call MKDIR,build)
-	$(Q)$(EZCC) $(EZCXXFLAGS) -std=c++14 $< -o $@
+	$(Q)$(EZCC) $(EZCXXFLAGS) -std=c++20 $< -o $@
 
 clean:
 	$(Q)$(call RMDIR,build)

@@ -3,6 +3,7 @@
 #define _EZCXX_VECTOR
 
 #include <__config>
+#include <initializer_list>
 #include <EASTL/vector.h>
 
 #pragma clang system_header

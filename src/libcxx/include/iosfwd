@@ -1,0 +1,10 @@
+// -*- C++ -*-
+#ifndef _EZCXX_IOSFWD
+#define _EZCXX_IOSFWD
+
+#include <__config>
+#include <__cxx_stream>
+
+#pragma clang system_header
+
+#endif // _EZCXX_IOSFWD

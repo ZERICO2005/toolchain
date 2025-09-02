@@ -3,6 +3,7 @@
 #define _EZCXX_QUEUE
 
 #include <__config>
+#include <initializer_list>
 #include <EASTL/queue.h>
 
 #pragma clang system_header

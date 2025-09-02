@@ -1,0 +1,10 @@
+// -*- C++ -*-
+#ifndef _EZCXX_IOSTREAM
+#define _EZCXX_IOSTREAM
+
+#include <__config>
+#include <__cxx_stream>
+
+#pragma clang system_header
+
+#endif /* _EZCXX_IOSTREAM */

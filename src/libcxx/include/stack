@@ -3,6 +3,7 @@
 #define _EZCXX_STACK
 
 #include <__config>
+#include <initializer_list>
 #include <EASTL/stack.h>
 
 #pragma clang system_header
