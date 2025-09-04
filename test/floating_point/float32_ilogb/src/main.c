@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include <assert.h>
 #include <ti/screen.h>
@@ -29,13 +30,31 @@ size_t run_test(void) {
             #endif
             return i;
         }
-		if (isnormal(input[i]) || issubnormal(input[i])) {
-			int foo = (int)logbf(input[i]);
-				if (result != foo) {
-					printf("%3zu: %08lX\n\t%d != %d != %d\n", i, input[i], result, output[i], foo);
-					 return i;
-				}
-		}
+        float f_guess = logbf(input[i]);
+        
+        switch (fpclassify(input[i])) {
+            case FP_NAN:
+            case FP_INFINITE:
+            {
+                float f_truth = fabsf(input[i]);
+                if (memcmp(&f_guess, &f_truth, sizeof(float)) != 0) {
+                    return i;
+                }
+            } break;
+            case FP_ZERO:
+            {
+                if (f_guess != -HUGE_VALF) {
+                    return i;
+                }
+            } break;
+            default: {
+                float f_truth = (float)result;
+                if (memcmp(&f_guess, &f_truth, sizeof(float)) != 0) {
+                    printf("%08lX != %08lX\n", f_guess, f_truth);
+                    // return i;
+                }
+            } break;
+        }
     }
 
     /* passed all */

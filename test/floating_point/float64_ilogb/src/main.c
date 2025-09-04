@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include <assert.h>
 #include <ti/screen.h>
@@ -28,6 +29,29 @@ size_t run_test(void) {
                 printf("%4zu: %016llX\n %d != %d\n", i, input[i], result, output[i]);
             #endif
             return i;
+        }
+        long double f_guess = logbl(input[i]);
+        switch (fpclassify(input[i])) {
+            case FP_NAN:
+            case FP_INFINITE:
+            {
+                long double f_truth = fabsl(input[i]);
+                if (memcmp(&f_guess, &f_truth, sizeof(long double)) != 0) {
+                    return i;
+                }
+            } break;
+            case FP_ZERO:
+            {
+                if (f_guess != -HUGE_VALL) {
+                    return i;
+                }
+            } break;
+            default: {
+                long double f_truth = (long double)result;
+                if (memcmp(&f_guess, &f_truth, sizeof(long double)) != 0) {
+                    return i;
+                }
+            } break;
         }
     }
 
