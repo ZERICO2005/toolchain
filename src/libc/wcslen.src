@@ -1,0 +1,33 @@
+	assume	adl=1
+
+	section	.text
+
+	public	_wcslen
+
+; size_t wcslen(const wchar_t *str)
+_wcslen:
+	pop	de
+	ex	(sp), hl
+	push	de
+	xor	a, a
+	ld	bc, 0
+.loop:
+	cpir	; find a zero
+	cpi	; test if the next byte is also a zero
+	jr	nz, .loop
+	; check that BC is even
+	bit	0, c
+	jr	nz, .loop
+	; HL = -2 - BC = -2 - -(2 * wcslen(str) + 2) = 2 * wcslen(str)
+	scf
+	sbc	hl, hl
+	sbc	hl, bc
+	; divide by 2
+	push	hl
+	ld	hl, 2
+	add	hl, sp
+	srl	(hl)
+	pop	hl
+	rr	h
+	rr	l
+	ret
