@@ -1,0 +1,127 @@
+	assume	adl=1
+
+; __nonzero_fill_calloc assumes that malloc(0) returns NULL
+; __generic_calloc makes no assumptions
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+
+    public  __generic_calloc
+
+if defined __TICE__
+
+; uses TICE specific hardware/platform optimizations
+
+; void *calloc(size_t nmemb, size_t size)
+__generic_calloc:
+	pop	de
+	pop	bc
+	ex	(sp), hl
+	push	bc
+	push	de
+	call	__imulu
+	push	hl
+	push	hl
+	call	_malloc
+	pop	bc	; reset SP
+	pop	bc	; BC = size
+	; test for NULL
+	add	hl, bc
+	; or	a, a	; assumes that ptr + size does not overflow on TICE
+	sbc	hl, bc
+	ret	z	; return NULL
+	; inlined bzero
+	push	hl
+	ex	de, hl	; DE = dest
+	; test if the size is zero
+	scf
+	sbc	hl, hl
+	add	hl, bc
+	jr	nc, .finish
+	; large region of all zeros on the Ti84CE
+	ld	hl, $E40000	; HL = src
+	ldir
+	pop	hl	; return value
+	ret
+
+else
+
+; makes no hardware assumptions
+
+; void *calloc(size_t nmemb, size_t size)
+__generic_calloc:
+	pop	de
+	pop	bc
+	ex	(sp),hl
+	push	bc
+	push	de
+	call	__imulu
+	push	hl
+	push	hl
+	call	_malloc
+	pop	de
+	add	hl,de
+	xor	a,a
+	sbc	hl,de
+	ld	e,a
+	push	de
+	push	hl
+	call	nz,_memset
+	pop	de
+	pop	de
+	pop	de
+	ret
+
+end if
+
+;-------------------------------------------------------------------------------
+
+    section	.text
+
+    public  __nonzero_fill_calloc
+
+if defined __TICE__
+
+; uses TICE specific hardware/platform optimizations
+
+; void *calloc(size_t nmemb, size_t size)
+__nonzero_fill_calloc:
+	pop	de
+	pop	bc
+	ex	(sp), hl
+	push	bc
+	push	de
+	call	__imulu
+	push	hl
+	push	hl
+	call	_malloc
+	pop	bc	; reset SP
+	pop	bc	; BC = size
+	; test for NULL
+	add	hl, bc
+	; or	a, a	; assumes that ptr + size does not overflow on TICE
+	sbc	hl, bc
+	ret	z	; return NULL
+	; assumes that malloc(0) returns NULL, so we can skip the check for zero bytes
+	push	hl
+	ex	de, hl
+	; large region of all zeros on the Ti84CE
+	ld	hl, $E40000
+	ldir
+	pop	hl
+	ret
+
+else
+
+; makes no hardware assumptions
+
+_nonzero_fill_calloc := _generic_calloc
+
+end if
+
+;-------------------------------------------------------------------------------
+
+    extern  __imulu
+    extern  _malloc
+    extern  _memset
