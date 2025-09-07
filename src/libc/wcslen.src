@@ -4,6 +4,8 @@
 
 	public	_wcslen
 
+if 0
+
 ; size_t wcslen(const wchar_t *str)
 _wcslen:
 	pop	de
@@ -31,3 +33,24 @@ _wcslen:
 	rr	h
 	rr	l
 	ret
+
+else
+
+; size_t wcslen(const wchar_t *str)
+_wcslen:
+	pop	de
+	ex	(sp), hl
+	push	de
+	ld	de, -1
+	; unoptimized
+.loop:
+	ld	a, (hl)
+	inc	hl
+	or	a, (hl)
+	inc	hl
+	inc	de
+	jr	nz, .loop
+	ex	de, hl
+	ret
+
+end if
