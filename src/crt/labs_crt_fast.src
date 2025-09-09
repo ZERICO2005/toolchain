@@ -1,0 +1,13 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__labs_crt_fast
+
+; E:UHL = abs(E:UHL)
+__labs_crt_fast:
+	bit	7, e
+	jq	nz, __lneg_fast
+	ret
+
+	extern	__lneg_fast

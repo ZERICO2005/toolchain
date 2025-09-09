@@ -1,0 +1,13 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__labs_crt
+
+; E:UHL = abs(E:UHL)
+__labs_crt:
+	bit	7, e
+	jq	nz, __lneg
+	ret
+
+	extern	__lneg

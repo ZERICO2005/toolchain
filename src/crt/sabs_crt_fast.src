@@ -1,0 +1,16 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__sabs_crt_fast
+
+; HL = abs(HL)
+__sabs_crt_fast:
+	bit	7, h
+	ret	z
+	; __sneg_fast
+	add	hl, de	; uhl=UHL+UDE
+	ex	de, hl	; ude=UHL+UDE, uhl=UDE
+	or	a, a
+	sbc	hl, de	; uhl=UDE-(UHL+UDE)
+	ret

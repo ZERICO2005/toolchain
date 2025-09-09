@@ -1,0 +1,15 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__iabs_crt
+
+; UHL = abs(UHL)
+__iabs_crt:
+	push	hl
+	add	hl, hl
+	pop	hl
+	jq	c, __ineg
+	ret
+
+	extern	__ineg

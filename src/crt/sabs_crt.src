@@ -1,0 +1,13 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__sabs_crt
+
+; HL = abs(HL)
+__sabs_crt:
+	bit	7, h
+	jq	nz, __sneg
+	ret
+
+	extern	__sneg

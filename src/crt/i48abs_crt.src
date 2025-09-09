@@ -1,0 +1,17 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__i48abs_crt
+
+; UDE:UHL = abs(UDE:UHL)
+__i48abs_crt:
+	ex	de, hl
+	push	hl
+	add	hl, hl
+	pop	hl
+	ex	de, hl
+	jq	c, __i48neg
+	ret
+
+	extern	__i48neg

@@ -1,0 +1,13 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__llabs_crt
+
+; BC:UDE:UHL = abs(BC:UDE:UHL)
+__llabs_crt:
+	bit	7, b
+	jq	nz, __llneg
+	ret
+
+	extern	__llneg
