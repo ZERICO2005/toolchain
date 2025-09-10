@@ -4148,12 +4148,12 @@ _FillTriangle:
 	sbc	hl, de
 	ld	bc, (ix + 6)		; x0
 	ld	hl, (ix + 12)
-	jr	nz, .notflat
+	jp	nz, .notflat
 ;-------------------------------------------------------------------------------
 	ld	(ix - 6), bc		; a = x0
 	ld	(ix - 3), bc		; b = x0;
 	; if (x1 < a) { a = x1; }
-	or	a, a
+	; or	a, a
 	sbc	hl, bc
 	ld	bc, (ix + 12)
 	jp	p, .cmp00
@@ -4201,6 +4201,26 @@ _FillTriangle:
 	jp	pe, .cmp31
 	jr	.cmp32
 ;-------------------------------------------------------------------------------
+.cmp30:
+	jp	po, .cmp31
+.cmp32:
+	ld	(ix - 6), bc
+.cmp31:
+	ld	de, (ix - 3)
+	ld	hl, (ix - 6)
+	or	a, a
+	sbc	hl, de
+	inc	hl
+	push	hl
+	ld	bc, (ix + 9)
+	push	bc
+	push	de
+	call	0			; horizline(a, y0, b-a+1);
+.line0 := $-3
+	ld	sp, ix
+	pop	ix
+	ret				; return;
+;-------------------------------------------------------------------------------
 .notflat:
 	or	a, a
 	sbc	hl, bc
@@ -4231,30 +4251,8 @@ _FillTriangle:
 	or	a, a
 	sbc	hl, bc
 	ld	(ix - 39), hl		; dy12 = y2 - y1;
-	jr	nz, .elselast		; if (y1 == y2) { last = y1; }
-	jr	.sublast
-;-------------------------------------------------------------------------------
-.cmp30:
-	jp	po, .cmp31
-.cmp32:
-	ld	(ix - 6), bc
-.cmp31:
-	ld	de, (ix - 3)
-	ld	hl, (ix - 6)
-	or	a, a
-	sbc	hl, de
-	inc	hl
-	push	hl
-	ld	bc, (ix + 9)
-	push	bc
-	push	de
-	call	0			; horizline(a, y0, b-a+1);
-.line0 := $-3
-	ld	sp, ix
-	pop	ix
-	ret				; return;
-;-------------------------------------------------------------------------------
-.elselast:
+	; if (y1 == y2) { last = y1; }
+	jr	z, .sublast
 	; else { last = y1-1; }
 	dec	bc
 .sublast:
