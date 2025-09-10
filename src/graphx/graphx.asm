@@ -4342,7 +4342,7 @@ _FillTriangle:
 	ld	bc, (ix - 39)
 	call	_DivideHLBC
 	ld	bc, (ix + 12)
-	add	hl, bc	
+	add	hl, bc
 	; a = x1 + sa / dy12;
 	push	hl	; ld (ix - 3), hl
 	ld	hl, (ix - 18)
