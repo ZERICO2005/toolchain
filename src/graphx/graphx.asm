@@ -4146,12 +4146,13 @@ _FillTriangle:
 	ld	hl, (ix + 9)
 	or	a, a
 	sbc	hl, de
+	ld	bc, (ix + 6)		; x0
+	ld	hl, (ix + 12)
 	jr	nz, .notflat
 ;-------------------------------------------------------------------------------
-	ld	bc, (ix + 6)		; x0
 	ld	(ix - 6), bc		; a = x0
 	ld	(ix - 3), bc		; b = x0;
-	ld	hl, (ix + 12)		; if (x1 < a) { a = x1; }
+	; if (x1 < a) { a = x1; }
 	or	a, a
 	sbc	hl, bc
 	ld	bc, (ix + 12)
@@ -4201,8 +4202,6 @@ _FillTriangle:
 	jr	.cmp32
 ;-------------------------------------------------------------------------------
 .notflat:
-	ld	bc, (ix + 6)		; x0
-	ld	hl, (ix + 12)
 	or	a, a
 	sbc	hl, bc
 	ld	(ix - 36), hl		; dx01 = x1 - x0;
@@ -4210,6 +4209,7 @@ _FillTriangle:
 	or	a, a
 	sbc	hl, bc
 	ld	(ix - 21), hl		; dx02 = x2 - x0;
+
 	ld	bc, (ix + 9)		; y0
 	ld	hl, (ix + 15)
 	or	a, a
@@ -4219,18 +4219,19 @@ _FillTriangle:
 	or	a, a
 	sbc	hl, bc
 	ld	(ix - 27), hl		; dy02 = y2 - y0;
+
 	ld	bc, (ix + 12)
 	ld	hl, (ix + 18)
 	or	a, a
 	sbc	hl, bc
 	ld	(ix - 30), hl		; dx12 = x2 - x1;
+
 	ld	bc, (ix + 15)
 	ld	hl, (ix + 21)
 	or	a, a
 	sbc	hl, bc
 	ld	(ix - 39), hl		; dy12 = y2 - y1;
 	jr	nz, .elselast		; if (y1 == y2) { last = y1; }
-	ld	(ix - 24), bc
 	jr	.sublast
 ;-------------------------------------------------------------------------------
 .cmp30:
@@ -4254,10 +4255,10 @@ _FillTriangle:
 	ret				; return;
 ;-------------------------------------------------------------------------------
 .elselast:
-	ld	bc, (ix + 15)		; else { last = y1-1; }
+	; else { last = y1-1; }
 	dec	bc
-	ld	(ix - 24), bc
 .sublast:
+	ld	(ix - 24), bc
 	ld	bc, (ix + 9)
 	ld	(ix - 12), bc		; for (y = y0; y <= last; y++)
 	jr	.firstloopstart
