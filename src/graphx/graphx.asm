@@ -3149,8 +3149,20 @@ t_tile_width  := 7
 t_draw_height := 8
 t_draw_width  := 9
 t_x_loc       := 15
-x_offset      := 9
-y_offset      := 12
+
+
+tm_frame_offset := -12
+
+tm_tilemap_data := 6
+tm_x_offset      := 9
+tm_y_offset      := 12
+
+tm_x_res := -1
+tm_x_pos := -2
+tm_y_pos := -3
+tm_y_index := -4
+tm_x_coord := -7
+tm_y_coord := -12
 
 	ld	hl, gfx_Sprite
 _Tilemap:
@@ -3161,9 +3173,9 @@ _Tilemap:
 	add	ix, sp
 	lea	hl, ix - 12
 	ld	sp, hl
-	ld	iy, (ix + 6)		; iy -> tilemap structure
+	ld	iy, (ix + tm_tilemap_data)	; iy -> tilemap structure
 
-	ld	hl, (ix + y_offset)
+	ld	hl, (ix + tm_y_offset)
 	ld	c, (iy + t_tile_height)
 	ld	a, (iy + t_type_height)
 	or	a, a
@@ -3184,11 +3196,11 @@ _Tilemap:
 	rr	l
 	djnz	.div0
 .heightnotpow2:
-	ld	(ix - 4), l		; y = y_offset / tilemap->tile_height
-	ld	(ix + y_offset), bc	; y_offset = y_offset % tilemap->tile_height;
+	ld	(ix + tm_y_index), l		; y = y_offset / tilemap->tile_height
+	ld	(ix + tm_y_offset), bc	; y_offset = y_offset % tilemap->tile_height;
 
 	ld	c, (iy + t_tile_width)
-	ld	hl, (ix + x_offset)	; x offset
+	ld	hl, (ix + tm_x_offset)	; x offset
 	ld	a, (iy + t_type_width)
 	or	a, a
 	jr	nz, .widthpow2
@@ -3218,16 +3230,16 @@ _Tilemap:
 	or	a, a
 	sbc	hl, hl
 	ld	l, (iy + 14)
-	ld	bc, (ix + y_offset)
-	ld	(ix - 3), h
+	ld	bc, (ix + tm_y_offset)
+	ld	(ix + tm_y_pos), h
 	sbc	hl, bc
-	ld	(ix - 12), hl
+	ld	(ix + tm_y_coord), hl
 	jr	.yloop
 
 .xloopinner:
 	or	a, a
 	sbc	hl, hl
-	ld	l, (ix - 1)
+	ld	l, (ix + tm_x_res)
 	ld	bc, (iy + t_data)	; iy -> tilemap data
 	add	hl, bc
 	ld	bc, 0
@@ -3241,9 +3253,9 @@ _Tilemap:
 	mlt	hl
 	ld	de, (iy + 3)
 	add	hl, de
-	ld	bc, (ix - 12)
+	ld	bc, (ix + tm_y_coord)
 	push	bc
-	ld	bc, (ix - 7)
+	ld	bc, (ix + tm_x_coord)
 	push	bc
 	ld	bc, (hl)
 	push	bc
@@ -3254,39 +3266,39 @@ _Tilemap:
 .blanktile:
 	or	a, a
 	sbc	hl, hl
-	ld	iy, (ix + 6)
+	ld	iy, (ix + tm_tilemap_data)
 	ld	l, (iy + 7)
-	ld	bc, (ix - 7)
+	ld	bc, (ix + tm_x_coord)
 	add	hl, bc
-	ld	(ix - 7), hl
-	inc	(ix - 1)
-	ld	a, (ix - 2)
+	ld	(ix + tm_x_coord), hl
+	inc	(ix + tm_x_res)
+	ld	a, (ix + tm_x_pos)
 	inc	a
 
 .xloop:
-	ld	(ix - 2), a
+	ld	(ix + tm_x_pos), a
 	cp	a, (iy + t_draw_width)
 	jr	nz, .xloopinner
 	ld	h, 0
 	ld	l, (iy + 6)
-	ld	bc, (ix - 12)
+	ld	bc, (ix + tm_y_coord)
 	add	hl, bc
-	ld	(ix - 12), hl
-	inc	(ix - 4)
-	inc	(ix - 3)
+	ld	(ix + tm_y_coord), hl
+	inc	(ix + tm_y_index)
+	inc	(ix + tm_y_pos)
 
 .yloop:
 	ld	a, (iy + t_draw_height)
-	cp	a, (ix - 3)
+	cp	a, (ix + tm_y_pos)
 	jr	z, .finish_loop
 ; .loop:
-	ld	(ix - 1), 0
+	ld	(ix + tm_x_res), 0
 .xres := $-1
 	ld	hl, 0
 .xoffset := $-3
-	ld	(ix - 7), hl
+	ld	(ix + tm_x_coord), hl
 	ld	l, (iy + t_width)
-	ld	h, (ix - 4)
+	ld	h, (ix + tm_y_index)
 	mlt	hl
 	ld	(.ynext), hl
 	xor	a, a
