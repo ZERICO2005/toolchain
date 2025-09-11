@@ -3238,10 +3238,8 @@ _Tilemap:
 	; or	a, a
 	sbc	hl, hl
 	ld	l, (ix + tm_x_res)
-	ld	bc, (iy + t_data)	; iy -> tilemap data
-	add	hl, bc
 	ld	bc, 0
-.ynext := $-3
+.ynext_plus_tilemap_data := $-3
 	add	hl, bc
 	ld	a, (hl)
 	ld	l, a
@@ -3297,7 +3295,9 @@ _Tilemap:
 	ld	l, (iy + t_width)
 	ld	h, (ix + tm_y_index)
 	mlt	hl
-	ld	(.ynext), hl
+	ld	bc, (iy + t_data)	; iy -> tilemap data
+	add	hl, bc
+	ld	(.ynext_plus_tilemap_data), hl
 	xor	a, a
 	jr	.xloop
 .finish_loop:
