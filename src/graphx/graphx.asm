@@ -775,17 +775,17 @@ gfx_FillRectangle_NoClip:
 ;  arg3 : Height
 ; Returns:
 ;  None
-	ld	iy,0
+	ld	iy,-1
 	add	iy,sp
-	ld	a,(iy+12)		; a = height
+	ld	bc,(iy+10)		; bc = width
+	sbc	hl,hl
+	add	hl,bc
+	ret	nc			; make sure width is not 0
+	ld	a,(iy+13)		; a = height
 	or	a,a
 	ret	z			; make sure height is not 0
-	ld	bc,(iy+9)		; bc = width
-	sbc	hl,hl
-	adc	hl,bc
-	ret	z			; make sure width is not 0
-	ld	hl,(iy+3)		; hl = x coordinate
-	ld	e,(iy+6)		; e = y coordinate
+	ld	hl,(iy+4)		; hl = x coordinate
+	ld	e,(iy+7)		; e = y coordinate
 _FillRectangle_NoClip:
 	ld	d,ti.lcdWidth / 2
 	mlt	de
@@ -795,8 +795,8 @@ _FillRectangle_NoClip:
 	add	hl,de
 	ex	de,hl			; de -> place to begin drawing
 	push	de
-	ld	(.width1),bc
-	ld	(.width2),bc
+	push	bc
+	pop	iy			; IY = BC = width
 	ld	hl,_Color
 	wait_quick
 	ldi				; check if we only need to draw 1 pixel
@@ -812,8 +812,7 @@ _FillRectangle_NoClip:
 	add	hl,bc
 	dec	de
 	ex	de,hl
-.width1 = $ + 1
-	ld	bc,0
+	lea	bc,iy
 	lddr
 	dec	a
 	ret	z
@@ -821,8 +820,7 @@ _FillRectangle_NoClip:
 	add	hl,bc
 	inc	de
 	ex	de,hl
-.width2 = $ + 1
-	ld	bc,0
+	lea	bc,iy
 	ldir
 	ld	bc,(2 * ti.lcdWidth) - 1
 	dec	a
