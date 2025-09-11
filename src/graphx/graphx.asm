@@ -3152,147 +3152,147 @@ t_x_loc       := 15
 x_offset      := 9
 y_offset      := 12
 
-	ld	hl,gfx_Sprite
+	ld	hl, gfx_Sprite
 _Tilemap:
-	ld	(.tilemethod),hl
+	ld	(.tilemethod), hl
 	push	ix
-	ld	ix,0
-	lea	bc,ix
-	add	ix,sp
-	lea	hl,ix-12
-	ld	sp,hl
-	ld	iy,(ix+6)		; iy -> tilemap structure
+	ld	ix, 0
+	lea	bc, ix
+	add	ix, sp
+	lea	hl, ix - 12
+	ld	sp, hl
+	ld	iy, (ix + 6)		; iy -> tilemap structure
 
-	ld	hl,(ix+y_offset)
-	ld	c,(iy+t_tile_height)
-	ld	a,(iy+t_type_height)
-	or	a,a
-	jr	nz,.heightpow2
+	ld	hl, (ix + y_offset)
+	ld	c, (iy + t_tile_height)
+	ld	a, (iy + t_type_height)
+	or	a, a
+	jr	nz, .heightpow2
 	call	ti._idvrmu
-	ex	de,hl
+	ex	de, hl
 	push	de
 	pop	bc
 	jr	.heightnotpow2
 .heightpow2:				; compute as power of 2 height using shifts
-	ld	b,a
+	ld	b, a
 	dec	c
-	ld	a,l
-	and	a,c
-	ld	c,a
+	ld	a, l
+	and	a, c
+	ld	c, a
 .div0:
 	srl	h
 	rr	l
 	djnz	.div0
 .heightnotpow2:
-	ld	(ix-4),l		; y = y_offset / tilemap->tile_height
-	ld	(ix+y_offset),bc	; y_offset = y_offset % tilemap->tile_height;
+	ld	(ix - 4), l		; y = y_offset / tilemap->tile_height
+	ld	(ix + y_offset), bc	; y_offset = y_offset % tilemap->tile_height;
 
-	ld	c,(iy+t_tile_width)
-	ld	hl,(ix+x_offset)	; x offset
-	ld	a,(iy+t_type_width)
-	or	a,a
-	jr	nz,.widthpow2
+	ld	c, (iy + t_tile_width)
+	ld	hl, (ix + x_offset)	; x offset
+	ld	a, (iy + t_type_width)
+	or	a, a
+	jr	nz, .widthpow2
 	call	ti._idvrmu
-	ex	de,hl
+	ex	de, hl
 	push	de
 	pop	bc
 	jr	.widthnotpow2
 .widthpow2:
-	ld	b,a
+	ld	b, a
 	dec	c
-	ld	a,l
-	and	a,c
-	ld	c,a
+	ld	a, l
+	and	a, c
+	ld	c, a
 .div1:
 	srl	h
 	rr	l
 	djnz	.div1
 .widthnotpow2:
-	ld	a,l
-	ld	(.xres),a
-	ld	hl,(iy+t_x_loc)
-	or	a,a
-	sbc	hl,bc
-	ld	(.xoffset),hl		; tilemap->x_loc - x_offset;
+	ld	a, l
+	ld	(.xres), a
+	ld	hl, (iy + t_x_loc)
+	or	a, a
+	sbc	hl, bc
+	ld	(.xoffset), hl		; tilemap->x_loc - x_offset;
 
-	or	a,a
-	sbc	hl,hl
-	ld	l,(iy+14)
-	ld	bc,(ix+y_offset)
-	ld	(ix-3),h
-	sbc	hl,bc
-	ld	(ix-12),hl
+	or	a, a
+	sbc	hl, hl
+	ld	l, (iy + 14)
+	ld	bc, (ix + y_offset)
+	ld	(ix - 3), h
+	sbc	hl, bc
+	ld	(ix - 12), hl
 	jr	.yloop
 
 .xloopinner:
-	or	a,a
-	sbc	hl,hl
-	ld	l,(ix-1)
-	ld	bc,(iy+t_data)		; iy -> tilemap data
-	add	hl,bc
-	ld	bc,0
+	or	a, a
+	sbc	hl, hl
+	ld	l, (ix - 1)
+	ld	bc, (iy + t_data)	; iy -> tilemap data
+	add	hl, bc
+	ld	bc, 0
 .ynext := $-3
-	add	hl,bc
-	ld	a,(hl)
-	ld	l,a
+	add	hl, bc
+	ld	a, (hl)
+	ld	l, a
 	inc	a
-	jr	z,.blanktile
-	ld	h,3
+	jr	z, .blanktile
+	ld	h, 3
 	mlt	hl
-	ld	de,(iy+3)
-	add	hl,de
-	ld	bc,(ix-12)
+	ld	de, (iy + 3)
+	add	hl, de
+	ld	bc, (ix - 12)
 	push	bc
-	ld	bc,(ix-7)
+	ld	bc, (ix - 7)
 	push	bc
-	ld	bc,(hl)
+	ld	bc, (hl)
 	push	bc
 	call	0			; call sprite drawing routine
 .tilemethod := $-3
-	lea	hl,ix-12
-	ld	sp,hl
+	lea	hl, ix - 12
+	ld	sp, hl
 .blanktile:
-	or	a,a
-	sbc	hl,hl
-	ld	iy,(ix+6)
-	ld	l,(iy+7)
-	ld	bc,(ix-7)
-	add	hl,bc
-	ld	(ix-7),hl
-	inc	(ix-1)
-	ld	a,(ix-2)
+	or	a, a
+	sbc	hl, hl
+	ld	iy, (ix + 6)
+	ld	l, (iy + 7)
+	ld	bc, (ix - 7)
+	add	hl, bc
+	ld	(ix - 7), hl
+	inc	(ix - 1)
+	ld	a, (ix - 2)
 	inc	a
 
 .xloop:
-	ld	(ix-2),a
-	cp	a,(iy+t_draw_width)
-	jr	nz,.xloopinner
-	ld	h,0
-	ld	l,(iy+6)
-	ld	bc,(ix-12)
-	add	hl,bc
-	ld	(ix-12),hl
-	inc	(ix-4)
-	inc	(ix-3)
+	ld	(ix - 2), a
+	cp	a, (iy + t_draw_width)
+	jr	nz, .xloopinner
+	ld	h, 0
+	ld	l, (iy + 6)
+	ld	bc, (ix - 12)
+	add	hl, bc
+	ld	(ix - 12), hl
+	inc	(ix - 4)
+	inc	(ix - 3)
 
 .yloop:
-	ld	a,(iy+t_draw_height)
-	cp	a,(ix-3)
-	jr	z,.finish_loop
-.xres := $+3
+	ld	a, (iy + t_draw_height)
+	cp	a, (ix - 3)
+	jr	z, .finish_loop
 ; .loop:
-	ld	(ix-1),0
-	ld	hl,0
+	ld	(ix - 1), 0
+.xres := $-1
+	ld	hl, 0
 .xoffset := $-3
-	ld	(ix-7),hl
-	ld	l,(iy+t_width)
-	ld	h,(ix-4)
+	ld	(ix - 7), hl
+	ld	l, (iy + t_width)
+	ld	h, (ix - 4)
 	mlt	hl
-	ld	(.ynext),hl
-	xor	a,a
+	ld	(.ynext), hl
+	xor	a, a
 	jr	.xloop
 .finish_loop:
-	ld	sp,ix
+	ld	sp, ix
 	pop	ix
 	ret
 
