@@ -4142,108 +4142,64 @@ _FillTriangle:
 	ld	(ix + 6), de
 	ld	(ix + 12), hl
 .cmp2:
-	ld	de, (ix + 21)		; if (y0 == y2) - handle awkward all-on-same-line case as its own thing
-	ld	hl, (ix + 9)
+	ld	hl, (ix + 21)		; if (y0 == y2) - handle awkward all-on-same-line case as its own thing
+	ld	bc, (ix + 9)
 	or	a, a
-	sbc	hl, de
-	ld	bc, (ix + 6)		; x0
-	ld	hl, (ix + 12)
-	jp	nz, .notflat
-;-------------------------------------------------------------------------------
-	ld	(ix - 6), bc		; a = x0
-	ld	(ix - 3), bc		; b = x0;
-	; if (x1 < a) { a = x1; }
-	; or	a, a
 	sbc	hl, bc
-	ld	bc, (ix + 12)
-	jp	p, .cmp00
-	jp	pe, .cmp01
-	jr	.cmp02
+	ld	de, (ix + 6)		; x0
+	ld	hl, (ix + 12)		; x1
+	jr	nz, .notflat
 ;-------------------------------------------------------------------------------
-.cmp00:
-	jp	po, .cmp01
-.cmp02:
-	ld	(ix - 3), bc
-	jr	.cmp11
-;-------------------------------------------------------------------------------
-.cmp01:
-	ld	hl, (ix - 6)
-	or	a, a
-	sbc	hl, bc			; else if (x1 > b) { b = x1; }
-	jp	p, .cmp10
-	jp	pe, .cmp11
-	jr	.cmp12
-;-------------------------------------------------------------------------------
-.cmp10:
-	jp	po, .cmp11
-.cmp12:
-	ld	(ix - 6), bc
-.cmp11:
-	ld	bc, (ix - 3)
-	ld	hl, (ix + 18)
-	or	a, a
-	sbc	hl, bc			; if (x2 < a) { a = x2; }
-	ld	bc, (ix + 18)
-	jp	p, .cmp20
-	jp	pe, .cmp21
-	jr	.cmp22
-;-------------------------------------------------------------------------------
-.cmp20:
-	jp	po, .cmp21
-.cmp22:
-	ld	(ix - 3), bc
-	jr	.cmp31
-.cmp21:
-	ld	hl, (ix - 6)
-	or	a, a
-	sbc	hl, bc			; else if (x2 > b) { b = x2; }
-	jp	p, .cmp30
-	jp	pe, .cmp31
-	jr	.cmp32
-;-------------------------------------------------------------------------------
-.cmp30:
-	jp	po, .cmp31
-.cmp32:
-	ld	(ix - 6), bc
-.cmp31:
-	ld	de, (ix - 3)
-	ld	hl, (ix - 6)
+	; draw a flat horizontal triangle
+	; x_min = min(x0, x1, x2)
+	; x_max = max(x0, x1, x2)
+	; horizline(x_min, y0, x_max - x_min + 1)
+	; DE = x0, HL = x1, BC = y0
+	call	_Minimum.no_carry
+	ld	de, (ix + 18)	; x2
+	call	_Minimum
+	push	hl		; x_min
+	ld	hl, (ix + 6)	; x0
+	ld	de, (ix + 12)	; x1
+	call	_Maximum
+	ld	de, (ix + 18)	; x2
+	call	_Maximum
+	pop	de		; x_min
 	or	a, a
 	sbc	hl, de
 	inc	hl
-	push	hl
-	ld	bc, (ix + 9)
-	push	bc
-	push	de
-	call	0			; horizline(a, y0, b-a+1);
+	push	hl		; x_max - x_min + 1
+	push	bc		; y0
+	push	de		; x_min
+	call	0		; horizline(x_min, y0, x_max - x_min + 1)
 .line0 := $-3
 	ld	sp, ix
 	pop	ix
-	ret				; return;
+	ret
 ;-------------------------------------------------------------------------------
 .notflat:
 	or	a, a
-	sbc	hl, bc
+	sbc	hl, de
 	ld	(ix - 36), hl		; dx01 = x1 - x0;
 	ld	hl, (ix + 18)
 	or	a, a
-	sbc	hl, bc
+	sbc	hl, de
 	ld	(ix - 21), hl		; dx02 = x2 - x0;
 
-	ld	bc, (ix + 9)		; y0
+	ld	de, (ix + 9)		; y0
 	ld	hl, (ix + 15)
 	or	a, a
-	sbc	hl, bc
+	sbc	hl, de
 	ld	(ix - 33), hl		; dy01 = y1 - y0;
 	ld	hl, (ix + 21)
 	or	a, a
-	sbc	hl, bc
+	sbc	hl, de
 	ld	(ix - 27), hl		; dy02 = y2 - y0;
 
-	ld	bc, (ix + 12)
+	ld	de, (ix + 12)
 	ld	hl, (ix + 18)
 	or	a, a
-	sbc	hl, bc
+	sbc	hl, de
 	ld	(ix - 30), hl		; dx12 = x2 - x1;
 
 	ld	bc, (ix + 15)
