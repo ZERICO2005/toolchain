@@ -4094,31 +4094,32 @@ gfx_FillTriangle:
 ; Returns:
 ;  None
 	ld	hl, gfx_HorizLine
-tri_x0 := 6
-tri_y0 := 9
-tri_x1 := 12
-tri_y1 := 15
-tri_x2 := 18
-tri_y2 := 21
-tri_y_counter := -12
-tri_sa := -15
-tri_sb := -18
-tri_dx02 := -21
-tri_last := -24
-tri_dy02 := -27
-tri_dx12 := -30
-tri_dy01 := -33
-tri_dx01 := -36
-tri_dy12 := -39
+tri_frame_offset := 30
+tri_x0        := tri_frame_offset + 6
+tri_y0        := tri_frame_offset + 9
+tri_x1        := tri_frame_offset + 12
+tri_y1        := tri_frame_offset + 15
+tri_x2        := tri_frame_offset + 18
+tri_y2        := tri_frame_offset + 21
+tri_y_counter := tri_frame_offset - 3
+tri_sa        := tri_frame_offset - 6
+tri_sb        := tri_frame_offset - 9
+tri_dx02      := tri_frame_offset - 12
+tri_last      := tri_frame_offset - 15
+tri_dy02      := tri_frame_offset - 18
+tri_dx12      := tri_frame_offset - 21
+tri_dy01      := tri_frame_offset - 24
+tri_dx01      := tri_frame_offset - 27
+tri_dy12      := tri_frame_offset - 30
 _FillTriangle:
 	ld	(.line0), hl
 	ld	(.line1), hl
 	ld	(.line2), hl
 	push	ix
-	ld	ix, 0
+	ld	ix, -tri_frame_offset
 	add	ix, sp
-	lea	hl, ix - 39
-	ld	sp, hl
+	ld	sp, ix
+	or	a, a
 	sbc	hl, hl
 	ld	(ix + tri_sa), hl
 	ld	(ix + tri_sb), hl		; int sa = 0, sb = 0;
@@ -4189,7 +4190,8 @@ _FillTriangle:
 	push	de		; x_min
 	call	0		; horizline(x_min, y0, x_max - x_min + 1)
 .line0 := $-3
-	ld	sp, ix
+	lea	hl, ix + tri_frame_offset
+	ld	sp, hl
 	pop	ix
 	ret
 ;-------------------------------------------------------------------------------
@@ -4233,31 +4235,31 @@ _FillTriangle:
 	ld	(ix + tri_y_counter), bc		; for (y = y0; y <= last; y++)
 	jr	.firstloopstart
 ;-------------------------------------------------------------------------------
+.cmp50:
+	jp	pe, .firstloopfinish
 .firstloop:
 	ld	hl, (ix + tri_sa)
 	ld	bc, (ix + tri_dy01)
 	call	_DivideHLBC
 	ld	bc, (ix + tri_x0)
 	add	hl, bc
-	; a = x0 + sa / dy01;
-	push	hl	; ld (ix - 3), hl
+	push	hl	; a = x0 + sa / dy01;
 	ld	hl, (ix + tri_sb)
 	ld	bc, (ix + tri_dy02)
 	call	_DivideHLBC
 	ld	bc, (ix + tri_x0)
 	add	hl, bc
-	; b = x0 + sb / dy02;
-	push	hl	; ld (ix - 6), hl
-	ld	bc, (ix + tri_dx01)
+	push	hl	; b = x0 + sb / dy02;
 	ld	hl, (ix + tri_sa)
+	ld	bc, (ix + tri_dx01)
 	add	hl, bc
 	ld	(ix + tri_sa), hl		; sa += dx01;
-	ld	bc, (ix + tri_dx02)
 	ld	hl, (ix + tri_sb)
+	ld	bc, (ix + tri_dx02)
 	add	hl, bc
 	ld	(ix + tri_sb), hl		; sb += dx02;
-	pop	hl	; ld hl, (ix - 6)
-	pop	de	; ld de, (ix - 3)
+	pop	hl	; HL = b
+	pop	de	; DE = a
 	or	a, a
 	sbc	hl, de			; if (b < a) { swap(a, b); }
 	add	hl, de
@@ -4276,9 +4278,7 @@ _FillTriangle:
 	push	de
 	call	0			; horizline(a, y, b-a+1);
 .line1 := $-3
-	pop	bc
-	pop	bc
-	pop	bc
+	ld	sp, ix
 	ld	bc, (ix + tri_y_counter)
 	inc	bc
 	ld	(ix + tri_y_counter), bc
@@ -4288,10 +4288,7 @@ _FillTriangle:
 	sbc	hl, bc
 	jp	p, .cmp50
 	jp	pe, .firstloop
-	jr	.cmp52
-.cmp50:
-	jp	po, .firstloop
-.cmp52:
+.firstloopfinish:
 	ld	bc, (ix + tri_y1)
 	ld	hl, (ix + tri_y_counter)
 	or	a, a
@@ -4309,31 +4306,31 @@ _FillTriangle:
 	ld	bc, (ix + tri_y_counter)
 	jr	.secondloopstart	; for(; y <= y2; y++)
 ;-------------------------------------------------------------------------------
+.cmp70:
+	jp	pe, .secondloopfinish
 .secondloop:
 	ld	hl, (ix + tri_sa)
 	ld	bc, (ix + tri_dy12)
 	call	_DivideHLBC
 	ld	bc, (ix + tri_x1)
 	add	hl, bc
-	; a = x1 + sa / dy12;
-	push	hl	; ld (ix - 3), hl
+	push	hl	; a = x1 + sa / dy12;
 	ld	hl, (ix + tri_sb)
 	ld	bc, (ix + tri_dy02)
 	call	_DivideHLBC
 	ld	bc, (ix + tri_x0)
 	add	hl, bc
-	; b = x0 + sb / dy02;
-	push	hl	; ld (ix - 6), hl
-	ld	bc, (ix + tri_dx12)
+	push	hl	; b = x0 + sb / dy02;
 	ld	hl, (ix + tri_sa)
+	ld	bc, (ix + tri_dx12)
 	add	hl, bc
 	ld	(ix + tri_sa), hl		; sa += dx12;
-	ld	bc, (ix + tri_dx02)
 	ld	hl, (ix + tri_sb)
+	ld	bc, (ix + tri_dx02)
 	add	hl, bc
 	ld	(ix + tri_sb), hl		; sb += dx02;
-	pop	hl	; ld hl, (ix - 6)
-	pop	de	; ld de, (ix - 3)
+	pop	hl	; HL = b
+	pop	de	; DE = a
 	or	a, a
 	sbc	hl, de			; if (b < a) { swap(a, b); }
 	add	hl, de
@@ -4352,9 +4349,7 @@ _FillTriangle:
 	push	de
 	call	0			; horizline(a, y, b-a+1);
 .line2 := $-3
-	pop	bc
-	pop	bc
-	pop	bc
+	ld	sp, ix
 	ld	bc, (ix + tri_y_counter)
 	inc	bc
 	ld	(ix + tri_y_counter), bc
@@ -4364,12 +4359,9 @@ _FillTriangle:
 	sbc	hl, bc
 	jp	p, .cmp70
 	jp	pe, .secondloop
-	ld	sp, ix
-	pop	ix
-	ret
-.cmp70:
-	jp	po, .secondloop
-	ld	sp, ix
+.secondloopfinish:
+	lea	hl, ix + tri_frame_offset
+	ld	sp, hl
 	pop	ix
 	ret
 
