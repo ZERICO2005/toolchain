@@ -3152,16 +3152,16 @@ t_width       := 13
 t_y_loc       := 14
 t_x_loc       := 15
 
-tm_frame_offset := 12
+tm_frame_offset := 14
 tm_tilemap_data := tm_frame_offset + 6
 tm_x_offset     := tm_frame_offset + 9
 tm_y_offset     := tm_frame_offset + 12
-tm_x_res        := tm_frame_offset - 1
-tm_x_pos        := tm_frame_offset - 2
-tm_y_pos        := tm_frame_offset - 3
-tm_y_index      := tm_frame_offset - 4
-tm_x_coord      := tm_frame_offset - 7
-tm_y_coord      := tm_frame_offset - 12
+tm_x_res        := tm_frame_offset - 3
+tm_x_pos        := tm_frame_offset - 4
+tm_y_pos        := tm_frame_offset - 5
+tm_y_index      := tm_frame_offset - 6
+tm_x_coord      := tm_frame_offset - 9
+tm_y_coord      := tm_frame_offset - 14
 
 	ld	hl, gfx_Sprite
 _Tilemap:
@@ -3173,10 +3173,13 @@ _Tilemap:
 	ld	sp, ix
 	ld	iy, (ix + tm_tilemap_data)	; iy -> tilemap structure
 
+	xor	a, a
+	sbc	hl, hl
+	ld	(ix + tm_x_res), hl
+
 	ld	hl, (ix + tm_y_offset)
 	ld	c, (iy + t_tile_height)
-	ld	a, (iy + t_type_height)
-	or	a, a
+	or	a, (iy + t_type_height)
 	jr	nz, .heightpow2
 	call	ti._idvrmu
 	ex	de, hl
@@ -3232,12 +3235,18 @@ _Tilemap:
 	ld	(ix + tm_y_pos), h
 	sbc	hl, bc
 	ld	(ix + tm_y_coord), hl
+	ld	hl, (iy + t_tiles)
+	ld	(.smc_t_tiles), hl
+	ld	a, (iy + t_tile_width)
+	ld	(.smc_t_tile_width), a
+	ld	a, (iy + t_draw_height)
+	inc	a
+	ld	(ix + tm_y_pos), a
 	jr	.yloop
+;-------------------------------------------------------------------------------
 
-.xloopinner:
-	; or	a, a
-	sbc	hl, hl
-	ld	l, (ix + tm_x_res)
+.xloop:
+	ld	hl, (ix + tm_x_res)	; UHL and H are zero
 	ld	bc, 0
 .ynext_plus_tilemap_data := $-3
 	add	hl, bc
@@ -3247,7 +3256,8 @@ _Tilemap:
 	jr	z, .blanktile
 	ld	h, 3
 	mlt	hl
-	ld	de, (iy + t_tiles)
+	ld	de, 0	; (iy + t_tiles)
+.smc_t_tiles := $-3
 	add	hl, de
 	ld	bc, (ix + tm_y_coord)
 	push	bc
@@ -3259,32 +3269,23 @@ _Tilemap:
 .tilemethod := $-3
 	ld	sp, ix
 .blanktile:
-	or	a, a
-	sbc	hl, hl
-	ld	iy, (ix + tm_tilemap_data)
-	ld	l, (iy + t_tile_width)
+	ld	hl, 0	; (iy + t_tile_width)
+.smc_t_tile_width := $-3
 	ld	bc, (ix + tm_x_coord)
 	add	hl, bc
 	ld	(ix + tm_x_coord), hl
 	inc	(ix + tm_x_res)
-	ld	a, (ix + tm_x_pos)
-	inc	a
-
-.xloop:
-	ld	(ix + tm_x_pos), a
-	xor	a, (iy + t_draw_width)
-	jr	nz, .xloopinner
-	ld	h, a			; ld h, 0
+	dec	(ix + tm_x_pos)
+	jr	nz, .xloop
+	ld	iy, (ix + tm_tilemap_data)
+	ld	h, 0
 	ld	l, (iy + t_tile_height)
 	ld	bc, (ix + tm_y_coord)
 	add	hl, bc
 	ld	(ix + tm_y_coord), hl
 	inc	(ix + tm_y_index)
-	inc	(ix + tm_y_pos)
-
 .yloop:
-	ld	a, (iy + t_draw_height)
-	cp	a, (ix + tm_y_pos)
+	dec	(ix + tm_y_pos)
 	jr	z, .finish_loop
 ; .loop:
 	ld	(ix + tm_x_res), 0
@@ -3299,7 +3300,9 @@ _Tilemap:
 	add	hl, bc
 	ld	(.ynext_plus_tilemap_data), hl
 	xor	a, a
-	jr	.xloop
+	or	a, (iy + t_draw_width)
+	ld	(ix + tm_x_pos), a
+	jr	nz, .xloop
 .finish_loop:
 	lea	hl, ix + tm_frame_offset
 	ld	sp, hl
