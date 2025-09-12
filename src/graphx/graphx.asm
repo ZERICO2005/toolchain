@@ -2714,8 +2714,8 @@ gfx_TransparentSprite:
 ; Returns:
 ;  None
 	push	ix			; save ix sp
+	; returns directly to the caller of gfx_(Transparent)Sprite when offscreen
 	call	_ClipCoordinates
-	jr	nc,.culled
 	;	iyl = new width (next)
 	;	iyh = new height
 	ld	(.amount),a
@@ -2734,7 +2734,6 @@ smcByte _TransparentColor
 	add	ix,de
 	dec	iyh
 	jr	nz,.loop
-.culled:
 	pop	ix
 	ret
 
@@ -2795,8 +2794,8 @@ gfx_Sprite:
 ; Returns:
 ;  None
 	push	ix			; save ix sp
+	; returns directly to the caller of gfx_(Transparent)Sprite when offscreen
 	call	_ClipCoordinates
-	jr	nc,.culled
 	;	iyl = new width (next)
 	;	iyh = new height
 	wait_quick
@@ -2810,7 +2809,6 @@ gfx_Sprite:
 	add	hl,bc			; move to next line
 	dec	iyh
 	jr	nz,.loop
-.culled:
 	pop	ix			; restore ix sp
 	ret
 
@@ -2957,10 +2955,15 @@ smcByte _TransparentColor
 	add	ix,de
 	dec	iyh			; loop for height
 	jr	nz,.loop
+_ClipCoordinates_Restore_IX:
 	pop	ix			; restore stack pointer
 	ret
 
 ;-------------------------------------------------------------------------------
+_ClipCoordinates_Offscreen:
+	; return directly to the caller of gfx_(Transparent)Sprite
+	pop	hl	; return address for gfx_(Transparent)Sprite
+	jr	_ClipCoordinates_Restore_IX
 _ClipCoordinates:
 ; Clipping stuff
 ; Arguments:
@@ -2968,6 +2971,7 @@ _ClipCoordinates:
 ;  arg1 : X coordinate
 ;  arg2 : Y coordinate
 ; Returns:
+;  Offscreen: returns directly to the caller of gfx_(Transparent)Sprite
 ;  A  : How much to add to the sprite per iteration
 ;  BCU: 0
 ;  B  : 0
@@ -2975,7 +2979,6 @@ _ClipCoordinates:
 ;  IYL: New sprite width
 ;  HL : Sprite pixel pointer
 ;  IX : Buffer pixel pointer
-;  NC : If offscreen
 	ld	ix,6			; get pointer to arguments
 	add	ix,sp
 	ld	hl,(ix+3)		; hl -> sprite data
@@ -3011,7 +3014,7 @@ smcByte _YSpan
 	sub	a,l			; a = negated relative y
 .cliptop:
 	add	hl,bc			; is partially clipped top?
-	ret	nc
+	jr	nc, _ClipCoordinates_Offscreen
 	ex	de,hl			; e = new height - 1
 	ld	c,a			; c = negated relative y
 	ld	b,iyl			; b = width
@@ -3056,7 +3059,7 @@ smcWord _XSpan
 	sub	a,l			; a = negated relative x
 .clipleft:
 	add	hl,bc			; is partially clipped left?
-	ret	nc			; return if offscreen
+	jr	nc, _ClipCoordinates_Offscreen
 	ex	de,hl			; e = new width - 1
 	ld	c,a			; bc = negated relative x
 	ld	hl,(ix+3)		; hl -> sprite data
@@ -3084,7 +3087,6 @@ smcWord _XMin
 	inc	hl
 	ld	ix,(CurrentBuffer)
 	add	ix,de
-	scf				; set carry for success
 	ret
 
 ;-------------------------------------------------------------------------------
