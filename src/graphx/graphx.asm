@@ -3228,20 +3228,22 @@ _Tilemap:
 	sbc	hl, bc
 	ld	(.xoffset), hl		; tilemap->x_loc - x_offset;
 
-	or	a, a
-	sbc	hl, hl
-	ld	l, (iy + t_y_loc)
-	ld	bc, (ix + tm_y_offset)
-	ld	(ix + tm_y_pos), h
-	sbc	hl, bc
-	ld	(ix + tm_y_coord), hl
 	ld	hl, (iy + t_tiles)
 	ld	(.smc_t_tiles), hl
+
 	ld	a, (iy + t_tile_width)
 	ld	(.smc_t_tile_width), a
+
 	ld	a, (iy + t_draw_height)
 	inc	a
 	ld	(ix + tm_y_pos), a
+
+	xor	a, a
+	sbc	hl, hl
+	ld	l, (iy + t_y_loc)
+	ld	bc, (ix + tm_y_offset)
+	sbc	hl, bc
+	ld	(ix + tm_y_coord), hl
 	jr	.yloop
 ;-------------------------------------------------------------------------------
 
@@ -3278,13 +3280,15 @@ _Tilemap:
 	dec	(ix + tm_x_pos)
 	jr	nz, .xloop
 	ld	iy, (ix + tm_tilemap_data)
-	ld	h, 0
+	xor	a, a
+	sbc	hl, hl
 	ld	l, (iy + t_tile_height)
 	ld	bc, (ix + tm_y_coord)
 	add	hl, bc
 	ld	(ix + tm_y_coord), hl
 	inc	(ix + tm_y_index)
 .yloop:
+	; A is zero here
 	dec	(ix + tm_y_pos)
 	jr	z, .finish_loop
 ; .loop:
@@ -3299,7 +3303,6 @@ _Tilemap:
 	ld	bc, (iy + t_data)	; iy -> tilemap data
 	add	hl, bc
 	ld	(.ynext_plus_tilemap_data), hl
-	xor	a, a
 	or	a, (iy + t_draw_width)
 	ld	(ix + tm_x_pos), a
 	jr	nz, .xloop
