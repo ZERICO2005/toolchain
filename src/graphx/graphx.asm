@@ -1661,14 +1661,10 @@ _Circle:
 	inc	bc
 	ld	(iy-3),bc
 	ld	bc,(iy-9)
-	or	a,a
-	sbc	hl,hl
-	sbc	hl,bc
-	jp	m,.cmp0
-	jp	pe,.cmp1
-	jr	.cmp2
-.cmp0:
-	jp	po,.cmp1
+	ld	hl, $800000
+	or	a, a
+	sbc	hl, bc
+	jp	pe, .cmp1	; BC <= 0
 .cmp2:
 	ld	hl,(iy-3)
 	add	hl,hl
@@ -1788,21 +1784,17 @@ _FillCircle:
 	ld	bc,(ix-3)
 	inc	bc
 	ld	(ix-3),bc
-	ld	bc,(ix-9)
-	or	a,a
-	sbc	hl,hl
-	sbc	hl,bc
-	jp	m,.cmp0
-	jp	pe,.cmp2
-	jr	.cmp1
-.cmp0:
-	jp	po,.cmp2
+	ld	bc, (hl)	; ld bc, (ix - 9)
+	ld	hl, $800000
+	or	a, a
+	sbc	hl, bc
+	jp	pe, .cmp2	; BC <= 0
 .cmp1:
 	ld	hl,(ix-3)
 	add	hl,hl
 	inc	hl
 	add	hl,bc
-	jr	.cmp3
+	jr	.loop
 .cmp2:
 	ld	bc,(ix-6)
 	dec	bc
@@ -1814,7 +1806,7 @@ _FillCircle:
 	add	hl,hl
 	inc	hl
 	add	hl,de
-.cmp3:
+.loop:
 	ld	(ix-9),hl
 	ld	bc,(ix-3)
 	ld	hl,(ix-6)
@@ -1853,7 +1845,7 @@ gfx_FillCircle:
 	ld	(ix - 3), hl
 	inc	hl
 	sbc	hl, bc	; HL = 1 - BC
-	jr	_FillCircle.cmp3
+	jr	_FillCircle.loop
 
 ;-------------------------------------------------------------------------------
 _FillCircle_NoClip:
@@ -1914,14 +1906,10 @@ _FillCircle_NoClip:
 	inc	bc
 	ld	(ix-3),bc
 	ld	bc,(ix-9)
-	or	a,a
-	sbc	hl,hl
-	sbc	hl,bc
-	jp	m,.cmp0
-	jp	pe,.cmp2
-	jr	.cmp1
-.cmp0:
-	jp	po,.cmp2
+	ld	hl, $800000
+	or	a, a
+	sbc	hl, bc
+	jp	pe, .cmp2	; BC <= 0
 .cmp1:
 	ld	hl,(ix-3)
 	add	hl,hl
