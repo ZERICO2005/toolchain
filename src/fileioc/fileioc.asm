@@ -767,7 +767,12 @@ ti_Seek:
 	push	de
 	pop	bc
 	jr	c, util_ret_neg_one
-	jp	util_set_offset
+	; jp	util_set_offset
+.util_set_offset:
+	call	util_get_offset_ptr
+	ld	(hl), bc
+	ret
+
 .seek_curr:
 	push	de
 	call	util_get_offset
@@ -1670,10 +1675,8 @@ util_get_offset:
 	call	util_get_offset_ptr
 	ld	bc, (hl)
 	ret
-util_set_offset:
-	call	util_get_offset_ptr
-	ld	(hl), bc
-	ret
+
+util_set_offset := ti_Seek.util_set_offset
 
 util_archive:				; properly handle garbage collects
 	ld	iy, ti.flags
