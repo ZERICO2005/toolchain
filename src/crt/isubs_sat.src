@@ -1,0 +1,17 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__isubs_sat
+
+__isubs_sat:
+	; signed saturated subtraction
+	; HL = HL - BC
+	or	a, a
+	sbc	hl, bc
+	ret	po
+	ld	hl, $800000
+	ret	p	; negative underflow
+	; positive overflow
+	inc	hl
+	ret

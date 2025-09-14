@@ -1,0 +1,23 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__i48subu_sat
+
+__i48subu_sat:
+	; unsigned saturated subtraction
+	; UDE:UHL = UDE:UHL - UIY:UBC
+	or	a, a
+	sbc	hl, bc
+	ex	de, hl
+	push	bc
+	lea	bc, iy
+	sbc	hl, bc
+	pop	bc
+	ex	de, hl
+	ret	nc
+	or	a, a
+	sbc	hl, hl
+	ex	de, hl
+	sbc	hl, hl
+	ret

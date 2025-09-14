@@ -1,0 +1,24 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__i48adds_sat
+
+__i48adds_sat:
+	; signed saturated addition
+	; UDE:UHL = UDE:UHL + UIY:UBC
+	add	hl, bc
+	ex	de, hl
+	push	bc
+	lea	bc, iy
+	adc	hl, bc
+	pop	bc
+	ex	de, hl
+	ret	po
+	ld	hl, $FFFFFF
+	ld	de, $7FFFFF
+	ret	m	; positive overflow
+	; negative underflow
+	inc	hl
+	inc	de
+	ret

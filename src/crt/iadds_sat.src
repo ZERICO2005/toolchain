@@ -1,0 +1,17 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__iadds_sat
+
+__iadds_sat:
+	; signed saturated addition
+	; UHL = UHL + UBC
+	or	a, a
+	adc	hl, bc
+	ret	po
+	ld	hl, $7FFFFF
+	ret	m	; positive overflow
+	; negative underflow
+	inc	hl
+	ret

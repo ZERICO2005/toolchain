@@ -1,0 +1,15 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__ssubu_sat
+
+__ssubu_sat:
+	; unsigned saturated subtraction
+	; HL = HL - BC
+	or	a, a
+	sbc.s	hl, bc
+	ret	nc
+	or	a, a
+	sbc	hl, hl
+	ret
