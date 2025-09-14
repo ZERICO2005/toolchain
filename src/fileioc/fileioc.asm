@@ -291,9 +291,9 @@ ti_OpenVar:
 ;  sp + 9 : variable Type
 ; return:
 ;  slot index if no error
-	ld	iy, 0
-	add	iy, sp
-	ld	a, (iy + 9)
+	ld	hl, 9
+	add	hl, sp
+	ld	a, (hl)
 ;	jr	ti_Open.start		; emulated by dummifying next instruction
 	db	$fe			; ld a,ti.AppVarObj -> cp a,$3e \ dec d
 assert ti.AppVarObj = $15
@@ -353,7 +353,7 @@ ti_Open:
 	cp	a,'a'
 	jr	z,.mode
 	cp	a,'w'
-	jp	nz,util_ret_null_pop_ix
+	jr	nz, .ret_null_pop_ix
 .mode:
 	inc	hl
 	ld	a,(hl)
@@ -372,7 +372,7 @@ ti_Open:
 	ld	d, (hl)
 	ex	de, hl
 	call	ti.EnoughMem
-	jp	c, util_ret_null_pop_ix
+	jr	c, .ret_null_pop_ix
 	call	util_unarchive
 	jr	.unarchive_var
 .no_append:
@@ -385,14 +385,21 @@ ti_Open:
 	ld	a, (hl)
 	cp	a, 'r'
 	pop	hl
-	jp	nz, util_ret_null_pop_ix
+	jr	nz, .ret_null_pop_ix
 	call	util_skip_archive_header
 	jr	.save_ptrs
+
+.ret_null_pop_ix:
+	pop	ix
+	xor	a, a
+	sbc	hl, hl
+	ret
+
 .not_found:
 	ld	hl, (ix + 9)
 	ld	a, (hl)
 	cp	a, 'r'
-	jp	z, util_ret_null_pop_ix
+	jr	z, .ret_null_pop_ix
 	or	a, a
 	sbc	hl, hl
 	ld	a, 0
@@ -491,9 +498,9 @@ ti_Write:
 	add	iy, sp
 	ld	c,(iy + 12)
 	call	util_is_slot_open
-	jr	nz, .ret0
+	jr	nz, ret0
 	call	util_is_in_ram
-	jr	z, .ret0
+	jr	z, ret0
 	ld	bc, (iy + 6)
 	ld	hl, (iy + 9)
 	call	ti._smulu
@@ -517,7 +524,7 @@ ti_Write:
 	ld	(resize_amount), hl
 	call	util_insert_mem
 	or	a, a
-	jr	z, .ret0
+	jr	z, ret0
 .no_core_needed:
 	call	util_get_data_offset
 	ex	de, hl
@@ -534,10 +541,7 @@ ti_Write:
 	ld	(hl), de
 	ld	hl, (iy + 9)
 	ret
-.ret0:
-	xor	a, a
-	sbc	hl, hl
-	ret
+
 
 util_get_data_offset:
 	call	util_get_data_ptr
@@ -548,6 +552,15 @@ util_get_data_offset:
 	add	hl, bc
 	inc	hl
 	inc	hl
+	ret
+
+;-------------------------------------------------------------------------------
+
+ret0.pop:
+	pop	hl
+ret0:
+	xor	a, a
+	sbc	hl, hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -564,15 +577,15 @@ ti_Read:
 	add	iy, sp
 	ld	c, (iy + 12)
 	call	util_is_slot_open
-	jr	nz, .ret0
+	jr	nz, ret0
 	call	util_get_slot_size
 	push	bc
 	call	util_get_offset
 	pop	hl
 	or	a, a
 	sbc	hl, bc			; size - offset = bytes left to read
-	jr	z, .ret0
-	jr	c, .ret0
+	jr	z, ret0
+	jr	c, ret0
 	ld	bc, (iy + 6)
 	call	ti._sdivu			; (size - offset) / chunk_size
 	ld	de, (iy + 9)		; number of chunks to read, hl = number of chunks left
@@ -589,7 +602,7 @@ ti_Read:
 	add	hl, de
 	or	a, a
 	sbc	hl, de
-	jr	z, .ret0.pop
+	jr	z, ret0.pop
 	push	hl
 	call	util_get_data_offset
 	ld	de, (iy + 3)
@@ -604,12 +617,6 @@ ti_Read:
 	ld	(hl), de
 	pop	hl
 	ret				; return actual chunks read
-.ret0.pop:
-	pop	hl
-.ret0:
-	xor	a, a
-	sbc	hl, hl
-	ret
 
 ;-------------------------------------------------------------------------------
 ti_GetC:
@@ -1348,7 +1355,7 @@ ti_StoVar:
 	jr	nz, .notcr
 .iscr:
 	call	ti.FindSym
-	jp	c, .notcr		; fill it with zeros
+	jr	c, .notcr		; fill it with zeros
 	and	a, $3f
 	ex	de, hl
 	call	ti.Mov9OP1OP2
@@ -1587,8 +1594,6 @@ util_ret_neg_one_byte:
 	ld	a, 255
 	ret
 
-util_ret_null_pop_ix:
-	pop	ix
 util_ret_null:
 	xor	a, a
 	sbc	hl, hl
