@@ -98,10 +98,14 @@ ti_AllocEqu:
 ;  sp + 6 : pointer to alloc routine
 ; return:
 ;  hl -> allocated space
-	ld	iy, 0
-	add	iy, sp
-	ld	hl, (iy + 3)
-	ld	iy, (iy + 6)
+	ld	hl, 6
+	add	hl, sp
+	ld	iy, (hl)
+	dec	hl
+	dec	hl
+	dec	hl
+	ld	hl, (hl)
+
 	push	hl
 	inc	hl
 	inc	hl
@@ -121,10 +125,14 @@ ti_AllocCplxList:
 ;  sp + 6 : pointer to alloc routine
 ; return:
 ;  hl -> allocated space
-	ld	iy, 0
-	add	iy, sp
-	ld	hl, (iy + 3)
-	ld	iy, (iy + 6)
+	ld	hl, 6
+	add	hl, sp
+	ld	iy, (hl)
+	dec	hl
+	dec	hl
+	dec	hl
+	ld	hl, (hl)
+
 	push	hl
 	add	hl, hl
 	jr	util_alloc_var
@@ -137,10 +145,14 @@ ti_AllocList:
 ;  sp + 6 : pointer to alloc routine
 ; return:
 ;  hl -> allocated space
-	ld	iy, 0
-	add	iy, sp
-	ld	hl, (iy + 3)
-	ld	iy, (iy + 6)
+	ld	hl, 6
+	add	hl, sp
+	ld	iy, (hl)
+	dec	hl
+	dec	hl
+	dec	hl
+	ld	hl, (hl)
+
 	push	hl
 	jr	util_alloc_var
 
@@ -920,9 +932,9 @@ ti_DetectVar:
 ;  sp + 9 : type of variable to search for
 ; return:
 ;  hl -> name of variable
-	ld	hl,9
-	add	hl,sp
-	ld	a,(hl)
+	ld	hl, 9
+	add	hl, sp
+	ld	a, (hl)
 ;	jr	ti_Detect.start		; emulated by dummifying next instruction:
 	db	$fe			; ld a,ti.AppVarObj -> cp a,$3E \ dec d
 assert ti.AppVarObj = $15
@@ -1200,9 +1212,9 @@ ti_RenameVar:
 ;  a = 1 if new file already exists
 ;  a = 2 if old file does not exist
 ;  a = 3 if other error
-	ld	iy, 0
-	add	iy, sp
-	ld	a, (iy + 9)
+	ld	hl, 9
+	add	hl, sp
+	ld	a, (hl)
 	ld	iy, ti.flags		; probably not needed
 ;	jr	ti_Rename.start		; emulated by dummifying next instruction
 	db	$fe			; ld a,appVarObj -> cp a,$3E \ dec d
