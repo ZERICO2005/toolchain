@@ -225,7 +225,7 @@ ti_Resize:
 	push	de
 	call	util_is_in_ram
 	pop	hl
-	jp	c, util_ret_null
+	jr	c, .ret_null
 	ld	de, TI_MAX_SIZE
 	or	a,a
 	sbc	hl,de
@@ -235,7 +235,7 @@ ti_Resize:
 	call	ti_Rewind.rewind	; rewind file offset
 	pop	hl
 	pop	af
-	jp	nc,util_ret_null	; return if too big
+	jr	nc, .ret_null		; return if too big
 	push	hl
 	call	util_get_slot_size
 	pop	hl
@@ -246,7 +246,7 @@ ti_Resize:
 	jr	c, .decrease
 .increase:
 	call	ti.EnoughMem
-	jp	c, util_ret_null
+	jr	c, .ret_null
 	ex	de, hl
 	call	util_insert_mem
 	jr	.no_resize
@@ -262,6 +262,11 @@ ti_Resize:
 	ld	hl, (resize_amount)
 	ret
 
+.ret_null:
+	xor	a, a
+	sbc	hl, hl
+	ret
+
 ;-------------------------------------------------------------------------------
 ti_IsArchived:
 ; Checks if a variable is archived
@@ -273,10 +278,7 @@ ti_IsArchived:
 	pop	bc
 	push	bc
 	push	de
-	call	util_is_slot_open
-	jr	z, util_is_in_ram
-	xor	a, a
-	ret
+	call	util_ret_zero_A_if_slot_is_not_open
 util_is_in_ram:
 	call	util_get_vat_ptr
 	ld	hl, (hl)
@@ -481,7 +483,7 @@ ti_SetArchiveStatus:
 	call	util_unarchive
 .relocate_var:
 	call	ti.ChkFindSym
-	jp	c, util_ret_neg_one
+	jr	c, .ret_neg_one
 	call	ti.ChkInRam
 	jr	z, .save_ptrs
 	call	util_skip_archive_header
@@ -492,6 +494,11 @@ ti_SetArchiveStatus:
 	ld	(hl), bc
 	call	util_get_data_ptr
 	ld	(hl), de
+	ret
+
+.ret_neg_one:
+	scf
+	sbc	hl, hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -509,7 +516,7 @@ ti_Write:
 	ld	c,(iy + 12)
 	call	util_ret_zero_if_slot_is_not_open
 	call	util_is_in_ram
-	jp	z, util_ret0
+	jr	z, util_ret0
 	ld	bc, (iy + 6)
 	ld	hl, (iy + 9)
 	call	ti._smulu
@@ -533,7 +540,7 @@ ti_Write:
 	ld	(resize_amount), hl
 	call	util_insert_mem
 	or	a, a
-	jp	z, util_ret0
+	jr	z, util_ret0
 .no_core_needed:
 	call	util_get_data_offset
 	ex	de, hl
@@ -563,6 +570,15 @@ util_get_data_offset:
 	ret
 
 ;-------------------------------------------------------------------------------
+
+util_ret0_pop_hl:
+	pop	hl
+util_ret0:
+	xor	a, a
+	sbc	hl, hl
+	ret
+
+;-------------------------------------------------------------------------------
 ti_Read:
 ; reads a chunk of data from a slot handle
 ; args:
@@ -580,10 +596,10 @@ ti_Read:
 	push	bc
 	call	util_get_offset
 	pop	hl
-	or	a, a
+	xor	a, a
 	sbc	hl, bc			; size - offset = bytes left to read
-	jp	z, util_ret0
-	jp	c, util_ret0
+	ret	z			; zero chunks left
+	jr	c, util_ret0		; negative chunks left
 	ld	bc, (iy + 6)
 	call	ti._sdivu			; (size - offset) / chunk_size
 	ld	de, (iy + 9)		; number of chunks to read, hl = number of chunks left
@@ -598,9 +614,9 @@ ti_Read:
 	push	hl
 	call	ti._smulu
 	add	hl, de
-	or	a, a
+	xor	a, a
 	sbc	hl, de
-	jp	z, util_ret0_pop_hl
+	jr	z, util_ret0_pop_hl
 	push	hl
 	call	util_get_data_offset
 	ld	de, (iy + 3)
@@ -634,7 +650,7 @@ ti_GetC:
 	pop	hl
 	scf
 	sbc	hl, bc			; size-offset
-	jp	c, util_ret_neg_one_AUHL
+	jr	c, util_ret_neg_one_AUHL
 	push	bc
 	call	util_get_data_ptr
 	ld	hl, (hl)
@@ -646,6 +662,14 @@ ti_GetC:
 	ld	a, (hl)
 	call	util_set_offset
 	or	a, a
+	sbc	hl, hl
+	ld	l, a
+	ret
+
+;-------------------------------------------------------------------------------
+
+util_ret_neg_one_AUHL:
+	scf
 	sbc	hl, hl
 	ld	l, a
 	ret
@@ -668,14 +692,14 @@ ti_PutC:
 	ld	(char_in), a
 	call	util_ret_neg_one_AUHL_if_slot_is_not_open
 	call	util_is_in_ram
-	jp	c, util_ret_neg_one_AUHL
+	jr	c, util_ret_neg_one_AUHL
 	call	util_get_slot_size
 	push	bc
 	call	util_get_offset
 	pop	hl
 	or	a, a
 	sbc	hl, bc
-	jp	c, util_ret_neg_one_AUHL
+	jr	c, util_ret_neg_one_AUHL
 	jr	nz, .no_increment
 .increment:
 	push	bc
@@ -683,13 +707,13 @@ ti_PutC:
 	ld	(resize_amount), hl
 	call	ti.EnoughMem
 	pop	bc
-	jp	c, util_ret_neg_one_AUHL
+	jr	c, util_ret_neg_one_AUHL
 	push	bc
 	ex	de, hl
 	call	util_insert_mem
 	pop	bc
 	or	a, a
-	jp	z, util_ret_neg_one_AUHL
+	jr	z, util_ret_neg_one_AUHL
 .no_increment:
 	call	util_get_data_ptr
 	ld	hl, (hl)
@@ -728,7 +752,7 @@ ti_Seek:
 	dec	a
 	jr	z, .seek_curr
 	dec	a
-	jp	nz, util_ret_neg_one_AUHL
+	jr	nz, util_ret_neg_one_AUHL
 .seek_end:
 	push	de
 	call	util_get_slot_size
@@ -789,11 +813,16 @@ ti_Delete:
 	pop	af
 	ld	(ti.OP1), a
 	call	ti.ChkFindSym
-	jp	c, util_ret_null
+	jr	c, util_ret_null
 	ld	iy, ti.flags
 	call	ti.DelVarArc
 util_ret_neg_one:
 	scf
+	sbc	hl, hl
+	ret
+
+util_ret_null:
+	xor	a, a
 	sbc	hl, hl
 	ret
 
@@ -1346,19 +1375,23 @@ ti_RclVar:
 	ld	iy,ti.flags
 	call	util_set_var_str
 	call	ti.FindSym
-	jp	c, util_ret_neg_one_byte
+	jr	c, .ret_neg_one_byte
 	push	af
 	call	ti.ChkInRam
 	pop	bc
 	ld	a, b
-	jp	nz, util_ret_neg_one_byte
+	jr	nz, .ret_neg_one_byte
 	ld	iy, 0
 	add	iy, sp
 	and	a, $3f
 	sub	a, (iy + 3)		; var type
-	jp	nz, util_ret_neg_one_byte
+	jr	nz, .ret_neg_one_byte
 	ld	hl, (iy + 9)
 	ld	(hl), de
+	ret
+
+.ret_neg_one_byte:
+	ld	a, 255
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1392,8 +1425,7 @@ ti_ArchiveHasRoomVar:
 	pop	bc
 	push	bc
 	push	de
-	call	util_is_slot_open
-	jr	nz,.fail
+	call	util_ret_zero_A_if_slot_is_not_open
 	call	util_get_vat_ptr
 	ld	hl,(hl)
 	ld	bc,-6
@@ -1550,47 +1582,6 @@ util_ret_neg_one_byte:
 	ld	a, 255
 	ret
 
-util_ret0_pop_hl:
-	pop	hl
-util_ret0:
-util_ret_null:
-	xor	a, a
-	sbc	hl, hl
-	ret
-
-util_ret_neg_one_AUHL:
-	scf
-	sbc	hl, hl
-	ld	a, l
-	ret
-
-if 1
-util_is_slot_open:
-; in:
-;  c = slot
-; out:
-;  a = 0
-;  ubc = slot * 3
-;  uhl = pointer to upper byte of slot offset
-;  zf = open
-;  (curr_slot) = slot
-	ld	a, c
-	cp	a, 6
-	jr	nc, .not_open
-	ld	(curr_slot), a
-	ld	b, 3
-	mlt	bc
-	ld	hl, variable_offsets - 1
-	add	hl, bc
-	ld	a, b
-	cp	a, (hl)
-	ret
-.not_open:
-	xor	a, a
-	inc	a
-	ret
-end if
-
 util_ret_zero_if_slot_is_not_open:
 ; in:
 ;  c = slot
@@ -1646,6 +1637,7 @@ util_ret_neg_one_AUHL_if_slot_is_not_open:
 
 util_ret_neg_one_if_slot_is_not_open := util_ret_neg_one_AUHL_if_slot_is_not_open
 util_ret_null_if_slot_is_not_open := util_ret_zero_if_slot_is_not_open
+util_ret_zero_A_if_slot_is_not_open := util_ret_zero_if_slot_is_not_open
 util_ret_if_slot_is_not_open := util_ret_zero_if_slot_is_not_open
 
 util_get_vat_ptr:
