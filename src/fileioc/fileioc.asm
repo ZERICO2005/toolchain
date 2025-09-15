@@ -454,8 +454,7 @@ ti_SetArchiveStatus:
 	push	de
 	push	hl
 	call	util_ret_null_if_slot_is_not_open
-	ld	a, e
-	push	af
+	push	de
 	call	util_get_vat_ptr
 	ld	hl, (hl)
 	ld	a, (hl)
@@ -473,8 +472,8 @@ ti_SetArchiveStatus:
 	djnz	.copy_name
 	xor	a, a
 	ld	(de), a
-	pop	af
-	or	a, a
+	pop	de
+	or	a, e
 	jr	z, .set_unarchived
 .set_archived:
 	call	util_archive
@@ -485,8 +484,8 @@ ti_SetArchiveStatus:
 	call	ti.ChkFindSym
 	jr	c, .ret_neg_one
 	call	ti.ChkInRam
-	jr	z, .save_ptrs
-	call	util_skip_archive_header
+	; jr	z, .save_ptrs
+	call	nz, util_skip_archive_header
 .save_ptrs:
 	push	hl
 	call	util_get_vat_ptr
@@ -497,7 +496,7 @@ ti_SetArchiveStatus:
 	ret
 
 .ret_neg_one:
-	scf
+	; carry is already set
 	sbc	hl, hl
 	ret
 
@@ -769,11 +768,18 @@ ti_Seek:
 	push	de
 	pop	bc
 	jr	c, util_ret_neg_one
-	jp	util_set_offset
+	; jp	util_set_offset
+.util_set_offset:
+	call	util_get_offset_ptr
+	ld	(hl), bc
+	ret
+
 .seek_curr:
 	push	de
 	call	util_get_offset
 	jr	.seek_set_asm
+
+util_set_offset := ti_Seek.util_set_offset
 
 ;-------------------------------------------------------------------------------
 ti_DeleteVar:
@@ -783,13 +789,9 @@ ti_DeleteVar:
 ;  sp + 6 : variable type
 ; return:
 ;  hl = 0 if failure
-	pop	hl
-	pop	de
-	pop	bc
-	push	bc
-	push	de
-	push	hl
-	ld	a, c
+	ld	hl, 6
+	add	hl, sp
+	ld	a, (hl)
 ;	jr	ti_Delete.start		; emulated by dummifying next instruction:
 	db	$fe			; ld a,ti.AppVarObj -> cp a,$3E \ dec d
 assert ti.AppVarObj = $15
@@ -804,8 +806,7 @@ ti_Delete:
 	ld	a,ti.AppVarObj
 .start:
 	pop	de
-	pop	hl
-	push	hl
+	ex	(sp), hl
 	push	de
 	dec	hl
 	push	af
@@ -965,14 +966,6 @@ ti_Detect:
 	jr	c, .finish
 	jr	z, .finish
 	add	hl, de
-	jr	.fcontinue
-
-.finish:
-	xor	a, a
-	sbc	hl, hl
-	pop	ix
-	ret
-
 .fcontinue:
 	push	hl
 	ld	a, 0
@@ -1022,6 +1015,12 @@ ti_Detect:
 	pop	hl
 	call	.fbypassname
 	jr	.fdetect
+
+.finish:
+	xor	a, a
+	sbc	hl, hl
+	pop	ix
+	ret
 
 .ffound:
 	pop	hl
@@ -1693,10 +1692,6 @@ util_get_slot_size:
 util_get_offset:
 	call	util_get_offset_ptr
 	ld	bc, (hl)
-	ret
-util_set_offset:
-	call	util_get_offset_ptr
-	ld	(hl), bc
 	ret
 
 util_archive:				; properly handle garbage collects
