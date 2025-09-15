@@ -751,7 +751,7 @@ ti_Seek:
 	sbc	hl, de
 	push	de
 	pop	bc
-	jp	c, util_ret_neg_one
+	jr	c, util_ret_neg_one
 	jp	util_set_offset
 .seek_curr:
 	push	de
@@ -799,6 +799,7 @@ ti_Delete:
 	jp	c, util_ret_null
 	ld	iy, ti.flags
 	call	ti.DelVarArc
+util_ret_neg_one:
 	scf
 	sbc	hl, hl
 	ret
@@ -815,7 +816,7 @@ ti_Rewind:
 	push	bc
 	push	hl
 	call	util_is_slot_open
-	jp	nz, util_ret_neg_one
+	jr	nz, util_ret_neg_one
 .rewind:
 	ld	bc, 0
 	call	util_set_offset
@@ -835,7 +836,7 @@ ti_Tell:
 	push	bc
 	push	hl
 	call	util_is_slot_open
-	jp	nz, util_ret_neg_one
+	jr	nz, util_ret_neg_one
 	call	util_get_offset
 	push	bc
 	pop	hl
@@ -853,7 +854,7 @@ ti_GetSize:
 	push	bc
 	push	hl
 	call	util_is_slot_open
-	jp	nz, util_ret_neg_one
+	jr	nz, util_ret_neg_one
 	call	util_get_slot_size
 	push	bc
 	pop	hl
@@ -1568,10 +1569,6 @@ util_ret0_pop_hl:
 util_ret0:
 util_ret_null:
 	xor	a, a
-	sbc	hl, hl
-	ret
-util_ret_neg_one:
-	scf
 	sbc	hl, hl
 	ret
 
