@@ -605,10 +605,9 @@ ti_Read:
 	or	a, a
 	sbc	hl, de
 	add	hl, de			; check if left <= read
-	jr	nc, .copy
+	jr	c, .no_copy
 	ex	de, hl
-.copy:
-	ex	de, hl
+.no_copy:
 	ld	bc, (iy + 6)
 	push	hl
 	call	ti._smulu
@@ -1160,12 +1159,11 @@ ti_GetName:
 	ld	bc, -6
 	add	hl, bc
 	ld	b, (hl)			; length of name
-	dec	hl
 .copy:
+	dec	hl
 	ld	a, (hl)
 	ld	(de), a
 	inc	de
-	dec	hl
 	djnz	.copy
 	xor	a, a
 	ld	(de), a			; terminate the string
