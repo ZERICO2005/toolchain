@@ -365,7 +365,7 @@ ti_Open:
 	cp	a,'a'
 	jr	z,.mode
 	cp	a,'w'
-	jp	nz,util_ret_null_pop_ix
+	jr	nz, .ret_null_pop_ix
 .mode:
 	inc	hl
 	ld	a,(hl)
@@ -384,7 +384,7 @@ ti_Open:
 	ld	d, (hl)
 	ex	de, hl
 	call	ti.EnoughMem
-	jp	c, util_ret_null_pop_ix
+	jr	c, .ret_null_pop_ix
 	call	util_unarchive
 	jr	.unarchive_var
 .no_append:
@@ -397,14 +397,21 @@ ti_Open:
 	ld	a, (hl)
 	cp	a, 'r'
 	pop	hl
-	jp	nz, util_ret_null_pop_ix
+	jr	nz, .ret_null_pop_ix
 	call	util_skip_archive_header
 	jr	.save_ptrs
+
+.ret_null_pop_ix:
+	pop	ix
+	xor	a, a
+	sbc	hl, hl
+	ret
+
 .not_found:
 	ld	hl, (ix + 9)
 	ld	a, (hl)
 	cp	a, 'r'
-	jp	z, util_ret_null_pop_ix
+	jr	z, .ret_null_pop_ix
 	or	a, a
 	sbc	hl, hl
 	ld	a, 0
@@ -503,9 +510,9 @@ ti_Write:
 	add	iy, sp
 	ld	c,(iy + 12)
 	call	util_is_slot_open
-	jr	nz, .ret0
+	jp	nz, util_ret0
 	call	util_is_in_ram
-	jr	z, .ret0
+	jp	z, util_ret0
 	ld	bc, (iy + 6)
 	ld	hl, (iy + 9)
 	call	ti._smulu
@@ -529,7 +536,7 @@ ti_Write:
 	ld	(resize_amount), hl
 	call	util_insert_mem
 	or	a, a
-	jr	z, .ret0
+	jp	z, util_ret0
 .no_core_needed:
 	call	util_get_data_offset
 	ex	de, hl
@@ -545,10 +552,6 @@ ti_Write:
 	call	util_get_offset_ptr
 	ld	(hl), de
 	ld	hl, (iy + 9)
-	ret
-.ret0:
-	xor	a, a
-	sbc	hl, hl
 	ret
 
 util_get_data_offset:
@@ -576,15 +579,15 @@ ti_Read:
 	add	iy, sp
 	ld	c, (iy + 12)
 	call	util_is_slot_open
-	jr	nz, .ret0
+	jp	nz, util_ret0
 	call	util_get_slot_size
 	push	bc
 	call	util_get_offset
 	pop	hl
 	or	a, a
 	sbc	hl, bc			; size - offset = bytes left to read
-	jr	z, .ret0
-	jr	c, .ret0
+	jp	z, util_ret0
+	jp	c, util_ret0
 	ld	bc, (iy + 6)
 	call	ti._sdivu			; (size - offset) / chunk_size
 	ld	de, (iy + 9)		; number of chunks to read, hl = number of chunks left
@@ -601,7 +604,7 @@ ti_Read:
 	add	hl, de
 	or	a, a
 	sbc	hl, de
-	jr	z, .ret0.pop
+	jp	z, util_ret0_pop_hl
 	push	hl
 	call	util_get_data_offset
 	ld	de, (iy + 3)
@@ -616,12 +619,6 @@ ti_Read:
 	ld	(hl), de
 	pop	hl
 	ret				; return actual chunks read
-.ret0.pop:
-	pop	hl
-.ret0:
-	xor	a, a
-	sbc	hl, hl
-	ret
 
 ;-------------------------------------------------------------------------------
 ti_GetC:
@@ -630,20 +627,19 @@ ti_GetC:
 ;  sp + 3 : slot index
 ; return:
 ;  a = character read if success
-;  EOF if failure
 	pop	de
 	pop	bc
 	push	bc
 	push	de
 	call	util_is_slot_open
-	jr	nz, .ret_EOF
+	jp	nz, util_ret_neg_one_AUHL
 	call	util_get_slot_size
 	push	bc
 	call	util_get_offset
 	pop	hl
 	scf
 	sbc	hl, bc			; size-offset
-	jr	c, .ret_EOF
+	jp	c, util_ret_neg_one_AUHL
 	push	bc
 	call	util_get_data_ptr
 	ld	hl, (hl)
@@ -658,11 +654,6 @@ ti_GetC:
 	sbc	hl, hl
 	ld	l, a
 	ret
-.ret_EOF:
-	scf
-	sbc	hl, hl
-	ld	a, l
-	ret
 
 ;-------------------------------------------------------------------------------
 ti_PutC:
@@ -672,7 +663,6 @@ ti_PutC:
 ;  sp + 6 : Slot number
 ; return:
 ;  Character written if no failure
-;  EOF if failure
 	pop	hl
 	pop	de
 	pop	bc
@@ -682,16 +672,16 @@ ti_PutC:
 	ld	a, e
 	ld	(char_in), a
 	call	util_is_slot_open
-	jr	nz, .ret_EOF
+	jp	nz, util_ret_neg_one_AUHL
 	call	util_is_in_ram
-	jr	c, .ret_EOF
+	jp	c, util_ret_neg_one_AUHL
 	call	util_get_slot_size
 	push	bc
 	call	util_get_offset
 	pop	hl
 	or	a, a
 	sbc	hl, bc
-	jr	c, .ret_EOF
+	jp	c, util_ret_neg_one_AUHL
 	jr	nz, .no_increment
 .increment:
 	push	bc
@@ -699,13 +689,13 @@ ti_PutC:
 	ld	(resize_amount), hl
 	call	ti.EnoughMem
 	pop	bc
-	jr	c, .ret_EOF
+	jp	c, util_ret_neg_one_AUHL
 	push	bc
 	ex	de, hl
 	call	util_insert_mem
 	pop	bc
 	or	a, a
-	jr	z, .ret_EOF
+	jp	z, util_ret_neg_one_AUHL
 .no_increment:
 	call	util_get_data_ptr
 	ld	hl, (hl)
@@ -723,11 +713,6 @@ char_in := $-1
 	sbc	hl, hl
 	ld	l, a
 	ret
-.ret_EOF:
-	scf
-	sbc	hl, hl
-	ld	a, l
-	ret
 
 ;-------------------------------------------------------------------------------
 ti_Seek:
@@ -737,20 +722,20 @@ ti_Seek:
 ;  sp + 6 : origin position
 ;  sp + 9 : slot index
 ; return:
-;  hl = -1 or EOF if failure
+;  hl = -1 if failure
 	ld	iy, 0
 	add	iy, sp
 	ld	de, (iy + 3)
 	ld	c, (iy + 9)
 	call	util_is_slot_open
-	jr	nz, .ret_neg_one
+	jp	nz, util_ret_neg_one_AUHL
 	ld	a, (iy + 6)		; origin location
 	or	a, a
 	jr	z, .seek_set
 	dec	a
 	jr	z, .seek_curr
 	dec	a
-	jr	nz, .ret_neg_one
+	jp	nz, util_ret_neg_one_AUHL
 .seek_end:
 	push	de
 	call	util_get_slot_size
@@ -766,16 +751,12 @@ ti_Seek:
 	sbc	hl, de
 	push	de
 	pop	bc
-	jr	c, .ret_neg_one
+	jp	c, util_ret_neg_one
 	jp	util_set_offset
 .seek_curr:
 	push	de
 	call	util_get_offset
 	jr	.seek_set_asm
-.ret_neg_one:
-	scf
-	sbc	hl, hl
-	ret
 
 ;-------------------------------------------------------------------------------
 ti_DeleteVar:
@@ -828,21 +809,17 @@ ti_Rewind:
 ; args:
 ;  sp + 3 : Slot number
 ; return:
-;  hl = -1 or EOF if failure
+;  hl = -1 if failure
 	pop	hl
 	pop	bc
 	push	bc
 	push	hl
 	call	util_is_slot_open
-	jr	nz, .ret_neg_one
+	jp	nz, util_ret_neg_one
 .rewind:
 	ld	bc, 0
 	call	util_set_offset
 	or	a, a
-	sbc	hl, hl
-	ret
-.ret_neg_one:
-	scf
 	sbc	hl, hl
 	ret
 
@@ -858,14 +835,10 @@ ti_Tell:
 	push	bc
 	push	hl
 	call	util_is_slot_open
-	jr	nz, .ret_neg_one
+	jp	nz, util_ret_neg_one
 	call	util_get_offset
 	push	bc
 	pop	hl
-	ret
-.ret_neg_one:
-	scf
-	sbc	hl, hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -880,14 +853,10 @@ ti_GetSize:
 	push	bc
 	push	hl
 	call	util_is_slot_open
-	jr	nz, .ret_neg_one
+	jp	nz, util_ret_neg_one
 	call	util_get_slot_size
 	push	bc
 	pop	hl
-	ret
-.ret_neg_one:
-	scf
-	sbc	hl, hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1129,17 +1098,13 @@ ti_GetDataPtr:
 	push	bc
 	push	de
 	call	util_is_slot_open
-	jr	nz, .ret_null
+	jp	nz, util_ret_null
 	call	util_get_slot_size
 	inc	hl
 	push	hl
 	call	util_get_offset
 	pop	hl
 	add	hl, bc
-	ret
-.ret_null:
-	xor	a, a
-	sbc	hl, hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1154,13 +1119,9 @@ ti_GetVATPtr:
 	push	bc
 	push	de
 	call	util_is_slot_open
-	jr	nz, .ret_null
+	jp	nz, util_ret_null
 	call	util_get_vat_ptr
 	ld	hl, (hl)
-	ret
-.ret_null:
-	xor	a, a
-	sbc	hl, hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1398,22 +1359,19 @@ ti_RclVar:
 	ld	iy,ti.flags
 	call	util_set_var_str
 	call	ti.FindSym
-	jr	c, .ret_neg_one
+	jp	c, util_ret_neg_one_byte
 	push	af
 	call	ti.ChkInRam
 	pop	bc
 	ld	a, b
-	jr	nz, .ret_neg_one
+	jp	nz, util_ret_neg_one_byte
 	ld	iy, 0
 	add	iy, sp
 	and	a, $3f
 	sub	a, (iy + 3)		; var type
-	jr	nz, .ret_neg_one
+	jp	nz, util_ret_neg_one_byte
 	ld	hl, (iy + 9)
 	ld	(hl), de
-	ret
-.ret_neg_one:
-	ld	a,-1
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -1605,8 +1563,9 @@ util_ret_neg_one_byte:
 	ld	a, 255
 	ret
 
-util_ret_null_pop_ix:
-	pop	ix
+util_ret0_pop_hl:
+	pop	hl
+util_ret0:
 util_ret_null:
 	xor	a, a
 	sbc	hl, hl
@@ -1614,6 +1573,12 @@ util_ret_null:
 util_ret_neg_one:
 	scf
 	sbc	hl, hl
+	ret
+
+util_ret_neg_one_AUHL:
+	scf
+	sbc	hl, hl
+	ld	a, l
 	ret
 
 util_is_slot_open:
