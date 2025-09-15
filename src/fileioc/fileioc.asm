@@ -221,8 +221,7 @@ ti_Resize:
 	push	bc
 	push	de
 	push	hl
-	call	util_is_slot_open
-	jp	nz, util_ret_neg_one
+	call	util_ret_neg_one_if_slot_is_not_open
 	push	de
 	call	util_is_in_ram
 	pop	hl
@@ -452,8 +451,7 @@ ti_SetArchiveStatus:
 	push	bc
 	push	de
 	push	hl
-	call	util_is_slot_open
-	jp	nz, util_ret_null
+	call	util_ret_null_if_slot_is_not_open
 	ld	a, e
 	push	af
 	call	util_get_vat_ptr
@@ -509,8 +507,7 @@ ti_Write:
 	ld	iy, 0
 	add	iy, sp
 	ld	c,(iy + 12)
-	call	util_is_slot_open
-	jp	nz, util_ret0
+	call	util_ret_zero_if_slot_is_not_open
 	call	util_is_in_ram
 	jp	z, util_ret0
 	ld	bc, (iy + 6)
@@ -578,8 +575,7 @@ ti_Read:
 	ld	iy, 0
 	add	iy, sp
 	ld	c, (iy + 12)
-	call	util_is_slot_open
-	jp	nz, util_ret0
+	call	util_ret_zero_if_slot_is_not_open
 	call	util_get_slot_size
 	push	bc
 	call	util_get_offset
@@ -631,8 +627,7 @@ ti_GetC:
 	pop	bc
 	push	bc
 	push	de
-	call	util_is_slot_open
-	jp	nz, util_ret_neg_one_AUHL
+	call	util_ret_neg_one_AUHL_if_slot_is_not_open
 	call	util_get_slot_size
 	push	bc
 	call	util_get_offset
@@ -671,8 +666,7 @@ ti_PutC:
 	push	hl
 	ld	a, e
 	ld	(char_in), a
-	call	util_is_slot_open
-	jp	nz, util_ret_neg_one_AUHL
+	call	util_ret_neg_one_AUHL_if_slot_is_not_open
 	call	util_is_in_ram
 	jp	c, util_ret_neg_one_AUHL
 	call	util_get_slot_size
@@ -727,8 +721,7 @@ ti_Seek:
 	add	iy, sp
 	ld	de, (iy + 3)
 	ld	c, (iy + 9)
-	call	util_is_slot_open
-	jp	nz, util_ret_neg_one_AUHL
+	call	util_ret_neg_one_AUHL_if_slot_is_not_open
 	ld	a, (iy + 6)		; origin location
 	or	a, a
 	jr	z, .seek_set
@@ -815,8 +808,7 @@ ti_Rewind:
 	pop	bc
 	push	bc
 	push	hl
-	call	util_is_slot_open
-	jr	nz, util_ret_neg_one
+	call	util_ret_neg_one_if_slot_is_not_open
 .rewind:
 	ld	bc, 0
 	call	util_set_offset
@@ -835,8 +827,7 @@ ti_Tell:
 	pop	bc
 	push	bc
 	push	hl
-	call	util_is_slot_open
-	jr	nz, util_ret_neg_one
+	call	util_ret_neg_one_if_slot_is_not_open
 	call	util_get_offset
 	push	bc
 	pop	hl
@@ -853,8 +844,7 @@ ti_GetSize:
 	pop	bc
 	push	bc
 	push	hl
-	call	util_is_slot_open
-	jr	nz, util_ret_neg_one
+	call	util_ret_neg_one_if_slot_is_not_open
 	call	util_get_slot_size
 	push	bc
 	pop	hl
@@ -871,8 +861,7 @@ ti_Close:
 	pop	bc
 	push	bc
 	push	de
-	call	util_is_slot_open
-	jq	nz, util_ret_null
+	call	util_ret_null_if_slot_is_not_open
 	ld	(hl), 255
 	ret
 
@@ -1098,8 +1087,7 @@ ti_GetDataPtr:
 	pop	bc
 	push	bc
 	push	de
-	call	util_is_slot_open
-	jp	nz, util_ret_null
+	call	util_ret_null_if_slot_is_not_open
 	call	util_get_slot_size
 	inc	hl
 	push	hl
@@ -1119,8 +1107,7 @@ ti_GetVATPtr:
 	pop	bc
 	push	bc
 	push	de
-	call	util_is_slot_open
-	jp	nz, util_ret_null
+	call	util_ret_null_if_slot_is_not_open
 	call	util_get_vat_ptr
 	ld	hl, (hl)
 	ret
@@ -1139,8 +1126,7 @@ ti_GetName:
 	push	bc
 	push	de
 	push	hl
-	call	util_is_slot_open
-	ret	nz
+	call	util_ret_if_slot_is_not_open
 	call	util_get_vat_ptr
 	ld	hl, (hl)
 	ld	bc, -6
@@ -1578,6 +1564,7 @@ util_ret_neg_one_AUHL:
 	ld	a, l
 	ret
 
+if 1
 util_is_slot_open:
 ; in:
 ;  c = slot
@@ -1602,6 +1589,64 @@ util_is_slot_open:
 	xor	a, a
 	inc	a
 	ret
+end if
+
+util_ret_zero_if_slot_is_not_open:
+; in:
+;  c = slot
+; out:
+;  a = 0
+;  ubc = slot * 3
+;  uhl = pointer to upper byte of slot offset
+;  zf = open
+;  (curr_slot) = slot
+	ld	a, c
+	cp	a, 6
+	jr	nc, .not_open
+	ld	(curr_slot), a
+	ld	b, 3
+	mlt	bc
+	ld	hl, variable_offsets - 1
+	add	hl, bc
+	ld	a, b
+	cp	a, (hl)
+	ret	z
+.not_open:
+	pop	hl	; return address of fileioc function
+	xor	a, a
+	sbc	hl, hl
+	ret		; return directly to the caller
+
+util_ret_neg_one_AUHL_if_slot_is_not_open:
+; in:
+;  c = slot
+; out:
+;  a = 0
+;  ubc = slot * 3
+;  uhl = pointer to upper byte of slot offset
+;  zf = open
+;  (curr_slot) = slot
+	ld	a, c
+	cp	a, 6
+	jr	nc, .not_open
+	ld	(curr_slot), a
+	ld	b, 3
+	mlt	bc
+	ld	hl, variable_offsets - 1
+	add	hl, bc
+	ld	a, b
+	cp	a, (hl)
+	ret	z
+.not_open:
+	pop	hl	; return address of fileioc function
+	scf
+	sbc	hl, hl
+	ld	a, l
+	ret		; return directly to the caller
+
+util_ret_neg_one_if_slot_is_not_open := util_ret_neg_one_AUHL_if_slot_is_not_open
+util_ret_null_if_slot_is_not_open := util_ret_zero_if_slot_is_not_open
+util_ret_if_slot_is_not_open := util_ret_zero_if_slot_is_not_open
 
 util_get_vat_ptr:
 	ld	a, (curr_slot)
