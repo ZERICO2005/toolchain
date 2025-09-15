@@ -1470,6 +1470,7 @@ ti_SetGCBehavior:
 	ld	hl,util_post_gc_default_handler
 .notdefault1:
 	ld	(util_post_gc_handler),hl
+	or	a,a
 	sbc	hl,hl
 	adc	hl,bc
 	jr	nz,.notdefault2
