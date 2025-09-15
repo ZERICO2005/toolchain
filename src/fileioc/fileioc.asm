@@ -1310,7 +1310,7 @@ ti_StoVar:
 	jr	nz, .notcr
 .iscr:
 	call	ti.FindSym
-	jp	c, .notcr		; fill it with zeros
+	jr	c, .notcr		; fill it with zeros
 	and	a, $3f
 	ex	de, hl
 	call	ti.Mov9OP1OP2
@@ -1693,7 +1693,7 @@ util_get_offset_ptr:
 util_get_slot_size:
 	call	util_get_data_ptr
 	ld	hl, (hl)
-	ld	bc, 0
+	inc.s	bc			; clear UBC
 	ld	c, (hl)
 	inc	hl
 	ld	b, (hl)
