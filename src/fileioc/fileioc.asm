@@ -630,19 +630,20 @@ ti_GetC:
 ;  sp + 3 : slot index
 ; return:
 ;  a = character read if success
+;  EOF if failure
 	pop	de
 	pop	bc
 	push	bc
 	push	de
 	call	util_is_slot_open
-	jr	nz, .ret_neg_one
+	jr	nz, .ret_EOF
 	call	util_get_slot_size
 	push	bc
 	call	util_get_offset
 	pop	hl
 	scf
 	sbc	hl, bc			; size-offset
-	jr	c, .ret_neg_one
+	jr	c, .ret_EOF
 	push	bc
 	call	util_get_data_ptr
 	ld	hl, (hl)
@@ -657,7 +658,7 @@ ti_GetC:
 	sbc	hl, hl
 	ld	l, a
 	ret
-.ret_neg_one:
+.ret_EOF:
 	scf
 	sbc	hl, hl
 	ld	a, l
@@ -671,6 +672,7 @@ ti_PutC:
 ;  sp + 6 : Slot number
 ; return:
 ;  Character written if no failure
+;  EOF if failure
 	pop	hl
 	pop	de
 	pop	bc
@@ -680,16 +682,16 @@ ti_PutC:
 	ld	a, e
 	ld	(char_in), a
 	call	util_is_slot_open
-	jr	nz, .ret_neg_one
+	jr	nz, .ret_EOF
 	call	util_is_in_ram
-	jr	c, .ret_neg_one
+	jr	c, .ret_EOF
 	call	util_get_slot_size
 	push	bc
 	call	util_get_offset
 	pop	hl
 	or	a, a
 	sbc	hl, bc
-	jr	c, .ret_neg_one
+	jr	c, .ret_EOF
 	jr	nz, .no_increment
 .increment:
 	push	bc
@@ -697,13 +699,13 @@ ti_PutC:
 	ld	(resize_amount), hl
 	call	ti.EnoughMem
 	pop	bc
-	jr	c, .ret_neg_one
+	jr	c, .ret_EOF
 	push	bc
 	ex	de, hl
 	call	util_insert_mem
 	pop	bc
 	or	a, a
-	jr	z, .ret_neg_one
+	jr	z, .ret_EOF
 .no_increment:
 	call	util_get_data_ptr
 	ld	hl, (hl)
@@ -721,7 +723,7 @@ char_in := $-1
 	sbc	hl, hl
 	ld	l, a
 	ret
-.ret_neg_one:
+.ret_EOF:
 	scf
 	sbc	hl, hl
 	ld	a, l
@@ -735,7 +737,7 @@ ti_Seek:
 ;  sp + 6 : origin position
 ;  sp + 9 : slot index
 ; return:
-;  hl = -1 if failure
+;  hl = -1 or EOF if failure
 	ld	iy, 0
 	add	iy, sp
 	ld	de, (iy + 3)
@@ -826,7 +828,7 @@ ti_Rewind:
 ; args:
 ;  sp + 3 : Slot number
 ; return:
-;  hl = -1 if failure
+;  hl = -1 or EOF if failure
 	pop	hl
 	pop	bc
 	push	bc
