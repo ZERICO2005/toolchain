@@ -1,0 +1,23 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__lsubu_overflow
+	public	__lsubs_overflow
+
+__lsubu_overflow:
+	; NC : no unsigned overflow
+	; C  : unsigned overflow occured
+__lsubs_overflow:
+	; PO : no signed overflow
+	; PE : signed overflow occured
+	push	bc
+	or	a, a
+	sbc	hl, bc
+	ld	c, a
+	ld	a, e
+	sbc	a, c
+	ld	e, a
+	ld	a, c
+	pop	bc
+	ret
