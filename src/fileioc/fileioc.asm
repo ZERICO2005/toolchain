@@ -209,7 +209,7 @@ ti_Resize:
 	push	bc
 	push	de
 	push	hl
-	call	util_is_slot_open
+	call	util_ret_NEG_ONE_UHL_if_slot_not_open
 	jp	nz, util_ret_neg_one
 	push	de
 	call	util_is_in_ram
@@ -262,7 +262,7 @@ ti_IsArchived:
 	pop	bc
 	push	bc
 	push	de
-	call	util_is_slot_open
+	call	util_ret_ZERO_A_if_slot_not_open
 	jr	z, util_is_in_ram
 	xor	a, a
 	ret
@@ -433,7 +433,7 @@ ti_SetArchiveStatus:
 	push	bc
 	push	de
 	push	hl
-	call	util_is_slot_open
+	call	util_ret_NULL_AUHL_if_slot_not_open
 	jp	nz, util_ret_null
 	ld	a, e
 	push	af
@@ -490,7 +490,7 @@ ti_Write:
 	ld	iy, 0
 	add	iy, sp
 	ld	c,(iy + 12)
-	call	util_is_slot_open
+	call	util_ret_ZERO_AUHL_if_slot_not_open
 	jr	nz, .ret0
 	call	util_is_in_ram
 	jr	z, .ret0
@@ -563,7 +563,7 @@ ti_Read:
 	ld	iy, 0
 	add	iy, sp
 	ld	c, (iy + 12)
-	call	util_is_slot_open
+	call	util_ret_ZERO_AUHL_if_slot_not_open
 	jr	nz, .ret0
 	call	util_get_slot_size
 	push	bc
@@ -622,7 +622,7 @@ ti_GetC:
 	pop	bc
 	push	bc
 	push	de
-	call	util_is_slot_open
+	call	util_ret_NEG_ONE_AUHL_if_slot_not_open
 	jr	nz, .ret_neg_one
 	call	util_get_slot_size
 	push	bc
@@ -667,7 +667,7 @@ ti_PutC:
 	push	hl
 	ld	a, e
 	ld	(char_in), a
-	call	util_is_slot_open
+	call	util_ret_NEG_ONE_AUHL_if_slot_not_open
 	jr	nz, .ret_neg_one
 	call	util_is_in_ram
 	jr	c, .ret_neg_one
@@ -728,7 +728,7 @@ ti_Seek:
 	add	iy, sp
 	ld	de, (iy + 3)
 	ld	c, (iy + 9)
-	call	util_is_slot_open
+	call	util_ret_NEG_ONE_UHL_if_slot_not_open
 	jr	nz, .ret_neg_one
 	ld	a, (iy + 6)		; origin location
 	or	a, a
@@ -819,7 +819,7 @@ ti_Rewind:
 	pop	bc
 	push	bc
 	push	hl
-	call	util_is_slot_open
+	call	util_ret_NEG_ONE_UHL_if_slot_not_open
 	jr	nz, .ret_neg_one
 .rewind:
 	ld	bc, 0
@@ -843,7 +843,7 @@ ti_Tell:
 	pop	bc
 	push	bc
 	push	hl
-	call	util_is_slot_open
+	call	util_ret_NEG_ONE_UHL_if_slot_not_open
 	jr	nz, .ret_neg_one
 	call	util_get_offset
 	push	bc
@@ -865,7 +865,7 @@ ti_GetSize:
 	pop	bc
 	push	bc
 	push	hl
-	call	util_is_slot_open
+	call	util_ret_NEG_ONE_UHL_if_slot_not_open
 	jr	nz, .ret_neg_one
 	call	util_get_slot_size
 	push	bc
@@ -887,7 +887,7 @@ ti_Close:
 	pop	bc
 	push	bc
 	push	de
-	call	util_is_slot_open
+	call	util_ret_NULL_AUHL_if_slot_not_open
 	jq	nz, util_ret_null
 	ld	(hl), 255
 	ret
@@ -1114,7 +1114,7 @@ ti_GetDataPtr:
 	pop	bc
 	push	bc
 	push	de
-	call	util_is_slot_open
+	call	util_ret_NULL_AUHL_if_slot_not_open
 	jr	nz, .ret_null
 	call	util_get_slot_size
 	inc	hl
@@ -1139,7 +1139,7 @@ ti_GetVATPtr:
 	pop	bc
 	push	bc
 	push	de
-	call	util_is_slot_open
+	call	util_ret_NULL_AUHL_if_slot_not_open
 	jr	nz, .ret_null
 	call	util_get_vat_ptr
 	ld	hl, (hl)
@@ -1163,7 +1163,7 @@ ti_GetName:
 	push	bc
 	push	de
 	push	hl
-	call	util_is_slot_open
+	call	util_ret_UNDEFINED_if_slot_not_open
 	ret	nz
 	call	util_get_vat_ptr
 	ld	hl, (hl)
@@ -1429,7 +1429,7 @@ ti_ArchiveHasRoomVar:
 	pop	bc
 	push	bc
 	push	de
-	call	util_is_slot_open
+	call	util_ret_ZERO_A_if_slot_not_open
 	jr	nz,.fail
 	call	util_get_vat_ptr
 	ld	hl,(hl)
@@ -1598,7 +1598,10 @@ util_ret_neg_one:
 	sbc	hl, hl
 	ret
 
-util_is_slot_open:
+util_ret_UNDEFINED_if_slot_not_open:
+util_ret_NULL_AUHL_if_slot_not_open:
+util_ret_ZERO_AUHL_if_slot_not_open:
+util_ret_ZERO_A_if_slot_not_open:
 ; in:
 ;  c = slot
 ; out:
@@ -1617,10 +1620,41 @@ util_is_slot_open:
 	add	hl, bc
 	ld	a, b
 	cp	a, (hl)
-	ret
+	ret	z
 .not_open:
+	pop	hl	; skip return
+	; return directly to caller
 	xor	a, a
-	inc	a
+	sbc	hl, hl
+	ret
+
+util_ret_NEG_ONE_AUHL_if_slot_not_open:
+util_ret_NEG_ONE_UHL_if_slot_not_open:
+; in:
+;  c = slot
+; out:
+;  a = 0
+;  ubc = slot * 3
+;  uhl = pointer to upper byte of slot offset
+;  zf = open
+;  (curr_slot) = slot
+	ld	a, c
+	cp	a, 6
+	jr	nc, .not_open
+	ld	(curr_slot), a
+	ld	b, 3
+	mlt	bc
+	ld	hl, variable_offsets - 1
+	add	hl, bc
+	ld	a, b
+	cp	a, (hl)
+	ret	z
+.not_open:
+	pop	hl	; skip return
+	; return directly to caller
+	scf
+	sbc	hl, hl
+	ld	a, l
 	ret
 
 util_get_vat_ptr:
