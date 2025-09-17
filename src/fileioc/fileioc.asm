@@ -98,10 +98,14 @@ ti_AllocEqu:
 ;  sp + 6 : pointer to alloc routine
 ; return:
 ;  hl -> allocated space
-	ld	iy, 0
-	add	iy, sp
-	ld	hl, (iy + 3)
-	ld	iy, (iy + 6)
+	ld	hl, 6
+	add	hl, sp
+	ld	iy, (hl)		; (sp + 6)
+	dec	hl
+	dec	hl
+	dec	hl
+	ld	hl, (hl)		; (sp + 3)
+
 	push	hl
 	inc	hl
 	inc	hl
@@ -121,10 +125,14 @@ ti_AllocCplxList:
 ;  sp + 6 : pointer to alloc routine
 ; return:
 ;  hl -> allocated space
-	ld	iy, 0
-	add	iy, sp
-	ld	hl, (iy + 3)
-	ld	iy, (iy + 6)
+	ld	hl, 6
+	add	hl, sp
+	ld	iy, (hl)		; (sp + 6)
+	dec	hl
+	dec	hl
+	dec	hl
+	ld	hl, (hl)		; (sp + 3)
+
 	push	hl
 	add	hl, hl
 	jr	util_alloc_var
@@ -137,10 +145,14 @@ ti_AllocList:
 ;  sp + 6 : pointer to alloc routine
 ; return:
 ;  hl -> allocated space
-	ld	iy, 0
-	add	iy, sp
-	ld	hl, (iy + 3)
-	ld	iy, (iy + 6)
+	ld	hl, 6
+	add	hl, sp
+	ld	iy, (hl)		; (sp + 6)
+	dec	hl
+	dec	hl
+	dec	hl
+	ld	hl, (hl)		; (sp + 3)
+
 	push	hl
 	jr	util_alloc_var
 
@@ -287,9 +299,9 @@ ti_OpenVar:
 ;  sp + 9 : variable Type
 ; return:
 ;  slot index if no error
-	ld	iy, 0
-	add	iy, sp
-	ld	a, (iy + 9)
+	ld	hl, 9
+	add	hl, sp
+	ld	a, (hl)			; (sp + 9)
 ;	jr	ti_Open.start		; emulated by dummifying next instruction
 	db	$fe			; ld a,ti.AppVarObj -> cp a,$3e \ dec d
 assert ti.AppVarObj = $15
@@ -886,9 +898,9 @@ ti_DetectVar:
 ;  sp + 9 : type of variable to search for
 ; return:
 ;  hl -> name of variable
-	ld	hl,9
-	add	hl,sp
-	ld	a,(hl)
+	ld	hl, 9
+	add	hl, sp
+	ld	a, (hl)			; (sp + 9)
 ;	jr	ti_Detect.start		; emulated by dummifying next instruction:
 	db	$fe			; ld a,ti.AppVarObj -> cp a,$3E \ dec d
 assert ti.AppVarObj = $15
@@ -1155,9 +1167,9 @@ ti_RenameVar:
 ;  a = 1 if new file already exists
 ;  a = 2 if old file does not exist
 ;  a = 3 if other error
-	ld	iy, 0
-	add	iy, sp
-	ld	a, (iy + 9)
+	ld	hl, 9
+	add	hl, sp
+	ld	a, (hl)			; (sp + 9)
 	ld	iy, ti.flags		; probably not needed
 ;	jr	ti_Rename.start		; emulated by dummifying next instruction
 	db	$fe			; ld a,appVarObj -> cp a,$3E \ dec d
@@ -1335,10 +1347,14 @@ ti_RclVar:
 ;  sp + 6 : pointer to data structure pointer
 ; return:
 ;  a = type of variable
-	ld	iy, 0
-	add	iy, sp
-	ld	hl, (iy + 6)		; pointer to data
-	ld	a, (iy + 3)		; var type
+	ld	hl, 3
+	add	hl, sp
+	ld	a, (hl)			; (sp + 3) var type
+	inc	hl
+	inc	hl
+	inc	hl
+	ld	hl, (hl)		; (sp + 6) pointer to data
+
 	ld	iy,ti.flags
 	call	util_set_var_str
 	call	ti.FindSym
