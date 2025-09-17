@@ -455,7 +455,7 @@ ti_SetArchiveStatus:
 	xor	a, a
 	ld	(de), a
 	pop	af
-	or	a, a
+	bit	0, a			; bit 0, (sp + 3)
 	jr	z, .set_unarchived
 .set_archived:
 	call	util_archive
