@@ -225,7 +225,7 @@ ti_Resize:
 	push	de
 	call	util_is_in_ram
 	pop	hl
-	jp	c, util_ret_null
+	jr	c, .ret_null
 	ld	de, TI_MAX_SIZE
 	or	a,a
 	sbc	hl,de
@@ -235,7 +235,7 @@ ti_Resize:
 	call	ti_Rewind.rewind	; rewind file offset
 	pop	hl
 	pop	af
-	jp	nc,util_ret_null	; return if too big
+	jr	nc,.ret_null		; return if too big
 	push	hl
 	call	util_get_slot_size
 	pop	hl
@@ -246,7 +246,7 @@ ti_Resize:
 	jr	c, .decrease
 .increase:
 	call	ti.EnoughMem
-	jp	c, util_ret_null
+	jr	c, .ret_null
 	ex	de, hl
 	call	util_insert_mem
 	jr	.no_resize
@@ -260,6 +260,11 @@ ti_Resize:
 	call	util_delete_mem
 .no_resize:
 	ld	hl, (resize_amount)
+	ret
+
+.ret_null:
+	xor	a, a
+	sbc	hl, hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -361,7 +366,7 @@ ti_Open:
 	cp	a,'a'
 	jr	z,.mode
 	cp	a,'w'
-	jp	nz,util_ret_null_pop_ix
+	jr	nz, .ret_null_pop_ix
 .mode:
 	inc	hl
 	ld	a,(hl)
@@ -380,7 +385,7 @@ ti_Open:
 	ld	d, (hl)
 	ex	de, hl
 	call	ti.EnoughMem
-	jp	c, util_ret_null_pop_ix
+	jr	c, .ret_null_pop_ix
 	call	util_unarchive
 	jr	.unarchive_var
 .no_append:
@@ -393,14 +398,21 @@ ti_Open:
 	ld	a, (hl)
 	cp	a, 'r'
 	pop	hl
-	jp	nz, util_ret_null_pop_ix
+	jr	nz, .ret_null_pop_ix
 	call	util_skip_archive_header
 	jr	.save_ptrs
+
+.ret_null_pop_ix:
+	pop	ix
+	xor	a, a
+	sbc	hl, hl
+	ret
+
 .not_found:
 	ld	hl, (ix + 9)
 	ld	a, (hl)
 	cp	a, 'r'
-	jp	z, util_ret_null_pop_ix
+	jr	z, .ret_null_pop_ix
 	or	a, a
 	sbc	hl, hl
 	ld	a, 0
@@ -471,7 +483,7 @@ ti_SetArchiveStatus:
 	call	util_unarchive
 .relocate_var:
 	call	ti.ChkFindSym
-	jp	c, util_ret_neg_one
+	jr	c, .ret_neg_one
 	call	ti.ChkInRam
 	jr	z, .save_ptrs
 	call	util_skip_archive_header
@@ -482,6 +494,11 @@ ti_SetArchiveStatus:
 	ld	(hl), bc
 	call	util_get_data_ptr
 	ld	(hl), de
+	ret
+
+.ret_neg_one:
+	; scf	; carry already set
+	sbc	hl, hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -499,7 +516,7 @@ ti_Write:
 	ld	c,(iy + 12)
 	call	util_ret_zero_if_slot_not_open
 	call	util_is_in_ram
-	jr	z, .ret0
+	jr	z, util_ret0
 	ld	bc, (iy + 6)
 	ld	hl, (iy + 9)
 	call	ti._smulu
@@ -523,7 +540,7 @@ ti_Write:
 	ld	(resize_amount), hl
 	call	util_insert_mem
 	or	a, a
-	jr	z, .ret0
+	jr	z, util_ret0
 .no_core_needed:
 	call	util_get_data_offset
 	ex	de, hl
@@ -540,10 +557,6 @@ ti_Write:
 	ld	(hl), de
 	ld	hl, (iy + 9)
 	ret
-.ret0:
-	xor	a, a
-	sbc	hl, hl
-	ret
 
 util_get_data_offset:
 	call	util_get_data_ptr
@@ -554,6 +567,16 @@ util_get_data_offset:
 	add	hl, bc
 	inc	hl
 	inc	hl
+	ret
+
+;-------------------------------------------------------------------------------
+
+util_ret0_pop_hl:
+	pop	hl
+util_ret0:
+util_ret_null:
+	xor	a, a
+	sbc	hl, hl
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -576,8 +599,8 @@ ti_Read:
 	pop	hl
 	or	a, a
 	sbc	hl, bc			; size - offset = bytes left to read
-	jr	z, .ret0
-	jr	c, .ret0
+	jr	z, util_ret0
+	jr	c, util_ret0
 	ld	bc, (iy + 6)
 	call	ti._sdivu			; (size - offset) / chunk_size
 	ld	de, (iy + 9)		; number of chunks to read, hl = number of chunks left
@@ -594,7 +617,7 @@ ti_Read:
 	add	hl, de
 	or	a, a
 	sbc	hl, de
-	jr	z, .ret0.pop
+	jr	z, util_ret0_pop_hl
 	push	hl
 	call	util_get_data_offset
 	ld	de, (iy + 3)
@@ -609,12 +632,6 @@ ti_Read:
 	ld	(hl), de
 	pop	hl
 	ret				; return actual chunks read
-.ret0.pop:
-	pop	hl
-.ret0:
-	xor	a, a
-	sbc	hl, hl
-	ret
 
 ;-------------------------------------------------------------------------------
 ti_GetC:
@@ -627,14 +644,14 @@ ti_GetC:
 	pop	bc
 	push	bc
 	push	de
-	call	util_ret_neg_one_if_slot_not_open
+	call	util_ret_EOF_if_slot_not_open
 	call	util_get_slot_size
 	push	bc
 	call	util_get_offset
 	pop	hl
 	scf
 	sbc	hl, bc			; size-offset
-	jr	c, .ret_neg_one
+	jr	c, util_ret_EOF
 	push	bc
 	call	util_get_data_ptr
 	ld	hl, (hl)
@@ -649,7 +666,10 @@ ti_GetC:
 	sbc	hl, hl
 	ld	l, a
 	ret
-.ret_neg_one:
+
+;-------------------------------------------------------------------------------
+
+util_ret_EOF:
 	scf
 	sbc	hl, hl
 	ld	a, l
@@ -671,16 +691,16 @@ ti_PutC:
 	push	hl
 	ld	a, e
 	ld	(char_in), a
-	call	util_ret_neg_one_if_slot_not_open
+	call	util_ret_EOF_if_slot_not_open
 	call	util_is_in_ram
-	jr	c, .ret_neg_one
+	jr	c, util_ret_EOF
 	call	util_get_slot_size
 	push	bc
 	call	util_get_offset
 	pop	hl
 	or	a, a
 	sbc	hl, bc
-	jr	c, .ret_neg_one
+	jr	c, util_ret_EOF
 	jr	nz, .no_increment
 .increment:
 	push	bc
@@ -688,13 +708,13 @@ ti_PutC:
 	ld	(resize_amount), hl
 	call	ti.EnoughMem
 	pop	bc
-	jr	c, .ret_neg_one
+	jr	c, util_ret_EOF
 	push	bc
 	ex	de, hl
 	call	util_insert_mem
 	pop	bc
 	or	a, a
-	jr	z, .ret_neg_one
+	jr	z, util_ret_EOF
 .no_increment:
 	call	util_get_data_ptr
 	ld	hl, (hl)
@@ -711,11 +731,6 @@ char_in := $-1
 	or	a, a
 	sbc	hl, hl
 	ld	l, a
-	ret
-.ret_neg_one:
-	scf
-	sbc	hl, hl
-	ld	a, l
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -738,7 +753,7 @@ ti_Seek:
 	dec	a
 	jr	z, .seek_curr
 	dec	a
-	jr	nz, .ret_neg_one
+	jr	nz, util_ret_neg_one
 .seek_end:
 	push	de
 	call	util_get_slot_size
@@ -754,16 +769,12 @@ ti_Seek:
 	sbc	hl, de
 	push	de
 	pop	bc
-	jr	c, .ret_neg_one
+	jr	c, util_ret_neg_one
 	jp	util_set_offset
 .seek_curr:
 	push	de
 	call	util_get_offset
 	jr	.seek_set_asm
-.ret_neg_one:
-	scf
-	sbc	hl, hl
-	ret
 
 ;-------------------------------------------------------------------------------
 ti_DeleteVar:
@@ -798,9 +809,10 @@ ti_Delete:
 	pop	af
 	ld	(ti.OP1), a
 	call	ti.ChkFindSym
-	jp	c, util_ret_null
+	jq	c, util_ret_null
 	ld	iy, ti.flags
 	call	ti.DelVarArc
+util_ret_neg_one:
 	scf
 	sbc	hl, hl
 	ret
@@ -1559,17 +1571,6 @@ util_ret_neg_one_byte:
 	ld	a, 255
 	ret
 
-util_ret_null_pop_ix:
-	pop	ix
-util_ret_null:
-	xor	a, a
-	sbc	hl, hl
-	ret
-util_ret_neg_one:
-	scf
-	sbc	hl, hl
-	ret
-
 util_ret_if_slot_not_open:
 util_ret_null_if_slot_not_open:
 util_ret_zero_if_slot_not_open:
@@ -1599,6 +1600,7 @@ util_ret_zero_if_slot_not_open:
 	sbc	hl, hl
 	ret
 
+util_ret_EOF_if_slot_not_open:
 util_ret_neg_one_if_slot_not_open:
 ; returns directly to the caller's caller and sets AUHL to -1 if the slot is not open
 ; in:
