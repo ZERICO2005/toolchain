@@ -773,13 +773,9 @@ ti_DeleteVar:
 ;  sp + 6 : variable type
 ; return:
 ;  hl = 0 if failure
-	pop	hl
-	pop	de
-	pop	bc
-	push	bc
-	push	de
-	push	hl
-	ld	a, c
+	ld	hl, 9
+	add	hl, sp
+	ld	a, (hl)			; (sp + 9)
 ;	jr	ti_Delete.start		; emulated by dummifying next instruction:
 	db	$fe			; ld a,ti.AppVarObj -> cp a,$3E \ dec d
 assert ti.AppVarObj = $15
@@ -794,8 +790,7 @@ ti_Delete:
 	ld	a,ti.AppVarObj
 .start:
 	pop	de
-	pop	hl
-	push	hl
+	ex	(sp), hl
 	push	de
 	dec	hl
 	push	af
