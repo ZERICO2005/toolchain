@@ -597,9 +597,9 @@ ti_Read:
 	push	bc
 	call	util_get_offset
 	pop	hl
-	or	a, a
+	xor	a, a
 	sbc	hl, bc			; size - offset = bytes left to read
-	jr	z, util_ret0
+	ret	z			; jr z, util_ret0
 	jr	c, util_ret0
 	ld	bc, (iy + 6)
 	call	ti._sdivu			; (size - offset) / chunk_size
@@ -607,10 +607,9 @@ ti_Read:
 	or	a, a
 	sbc	hl, de
 	add	hl, de			; check if left <= read
-	jr	nc, .copy
+	jr	c, .no_copy
 	ex	de, hl
-.copy:
-	ex	de, hl
+.no_copy:
 	ld	bc, (iy + 6)
 	push	hl
 	call	ti._smulu
@@ -770,11 +769,18 @@ ti_Seek:
 	push	de
 	pop	bc
 	jr	c, util_ret_neg_one
-	jp	util_set_offset
+	; jp	util_set_offset
+.util_set_offset:
+	call	util_get_offset_ptr
+	ld	(hl), bc
+	ret
+
 .seek_curr:
 	push	de
 	call	util_get_offset
 	jr	.seek_set_asm
+
+util_set_offset := .util_set_offset
 
 ;-------------------------------------------------------------------------------
 ti_DeleteVar:
@@ -955,14 +961,6 @@ ti_Detect:
 	jr	c, .finish
 	jr	z, .finish
 	add	hl, de
-	jr	.fcontinue
-
-.finish:
-	xor	a, a
-	sbc	hl, hl
-	pop	ix
-	ret
-
 .fcontinue:
 	push	hl
 	ld	a, 0
@@ -973,6 +971,13 @@ ti_Detect:
 	ld	de, (ix + 12)
 	ld	(de), a
 	jr	.fgoodtype
+
+.finish:
+	xor	a, a
+	sbc	hl, hl
+	pop	ix
+	ret
+
 .fdetectnormal:
 	cp	a, ti.AppVarObj
 .smc_type := $-1
@@ -1329,7 +1334,7 @@ ti_StoVar:
 	jr	nz, .notcr
 .iscr:
 	call	ti.FindSym
-	jp	c, .notcr		; fill it with zeros
+	jr	c, .notcr		; fill it with zeros
 	and	a, $3f
 	ex	de, hl
 	call	ti.Mov9OP1OP2
@@ -1674,7 +1679,7 @@ util_get_offset_ptr:
 util_get_slot_size:
 	call	util_get_data_ptr
 	ld	hl, (hl)
-	ld	bc, 0
+	inc.s	bc			; clear UBC
 	ld	c, (hl)
 	inc	hl
 	ld	b, (hl)
@@ -1682,10 +1687,6 @@ util_get_slot_size:
 util_get_offset:
 	call	util_get_offset_ptr
 	ld	bc, (hl)
-	ret
-util_set_offset:
-	call	util_get_offset_ptr
-	ld	(hl), bc
 	ret
 
 util_archive:				; properly handle garbage collects
