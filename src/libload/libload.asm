@@ -61,7 +61,7 @@ LIB_MAGIC_2       := $C1	; library magic byte 2
 LIB_MAGIC_1_ALT   := $BF	; alternate library magic byte 1
 LIB_MAGIC_2_ALT   := $FE	; alternate library magic byte 2
 
-LIB_FLAGS         := $22	; flag storage
+LIB_FLAGS         := 56		; flag storage
 loaded            := 0
 keep_in_arc       := 1
 optional          := 2
@@ -95,9 +95,8 @@ disable_relocations
 	call	ti.MemClear
 	pop	bc
 
-	ld	a, (iy + LIB_FLAGS)
 	ld	(ix_save), ix		; save IX since older ICE programs don't
-	ld	(flag_save), a
+	ld	ix, ix_base
 
 	ld	hl, $AA55AA
 	xor	a, a
@@ -122,19 +121,16 @@ disable_relocations
 
 	ld	(error_sp), sp
 
-	ld	(iy + LIB_FLAGS), c	; C is zero here
-	; res	is_dep, (iy + LIB_FLAGS)
-	; res	optional, (iy + LIB_FLAGS)
-
+	; LIB_FLAGS is already zero
+	; res	is_dep, (ix + LIB_FLAGS)
+	; res	optional, (ix + LIB_FLAGS)
 	ld	a, (hl)
 	cp	a, REQ_LIB_MARKER
 	jr	z, start
-	set	optional, (iy + LIB_FLAGS)
+	set	optional, (ix + LIB_FLAGS)
 	cp	a, OPT_LIB_MARKER
 	jr	z, start
-	ld	a, (flag_save)
-	ld	(iy + LIB_FLAGS), a	; restore flag bits
-	ld	ix, (ix_save)		; restore IX register
+	ld	ix, (ix_restore)	; restore IX register
 	jp	(hl)			; return to execution if there are no libs
 
 macro relocate? name, address*
@@ -202,7 +198,7 @@ load_lib:				; hl->NULL terminated libray name string ($CX, 'LIBNAME', 0)
 	call	ti.Mov9ToOP1
 	pop	hl
 	inc	hl
-	res	loaded, (iy + LIB_FLAGS)
+	res	loaded, (ix + LIB_FLAGS)
 	ld	(lib_name_ptr), hl
 
 check_already_loaded:
@@ -220,7 +216,7 @@ check_already_loaded:
 	jr	nz, .seach_tbl
 
 .match:					; mark as previously loaded (don't resolve absolutes again)
-	set	loaded, (iy + LIB_FLAGS)
+	set	loaded, (ix + LIB_FLAGS)
 	pop	hl
 	ld	de, 9
 	add	hl, de
@@ -258,7 +254,7 @@ check_already_loaded:
 findlib:
 	call	ti.ChkFindSym
 	jr	nc, .foundlib		; throw an error if the library doesn't exist
-	bit	optional, (iy + LIB_FLAGS)
+	bit	optional, (ix + LIB_FLAGS)
 	; if optional, zeroize marker and move on
 	jr	nz, optional_lib_clear_pop_hl
 .missing:
@@ -297,7 +293,7 @@ assert LIB_MAGIC_1 = LIB_MAGIC_1_ALT+1
 	cp	a, LIB_MAGIC_2_ALT
 .magic_error:
 	jr	z, lib_exists
-	bit	optional, (iy + LIB_FLAGS)
+	bit	optional, (ix + LIB_FLAGS)
 	jr	z, invalid_error
 optional_lib_clear_pop_hl:
 	pop	hl			; get version byte pointer
@@ -347,7 +343,7 @@ lib_exists:
 	pop	hl			; hl->version of library in the program
 	cp	a, (hl)			; check if library version in program is greater than library version on-calc
 	jr	nc, good_version
-	bit	optional, (iy + LIB_FLAGS)
+	bit	optional, (ix + LIB_FLAGS)
 	jr	nz, optional_lib_clear
 .version_error:
 	rjump	error_version		; c flag set if on-calc lib version is less than the one used in the program
@@ -381,7 +377,7 @@ good_version:
 
 	ld	(ramlocation), hl	; save this pointer
 
-	res	keep_in_arc, (iy + LIB_FLAGS)
+	res	keep_in_arc, (ix + LIB_FLAGS)
 	ld	hl, (arclocation)	; hl->start of library code in archive
 	ld	de, (loaded_size)
 	add	hl, de			; hl->start of library relocation table
@@ -392,7 +388,7 @@ good_version:
 	jr	nz, need_to_load_lib
 	ld	hl, (arclocation)
 	ld	(ramlocation), hl	; okay, not a ram location, but it's use is still the same
-	set	keep_in_arc, (iy + LIB_FLAGS)
+	set	keep_in_arc, (ix + LIB_FLAGS)
 
 need_to_load_lib:
 	ld	de, (ramlocation)	; de->location to load to
@@ -403,7 +399,7 @@ need_to_load_lib:
 	inc	hl
 	ld	(end_arc_lib_locs), hl
 
-	bit	keep_in_arc, (iy + LIB_FLAGS)
+	bit	keep_in_arc, (ix + LIB_FLAGS)
 	jr	nz, resolve_entry_points
 .not_in_arc:
 	ld	hl, (loaded_size)
@@ -435,10 +431,10 @@ resolve_entry_points:
 	ld	hl, (ramlocation)
 	; get all the dependency pointers that reside in the ram lib
 enqueue_all_deps:			; we don't need to store anything if we are here
-	bit	keep_in_arc, (iy + LIB_FLAGS)
+	bit	keep_in_arc, (ix + LIB_FLAGS)
 	jr	nz, .finish		; really, this is just a precautionary check -- should work fine without
 .loop:
-	res	optional, (iy + LIB_FLAGS)
+	res	optional, (ix + LIB_FLAGS)
 	ld	a, (hl)
 	cp	a, REQ_LIB_MARKER	; is there a dependency?
 	jr	nz, .check
@@ -503,9 +499,9 @@ resolve_entry_points_enqueued:
 					; now relocate absolutes in library
 relocate_absolutes:
 	ld	(next_lib_ptr), hl	; hl->next library in program (if there is one)
-	bit	loaded, (iy + LIB_FLAGS)
+	bit	loaded, (ix + LIB_FLAGS)
 	jr	nz, .done
-	bit	keep_in_arc, (iy + LIB_FLAGS)
+	bit	keep_in_arc, (ix + LIB_FLAGS)
 	jr	nz, .done
 	ld	hl, (reloc_tbl_ptr)	; restore this
 .loop:
@@ -534,26 +530,26 @@ relocate_absolutes:
 	jr	.loop
 
 .done:					; have we found the start of the program?
-	bit	is_dep, (iy + LIB_FLAGS)
+	bit	is_dep, (ix + LIB_FLAGS)
 	jr	nz, load_next_dep	; if loading dependencies, don't check markers
 	ld	hl, (next_lib_ptr)
 check_for_lib_marker:
-	res	optional, (iy + LIB_FLAGS)
+	res	optional, (ix + LIB_FLAGS)
 	ld	a, (hl)			; hl->maybe REQ_LIB_MARKER -- If the program is using more libraries
 	cp	a, REQ_LIB_MARKER
 	jr	z, goto_load_lib
-	set	optional, (iy + LIB_FLAGS)
+	set	optional, (ix + LIB_FLAGS)
 	cp	a, OPT_LIB_MARKER
 	jr	nz, check_has_deps
 goto_load_lib:
 	rjump	load_lib		; load the next library
 
 check_has_deps:				; the first time we hit this,  we have all the dependencies placed onto the queue that the libraries use.
-	res	optional, (iy + LIB_FLAGS)
-	bit	is_dep, (iy + LIB_FLAGS)
+	res	optional, (ix + LIB_FLAGS)
+	bit	is_dep, (ix + LIB_FLAGS)
 	jr	nz, load_next_dep
 	ld	(prgm_start), hl	; save program start
-	set	is_dep, (iy + LIB_FLAGS)
+	set	is_dep, (ix + LIB_FLAGS)
 load_next_dep:
 	ld	hl, (end_dep_queue)
 	ld	de, dep_queue_ptr
@@ -572,9 +568,7 @@ load_next_dep:
 .exit:
 	call	ti.PopOP1		; restore program name
 	ld	hl, (prgm_start)
-	ld	ix, (ix_save)		; restore IX register
-	ld	a, (flag_save)
-	ld	(iy + LIB_FLAGS), a	; restore flag bits
+	ld	ix, (ix_restore)	; restore IX register
 	ld	a, 1
 	jp	(hl)			; passed all the checks; let's start execution! :)
 
@@ -635,9 +629,7 @@ throw_error:				; draw the error message onscreen
 	call	ti.HomeUp
 .return:
 	call	ti.PopOP1
-	ld	a, (flag_save)
-	ld	(iy + LIB_FLAGS), a	; restore flag bits
-	ld	ix, (ix_save)		; restore IX register
+	ld	ix, (ix_restore)	; restore IX register
 	xor	a, a			; return with zero in a
 	ret
 
