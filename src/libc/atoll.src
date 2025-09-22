@@ -1,6 +1,9 @@
 	assume	adl=1
 
 	section	.text
+
+if 1
+
 	public	_atoll
 _atoll:
 	pop	bc
@@ -18,6 +21,8 @@ _atoll:
 	ret
 
 	extern	_strtoll
+
+else
 
 _atoll:
 	call	__frameset0
@@ -83,3 +88,5 @@ _atoll:
 	extern	__llneg
 	extern	__lladd
 	extern	__llmulu
+
+end if

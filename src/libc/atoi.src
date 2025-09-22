@@ -26,8 +26,8 @@ if 0
 	cp	a, '+' + 14
 	jr	z, .plus_sign
 	dec	hl
-.plus_sign:
 .minus_sign:
+.plus_sign:
 	xor	a, a
 else
 	sub	a, '-' + 14
@@ -37,8 +37,8 @@ else
 	jr	z, .plus_sign
 	dec	hl
 	xor	a, a
-.plus_sign:
 .minus_sign:
+.plus_sign:
 end if
 	ex	de, hl
 	sbc	hl, hl
@@ -69,20 +69,3 @@ end if
 	jp	__ineg
 
 	extern	__ineg
-
-
-.loop:
-	; loop :  16F +  1R +  3W +  1
-	; imulu:  49F + 15R + 12W + 25
-	; total:  65F + 16R + 15W + 26 per digit
-	call	__imulu
-	ld	c, a
-	add	hl, bc
-	inc	de		; next digit
-.start:
-	ld	c, 10
-	ld	a, (de)
-	sub	a, 48
-	cp	a, c
-	jr	c, .loop
-.finish:

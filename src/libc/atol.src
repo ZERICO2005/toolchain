@@ -3,6 +3,7 @@
 	section	.text
 
 	public	_atol
+
 _atol:
 	pop	de
 	ex	(sp), hl
@@ -32,29 +33,39 @@ _atol:
 	xor	a, a
 	sbc	hl, hl
 	ld	e, a
-	inc.s	bc
-	ld	b, a
 	; IY = start of the digits
 	; E:UHL = 0
-	; UBC = $0000??
 	jr	.start
 .loop:
-	; loop :  23F +  1R  + 3W +  1
-	; lmulu:  93F + 15R + 15W + 41
-	; total: 116F + 16R + 18W + 42 per digit
+	; 32F + 4R + 3W + 1 per digit
 	ld	d, a
-	xor	a, a
-	call	__lmulu		; E:UHL *= 10
-	ld	c, d
+	ld	a, e
+	push	hl
+	pop	bc
+	; *= 2
+	add	hl, hl
+	rla
+	; *= 4
+	add	hl, hl
+	rla
+	; *= 5
 	add	hl, bc
 	adc	a, e
+	; *= 10
+	add	hl, hl
+	rla
+	; += digit
+	ld	bc, 0
+	ld	c, d
+	add	hl, bc
+	adc	a, b
 	ld	e, a
-	inc	iy		; next digit
+	; next digit
+	inc	iy
 .start:
-	ld	c, 10
 	ld	a, (iy)
 	sub	a, 48
-	cp	a, c
+	cp	a, 10
 	jr	c, .loop
 .finish:
 	pop	af
@@ -62,5 +73,4 @@ _atol:
 	; A == '-' negative
 	jp	__lneg
 
-	extern	__lmulu
 	extern	__lneg
