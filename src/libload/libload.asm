@@ -121,10 +121,12 @@ disable_relocations
 	; res	is_dep, (iy + LIB_FLAGS)
 	; res	optional, (iy + LIB_FLAGS)
 	ld	a, (hl)
-	cp	a, REQ_LIB_MARKER
+	assert REQ_LIB_MARKER = OPT_LIB_MARKER - 1
+	sub	a, REQ_LIB_MARKER
 	jr	z, start
 	set	optional, (iy + LIB_FLAGS)
-	cp	a, OPT_LIB_MARKER
+	; cp	a, OPT_LIB_MARKER
+	dec	a
 	jr	z, start
 	ld	a, (flag_save)
 	ld	(iy + LIB_FLAGS), a	; restore flag bits
