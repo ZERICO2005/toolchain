@@ -44,9 +44,8 @@ end_reloc_tbl     := buf + 883	; pointer to end of relocation table
 prgm_start        := buf + 886	; pointer to start of actual program when dealing with dependencies
 appvar_ptr        := buf + 889	; pointer to start of library appvar in archive
 lib_name_ptr      := buf + 892	; pointer to name of library to extract
-show_msgs         := buf + 895  ; show error messages or just exit with error
-flag_save         := buf + 896  ; save/restore modified iy flag
-ix_save           := buf + 897  ; save/restore modified ix register
+flag_save         := buf + 895  ; save/restore modified iy flag
+ix_save           := buf + 896  ; save/restore modified ix register
 
 REQ_LIB_MARKER    := $C0	; required library signifier byte
 OPT_LIB_MARKER    := $C1	; optional library signifier byte
@@ -61,6 +60,7 @@ loaded            := 0
 keep_in_arc       := 1
 optional          := 2
 is_dep            := 3
+show_msgs         := 4
 
 macro move_string_to_end
 	ld	bc, 0
@@ -98,12 +98,10 @@ disable_relocations
 	xor	a, a
 	ld	(iy + LIB_FLAGS), a	; clear LIB_FLAGS
 	sbc	hl, bc
+	; disable or enable error printing
 	jr	z, .no_show_msgs
-; .show_msgs:
-	inc	a
+	set	show_msgs, (iy + LIB_FLAGS)
 .no_show_msgs:
-	ld	hl, show_msgs		; disable or enable error printing
-	ld	(hl), a
 
 	pop	hl
 	ld	de,helpers.source
@@ -573,8 +571,8 @@ error_missing:
 	rload	str_error_missing
 throw_error:				; draw the error message onscreen
 	ld	sp, (error_sp)
-	ld	a, (show_msgs)
-	or	a, a
+	bit	show_msgs, (iy + LIB_FLAGS)
+	; show error messages or just exit with error
 	jr	z, .return
  .show_msgs:
 	ld	a, ti.lcdBpp16
