@@ -1,0 +1,88 @@
+	assume	adl=1
+
+	section	.text
+
+	public	_atoi
+
+_atoi:
+	pop	de
+	ex	(sp), hl
+	push	de
+	; inlined isspace
+.whitespace_loop:
+	ld	a, (hl)
+	inc	hl
+	cp	a, 32
+	jr	z, .whitespace_loop
+	sub	a, 9
+	add	a, -5
+	jr	nc, .whitespace_loop
+	; A = (HL - 1) - 9 + -5 = (HL - 1) - 14
+	; A + 14 = (HL - 1)
+if 0
+	cp	a, '-' + 14
+	push	af
+	jr	z, .minus_sign
+	cp	a, '+' + 14
+	jr	z, .plus_sign
+	dec	hl
+.plus_sign:
+.minus_sign:
+	xor	a, a
+else
+	sub	a, '-' + 14
+	push	af
+	jr	z, .minus_sign
+	sub	a, '+' - '-'
+	jr	z, .plus_sign
+	dec	hl
+	xor	a, a
+.plus_sign:
+.minus_sign:
+end if
+	ex	de, hl
+	sbc	hl, hl
+	; DE = start of the digits
+	; HL = 0
+	jr	.start
+.loop:
+	; 21F + 4R + 3W + 1 per digit
+	push	hl
+	pop	bc
+	add	hl, hl		; *= 2
+	add	hl, hl		; *= 4
+	add	hl, bc		; *= 5
+	add	hl, hl		; *= 10
+	ld	bc, 0
+	ld	c, a
+	add	hl, bc
+	inc	de		; next digit
+.start:
+	ld	a, (de)
+	sub	a, 48
+	cp	a, 10
+	jr	c, .loop
+.finish:
+	pop	af
+	ret	nz	; A != '-' positive
+	; A == '-' negative
+	jp	__ineg
+
+	extern	__ineg
+
+
+.loop:
+	; loop :  16F +  1R +  3W +  1
+	; imulu:  49F + 15R + 12W + 25
+	; total:  65F + 16R + 15W + 26 per digit
+	call	__imulu
+	ld	c, a
+	add	hl, bc
+	inc	de		; next digit
+.start:
+	ld	c, 10
+	ld	a, (de)
+	sub	a, 48
+	cp	a, c
+	jr	c, .loop
+.finish:

@@ -1,21 +1,66 @@
 	assume	adl=1
 
 	section	.text
-	public	_atoi, _atol
-_atoi:
-_atol:
-	pop	bc
-	ex	(sp),hl
-	push	bc
-	ld	bc,10
-	push	bc
-	ld	c,b
-	push	bc
-	push	hl
-	call	_strtol
-	pop	af
-	pop	af
-	pop	af
-	ret
 
-	extern	_strtol
+	public	_atol
+_atol:
+	pop	de
+	ex	(sp), hl
+	push	de
+	; inlined isspace
+.whitespace_loop:
+	ld	a, (hl)
+	inc	hl
+	cp	a, 32
+	jr	z, .whitespace_loop
+	sub	a, 9
+	add	a, -5
+	jr	nc, .whitespace_loop
+
+	; A = (HL - 1) - 9 + -5 = (HL - 1) - 14
+	; A + 14 = (HL - 1)
+	cp	a, '-' + 14
+	push	af
+	jr	z, .minus_sign
+	cp	a, '+' + 14
+	jr	z, .plus_sign
+	dec	hl
+.plus_sign:
+.minus_sign:
+	push	hl
+	pop	iy
+	xor	a, a
+	sbc	hl, hl
+	ld	e, a
+	inc.s	bc
+	ld	b, a
+	; IY = start of the digits
+	; E:UHL = 0
+	; UBC = $0000??
+	jr	.start
+.loop:
+	; loop :  23F +  1R  + 3W +  1
+	; lmulu:  93F + 15R + 15W + 41
+	; total: 116F + 16R + 18W + 42 per digit
+	ld	d, a
+	xor	a, a
+	call	__lmulu		; E:UHL *= 10
+	ld	c, d
+	add	hl, bc
+	adc	a, e
+	ld	e, a
+	inc	iy		; next digit
+.start:
+	ld	c, 10
+	ld	a, (iy)
+	sub	a, 48
+	cp	a, c
+	jr	c, .loop
+.finish:
+	pop	af
+	ret	nz	; A != '-' positive
+	; A == '-' negative
+	jp	__lneg
+
+	extern	__lmulu
+	extern	__lneg
