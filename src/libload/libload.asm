@@ -30,23 +30,28 @@ buf := ti.cursorImage
 arc_lib_locs      := buf + 000	; place to store locations of archived libraries
 dep_queue_ptr     := buf + 450	; queue for keeping track of which libraries still need to be resolved
 error_sp          := buf + 850	; save sp for errors
-total_lib_size    := buf + 853	; total size of the library appvar (not used)
-loaded_size       := buf + 856	; holds extracted size of the library
-arclocation       := buf + 859	; pointer to place to begin extraction from the archive
-ramlocation       := buf + 862	; pointer to place to extract in usermem
-end_arc_lib_locs  := buf + 865	; pointer to end of archived library locations in arc_lib_locs
-end_dep_queue     := buf + 868	; pointer to end of dependency stack
-next_lib_ptr      := buf + 871	; pointer to save location of next lib place that needs to be relocated
-jump_tbl_ptr      := buf + 874	; pointer to start of function table for each library in the program
-vector_tbl_ptr    := buf + 877	; pointer to start of archived function vector table
-reloc_tbl_ptr     := buf + 880	; pointer to start of relocation table
-end_reloc_tbl     := buf + 883	; pointer to end of relocation table
-prgm_start        := buf + 886	; pointer to start of actual program when dealing with dependencies
-appvar_ptr        := buf + 889	; pointer to start of library appvar in archive
-lib_name_ptr      := buf + 892	; pointer to name of library to extract
-show_msgs         := buf + 895  ; show error messages or just exit with error
-flag_save         := buf + 896  ; save/restore modified iy flag
-ix_save           := buf + 897  ; save/restore modified ix register
+
+ix_base           := buf + 850
+
+total_lib_size    := ix + 03	; total size of the library appvar (not used)
+loaded_size       := ix + 06	; holds extracted size of the library
+arclocation       := ix + 09	; pointer to place to begin extraction from the archive
+ramlocation       := ix + 12	; pointer to place to extract in usermem
+end_arc_lib_locs  := ix + 15	; pointer to end of archived library locations in arc_lib_locs
+end_dep_queue     := ix + 18	; pointer to end of dependency stack
+next_lib_ptr      := ix + 21	; pointer to save location of next lib place that needs to be relocated
+jump_tbl_ptr      := ix + 24	; pointer to start of function table for each library in the program
+vector_tbl_ptr    := ix + 27	; pointer to start of archived function vector table
+reloc_tbl_ptr     := ix + 40	; pointer to start of relocation table
+end_reloc_tbl     := ix + 43	; pointer to end of relocation table
+prgm_start        := ix + 46	; pointer to start of actual program when dealing with dependencies
+appvar_ptr        := ix + 49	; pointer to start of library appvar in archive
+lib_name_ptr      := ix + 52	; pointer to name of library to extract
+show_msgs         := ix + 55	; show error messages or just exit with error
+flag_save         := ix + 56	; save/restore modified iy flag
+
+ix_save           := ix_base + 57	; save/restore modified ix register
+ix_restore        := ix      + 57
 
 REQ_LIB_MARKER    := $C0	; required library signifier byte
 OPT_LIB_MARKER    := $C1	; optional library signifier byte
@@ -91,8 +96,8 @@ disable_relocations
 	pop	bc
 
 	ld	a, (iy + LIB_FLAGS)
-	ld	(flag_save), a
 	ld	(ix_save), ix		; save IX since older ICE programs don't
+	ld	(flag_save), a
 
 	ld	hl, $AA55AA
 	xor	a, a
@@ -101,8 +106,7 @@ disable_relocations
 ; .show_msgs:
 	inc	a
 .no_show_msgs:
-	ld	hl, show_msgs		; disable or enable error printing
-	ld	(hl), a
+	ld	(show_msgs), a		; disable or enable error printing
 
 	pop	hl
 	ld	de,helpers.source
