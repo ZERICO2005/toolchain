@@ -96,6 +96,7 @@ disable_relocations
 
 	ld	hl, $AA55AA
 	xor	a, a
+	ld	(iy + LIB_FLAGS), a	; clear LIB_FLAGS
 	sbc	hl, bc
 	jr	z, .no_show_msgs
 ; .show_msgs:
@@ -118,8 +119,9 @@ disable_relocations
 
 	ld	(error_sp), sp
 
-	res	is_dep, (iy + LIB_FLAGS)
-	res	optional, (iy + LIB_FLAGS)
+	; LIB_FLAGS is already zero
+	; res	is_dep, (iy + LIB_FLAGS)
+	; res	optional, (iy + LIB_FLAGS)
 	ld	a, (hl)
 	cp	a, REQ_LIB_MARKER
 	jr	z, start
