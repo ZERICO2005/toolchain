@@ -2,27 +2,7 @@
 
 	section	.text
 
-if 1
-
 	public	_atoll
-_atoll:
-	pop	bc
-	ex	(sp),hl
-	push	bc
-	ld	bc,10
-	push	bc
-	ld	c,b
-	push	bc
-	push	hl
-	call	_strtoll
-	pop	af
-	pop	af
-	pop	af
-	ret
-
-	extern	_strtoll
-
-else
 
 _atoll:
 	call	__frameset0
@@ -37,19 +17,21 @@ _atoll:
 	add	a, -5
 	jr	nc, .whitespace_loop
 
-	; A = (HL - 1) - 9 + -5 = (HL - 1) - 14
-	; A + 14 = (HL - 1)
-	cp	a, '-' + 14
+	; A = (HL - 1) - 9 + -5
+	; A = (HL - 1) - 14
+	sub	a, '-' - 14
 	push	af
 	jr	z, .minus_sign
-	cp	a, '+' + 14
+	; A = (HL - 1) - 14 - ('-' - 14)
+	; A = (HL - 1) - '-'
+	sub	a, '+' - '-'
 	jr	z, .plus_sign
 	dec	hl
+	xor	a, a
 .plus_sign:
 .minus_sign:
 	push	hl
 	pop	iy
-	xor	a, a
 	sbc	hl, hl
 	ex	de, hl
 	sbc	hl, hl
@@ -85,8 +67,7 @@ _atoll:
 	; A == '-' negative
 	jp	__llneg
 
+	extern	__frameset0
 	extern	__llneg
 	extern	__lladd
 	extern	__llmulu
-
-end if

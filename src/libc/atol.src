@@ -18,19 +18,21 @@ _atol:
 	add	a, -5
 	jr	nc, .whitespace_loop
 
-	; A = (HL - 1) - 9 + -5 = (HL - 1) - 14
-	; A + 14 = (HL - 1)
-	cp	a, '-' + 14
+	; A = (HL - 1) - 9 + -5
+	; A = (HL - 1) - 14
+	sub	a, '-' - 14
 	push	af
 	jr	z, .minus_sign
-	cp	a, '+' + 14
+	; A = (HL - 1) - 14 - ('-' - 14)
+	; A = (HL - 1) - '-'
+	sub	a, '+' - '-'
 	jr	z, .plus_sign
 	dec	hl
+	xor	a, a
 .plus_sign:
 .minus_sign:
 	push	hl
 	pop	iy
-	xor	a, a
 	sbc	hl, hl
 	ld	e, a
 	; IY = start of the digits

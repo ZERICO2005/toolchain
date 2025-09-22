@@ -17,29 +17,20 @@ _atoi:
 	sub	a, 9
 	add	a, -5
 	jr	nc, .whitespace_loop
-	; A = (HL - 1) - 9 + -5 = (HL - 1) - 14
-	; A + 14 = (HL - 1)
-if 0
-	cp	a, '-' + 14
+
+	; A = (HL - 1) - 9 + -5
+	; A = (HL - 1) - 14
+	sub	a, '-' - 14
 	push	af
 	jr	z, .minus_sign
-	cp	a, '+' + 14
-	jr	z, .plus_sign
-	dec	hl
-.minus_sign:
-.plus_sign:
-	xor	a, a
-else
-	sub	a, '-' + 14
-	push	af
-	jr	z, .minus_sign
+	; A = (HL - 1) - 14 - ('-' - 14)
+	; A = (HL - 1) - '-'
 	sub	a, '+' - '-'
 	jr	z, .plus_sign
 	dec	hl
 	xor	a, a
-.minus_sign:
 .plus_sign:
-end if
+.minus_sign:
 	ex	de, hl
 	sbc	hl, hl
 	; DE = start of the digits
