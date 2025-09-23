@@ -5,8 +5,10 @@
 	public	_atoll
 
 _atoll:
-	call	__frameset0
-	ld	hl, (ix + 6)
+	push	ix
+	ld	ix, -3
+	add	ix, sp
+	ld	hl, (ix + 9)
 	; inlined isspace
 .whitespace_loop:
 	ld	a, (hl)
@@ -45,7 +47,7 @@ _atoll:
 	; (ix - 9) = [0, 10]
 	jr	.start
 .loop:
-	; loop  : 27F +  1R  + 8W +  1
+	; loop  : 27F + 1R + 8W + 1
 	; lladd : ?
 	; llmulu: ?
 	; total : a lot per digit
@@ -60,14 +62,13 @@ _atoll:
 	cp	a, 10
 	jr	c, .loop
 .finish:
-	pop	af
 	ld	sp, ix
+	pop	af
 	pop	ix
 	ret	nz	; A != '-' positive
 	; A == '-' negative
 	jp	__llneg
 
-	extern	__frameset0
 	extern	__llneg
 	extern	__lladd
 	extern	__llmulu

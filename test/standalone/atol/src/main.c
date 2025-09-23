@@ -16,7 +16,7 @@
 //------------------------------------------------------------------------------
 
 // define to 0 or 1
-#define DEBUG_DIAGNOSTICS 1
+#define DEBUG_DIAGNOSTICS 0
 
 //------------------------------------------------------------------------------
 // Tests
@@ -38,35 +38,38 @@
     long long temp = (long long)(expr); \
     if ((long long)(val) != temp) { \
         test_printf("E: %lld\n", temp); \
+        return __LINE__; \
     } \
 } while (0);
 
 #define TEST(test) { ret = test; if (ret != 0) { return ret; }}
 
-
 int test_atoi(void) {
-    T(   0, atoi(""         ));
-    T(   0, atoi("+"        ));
-    T(   0, atoi("-"        ));
-    T(   0, atoi("0"        ));
-    T(   0, atoi("+0"       ));
-    T(   0, atoi("-0"       ));
-    T(   1, atoi("1"        ));
-    T(   1, atoi("+1"       ));
-    T(  -1, atoi("-1"       ));
-    T(   0, atoi("+-84"     ));
-    T(   0, atoi("--84"     ));
-    T(   0, atoi("-+84"     ));
-    T(   0, atoi("++84"     ));
-    T( 100, atoi("100"      ));
-    T( 100, atoi("+100"     ));
-    T(-100, atoi("-100"     ));
-    T(-123, atoi(" -123junk"));
-    T( 321, atoi(" +321dust"));
-    T(  42, atoi("0042"     ));
-    T(   0, atoi("0x2A"     ));
-    T(   0, atoi("junk"     ));
-    T(   0, atoi("a701"     ));
+    T(   0, atoi(""             ));
+    T(   0, atoi("+"            ));
+    T(   0, atoi("-"            ));
+    T(   0, atoi("0"            ));
+    T(   0, atoi("+0"           ));
+    T(   0, atoi("-0"           ));
+    T(   1, atoi("1"            ));
+    T(   1, atoi("+1"           ));
+    T(  -1, atoi("-1"           ));
+    T(   0, atoi("+-84"         ));
+    T(   0, atoi("--84"         ));
+    T(   0, atoi("-+84"         ));
+    T(   0, atoi("++84"         ));
+    T(   0, atoi("+ 84"         ));
+    T(   0, atoi("- 84"         ));
+    T( 100, atoi("100"          ));
+    T( 100, atoi("+100"         ));
+    T(-100, atoi("-100"         ));
+    T(-123, atoi(" -123junk"    ));
+    T( 321, atoi(" +321dust"    ));
+    T(  99, atoi(" \f\n\r\t\v99"));
+    T(  42, atoi("0042"         ));
+    T(   0, atoi("0x2A"         ));
+    T(   0, atoi("junk"         ));
+    T(   0, atoi("a701"         ));
 
     T( INT_MIN, atoi("-8388608" ));
     T( INT_MAX, atoi("8388607"  ));
@@ -76,28 +79,31 @@ int test_atoi(void) {
 }
 
 int test_atol(void) {
-    T(   0, atol(""         ));
-    T(   0, atol("+"        ));
-    T(   0, atol("-"        ));
-    T(   0, atol("0"        ));
-    T(   0, atol("+0"       ));
-    T(   0, atol("-0"       ));
-    T(   1, atol("1"        ));
-    T(   1, atol("+1"       ));
-    T(  -1, atol("-1"       ));
-    T(   0, atol("+-84"     ));
-    T(   0, atol("--84"     ));
-    T(   0, atol("-+84"     ));
-    T(   0, atol("++84"     ));
-    T( 100, atol("100"      ));
-    T( 100, atol("+100"     ));
-    T(-100, atol("-100"     ));
-    T(-123, atol(" -123junk"));
-    T( 321, atol(" +321dust"));
-    T(  42, atol("0042"     ));
-    T(   0, atol("0x2A"     ));
-    T(   0, atol("junk"     ));
-    T(   0, atol("a701"     ));
+    T(   0, atol(""             ));
+    T(   0, atol("+"            ));
+    T(   0, atol("-"            ));
+    T(   0, atol("0"            ));
+    T(   0, atol("+0"           ));
+    T(   0, atol("-0"           ));
+    T(   1, atol("1"            ));
+    T(   1, atol("+1"           ));
+    T(  -1, atol("-1"           ));
+    T(   0, atol("+-84"         ));
+    T(   0, atol("--84"         ));
+    T(   0, atol("-+84"         ));
+    T(   0, atol("++84"         ));
+    T(   0, atol("+ 84"         ));
+    T(   0, atol("- 84"         ));
+    T( 100, atol("100"          ));
+    T( 100, atol("+100"         ));
+    T(-100, atol("-100"         ));
+    T(-123, atol(" -123junk"    ));
+    T( 321, atol(" +321dust"    ));
+    T(  99, atol(" \f\n\r\t\v99"));
+    T(  42, atol("0042"         ));
+    T(   0, atol("0x2A"         ));
+    T(   0, atol("junk"         ));
+    T(   0, atol("a701"         ));
 
     T( LONG_MIN, atol("-2147483648"));
     T( LONG_MAX, atol("2147483647"));
@@ -107,28 +113,31 @@ int test_atol(void) {
 }
 
 int test_atoll(void) {
-    T(   0, atoll(""         ));
-    T(   0, atoll("+"        ));
-    T(   0, atoll("-"        ));
-    T(   0, atoll("0"        ));
-    T(   0, atoll("+0"       ));
-    T(   0, atoll("-0"       ));
-    T(   1, atoll("1"        ));
-    T(   1, atoll("+1"       ));
-    T(  -1, atoll("-1"       ));
-    T(   0, atoll("+-84"     ));
-    T(   0, atoll("--84"     ));
-    T(   0, atoll("-+84"     ));
-    T(   0, atoll("++84"     ));
-    T( 100, atoll("100"      ));
-    T( 100, atoll("+100"     ));
-    T(-100, atoll("-100"     ));
-    T(-123, atoll(" -123junk"));
-    T( 321, atoll(" +321dust"));
-    T(  42, atoll("0042"     ));
-    T(   0, atoll("0x2A"     ));
-    T(   0, atoll("junk"     ));
-    T(   0, atoll("a701"     ));
+    T(   0, atoll(""             ));
+    T(   0, atoll("+"            ));
+    T(   0, atoll("-"            ));
+    T(   0, atoll("0"            ));
+    T(   0, atoll("+0"           ));
+    T(   0, atoll("-0"           ));
+    T(   1, atoll("1"            ));
+    T(   1, atoll("+1"           ));
+    T(  -1, atoll("-1"           ));
+    T(   0, atoll("+-84"         ));
+    T(   0, atoll("--84"         ));
+    T(   0, atoll("-+84"         ));
+    T(   0, atoll("++84"         ));
+    T(   0, atoll("+ 84"         ));
+    T(   0, atoll("- 84"         ));
+    T( 100, atoll("100"          ));
+    T( 100, atoll("+100"         ));
+    T(-100, atoll("-100"         ));
+    T(-123, atoll(" -123junk"    ));
+    T( 321, atoll(" +321dust"    ));
+    T(  99, atoll(" \f\n\r\t\v99"));
+    T(  42, atoll("0042"         ));
+    T(   0, atoll("0x2A"         ));
+    T(   0, atoll("junk"         ));
+    T(   0, atoll("a701"         ));
 
     T( LLONG_MIN, atoll("-9223372036854775808"));
     T( LLONG_MAX, atoll("9223372036854775807"));
