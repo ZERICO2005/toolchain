@@ -16,7 +16,7 @@
 //------------------------------------------------------------------------------
 
 // define to 0 or 1
-#define DEBUG_DIAGNOSTICS 0
+#define DEBUG_DIAGNOSTICS 1
 
 //------------------------------------------------------------------------------
 // Tests
@@ -37,10 +37,13 @@
 #define T(val, expr) do { \
     long long temp = (long long)(expr); \
     if ((long long)(val) != temp) { \
-        test_printf("E: %lld\n", temp); \
+        test_printf("E: %llX\n", temp); \
         return __LINE__; \
     } \
 } while (0);
+
+long my_strtol(const char*, char*, int);
+#define strtol my_strtol
 
 #define TEST(test) { ret = test; if (ret != 0) { return ret; }}
 
@@ -146,12 +149,47 @@ int test_atoll(void) {
     return 0;
 }
 
+int test_strtol(void) {
+    T(   0, strtol(""             , NULL, 10));
+    T(   0, strtol("+"            , NULL, 10));
+    T(   0, strtol("-"            , NULL, 10));
+    T(   0, strtol("0"            , NULL, 10));
+    T(   0, strtol("+0"           , NULL, 10));
+    T(   0, strtol("-0"           , NULL, 10));
+    T(   1, strtol("1"            , NULL, 10));
+    T(   1, strtol("+1"           , NULL, 10));
+    T(  -1, strtol("-1"           , NULL, 10));
+    T(   0, strtol("+-84"         , NULL, 10));
+    T(   0, strtol("--84"         , NULL, 10));
+    T(   0, strtol("-+84"         , NULL, 10));
+    T(   0, strtol("++84"         , NULL, 10));
+    T(   0, strtol("+ 84"         , NULL, 10));
+    T(   0, strtol("- 84"         , NULL, 10));
+    T( 100, strtol("100"          , NULL, 10));
+    T( 100, strtol("+100"         , NULL, 10));
+    T(-100, strtol("-100"         , NULL, 10));
+    T(-123, strtol(" -123junk"    , NULL, 10));
+    T( 321, strtol(" +321dust"    , NULL, 10));
+    T(  99, strtol(" \f\n\r\t\v99", NULL, 10));
+    T(  42, strtol("0042"         , NULL, 10));
+    T(   0, strtol("0x2A"         , NULL, 10));
+    T(   0, strtol("junk"         , NULL, 10));
+    T(   0, strtol("a701"         , NULL, 10));
+
+    T( LONG_MIN, strtol("-2147483648", NULL, 10));
+    T( LONG_MAX, strtol("2147483647" , NULL, 10));
+    T( LONG_MAX, strtol("+2147483647", NULL, 10));
+    T(-LONG_MAX, strtol("-2147483647", NULL, 10));
+    return 0;
+}
+
 int run_tests(void) {
     int ret = 0;
 
     TEST(test_atoi());
     TEST(test_atol());
     TEST(test_atoll());
+    TEST(test_strtol());
 
     return ret;
 }
