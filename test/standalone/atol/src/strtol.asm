@@ -105,66 +105,43 @@ _my_strtol:
 	ld	hl, 0
 	ld	de, 0
 	ld	bc, 0
+	ld	d, (ix + 12)	; base
 	jr	.start
 .loop_add_10:
 	add	a, 10
 .loop:
-	ld	(ix - 3), a	; digit
-	ld	a, (ix + 12)	; base
-; __lmulu_b_fast
-	dec	sp
-	push	hl
-	inc	sp
-	pop	bc	; B = UHL, C = H
-	ld	c, a
-	mlt	bc	; BC = A * U
-	ld	d, a
-	push	de	; A * E
-	ld	d, l
+	ld	c, a ; UBC = digit if no carry, don't care otherwise
+	ld	a, d ; A = base
+	ld	d, e ; D = upper accumulator byte
+	ld	e, b ; E = 0 if no carry, don't care otherwise
+	; E:UHL = UHL * base
+	call	__lmulu_b
+	; Add digit to lower product bytes
+	add	hl, bc
+	ld	c, a ; C = base
+	ld	a, e ; A = upper product byte
+	ld	e, c ; E = base
+	mlt	de ; DE = upper accumulator byte * base
+	; Carry into upper product byte
+	adc	a, e
 	ld	e, a
-	ld	l, a
-	mlt	hl	; HL = A * H
-	ld	a, h
-	add	a, c
-	ld	h, a	; A = H
-	adc	a, b	; A = H + AU.hi + carry
-	sub	a, h	; A = AU.hi + carry
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, hl
-	mlt	de	; DE = A * L
-	; add digit
-	ld	a, (ix - 3)
-	add	a, e
-	ld	e, a
-	adc	a, d
-	sub	a, e
-	ld	d, a
-	; continue
-	add	hl, de	; UHL = AH.hi + AU.lo, AH.lo + AL.hi, AL.lo
-	pop	de
-	mlt	de	; DE = A * E
-	adc	a, e	; AU.hi + AE.lo + Carry
-	ld	e, a
-; overflow test
-	adc	a, d
-	sub	a, e
-	jr	nz, .overflow
+	; Set B != 0 if any carry from the upper byte or previous iterations
+	sbc	a, a
+	or	a, d
+	or	a, b
+	ld	b, a
+	ld	d, c ; D = base
+	; IY = str, D = base, E:UHL = accumulator, BCU = 0, B = 0 if no carry
 ; next digit
 	inc	iy
 .start:
 	ld	a, (iy)
-	; sub	a, 48
-	; cp	a, 10
-	; jr	c, .loop
-	sub	a, $30
-	cp	a, (ix - 1)
+	sub	a, 48
+	cp	a, 10
 	jr	c, .loop
+	; sub	a, $30
+	; cp	a, (ix - 1)
+	; jr	c, .loop
 	; sub	a, $11
 	; cp	a, (ix - 2)
 	; jr	c, .loop_add_10
