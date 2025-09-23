@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <errno.h>
 #include <ti/sprintf.h>
 
 //------------------------------------------------------------------------------
@@ -32,6 +33,8 @@
 #define test_printf(...)
 #endif
 
+#define ARRAY_LENGTH(x) (sizeof(x) / sizeof((x)[0]))
+
 #define C(expr) if (!(expr)) { return __LINE__; }
 
 #define T(val, expr) do { \
@@ -42,7 +45,7 @@
     } \
 } while (0);
 
-long my_strtol(const char*, char*, int);
+long my_strtol(const char*, char**, int);
 #define strtol my_strtol
 
 #define TEST(test) { ret = test; if (ret != 0) { return ret; }}
@@ -149,6 +152,36 @@ int test_atoll(void) {
     return 0;
 }
 
+void extra_strtol_test(void) {
+    // https://en.cppreference.com/w/c/string/byte/strtol
+    // parsing with error handling
+    const char* p = "10 200000000000000000000000000000 30 -40 junk";
+    printf("Parsing '%s':\n", p);
+ 
+    for (;;) {
+        // errno can be set to any non-zero value by a library function call
+        // regardless of whether there was an error, so it needs to be cleared
+        // in order to check the error set by strtol
+        errno = 0;
+        char* end = NULL;
+        const long i = strtol(p, &end, 10);
+        if (p == end) {
+            break;
+        }
+ 
+        const bool range_error = errno == ERANGE;
+        printf("Extracted '%.*s', strtol returned %ld.", (int)(end-p), p, i);
+        p = end;
+ 
+        if (range_error)
+            printf("\n --> Range error occurred.");
+ 
+        putchar('\n');
+        while (!os_GetCSC());
+    }
+    printf("Unextracted leftover: '%s'\n\n", p);
+}
+
 int test_strtol(void) {
     T(   0, strtol(""             , NULL, 10));
     T(   0, strtol("+"            , NULL, 10));
@@ -176,10 +209,36 @@ int test_strtol(void) {
     T(   0, strtol("junk"         , NULL, 10));
     T(   0, strtol("a701"         , NULL, 10));
 
+    T(10, strtol("1010", NULL, 2));
+    T(10, strtol("12",   NULL, 8));
+    T(10, strtol("A",    NULL, 16));
+    T(926192, strtol("junk", NULL, 36));
+    T(926192, strtol("jUnK", NULL, 36));
+    T(0, strtol("foobar", NULL, 37));
+    T(0, strtol("fizzbuzz", NULL, -1));
+    T(0, strtol("000?", NULL, 1));
+    T(10, strtol("012",  NULL, 0));
+    T(10, strtol("\f0xA",  NULL, 0));
+    T(0, strtol("junk", NULL, 0));
+
+    errno = 0;
     T( LONG_MIN, strtol("-2147483648", NULL, 10));
     T( LONG_MAX, strtol("2147483647" , NULL, 10));
     T( LONG_MAX, strtol("+2147483647", NULL, 10));
     T(-LONG_MAX, strtol("-2147483647", NULL, 10));
+    C(errno == 0);
+
+    T( LONG_MIN, strtol("-2147483649", NULL, 10));
+    T( LONG_MAX, strtol("2147483648" , NULL, 10));
+    T( LONG_MAX, strtol("+2147483648", NULL, 0));
+    T( LONG_MIN, strtol("-2147483649", NULL, 0));
+    T( LONG_MIN, strtol("-1qaz2WSX3edc4RFV", NULL, 36));
+    T( LONG_MAX, strtol("+1qaz2WSX3edc4RFV", NULL, 36));
+
+    #if DEBUG_DIAGNOSTICS
+    extra_strtol_test();
+    #endif
+
     return 0;
 }
 
