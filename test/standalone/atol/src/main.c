@@ -81,35 +81,67 @@ static void write_letter(char c) {
 #define TEST(test) { ret = test; if (ret != 0) { return ret; }}
 
 //------------------------------------------------------------------------------
+// Strings
+//------------------------------------------------------------------------------
+
+char const * const test_str[] = {
+    ""             ,
+    "+"            ,
+    "-"            ,
+    "0"            ,
+    "+0"           ,
+    "-0"           ,
+    "1"            ,
+    "+1"           ,
+    "-1"           ,
+    "+-84"         ,
+    "--84"         ,
+    "-+84"         ,
+    "++84"         ,
+    "+ 84"         ,
+    "- 84"         ,
+    "100"          ,
+    "+100"         ,
+    "-100"         ,
+    " -123junk"    ,
+    " +321dust"    ,
+    " \f\n\r\t\v99",
+    "0042"         ,
+    "0x2A"         ,
+    "junk"         ,
+    "a701"         ,
+};
+
+//------------------------------------------------------------------------------
 // Tests
 //------------------------------------------------------------------------------
 
 int test_atoi(void) {
-    T(   0, atoi(""             ));
-    T(   0, atoi("+"            ));
-    T(   0, atoi("-"            ));
-    T(   0, atoi("0"            ));
-    T(   0, atoi("+0"           ));
-    T(   0, atoi("-0"           ));
-    T(   1, atoi("1"            ));
-    T(   1, atoi("+1"           ));
-    T(  -1, atoi("-1"           ));
-    T(   0, atoi("+-84"         ));
-    T(   0, atoi("--84"         ));
-    T(   0, atoi("-+84"         ));
-    T(   0, atoi("++84"         ));
-    T(   0, atoi("+ 84"         ));
-    T(   0, atoi("- 84"         ));
-    T( 100, atoi("100"          ));
-    T( 100, atoi("+100"         ));
-    T(-100, atoi("-100"         ));
-    T(-123, atoi(" -123junk"    ));
-    T( 321, atoi(" +321dust"    ));
-    T(  99, atoi(" \f\n\r\t\v99"));
-    T(  42, atoi("0042"         ));
-    T(   0, atoi("0x2A"         ));
-    T(   0, atoi("junk"         ));
-    T(   0, atoi("a701"         ));
+    T(   0, atoi(test_str[ 0]));
+    T(   0, atoi(test_str[ 1]));
+    T(   0, atoi(test_str[ 2]));
+    T(   0, atoi(test_str[ 3]));
+    T(   0, atoi(test_str[ 4]));
+    T(   0, atoi(test_str[ 5]));
+    T(   1, atoi(test_str[ 6]));
+    T(   1, atoi(test_str[ 7]));
+    T(  -1, atoi(test_str[ 8]));
+    T(   0, atoi(test_str[ 9]));
+    T(   0, atoi(test_str[10]));
+    T(   0, atoi(test_str[11]));
+    T(   0, atoi(test_str[12]));
+    T(   0, atoi(test_str[13]));
+    T(   0, atoi(test_str[14]));
+    T( 100, atoi(test_str[15]));
+    T( 100, atoi(test_str[16]));
+    T(-100, atoi(test_str[17]));
+    T(-123, atoi(test_str[18]));
+    T( 321, atoi(test_str[19]));
+    T(  99, atoi(test_str[20]));
+    T(  42, atoi(test_str[21]));
+    T(   0, atoi(test_str[22]));
+    T(   0, atoi(test_str[23]));
+    T(   0, atoi(test_str[24]));
 
     T( INT_MIN, atoi("-8388608" ));
     T( INT_MAX, atoi("8388607"  ));
@@ -119,31 +151,31 @@ int test_atoi(void) {
 }
 
 int test_atol(void) {
-    T(   0, atol(""             ));
-    T(   0, atol("+"            ));
-    T(   0, atol("-"            ));
-    T(   0, atol("0"            ));
-    T(   0, atol("+0"           ));
-    T(   0, atol("-0"           ));
-    T(   1, atol("1"            ));
-    T(   1, atol("+1"           ));
-    T(  -1, atol("-1"           ));
-    T(   0, atol("+-84"         ));
-    T(   0, atol("--84"         ));
-    T(   0, atol("-+84"         ));
-    T(   0, atol("++84"         ));
-    T(   0, atol("+ 84"         ));
-    T(   0, atol("- 84"         ));
-    T( 100, atol("100"          ));
-    T( 100, atol("+100"         ));
-    T(-100, atol("-100"         ));
-    T(-123, atol(" -123junk"    ));
-    T( 321, atol(" +321dust"    ));
-    T(  99, atol(" \f\n\r\t\v99"));
-    T(  42, atol("0042"         ));
-    T(   0, atol("0x2A"         ));
-    T(   0, atol("junk"         ));
-    T(   0, atol("a701"         ));
+    T(   0, atol(test_str[ 0]));
+    T(   0, atol(test_str[ 1]));
+    T(   0, atol(test_str[ 2]));
+    T(   0, atol(test_str[ 3]));
+    T(   0, atol(test_str[ 4]));
+    T(   0, atol(test_str[ 5]));
+    T(   1, atol(test_str[ 6]));
+    T(   1, atol(test_str[ 7]));
+    T(  -1, atol(test_str[ 8]));
+    T(   0, atol(test_str[ 9]));
+    T(   0, atol(test_str[10]));
+    T(   0, atol(test_str[11]));
+    T(   0, atol(test_str[12]));
+    T(   0, atol(test_str[13]));
+    T(   0, atol(test_str[14]));
+    T( 100, atol(test_str[15]));
+    T( 100, atol(test_str[16]));
+    T(-100, atol(test_str[17]));
+    T(-123, atol(test_str[18]));
+    T( 321, atol(test_str[19]));
+    T(  99, atol(test_str[20]));
+    T(  42, atol(test_str[21]));
+    T(   0, atol(test_str[22]));
+    T(   0, atol(test_str[23]));
+    T(   0, atol(test_str[24]));
 
     T( LONG_MIN, atol("-2147483648"));
     T( LONG_MAX, atol("2147483647"));
@@ -153,31 +185,31 @@ int test_atol(void) {
 }
 
 int test_atoll(void) {
-    T(   0, atoll(""             ));
-    T(   0, atoll("+"            ));
-    T(   0, atoll("-"            ));
-    T(   0, atoll("0"            ));
-    T(   0, atoll("+0"           ));
-    T(   0, atoll("-0"           ));
-    T(   1, atoll("1"            ));
-    T(   1, atoll("+1"           ));
-    T(  -1, atoll("-1"           ));
-    T(   0, atoll("+-84"         ));
-    T(   0, atoll("--84"         ));
-    T(   0, atoll("-+84"         ));
-    T(   0, atoll("++84"         ));
-    T(   0, atoll("+ 84"         ));
-    T(   0, atoll("- 84"         ));
-    T( 100, atoll("100"          ));
-    T( 100, atoll("+100"         ));
-    T(-100, atoll("-100"         ));
-    T(-123, atoll(" -123junk"    ));
-    T( 321, atoll(" +321dust"    ));
-    T(  99, atoll(" \f\n\r\t\v99"));
-    T(  42, atoll("0042"         ));
-    T(   0, atoll("0x2A"         ));
-    T(   0, atoll("junk"         ));
-    T(   0, atoll("a701"         ));
+    T(   0, atoll(test_str[ 0]));
+    T(   0, atoll(test_str[ 1]));
+    T(   0, atoll(test_str[ 2]));
+    T(   0, atoll(test_str[ 3]));
+    T(   0, atoll(test_str[ 4]));
+    T(   0, atoll(test_str[ 5]));
+    T(   1, atoll(test_str[ 6]));
+    T(   1, atoll(test_str[ 7]));
+    T(  -1, atoll(test_str[ 8]));
+    T(   0, atoll(test_str[ 9]));
+    T(   0, atoll(test_str[10]));
+    T(   0, atoll(test_str[11]));
+    T(   0, atoll(test_str[12]));
+    T(   0, atoll(test_str[13]));
+    T(   0, atoll(test_str[14]));
+    T( 100, atoll(test_str[15]));
+    T( 100, atoll(test_str[16]));
+    T(-100, atoll(test_str[17]));
+    T(-123, atoll(test_str[18]));
+    T( 321, atoll(test_str[19]));
+    T(  99, atoll(test_str[20]));
+    T(  42, atoll(test_str[21]));
+    T(   0, atoll(test_str[22]));
+    T(   0, atoll(test_str[23]));
+    T(   0, atoll(test_str[24]));
 
     T( LLONG_MIN, atoll("-9223372036854775808"));
     T( LLONG_MAX, atoll("9223372036854775807"));
@@ -216,34 +248,36 @@ void extra_strtol_test(void) {
     printf("Unextracted leftover: '%s'\n\n", p);
 }
 
+#define PRINT_PTR(x) printf("%p - %p = %td\n", endptr, (x), endptr - (x))
+
 int test_strtol(void) {
     char* endptr;
 
-    T(   0, strtol(""             , NULL, 10));
-    T(   0, strtol("+"            , NULL, 10));
-    T(   0, strtol("-"            , NULL, 10));
-    T(   0, strtol("0"            , NULL, 10));
-    T(   0, strtol("+0"           , NULL, 10));
-    T(   0, strtol("-0"           , NULL, 10));
-    T(   1, strtol("1"            , NULL, 10));
-    T(   1, strtol("+1"           , NULL, 10));
-    T(  -1, strtol("-1"           , NULL, 10));
-    T(   0, strtol("+-84"         , NULL, 10));
-    T(   0, strtol("--84"         , NULL, 10));
-    T(   0, strtol("-+84"         , NULL, 10));
-    T(   0, strtol("++84"         , NULL, 10));
-    T(   0, strtol("+ 84"         , NULL, 10));
-    T(   0, strtol("- 84"         , NULL, 10));
-    T( 100, strtol("100"          , NULL, 10));
-    T( 100, strtol("+100"         , NULL, 10));
-    T(-100, strtol("-100"         , NULL, 10));
-    T(-123, strtol(" -123junk"    , NULL, 10));
-    T( 321, strtol(" +321dust"    , NULL, 10));
-    T(  99, strtol(" \f\n\r\t\v99", NULL, 10));
-    T(  42, strtol("0042"         , NULL, 10));
-    T(   0, strtol("0x2A"         , NULL, 10));
-    T(   0, strtol("junk"         , NULL, 10));
-    T(   0, strtol("a701"         , NULL, 10));
+    T(   0, strtol(test_str[ 0], &endptr, 10)); C(endptr == test_str[ 0] + 0);
+    T(   0, strtol(test_str[ 1], &endptr, 10)); C(endptr == test_str[ 1] + 0);
+    T(   0, strtol(test_str[ 2], &endptr, 10)); C(endptr == test_str[ 2] + 0);
+    T(   0, strtol(test_str[ 3], &endptr, 10)); C(endptr == test_str[ 3] + 1);
+    T(   0, strtol(test_str[ 4], &endptr, 10)); C(endptr == test_str[ 4] + 2);
+    T(   0, strtol(test_str[ 5], &endptr, 10)); C(endptr == test_str[ 5] + 2);
+    T(   1, strtol(test_str[ 6], &endptr, 10)); C(endptr == test_str[ 6] + 1);
+    T(   1, strtol(test_str[ 7], &endptr, 10)); C(endptr == test_str[ 7] + 2);
+    T(  -1, strtol(test_str[ 8], &endptr, 10)); C(endptr == test_str[ 8] + 2);
+    T(   0, strtol(test_str[ 9], &endptr, 10)); C(endptr == test_str[ 9] + 0);
+    T(   0, strtol(test_str[10], &endptr, 10)); C(endptr == test_str[10] + 0);
+    T(   0, strtol(test_str[11], &endptr, 10)); C(endptr == test_str[11] + 0);
+    T(   0, strtol(test_str[12], &endptr, 10)); C(endptr == test_str[12] + 0);
+    T(   0, strtol(test_str[13], &endptr, 10)); C(endptr == test_str[13] + 0);
+    T(   0, strtol(test_str[14], &endptr, 10)); C(endptr == test_str[14] + 0);
+    T( 100, strtol(test_str[15], &endptr, 10)); C(endptr == test_str[15] + 3);
+    T( 100, strtol(test_str[16], &endptr, 10)); C(endptr == test_str[16] + 4);
+    T(-100, strtol(test_str[17], &endptr, 10)); C(endptr == test_str[17] + 4);
+    T(-123, strtol(test_str[18], &endptr, 10)); C(endptr == test_str[18] + 5);
+    T( 321, strtol(test_str[19], &endptr, 10)); C(endptr == test_str[19] + 5);
+    T(  99, strtol(test_str[20], &endptr, 10)); C(endptr == test_str[20] + 8);
+    T(  42, strtol(test_str[21], &endptr, 10)); C(endptr == test_str[21] + 4);
+    T(   0, strtol(test_str[22], &endptr, 10)); C(endptr == test_str[22] + 1);
+    T(   0, strtol(test_str[23], &endptr, 10)); C(endptr == test_str[23] + 0);
+    T(   0, strtol(test_str[24], &endptr, 10)); C(endptr == test_str[24] + 0);
 
     T(10, strtol("1010", NULL, 2));
     T(10, strtol("12",   NULL, 8));

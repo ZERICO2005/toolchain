@@ -11,7 +11,7 @@ _my_strtol:
 	ld	b, l		; so we don't have to load base again
 	ld	de, -37
 	add	hl, de
-	ld	c, e		; ld c, -1 (indicates that no prefixes have been found)
+	ld	c, d		; ld c, -1 (indicates that no prefixes have been found)
 	jp	c, .invalid_base
 	ld	hl, (ix + 6)	; nptr
 ;-------------------------------------------------------------------------------
@@ -100,7 +100,8 @@ _my_strtol:
 	sbc	hl, hl
 	ld	e, l
 	ld	d, b
-	inc.s	bc
+	inc	bc
+	dec.s	bc
 	ld	b, l
 	; A = first digit of the number
 	; E:UHL = 0
