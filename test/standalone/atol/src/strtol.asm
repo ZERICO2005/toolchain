@@ -5,8 +5,7 @@
 	public	_my_strtol
 
 _my_strtol:
-	ld	hl, -3
-	call	__frameset
+	call	__frameset0
 	ld	hl, (ix + 12)	; base
 	ld	b, l		; so we don't have to load base again
 	ld	de, -37
@@ -93,11 +92,12 @@ _my_strtol:
 	ld	a, (hl)		; first digit of the number
 	push	hl
 	pop	iy
+	ld	d, b
+	inc.s	bc
+.invalid_base_hijack:
 	or	a, a
 	sbc	hl, hl
 	ld	e, l
-	ld	d, b
-	inc.s	bc
 	ld	b, l
 	; A = first digit of the number
 	; E:UHL = 0
@@ -121,17 +121,15 @@ _my_strtol:
 	cp	a, d
 	jr	c, .loop
 ;-------------------------------------------------------------------------------
-.no_number:
+; no digit found or invalid base
 	; set *endptr to nptr and return 0
 	ld	iy, (ix + 6)	; nptr
 	jr	.write_endptr
 .invalid_base:
-	sbc	hl, hl
-	inc	hl
-	ld	e, l
-	ld	b, l
+	inc	d	; set base to zero to force the function to return
 	push	af
-	jr	.no_number
+	; sets E:UHL and B to zero
+	jr	.invalid_base_hijack
 ;-------------------------------------------------------------------------------
 .check_decimal:
 	cp	a, d
@@ -197,7 +195,7 @@ _my_strtol:
 	pop	af		; Z = negative, NZ = positive, carry unknown (due to unknown base branch)
 .exact_int_min:
 .finish:
-	ld	sp, ix
+	; ld	sp, ix
 	pop	ix
 	ret	nz
 	jp	__lneg
