@@ -8,6 +8,7 @@ _my_strtol:
 	ld	hl, -3
 	call	__frameset
 	ld	hl, (ix + 12)	; base
+	ld	b, l		; store base for safe keeping
 	ld	de, -37
 	add	hl, de
 	jp	c, .invalid_base
@@ -26,43 +27,39 @@ _my_strtol:
 	; A = (HL - 1) - 9 + -5
 	; A = (HL - 1) - 14
 	sub	a, '-' - 14
-	push	af
+	push	af	; Z = negative, NZ = positive
 	jr	z, .minus_sign
 	; A = (HL - 1) - 14 - ('-' - 14)
 	; A = (HL - 1) - '-'
 	xor	a, '+' - '-'
 	jr	z, .plus_sign
 	dec	hl
+	xor	a, a
 .plus_sign:
 .minus_sign:
+	; A = 0, (HL) = start of number
 ;-------------------------------------------------------------------------------
-	ld	a, (ix + 12)	; base
-	or	a, a
+	or	a, b	; base
 	jr	z, .auto_base
 	cp	a, 16
 	jr	z, .hex_base
 	cp	a, 2
-	jr	z, .bin_base
-	jr	.other_base
-.auto_base:
-.bin_base:
-.hex_base:
-	ld	b, a
+	jr	nz, .other_base
+.auto_base:	; test for 0* 0x* 0X* 0b* 0B*
+.bin_base:	; test for 0x* 0X*
+.hex_base:	; test for 0b* 0B*
+	inc	b	; djnz hax
 	ld	a, (hl)
 	cp	a, '0'
 	jr	nz, .maybe_decimal
 	inc	hl
 	ld	a, (hl)
-	cp	a, 'x'
-	jr	z, .maybe_hex
+	res	5, a	; upper case
 	cp	a, 'X'
 	jr	z, .maybe_hex
-	cp	a, 'b'
-	jr	z, .maybe_bin
 	cp	a, 'B'
 	jr	z, .maybe_bin
 	dec	hl
-	inc	b
 	djnz	.other_base
 	ld	b, 8	; octal
 	jr	.save_new_base
@@ -70,6 +67,7 @@ _my_strtol:
 .maybe_bin:
 	bit	4, b
 	jr	nz, .undo_inc	; hexadecimal
+	; base is 0 or 2
 	inc	hl
 	ld	b, 2
 	jr	.save_new_base
@@ -77,32 +75,39 @@ _my_strtol:
 .maybe_hex:
 	bit	1, b
 	jr	nz, .undo_inc	; binary
+	; base is 0 or 16
 	inc	hl
 	ld	b, 16
 	jr	.save_new_base
 
 .undo_inc:
 	dec	hl
-	jr	.other_base
-
+	; dec	b
+	; jr	.other_base
 .maybe_decimal:
-	inc	b
+	; set to decimal if base is not zero
 	djnz	.other_base
 	ld	b, 10	; decimal
-.decimal_base:
 .save_new_base:
-	ld	(ix + 12), b	; save new base
 ;-------------------------------------------------------------------------------
 .other_base:
+	ld	a, (hl)	; first digit of the number
 	push	hl
 	pop	iy
-	xor	a, a
-	ld	hl, 0
-	ld	de, 0
-	ld	bc, 0
-	ld	d, (ix + 12)	; base
-	; jr	.start
-	ld	a, (iy)
+	or	a, a
+	sbc	hl, hl
+	ld	e, l
+	ld	d, b
+	inc.s	bc
+	ld	b, l
+	; A = first digit of the number
+	; E:UHL = 0
+	; D = base
+
+	; The strto* functions return nptr (not nptr + whitespace) if there are
+	; no digits in the string. Having a digit check here allows us to
+	; directly handle the case where the string has no digits.
+
 	sub	a, 48
 	cp	a, 10
 	jr	c, .check_digit
@@ -115,7 +120,7 @@ _my_strtol:
 	cp	a, d
 	jr	c, .loop
 	jr	.no_number
-
+;-------------------------------------------------------------------------------
 .check_decimal:
 	cp	a, d
 	jr	nc, .end_loop
@@ -171,11 +176,11 @@ _my_strtol:
 	pop	hl
 ;-------------------------------------------------------------------------------
 .overflow_testing:
+	; overflow occured if B is non-zero
 	inc	b
-	dec	b
-	jr	nz, .out_of_range
+	djnz	.out_of_range
 	bit	7, e
-	jr	nz, .maybe_overflow
+	jr	nz, .maybe_out_of_range
 ;-------------------------------------------------------------------------------
 .finish:
 	pop	af
@@ -202,7 +207,7 @@ _my_strtol:
 	ld	e, h
 	jr	.finish
 
-.maybe_overflow:
+.maybe_out_of_range:
 	pop	af
 	; greater than INT_MAX
 	jr	nz, .overflow

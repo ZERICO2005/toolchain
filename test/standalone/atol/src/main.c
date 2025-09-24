@@ -273,6 +273,32 @@ int test_strtol(void) {
     T( LONG_MIN, strtol("-1qaz2WSX3edc4RFV", NULL, 36));
     T( LONG_MAX, strtol("+1qaz2WSX3edc4RFV", NULL, 36));
 
+    {
+        char* endptr_test;
+    
+        /**
+         * @remarks If the first digit is '0' and the base is 0, then the
+         * string should be treated as octal. This also implies that the string
+         * contains a number, even if there are no more digits after the '0'.
+         * Here we test that the string has been correctly classified as
+         * containing a number, meaning that nptr != endptr.
+         */
+        char const * const octal_1 = "0";
+        char const * const octal_2 = "\n09";
+        T(0, strtol(octal_1, &endptr_test, 0));
+        C(endptr_test == octal_1 + 1);
+        T(0, strtol(octal_2, &endptr_test, 0));
+        C(endptr_test == octal_2 + 2);
+
+        char const * const hex_1 = "0x";
+        char const * const hex_2 = "0b";
+        T(0, strtol(hex_1, &endptr_test, 0));
+        printf("%p %p %td\n", hex_1, endptr_test, hex_1 - endptr_test);
+        C(endptr_test == hex_1 + 1);
+        T(0, strtol(hex_2, &endptr_test, 0));
+        C(endptr_test == hex_2 + 1);
+    }
+
     #if EXTRA_TESTS
     extra_strtol_test();
     #endif
