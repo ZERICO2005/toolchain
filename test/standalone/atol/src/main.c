@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <limits.h>
 #include <errno.h>
 #include <ti/sprintf.h>
@@ -19,18 +20,47 @@
 // define to 0 or 1
 #define DEBUG_DIAGNOSTICS 1
 
+// define to 0 or 1
+#define EXTRA_TESTS 0
+
 //------------------------------------------------------------------------------
-// Tests
+// Utility
 //------------------------------------------------------------------------------
 
 #ifndef DEBUG_DIAGNOSTICS
 #error "DEBUG_DIAGNOSTICS needs to be defined to 0 or 1"
 #endif
 
+#ifndef EXTRA_TESTS
+#error "EXTRA_TESTS needs to be defined to 0 or 1"
+#endif
+
 #if DEBUG_DIAGNOSTICS
 #define test_printf printf
+
+__attribute__((__unused__))
+static void write_letter(char c) {
+    if (isgraph(c)) {
+        fputc(c, stdout);
+        return;
+    }
+    fputc('\\', stdout);
+    switch (c) {
+        case '\0': fputc('0', stdout); return;
+        case ' ' : fputc('s', stdout); return;
+        case '\n': fputc('n', stdout); return;
+        case '\t': fputc('t', stdout); return;
+        case '\v': fputc('v', stdout); return;
+        case '\r': fputc('r', stdout); return;
+        case '\f': fputc('f', stdout); return;
+        case '\b': fputc('b', stdout); return;
+        default: printf("x%02X", (unsigned int)c); return;
+    }
+}
+
 #else
 #define test_printf(...)
+#define write_letter(...)
 #endif
 
 #define ARRAY_LENGTH(x) (sizeof(x) / sizeof((x)[0]))
@@ -45,10 +75,15 @@
     } \
 } while (0);
 
+#define TEST(test) { ret = test; if (ret != 0) { return ret; }}
+
+//------------------------------------------------------------------------------
+// Tests
+//------------------------------------------------------------------------------
+
 long my_strtol(const char*, char**, int);
 #define strtol my_strtol
 
-#define TEST(test) { ret = test; if (ret != 0) { return ret; }}
 
 int test_atoi(void) {
     T(   0, atoi(""             ));
@@ -226,6 +261,9 @@ int test_strtol(void) {
     T( LONG_MAX, strtol("2147483647" , NULL, 10));
     T( LONG_MAX, strtol("+2147483647", NULL, 10));
     T(-LONG_MAX, strtol("-2147483647", NULL, 10));
+    T( LONG_MIN, strtol("-10000000000000000000000000000000", NULL, 2));
+    T( LONG_MAX, strtol("0b1111111111111111111111111111111", NULL, 0));
+    T(-LONG_MAX, strtol(" -1111111111111111111111111111111", NULL, 2));
     C(errno == 0);
 
     T( LONG_MIN, strtol("-2147483649", NULL, 10));
@@ -235,10 +273,45 @@ int test_strtol(void) {
     T( LONG_MIN, strtol("-1qaz2WSX3edc4RFV", NULL, 36));
     T( LONG_MAX, strtol("+1qaz2WSX3edc4RFV", NULL, 36));
 
-    #if DEBUG_DIAGNOSTICS
+    #if EXTRA_TESTS
     extra_strtol_test();
     #endif
 
+    return 0;
+}
+
+/**
+ * returns [0, 9] when ['0', '9']
+ * returns [10, 35] when ['A', 'Z'] or ['a', 'z']
+ * otherwise returns -1
+ */
+char char_to_digit(char c);
+
+char char_to_digit_truth(char c) {
+    if (c >= '0' && c <= '9') {
+        return (c - '0');
+    }
+    if (c >= 'A' && c <= 'Z') {
+        return (c - 'A') + 10;
+    }
+    if (c >= 'a' && c <= 'z') {
+        return (c - 'a') + 10;
+    }
+    return -1;
+}
+
+int test_char_to_digit(void) {
+    for (int i = 0; i < 255; i++) {
+        char c = (char)i;
+        char guess = char_to_digit(c);
+        char truth = char_to_digit_truth(c);
+        if (guess != truth) {
+            test_printf("%02X: \'", (uint8_t)c);
+            write_letter(c);
+            test_printf("\' --> %d != %d\n", guess, truth);
+            return __LINE__;
+        }
+    }
     return 0;
 }
 
@@ -249,6 +322,7 @@ int run_tests(void) {
     TEST(test_atol());
     TEST(test_atoll());
     TEST(test_strtol());
+    TEST(test_char_to_digit());
 
     return ret;
 }

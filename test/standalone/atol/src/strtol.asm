@@ -96,17 +96,6 @@ _my_strtol:
 .other_base:
 	push	hl
 	pop	iy
-	ld	(ix - 1), 10
-	ld	(ix - 2), 0
-	ld	a, (ix + 12)	; base
-	cp	a, 11
-	jr	nc, .has_letters
-	ld	(ix - 1), a
-	jr	.no_letters
-.has_letters:
-	sub	a, 10
-	ld	(ix - 2), a
-.no_letters:
 	xor	a, a
 	ld	hl, 0
 	ld	de, 0
@@ -114,19 +103,22 @@ _my_strtol:
 	ld	d, (ix + 12)	; base
 	; jr	.start
 	ld	a, (iy)
-	sub	a, $30
-	cp	a, (ix - 1)
+	sub	a, 48
+	cp	a, 10
+	jr	c, .check_digit
+	; Convert an alphabetic digit, case-insensitive
+	sub	a, 65 - 48
+	res	5, a
+	add	a, 10
+.check_digit:
+	; End the loop when the digit is out of range for the base
+	cp	a, d
 	jr	c, .loop
-	sub	a, $11
-	cp	a, (ix - 2)
-	jr	c, .loop_add_10
-	sub	a, $20
-	cp	a, (ix - 2)
-	jr	c, .loop_add_10
 	jr	.no_number
 
-.loop_add_10:
-	add	a, 10
+.check_decimal:
+	cp	a, d
+	jr	nc, .end_loop
 .loop:
 	ld	c, a	; UBC = digit if no carry, don't care otherwise
 	ld	a, d	; A = base
@@ -153,16 +145,19 @@ _my_strtol:
 ; next digit
 	inc	iy
 .start:
+	; Convert a numerical digit
 	ld	a, (iy)
-	sub	a, $30
-	cp	a, (ix - 1)
+	sub	a, 48
+	cp	a, 10
+	jr	c, .check_decimal
+	; Convert an alphabetic digit, case-insensitive
+	sub	a, 65 - 48
+	res	5, a
+	add	a, 10
+	; End the loop when the digit is out of range for the base
+	cp	a, d
 	jr	c, .loop
-	sub	a, $11
-	cp	a, (ix - 2)
-	jr	c, .loop_add_10
-	sub	a, $20
-	cp	a, (ix - 2)
-	jr	c, .loop_add_10
+.end_loop:
 ;-------------------------------------------------------------------------------
 .write_endptr:
 	push	hl
