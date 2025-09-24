@@ -289,6 +289,9 @@ int test_strtol(void) {
     T(0, strtol("000?", NULL, 1));
     T(10, strtol("012",  NULL, 0));
     T(10, strtol("\f0xA",  NULL, 0));
+    T(0xCAFE, strtol("0XCAFE", NULL, 16));
+    T(0b1011100010, strtol("0b1011100010", NULL, 2));
+    T(0b0100011101, strtol("0B0100011101", NULL, 0));
     T(0, strtol("junk", NULL, 0));
 
     errno = 0;
@@ -328,16 +331,16 @@ int test_strtol(void) {
          * @remarks Make sure endptr is handled correctly when there is a
          * prefix without digits.
          */
-        char const * const hex_prefix = "0x"; /**< should point to 'x' */
-        char const * const bin_prefix = "\v-0b"; /**< should point to 'b' */
+        char const * const hex_prefix = "0x";
+        char const * const bin_prefix = "\v-0b";
         T(0, strtol(hex_prefix, &endptr, 0));
-        C(endptr == hex_prefix + 1);
+        C(endptr == hex_prefix);
         T(0, strtol(hex_prefix, &endptr, 16));
-        C(endptr == hex_prefix + 1);
+        C(endptr == hex_prefix);
         T(0, strtol(bin_prefix, &endptr, 0));
-        C(endptr == bin_prefix + 3);
+        C(endptr == bin_prefix);
         T(0, strtol(bin_prefix, &endptr, 2));
-        C(endptr == bin_prefix + 3);
+        C(endptr == bin_prefix);
     }
 
     #if EXTRA_TESTS

@@ -11,8 +11,7 @@ _my_strtol:
 	ld	b, l		; so we don't have to load base again
 	ld	de, -37
 	add	hl, de
-	ld	c, d		; ld c, -1 (indicates that no prefixes have been found)
-	jp	c, .invalid_base
+	jr	c, .invalid_base
 	ld	hl, (ix + 6)	; nptr
 ;-------------------------------------------------------------------------------
 ; consume whitespace (inlined isspace)
@@ -70,7 +69,6 @@ _my_strtol:
 	; base is 0 or 2
 	inc	hl
 	ld	b, 2
-	ld	c, b
 	jr	.save_new_base
 
 .maybe_hex:
@@ -79,7 +77,6 @@ _my_strtol:
 	; base is 0 or 16
 	inc	hl
 	ld	b, 16
-	ld	c, b
 	jr	.save_new_base
 
 .undo_inc:
@@ -100,15 +97,13 @@ _my_strtol:
 	sbc	hl, hl
 	ld	e, l
 	ld	d, b
-	inc	bc
-	dec.s	bc
+	inc.s	bc
 	ld	b, l
 	; A = first digit of the number
 	; E:UHL = 0
 	; D = base
 	; UBC = 0
 	; B = 0
-	; C is -1 if a "0x", "0X", "0b", or "0B" prefix was not detected
 
 	; The strto* functions return nptr (not nptr + whitespace) if there are
 	; no digits in the string. Having a digit check here allows us to
@@ -125,12 +120,23 @@ _my_strtol:
 	; End the loop when the digit is out of range for the base
 	cp	a, d
 	jr	c, .loop
+;-------------------------------------------------------------------------------
 	; no digit found
-	inc	c
-	jr	z, .no_number
-	; no digits found after a prefix
-	dec	iy
-	jr	.end_loop
+.no_number:
+.invalid_base:
+	xor	a, a
+	sbc	hl, hl
+	ex	de, hl
+	ld	hl, (ix + 9)	; endptr
+	adc	hl, de
+	jr	z, .invalid_base_endptr_null
+	ld	iy, (ix + 6)	; nptr
+	ld	(hl), iy
+.invalid_base_endptr_null:
+	ex	de, hl
+	ld	e, a
+	; E:UHL = 0
+	jr	.finish
 ;-------------------------------------------------------------------------------
 .check_decimal:
 	cp	a, d
@@ -158,9 +164,8 @@ _my_strtol:
 	ld	b, a
 	ld	d, c		; D = base
 	; IY = str, D = base, E:UHL = accumulator, BCU = 0, B = 0 if no carry
-; next digit
+.next_digit:
 	inc	iy
-.start:
 	; Convert a numerical digit
 	ld	a, (iy)
 	sub	a, 48
@@ -201,22 +206,6 @@ _my_strtol:
 	pop	ix
 	ret	nz
 	jp	__lneg
-
-.no_number:
-.invalid_base:
-	xor	a, a
-	sbc	hl, hl
-	ex	de, hl
-	ld	hl, (ix + 9)	; endptr
-	adc	hl, de
-	jr	z, .invalid_base_endptr_null
-	ld	iy, (ix + 6)	; nptr
-	ld	(hl), iy
-.invalid_base_endptr_null:
-	ex	de, hl
-	ld	e, a
-	; E:UHL = 0
-	jr	.finish
 
 .maybe_out_of_range:
 	pop	af		; Z = negative, NZ = positive, carry cleared
