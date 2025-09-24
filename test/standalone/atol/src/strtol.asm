@@ -25,14 +25,17 @@ _my_strtol:
 	add	a, -5
 	jr	nc, .whitespace_loop
 ; test for plus/minus signs
+	; '-' == $2D
+	; '+' == $2B
+
 	; A = (HL - 1) - 9 + -5
 	; A = (HL - 1) - 14
-	sub	a, '-' - 14
+	xor	a, $1F
 	push	af	; Z = negative, NZ = positive
 	jr	z, .minus_sign
 	; A = (HL - 1) - 14 - ('-' - 14)
 	; A = (HL - 1) - '-'
-	xor	a, '+' - '-'
+	xor	a, 2
 	jr	z, .plus_sign
 	dec	hl
 	xor	a, a
@@ -191,10 +194,10 @@ _my_strtol:
 	bit	7, e
 	jr	nz, .maybe_out_of_range
 ;-------------------------------------------------------------------------------
+.finish_pop_af:
+	pop	af		; Z = negative, NZ = positive, carry cleared
+.exact_int_min:
 .finish:
-	pop	af
-.was_int_min:
-.finish_out_of_range:
 	ld	sp, ix
 	pop	ix
 	ret	nz
@@ -202,53 +205,48 @@ _my_strtol:
 
 .no_number:
 .invalid_base:
+	xor	a, a
+	sbc	hl, hl
+	ex	de, hl
 	ld	hl, (ix + 9)	; endptr
-	add	hl, de
-	or	a, a
-	sbc	hl, de
+	adc	hl, de
 	jr	z, .invalid_base_endptr_null
-	ld	de, (ix + 6)	; nptr
-	ld	(hl), de
+	ld	iy, (ix + 6)	; nptr
+	ld	(hl), iy
 .invalid_base_endptr_null:
-	ld	hl, 5	; ERANGE
-	ld	(_errno), hl
-	ld	l, h
-	ld	e, h
+	; E:UHL = 0
+	ex	de, hl
+	ld	e, a
 	jr	.finish
 
 .maybe_out_of_range:
-	pop	af
+	pop	af		; Z = negative, NZ = positive, carry cleared
 	; greater than INT_MAX
 	jr	nz, .overflow
 	; negative
 	; check that the result is not an exact INT_MIN
-	add	hl, de
-	or	a, a
-	sbc	hl, de
+	adc	hl, hl
 	jr	nz, .is_actually_underflow
 	ld	a, e
-	cp	a, $80
-	jr	nz, .is_actually_underflow
-	jr	.was_int_min
-
+	adc	a, a
+	jr	z, .exact_int_min
 .is_actually_underflow:
-	ld	hl, 5	; ERANGE
-	ld	(_errno), hl
-	ld	e, $80
-	ld	hl, $000000
-	jr	.finish_out_of_range
+	xor	a, a		; set Z
+	jr	.underflow
 
 .out_of_range:
-	pop	af
+	pop	af		; Z = negative, NZ = positive, carry cleared
 .overflow:
-	ld	hl, 5	; ERANGE
+.underflow:
+	ld	e, $80
+	ld	hl, 5		; ERANGE
 	ld	(_errno), hl
-	ld	e, $7F
-	ld	hl, $FFFFFF
-	jr	nz, .finish_out_of_range
-	inc	hl
-	inc	e
-	jr	.finish_out_of_range
+	ld	l, h		; ld HL, 0
+	jr	z, .finish	; underflow or invalid base
+	dec	hl
+	dec	e		; sets NZ
+	; overflow
+	jr	.finish
 
 	extern	__frameset
 	extern	_errno
