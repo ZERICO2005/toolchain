@@ -8,14 +8,14 @@ _my_strtol:
 	ld	hl, -3
 	call	__frameset
 	ld	hl, (ix + 12)	; base
-	ld	b, l		; store base for safe keeping
+	ld	b, l		; so we don't have to load base again
 	ld	de, -37
 	add	hl, de
-	ld	c, e
+	ld	c, e		; ld c, -1 (indicates that no prefixes have been found)
 	jp	c, .invalid_base
 	ld	hl, (ix + 6)	; nptr
 ;-------------------------------------------------------------------------------
-; consume whitespace
+; consume whitespace (inlined isspace)
 .whitespace_loop:
 	ld	a, (hl)
 	inc	hl
@@ -25,17 +25,12 @@ _my_strtol:
 	add	a, -5
 	jr	nc, .whitespace_loop
 ; test for plus/minus signs
-	; '-' == $2D
-	; '+' == $2B
-
 	; A = (HL - 1) - 9 + -5
 	; A = (HL - 1) - 14
-	xor	a, $1F
-	push	af	; Z = negative, NZ = positive
+	xor	a, '-' - 14
+	push	af		; Z = negative, NZ = positive, carry cleared
 	jr	z, .minus_sign
-	; A = (HL - 1) - 14 - ('-' - 14)
-	; A = (HL - 1) - '-'
-	xor	a, 2
+	xor	a, ('+' - 14) xor ('-' - 14)
 	jr	z, .plus_sign
 	dec	hl
 	xor	a, a
@@ -43,7 +38,8 @@ _my_strtol:
 .minus_sign:
 	; A = 0, (HL) = start of number
 ;-------------------------------------------------------------------------------
-	or	a, b	; base
+; update the base if needed
+	or	a, b		; base
 	jr	z, .auto_base
 	cp	a, 16
 	jr	z, .hex_base
@@ -52,20 +48,20 @@ _my_strtol:
 .auto_base:	; test for 0* 0x* 0X* 0b* 0B*
 .bin_base:	; test for 0x* 0X*
 .hex_base:	; test for 0b* 0B*
-	inc	b	; djnz hax
+	inc	b		; djnz hax
 	ld	a, (hl)
 	cp	a, '0'
 	jr	nz, .maybe_decimal
 	inc	hl
 	ld	a, (hl)
-	res	5, a	; upper case
+	res	5, a		; upper case
 	cp	a, 'X'
 	jr	z, .maybe_hex
 	cp	a, 'B'
 	jr	z, .maybe_bin
 	dec	hl
 	djnz	.other_base
-	ld	b, 8	; octal
+	ld	b, 8		; octal
 	jr	.save_new_base
 
 .maybe_bin:
@@ -93,11 +89,11 @@ _my_strtol:
 .maybe_decimal:
 	; set to decimal if base is not zero
 	djnz	.other_base
-	ld	b, 10	; decimal
+	ld	b, 10		; decimal
 .save_new_base:
 ;-------------------------------------------------------------------------------
 .other_base:
-	ld	a, (hl)	; first digit of the number
+	ld	a, (hl)		; first digit of the number
 	push	hl
 	pop	iy
 	or	a, a
@@ -109,6 +105,8 @@ _my_strtol:
 	; A = first digit of the number
 	; E:UHL = 0
 	; D = base
+	; UBC = 0
+	; B = 0
 	; C is -1 if a "0x", "0X", "0b", or "0B" prefix was not detected
 
 	; The strto* functions return nptr (not nptr + whitespace) if there are
@@ -137,18 +135,18 @@ _my_strtol:
 	cp	a, d
 	jr	nc, .end_loop
 .loop:
-	ld	c, a	; UBC = digit if no carry, don't care otherwise
-	ld	a, d	; A = base
-	ld	d, e	; D = upper accumulator byte
-	ld	e, b	; E = 0 if no carry, don't care otherwise
+	ld	c, a		; UBC = digit if no carry, don't care otherwise
+	ld	a, d		; A = base
+	ld	d, e		; D = upper accumulator byte
+	ld	e, b		; E = 0 if no carry, don't care otherwise
 	; E:UHL = UHL * base
 	call	__lmulu_b
 	; Add digit to lower product bytes
 	add	hl, bc
-	ld	c, a	; C = base
-	ld	a, e	; A = upper product byte
-	ld	e, c	; E = base
-	mlt	de	; DE = upper accumulator byte * base
+	ld	c, a		; C = base
+	ld	a, e		; A = upper product byte
+	ld	e, c		; E = base
+	mlt	de		; DE = upper accumulator byte * base
 	; Carry into upper product byte
 	adc	a, e
 	ld	e, a
@@ -157,7 +155,7 @@ _my_strtol:
 	or	a, d
 	or	a, b
 	ld	b, a
-	ld	d, c	; D = base
+	ld	d, c		; D = base
 	; IY = str, D = base, E:UHL = accumulator, BCU = 0, B = 0 if no carry
 ; next digit
 	inc	iy
@@ -214,9 +212,9 @@ _my_strtol:
 	ld	iy, (ix + 6)	; nptr
 	ld	(hl), iy
 .invalid_base_endptr_null:
-	; E:UHL = 0
 	ex	de, hl
 	ld	e, a
+	; E:UHL = 0
 	jr	.finish
 
 .maybe_out_of_range:
@@ -241,7 +239,7 @@ _my_strtol:
 	ld	e, $80
 	ld	hl, 5		; ERANGE
 	ld	(_errno), hl
-	ld	l, h		; ld HL, 0
+	ld	l, h		; ld hl, 0
 	jr	z, .finish	; underflow or invalid base
 	dec	hl
 	dec	e		; sets NZ
