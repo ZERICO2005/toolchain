@@ -17,6 +17,9 @@
 // Config
 //------------------------------------------------------------------------------
 
+long my_strtol(const char* nptr, char** endptr, int base);
+#define strtol my_strtol
+
 // define to 0 or 1
 #define DEBUG_DIAGNOSTICS 1
 
@@ -80,10 +83,6 @@ static void write_letter(char c) {
 //------------------------------------------------------------------------------
 // Tests
 //------------------------------------------------------------------------------
-
-long my_strtol(const char*, char**, int);
-#define strtol my_strtol
-
 
 int test_atoi(void) {
     T(   0, atoi(""             ));
@@ -218,6 +217,8 @@ void extra_strtol_test(void) {
 }
 
 int test_strtol(void) {
+    char* endptr;
+
     T(   0, strtol(""             , NULL, 10));
     T(   0, strtol("+"            , NULL, 10));
     T(   0, strtol("-"            , NULL, 10));
@@ -274,8 +275,6 @@ int test_strtol(void) {
     T( LONG_MAX, strtol("+1qaz2WSX3edc4RFV", NULL, 36));
 
     {
-        char* endptr_test;
-    
         /**
          * @remarks If the first digit is '0' and the base is 0, then the
          * string should be treated as octal. This also implies that the string
@@ -285,18 +284,26 @@ int test_strtol(void) {
          */
         char const * const octal_1 = "0";
         char const * const octal_2 = "\n09";
-        T(0, strtol(octal_1, &endptr_test, 0));
-        C(endptr_test == octal_1 + 1);
-        T(0, strtol(octal_2, &endptr_test, 0));
-        C(endptr_test == octal_2 + 2);
-
-        char const * const hex_1 = "0x";
-        char const * const hex_2 = "0b";
-        T(0, strtol(hex_1, &endptr_test, 0));
-        printf("%p %p %td\n", hex_1, endptr_test, hex_1 - endptr_test);
-        C(endptr_test == hex_1 + 1);
-        T(0, strtol(hex_2, &endptr_test, 0));
-        C(endptr_test == hex_2 + 1);
+        T(0, strtol(octal_1, &endptr, 0));
+        C(endptr == octal_1 + 1);
+        T(0, strtol(octal_2, &endptr, 0));
+        C(endptr == octal_2 + 2);
+    }
+    {
+        /**
+         * @remarks Make sure endptr is handled correctly when there is a
+         * prefix without digits.
+         */
+        char const * const hex_prefix = "0x"; /**< should point to 'x' */
+        char const * const bin_prefix = "\v-0b"; /**< should point to 'b' */
+        T(0, strtol(hex_prefix, &endptr, 0));
+        C(endptr == hex_prefix + 1);
+        T(0, strtol(hex_prefix, &endptr, 16));
+        C(endptr == hex_prefix + 1);
+        T(0, strtol(bin_prefix, &endptr, 0));
+        C(endptr == bin_prefix + 3);
+        T(0, strtol(bin_prefix, &endptr, 2));
+        C(endptr == bin_prefix + 3);
     }
 
     #if EXTRA_TESTS

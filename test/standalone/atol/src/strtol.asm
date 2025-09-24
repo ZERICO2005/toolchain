@@ -11,6 +11,7 @@ _my_strtol:
 	ld	b, l		; store base for safe keeping
 	ld	de, -37
 	add	hl, de
+	ld	c, e
 	jp	c, .invalid_base
 	ld	hl, (ix + 6)	; nptr
 ;-------------------------------------------------------------------------------
@@ -70,6 +71,7 @@ _my_strtol:
 	; base is 0 or 2
 	inc	hl
 	ld	b, 2
+	ld	c, b
 	jr	.save_new_base
 
 .maybe_hex:
@@ -78,6 +80,7 @@ _my_strtol:
 	; base is 0 or 16
 	inc	hl
 	ld	b, 16
+	ld	c, b
 	jr	.save_new_base
 
 .undo_inc:
@@ -103,6 +106,7 @@ _my_strtol:
 	; A = first digit of the number
 	; E:UHL = 0
 	; D = base
+	; C is -1 if a "0x", "0X", "0b", or "0B" prefix was not detected
 
 	; The strto* functions return nptr (not nptr + whitespace) if there are
 	; no digits in the string. Having a digit check here allows us to
@@ -119,7 +123,12 @@ _my_strtol:
 	; End the loop when the digit is out of range for the base
 	cp	a, d
 	jr	c, .loop
-	jr	.no_number
+	; no digit found
+	inc	c
+	jr	z, .no_number
+	; no digits found after a prefix
+	dec	iy
+	jr	.end_loop
 ;-------------------------------------------------------------------------------
 .check_decimal:
 	cp	a, d
