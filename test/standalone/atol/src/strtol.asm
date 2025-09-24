@@ -121,22 +121,17 @@ _my_strtol:
 	cp	a, d
 	jr	c, .loop
 ;-------------------------------------------------------------------------------
-	; no digit found
 .no_number:
-.invalid_base:
-	xor	a, a
-	sbc	hl, hl
-	ex	de, hl
-	ld	hl, (ix + 9)	; endptr
-	adc	hl, de
-	jr	z, .invalid_base_endptr_null
+	; set *endptr to nptr and return 0
 	ld	iy, (ix + 6)	; nptr
-	ld	(hl), iy
-.invalid_base_endptr_null:
-	ex	de, hl
-	ld	e, a
-	; E:UHL = 0
-	jr	.finish
+	jr	.write_endptr
+.invalid_base:
+	sbc	hl, hl
+	inc	hl
+	ld	e, l
+	ld	b, l
+	push	af
+	jr	.no_number
 ;-------------------------------------------------------------------------------
 .check_decimal:
 	cp	a, d
@@ -199,7 +194,7 @@ _my_strtol:
 	jr	nz, .maybe_out_of_range
 ;-------------------------------------------------------------------------------
 .finish_pop_af:
-	pop	af		; Z = negative, NZ = positive, carry cleared
+	pop	af		; Z = negative, NZ = positive, carry unknown (due to unknown base branch)
 .exact_int_min:
 .finish:
 	ld	sp, ix
