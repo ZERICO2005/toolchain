@@ -18,7 +18,14 @@
 //------------------------------------------------------------------------------
 
 long my_strtol(const char* nptr, char** endptr, int base);
+long _strtol_c(const char* nptr, char** endptr, int base);
+unsigned long _strtoul_c(const char* nptr, char** endptr, int base);
+#if 0
 #define strtol my_strtol
+#else
+#define strtol _strtol_c
+#endif
+#define strtoul _strtoul_c
 
 // define to 0 or 1
 #define DEBUG_DIAGNOSTICS 1

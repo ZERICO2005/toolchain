@@ -1,17 +1,87 @@
 	assume	adl=1
 
+;-------------------------------------------------------------------------------
+
 	section	.text
 
-	public	_my_strtol
+	public	__strtol_c
 
-_my_strtol:
-	call	__frameset0
-	ld	hl, (ix + 12)	; base
+__strtol_c:
+	call	__strtol_common
+	; overflow occured if B is non-zero
+	djnz	.out_of_range
+	ld	a, e
+	rla
+	jr	c, .maybe_out_of_range
+	ret	nz
+	jp	__lneg
+
+.maybe_out_of_range:
+	; greater than INT_MAX
+	jr	nz, .overflow
+	; negative
+	; check that the result is not an exact INT_MIN
+	or	a, a
+	adc	hl, hl
+	jr	nz, .underflow
+	ld	a, e
+	adc	a, a
+	ret	z		; exact INT_MIN
+.underflow:
+	xor	a, a		; set Z
+.out_of_range:
+.overflow:
+	ld	e, $80
+	ld	hl, 5		; ERANGE
+	ld	(_errno), hl
+	ld	l, h		; ld hl, 0
+	ret	z		; underflow
+	; overflow
+	dec	hl
+	dec	e
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+
+	public	__strtoul_c
+
+__strtoul_c:
+	call	__strtol_common
+	; overflow occured if B is non-zero
+	djnz	.out_of_range
+	ret	nz
+	jp	__lneg
+
+.out_of_range:
+	ld	hl, 5		; ERANGE
+	ld	(_errno), hl
+	ld	l, h		; ld hl, 0
+	dec	hl
+	ld	e, l
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+
+	private	__strtol_common
+
+__strtol_common:
+	push	ix
+	ld	ix, 0
+	add	ix, sp
+	; output: E:UHL
+	; B = 1 if no overflow
+	; Z means that A is zero = negate return value
+	; NZ means that A is non-zero = positive return value
+	ld	hl, (ix + 15)	; base
 	ld	b, l		; so we don't have to load base again
 	ld	de, -37
 	add	hl, de
 	jr	c, .invalid_base
-	ld	hl, (ix + 6)	; nptr
+	ld	hl, (ix + 9)	; nptr
 ;-------------------------------------------------------------------------------
 ; consume whitespace (inlined isspace)
 .whitespace_loop:
@@ -26,7 +96,7 @@ _my_strtol:
 	; A = (HL - 1) - 9 + -5
 	; A = (HL - 1) - 14
 	xor	a, '-' - 14
-	push	af		; Z = negative, NZ = positive, carry cleared
+	push	af
 	jr	z, .minus_sign
 	xor	a, ('+' - 14) xor ('-' - 14)
 	jr	z, .plus_sign
@@ -123,7 +193,7 @@ _my_strtol:
 ;-------------------------------------------------------------------------------
 ; no digit found or invalid base
 	; set *endptr to nptr and return 0
-	ld	iy, (ix + 6)	; nptr
+	ld	iy, (ix + 9)	; nptr
 	jr	.write_endptr
 .invalid_base:
 	inc	d	; set base to zero to force the function to return
@@ -175,7 +245,7 @@ _my_strtol:
 ;-------------------------------------------------------------------------------
 .write_endptr:
 	push	hl
-	ld	hl, (ix + 9)	; endptr
+	ld	hl, (ix + 12)	; endptr
 	add	hl, de
 	or	a, a
 	sbc	hl, de
@@ -183,51 +253,10 @@ _my_strtol:
 	ld	(hl), iy
 .endptr_null:
 	pop	hl
-;-------------------------------------------------------------------------------
-.overflow_testing:
-	; overflow occured if B is non-zero
-	inc	b
-	djnz	.out_of_range
-	bit	7, e
-	jr	nz, .maybe_out_of_range
-;-------------------------------------------------------------------------------
-.finish_pop_af:
-	pop	af		; Z = negative, NZ = positive, carry unknown (due to unknown base branch)
-.exact_int_min:
-.finish:
-	; ld	sp, ix
+	inc	b		; djnz hax
+	pop	af
 	pop	ix
-	ret	nz
-	jp	__lneg
-
-.maybe_out_of_range:
-	pop	af		; Z = negative, NZ = positive, carry cleared
-	; greater than INT_MAX
-	jr	nz, .overflow
-	; negative
-	; check that the result is not an exact INT_MIN
-	adc	hl, hl
-	jr	nz, .is_actually_underflow
-	ld	a, e
-	adc	a, a
-	jr	z, .exact_int_min
-.is_actually_underflow:
-	xor	a, a		; set Z
-	jr	.underflow
-
-.out_of_range:
-	pop	af		; Z = negative, NZ = positive, carry cleared
-.overflow:
-.underflow:
-	ld	e, $80
-	ld	hl, 5		; ERANGE
-	ld	(_errno), hl
-	ld	l, h		; ld hl, 0
-	jr	z, .finish	; underflow or invalid base
-	dec	hl
-	dec	e		; sets NZ
-	; overflow
-	jr	.finish
+	ret
 
 	extern	__frameset0
 	extern	_errno
