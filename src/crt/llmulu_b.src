@@ -1,8 +1,15 @@
 	assume	adl=1
 
 	section	.text
+
 	public	__llmulu_b
+
 __llmulu_b:
+; Multiplies BC:UDE:UHL by (SP) and returns the 64-bit unsigned product bc:ude:uhl.
+;    I: (SP) = 8-bit multiplier, BC:UDE:UHL = multiplicand, ADL=1
+;    O: bc:ude:uhl = BC:UDE:UHL * (SP)
+;   CC: 135*r(PC)+21*r(SPL)+18*w(SPL)+33
+;   CC: 134 bytes | 135F + 21R + 18W + 33
 	push	af
 	push	iy
 	ld	iy, 0
