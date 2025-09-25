@@ -71,19 +71,20 @@ __strtoul_c:
 __strtol_common:
 	push	ix
 	ld	ix, 0
+	lea	hl, ix - 37	; ld hl, -37
 	add	ix, sp
 	; output: E:UHL
 	; B = 1 if no overflow
 	; Z means that A is zero = negate return value
 	; NZ means that A is non-zero = positive return value
-	ld	hl, (ix + 15)	; base
-	ld	b, l		; so we don't have to load base again
-	ld	de, -37
-	add	hl, de
+	ld	bc, (ix + 15)	; base
+	add	hl, bc
 	jr	c, .invalid_base
+	; UBC is zero here
+	ld	b, c		; store the base in B to allow for djnz hax
 	ld	hl, (ix + 9)	; nptr
 ;-------------------------------------------------------------------------------
-; consume whitespace (inlined isspace)
+; consume whitespace (inlinsed isspace)
 .whitespace_loop:
 	ld	a, (hl)
 	inc	hl
@@ -94,7 +95,7 @@ __strtol_common:
 	jr	nc, .whitespace_loop
 ; test for plus/minus signs
 	; A = (HL - 1) - 9 + -5
-	; A = (HL - 1) - 14
+	; A = (HL - 1) - 14            
 	xor	a, '-' - 14
 	push	af
 	jr	z, .minus_sign
@@ -109,23 +110,23 @@ __strtol_common:
 ; update the base if needed
 	or	a, b		; base
 	jr	z, .auto_base
-	cp	a, 16
+	xor	a, 16
 	jr	z, .hex_base
-	cp	a, 2
+	xor	a, 2 xor 16
 	jr	nz, .other_base
 .auto_base:	; test for 0* 0x* 0X* 0b* 0B*
 .bin_base:	; test for 0x* 0X*
 .hex_base:	; test for 0b* 0B*
 	inc	b		; djnz hax
 	ld	a, (hl)
-	cp	a, '0'
+	xor	a, '0'
 	jr	nz, .maybe_decimal
 	inc	hl
 	ld	a, (hl)
 	res	5, a		; upper case
-	cp	a, 'X'
+	xor	a, 'X'
 	jr	z, .maybe_hex
-	cp	a, 'B'
+	xor	a, 'B' xor 'X'
 	jr	z, .maybe_bin
 	dec	hl
 	djnz	.other_base
@@ -163,16 +164,15 @@ __strtol_common:
 	push	hl
 	pop	iy
 	ld	d, b
-	inc.s	bc
 .invalid_base_hijack:
-	or	a, a
+	; or	a, a		; carry is cleared here
 	sbc	hl, hl
 	ld	e, l
 	ld	b, l
 	; A = first digit of the number
 	; E:UHL = 0
 	; D = base
-	; UBC = 0
+	; UBC = 0 when base is valid (otherwise unknown)
 	; B = 0
 
 	; The strto* functions return nptr (not nptr + whitespace) if there are
@@ -196,11 +196,25 @@ __strtol_common:
 	ld	iy, (ix + 9)	; nptr
 	jr	.write_endptr
 .invalid_base:
-	inc	d	; set base to zero to force the function to return
+	xor	a, a
+	ld	d, a
+	; Setting D (base) to zero ensures that cp a, d will never set carry.
+	; forcing the function to return.
 	push	af
-	; sets E:UHL and B to zero
+	; sets E:UHL to zero
 	jr	.invalid_base_hijack
 ;-------------------------------------------------------------------------------
+	; common path   : 30F +  1R +  3W +  5 + __lmulu_b
+	; decimal path  :  6F +  0R +  0W +  1
+	; other path    : 12F +  0R +  0W +  1
+	;
+	; decimal digit : 36F +  1R +  3W +  4 + __lmulu_b
+	; other digit   : 42F +  1R +  3W +  4 + __lmulu_b
+	; __lmulu_b     : 43F + 12R +  9W + 17
+	;
+	; Total CC per digit:
+	; decimal digit : 79F + 13R + 12W + 21
+	; other digit   : 85F + 13R + 12W + 21
 .check_decimal:
 	cp	a, d
 	jr	nc, .end_loop
@@ -258,7 +272,6 @@ __strtol_common:
 	pop	ix
 	ret
 
-	extern	__frameset0
 	extern	_errno
 	extern	__lneg
 	extern	__lmulu_b
