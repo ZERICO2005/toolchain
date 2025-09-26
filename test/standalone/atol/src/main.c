@@ -45,6 +45,8 @@ unsigned long _strtoul_c(const char* nptr, char** endptr, int base);
 #error "EXTRA_TESTS needs to be defined to 0 or 1"
 #endif
 
+#define NO_ERR 0
+
 #if DEBUG_DIAGNOSTICS
 #define test_printf printf
 
@@ -87,6 +89,10 @@ static void write_letter(char c) {
 
 #define TEST(test) { ret = test; if (ret != 0) { return ret; }}
 
+#define TEST_NAME(test, name) { ret = test; if (ret != 0) { fputs(name "\n", stdout); return ret; }}
+
+#define PRINT_ENDPTR(x) printf("%p - %p = %td\n", endptr, (x), endptr - (x))
+
 //------------------------------------------------------------------------------
 // Strings
 //------------------------------------------------------------------------------
@@ -118,6 +124,199 @@ char const * const test_str[] = {
     "junk"         ,
     "a701"         ,
 };
+
+//------------------------------------------------------------------------------
+// Wrapper functions
+//------------------------------------------------------------------------------
+
+typedef long long (*atoint_func)(const char* nptr);
+
+long long atoint_atoi(const char* nptr) {
+    return (long long)atoi(nptr);
+}
+
+long long atoint_atol(const char* nptr) {
+    return (long long)atol(nptr);
+}
+
+long long atoint_atoll(const char* nptr) {
+    return (long long)atoll(nptr);
+}
+
+long long atoint_strtol(const char* nptr) {
+    return (long long)strtol(nptr, NULL, 10);
+}
+
+long long atoint_strtoul(const char* nptr) {
+    return (long long)(long)strtoul(nptr, NULL, 10);
+}
+
+long long atoint_strtoll(const char* nptr) {
+    return strtoll(nptr, NULL, 10);
+}
+
+long long atoint_strtoull(const char* nptr) {
+    return (long long)strtoull(nptr, NULL, 10);
+}
+
+typedef long long (*strtoint_func)(const char* nptr, char** endptr, int base);
+
+long long strtoint_strtol(const char* nptr, char** endptr, int base) {
+    return (long long)strtol(nptr, endptr, base);
+}
+
+long long strtoint_strtoul(const char* nptr, char** endptr, int base) {
+    return (long long)(long)strtoul(nptr, endptr, base);
+}
+
+long long strtoint_strtoll(const char* nptr, char** endptr, int base) {
+    return strtoll(nptr, endptr, base);
+}
+
+long long strtoint_strtoull(const char* nptr, char** endptr, int base) {
+    return (long long)strtoull(nptr, endptr, base);
+}
+
+//------------------------------------------------------------------------------
+// Tests
+//------------------------------------------------------------------------------
+
+bool atoint_verify(atoint_func func, long long truth, const char* nptr) {
+    long long guess = (func)(nptr);
+    if (guess == truth) {
+        return true;
+    }
+    test_printf("E: %llX\n", guess);
+    return false;
+}
+
+int atoint_test(atoint_func const func) {
+    C(atoint_verify(func,        0, ""             ));
+    C(atoint_verify(func,        0, "+"            ));
+    C(atoint_verify(func,        0, "-"            ));
+    C(atoint_verify(func,        0, "0"            ));
+    C(atoint_verify(func,        0, "+0"           ));
+    C(atoint_verify(func,        0, "-0"           ));
+    C(atoint_verify(func,        1, "1"            ));
+    C(atoint_verify(func,        1, "+1"           ));
+    C(atoint_verify(func,       -1, "-1"           ));
+    C(atoint_verify(func,        0, "+-84"         ));
+    C(atoint_verify(func,        0, "--84"         ));
+    C(atoint_verify(func,        0, "-+84"         ));
+    C(atoint_verify(func,        0, "++84"         ));
+    C(atoint_verify(func,        0, "+ 84"         ));
+    C(atoint_verify(func,        0, "- 84"         ));
+    C(atoint_verify(func,      100, "100"          ));
+    C(atoint_verify(func,      100, "+100"         ));
+    C(atoint_verify(func,     -100, "-100"         ));
+    C(atoint_verify(func,     -123, " -123junk"    ));
+    C(atoint_verify(func,      321, " +321dust"    ));
+    C(atoint_verify(func,       99, " \f\n\r\t\v99"));
+    C(atoint_verify(func,       42, "0042"         ));
+    C(atoint_verify(func,        0, "0x2A"         ));
+    C(atoint_verify(func,        0, "junk"         ));
+    C(atoint_verify(func,        0, "a701"         ));
+    C(atoint_verify(func,  8388607, "8388607"      ));
+    C(atoint_verify(func, -8388608, "-8388608"     ));
+    C(atoint_verify(func, -8388607, "\t-8388607"   ));
+    return 0;
+}
+
+bool strtoint_verify(
+    long long truth,
+    const char* nptr,
+    int endptr_offset,
+    strtoint_func func,
+    int base,
+    int errno_state
+) {
+    char* endptr;
+    long long guess;
+    errno = 0;
+    guess = (func)(nptr, &endptr, base);
+    if (guess != truth) {
+        test_printf("E: %llX\n", guess);
+        return false;
+    }
+    if (endptr != nptr + endptr_offset) {
+        test_printf("%p - %p = %td\n", endptr, nptr, endptr - nptr);
+        return false;
+    }
+    if (errno != errno_state) {
+        test_printf("errno: G %d != T %d\n", errno, errno_state);
+        return false;
+    }
+    guess = (func)(nptr, NULL, base);
+    if (guess != truth) {
+        test_printf("NULL error: %llX\n", guess);
+        return false;
+    }
+    return true;
+}
+
+int strtoint_test(strtoint_func const func) {
+    C(strtoint_verify(   0, ""             , 0, func, 10, NO_ERR));
+    C(strtoint_verify(   0, "+"            , 0, func, 10, NO_ERR));
+    C(strtoint_verify(   0, "-"            , 0, func, 10, NO_ERR));
+    C(strtoint_verify(   0, "0"            , 1, func, 10, NO_ERR));
+    C(strtoint_verify(   0, "+0"           , 2, func, 10, NO_ERR));
+    C(strtoint_verify(   0, "-0"           , 2, func, 10, NO_ERR));
+    C(strtoint_verify(   1, "1"            , 1, func, 10, NO_ERR));
+    C(strtoint_verify(   1, "+1"           , 2, func, 10, NO_ERR));
+    C(strtoint_verify(  -1, "-1"           , 2, func, 10, NO_ERR));
+    C(strtoint_verify(   0, "+-84"         , 0, func, 10, NO_ERR));
+    C(strtoint_verify(   0, "--84"         , 0, func, 10, NO_ERR));
+    C(strtoint_verify(   0, "-+84"         , 0, func, 10, NO_ERR));
+    C(strtoint_verify(   0, "++84"         , 0, func, 10, NO_ERR));
+    C(strtoint_verify(   0, "+ 84"         , 0, func, 10, NO_ERR));
+    C(strtoint_verify(   0, "- 84"         , 0, func, 10, NO_ERR));
+    C(strtoint_verify( 100, "100"          , 3, func, 10, NO_ERR));
+    C(strtoint_verify( 100, "+100"         , 4, func, 10, NO_ERR));
+    C(strtoint_verify(-100, "-100"         , 4, func, 10, NO_ERR));
+    C(strtoint_verify(-123, " -123junk"    , 5, func, 10, NO_ERR));
+    C(strtoint_verify( 321, " +321dust"    , 5, func, 10, NO_ERR));
+    C(strtoint_verify(  99, " \f\n\r\t\v99", 8, func, 10, NO_ERR));
+    C(strtoint_verify(  42, "0042"         , 4, func, 10, NO_ERR));
+    C(strtoint_verify(   0, "0x2A"         , 1, func, 10, NO_ERR));
+    C(strtoint_verify(   0, "junk"         , 0, func, 10, NO_ERR));
+    C(strtoint_verify(   0, "a701"         , 0, func, 10, NO_ERR));
+    
+    C(strtoint_verify(          10, "1010"        ,  4, func,  2, NO_ERR));
+    C(strtoint_verify(          10, "12"          ,  2, func,  8, NO_ERR));
+    C(strtoint_verify(          10, "A"           ,  1, func, 16, NO_ERR));
+    C(strtoint_verify(           0, "junk"        ,  0, func,  0, NO_ERR));
+    C(strtoint_verify(      926192, "junk"        ,  4, func, 36, NO_ERR));
+    C(strtoint_verify(      926192, "JuNk"        ,  4, func, 36, NO_ERR));
+    C(strtoint_verify(           0, "foobar"      ,  0, func, 37, NO_ERR));
+    C(strtoint_verify(           0, "fizzbuzz"    ,  0, func, -1, NO_ERR));
+    C(strtoint_verify(           0, "000?"        ,  3, func,  1, NO_ERR));
+    C(strtoint_verify(          10, "012"         ,  3, func,  0, NO_ERR));
+    C(strtoint_verify(          10, "\f0xA"       ,  4, func,  0, NO_ERR));
+    C(strtoint_verify(         -83, "-0123ABC"    ,  5, func,  0, NO_ERR));
+    C(strtoint_verify(      0xCAFE, "0XCAFE"      ,  6, func,  0, NO_ERR));
+    C(strtoint_verify(0b1011100010, "0b1011100010", 12, func,  2, NO_ERR));
+    C(strtoint_verify(0b0100011101, "0B0100011101", 12, func,  0, NO_ERR));
+
+    /**
+     * @remarks If the first digit is '0' and the base is 0, then the
+     * string should be treated as octal. This also implies that the string
+     * contains a number, even if there are no more digits after the '0'.
+     * Here we test that the string has been correctly classified as
+     * containing a number, meaning that nptr != endptr.
+     */
+    C(strtoint_verify(           0, "0"      , 1, func,  0, NO_ERR));
+    C(strtoint_verify(           0, "\n09"   , 2, func,  0, NO_ERR));
+
+    /**
+     * @remarks Make sure endptr is handled correctly when there is a
+     * prefix without digits.
+     */
+    C(strtoint_verify(           0, "0x"   , 0, func,  0, NO_ERR));
+    C(strtoint_verify(           0, "0x"   , 0, func, 16, NO_ERR));
+    C(strtoint_verify(           0, "\v-0b", 0, func,  0, NO_ERR));
+    C(strtoint_verify(           0, "\v-0b", 0, func,  2, NO_ERR));
+    return 0;
+}
 
 //------------------------------------------------------------------------------
 // Tests
@@ -254,8 +453,6 @@ void extra_strtol_test(void) {
     }
     printf("Unextracted leftover: '%s'\n\n", p);
 }
-
-#define PRINT_PTR(x) printf("%p - %p = %td\n", endptr, (x), endptr - (x))
 
 int test_strtol(void) {
     char* endptr;
@@ -400,6 +597,19 @@ int run_tests(void) {
     TEST(test_atoll());
     TEST(test_strtol());
     TEST(test_char_to_digit());
+
+    TEST_NAME(atoint_test(atoint_atoi    ), "atoi"    );
+    TEST_NAME(atoint_test(atoint_atol    ), "atol"    );
+    TEST_NAME(atoint_test(atoint_atoll   ), "atoll"   );
+    TEST_NAME(atoint_test(atoint_strtol  ), "strtol"  );
+    TEST_NAME(atoint_test(atoint_strtoul ), "strtoul" );
+    TEST_NAME(atoint_test(atoint_strtoll ), "strtoll" );
+    TEST_NAME(atoint_test(atoint_strtoull), "strtoull");
+
+    TEST_NAME(strtoint_test(strtoint_strtol  ), "strtol"  );
+    TEST_NAME(strtoint_test(strtoint_strtoul ), "strtoul" );
+    TEST_NAME(strtoint_test(strtoint_strtoll ), "strtoll" );
+    TEST_NAME(strtoint_test(strtoint_strtoull), "strtoull");
 
     return ret;
 }
