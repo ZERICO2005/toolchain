@@ -1,0 +1,464 @@
+	assume	adl=1
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+	public	__i72add_1
+__i72add_1:
+	inc	hl
+	add	hl, de
+	or	a, a
+	sbc	hl, de
+	ret	nz
+	inc	de
+	sbc	hl, de
+	add	hl, de
+	ret	nz
+	inc	bc
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+	public	__i72sub_1
+__i72sub_1:
+	add	hl, de
+	or	a, a
+	sbc	hl, de
+	dec	hl
+	ret	nz
+	ex	de, hl
+	add	hl, de
+	ex	de, hl
+	ret	c
+	dec	bc
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+	public	__i72neg
+__i72neg:
+	or	a, a
+	ex	de, hl		; ude=UHL, uhl=UDE
+	push	hl		; *spl=UDE
+	sbc	hl, hl		; uhl=0
+	sbc	hl, de		; uhl=-UHL
+	ex	(sp), hl	; uhl=UDE, *spl=-UHL
+	ex	de, hl		; ude=UDE, uhl=UHL
+	ld	hl, 0		; uhl=0
+	sbc	hl, de		; uhl=-UDE-(UHL!=0)
+				;    =-UDEUHL>>24
+	ex	de, hl		; ude=-UDEUHL>>24, uhl=UDE
+	sbc	hl, hl		; uhl=-(UDEUHL!=0)
+	or	a, a
+	sbc	hl, bc		; uhl=-UBC-(UDEUHL!=0)
+				;    =-UBCUDEUHL>>48
+	ex	(sp), hl	; bc=-BCUDEUHL>>48
+	pop	bc		; bcudeuhl=-BCUDEUHL
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+	public	__i72not
+__i72not:
+	push	hl		; *spl=UHL
+	add	hl, de		; uhl=UHL+UDE
+	ex	de, hl		; ude=UHL+UDE, uhl=UDE
+	scf
+	sbc	hl, de		; uhl=UDE-(UHL+UDE)-1
+				;    =UDE-UHL-UDE-1
+				;    =-UHL-1
+				;    =~UHL
+	ex	(sp), hl	; uhl=UHL, *spl=~UHL
+	scf
+	sbc	hl, de		; uhl=UHL-(UHL+UDE)-1
+				;    =UHL-UHL-UDE-1
+				;    =-UDE-1
+				;    =~UDE
+	ex	de, hl		; ude=~UDE, uhl=UHL+UDE
+	sbc	hl, hl		; uhl=-some_bool
+	ccf			; cf=!some_bool
+	sbc	hl, bc		; uhl=-some_bool-UBC-!some_bool
+				;    =-UBC-(some_bool+!some_bool)
+				;    =-UBC-1
+				;    =~UBC
+	ex	(sp), hl	; uhl=~UHL
+	pop	bc		; bc=~BC
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+	public	__i72add
+__i72add:
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	bc
+	ld	bc, (iy + 6)
+	add	hl, bc
+	ex	de, hl
+	ld	bc, (iy + 9)
+	adc	hl, bc
+	ex	de, hl
+	pop	bc
+	jr	nc, .no_carry_low48
+	inc	bc
+.no_carry_low48:
+	ld	iy, (iy + 12)
+	add	iy, bc
+	lea	bc, iy
+	pop	iy
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+	public	__i72sub
+__i72sub:
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	bc
+	ld	bc, (iy + 6)
+	sbc	hl, bc
+	ex	de, hl
+	ld	bc, (iy + 9)
+	sbc	hl, bc
+	ex	de, hl
+	ex	(sp), hl
+	ld	bc, (iy + 12)
+	sbc	hl, bc
+	ex	(sp), hl
+	pop	bc
+	pop	iy
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+	public	__i72cmpzero
+__i72cmpzero:
+	push	hl
+	sbc	hl, hl
+	adc	hl, bc
+	pop	hl
+	ret	nz
+	or	a, a
+	sbc	hl, bc
+	jr	nz, .positive_nonzero
+	sbc	hl, de
+	ret	z
+	add	hl, de
+.positive_nonzero:
+	inc	b
+	ld	b, c
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+	public	__i72cmpu
+__i72cmpu:
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	hl
+	ld	hl, (iy + 12)
+	sbc	hl, bc
+	jr	nz, .not_equal
+	ld	hl, (iy + 9)
+	sbc	hl, de
+	jr	nz, .not_equal
+	pop	hl
+	push	bc
+	ld	bc, (iy + 6)
+	sbc	hl, bc
+	add	hl, bc
+	pop	bc
+	pop	iy
+	ret
+.not_equal:
+	ccf
+	pop	hl
+	pop	iy
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+	public	__i72cmps
+__i72cmps:
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	bc
+	push	hl
+	push	hl
+	pop	bc
+	ld	bc, (iy + 12)
+	sbc	hl, bc
+	pop	hl
+	jr	nz, .finish
+	ld	bc, (iy + 9)
+	ex	de, hl
+	sbc	hl, bc
+	add	hl, bc
+	ex	de, hl
+	jr	nz, .finish_unsigned
+	ld	bc, (iy + 6)
+	sbc	hl, bc
+	add	hl, bc
+.finish_unsigned:
+	ld	b, a
+	sbc	a, a
+	ld	a, b
+.finish:
+	pop	bc
+	pop	iy
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+	public	__i72and
+__i72and:
+	push	af
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	hl
+	push	de
+	push	bc
+	lea	hl, iy + 17
+	lea	bc, iy - 7
+	ld	a, (bc)
+	and	a, (hl)
+	ld	(bc), a
+	pop	bc
+	ld	a, b
+	and	a, (hl)
+	ld	b, a
+	dec	hl
+	ld	a, c
+	and	a, (hl)
+	ld	c, a
+	dec	hl
+	lea	de, iy - 4
+	ld	a, (de)
+	and	a, (hl)
+	ld	(de), a
+	pop	de
+	dec	hl
+	ld	a, d
+	and	a, (hl)
+	ld	d, c
+	dec	hl
+	ld	a, e
+	and	a, (hl)
+	ld	e, a
+	dec	hl
+	ld	a, (hl)
+	lea	hl, iy - 1
+	and	a, (hl)
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	and	a, (iy + 10)
+	ld	h, a
+	ld	a, l
+	and	a, (iy + 9)
+	ld	l, a
+	pop	iy
+	pop	af
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+	public	__i72or
+__i72or:
+	push	af
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	hl
+	push	de
+	push	bc
+	lea	hl, iy + 17
+	lea	bc, iy - 7
+	ld	a, (bc)
+	or	a, (hl)
+	ld	(bc), a
+	pop	bc
+	ld	a, b
+	or	a, (hl)
+	ld	b, a
+	dec	hl
+	ld	a, c
+	or	a, (hl)
+	ld	c, a
+	dec	hl
+	lea	de, iy - 4
+	ld	a, (de)
+	or	a, (hl)
+	ld	(de), a
+	pop	de
+	dec	hl
+	ld	a, d
+	or	a, (hl)
+	ld	d, c
+	dec	hl
+	ld	a, e
+	or	a, (hl)
+	ld	e, a
+	dec	hl
+	ld	a, (hl)
+	lea	hl, iy - 1
+	or	a, (hl)
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	or	a, (iy + 10)
+	ld	h, a
+	ld	a, l
+	or	a, (iy + 9)
+	ld	l, a
+	pop	iy
+	pop	af
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+	public	__i72xor
+__i72xor:
+	push	af
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	hl
+	push	de
+	push	bc
+	lea	hl, iy + 17
+	lea	bc, iy - 7
+	ld	a, (bc)
+	xor	a, (hl)
+	ld	(bc), a
+	pop	bc
+	ld	a, b
+	xor	a, (hl)
+	ld	b, a
+	dec	hl
+	ld	a, c
+	xor	a, (hl)
+	ld	c, a
+	dec	hl
+	lea	de, iy - 4
+	ld	a, (de)
+	xor	a, (hl)
+	ld	(de), a
+	pop	de
+	dec	hl
+	ld	a, d
+	xor	a, (hl)
+	ld	d, c
+	dec	hl
+	ld	a, e
+	xor	a, (hl)
+	ld	e, a
+	dec	hl
+	ld	a, (hl)
+	lea	hl, iy - 1
+	xor	a, (hl)
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	xor	a, (iy + 10)
+	ld	h, a
+	ld	a, l
+	xor	a, (iy + 9)
+	ld	l, a
+	pop	iy
+	pop	af
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+	public	__i72mulu_b
+__i72mulu_b:
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	bc
+	push	de
+	push	hl
+	ld	b, 0
+	ld	c, (iy + 9)
+	ld	h, c
+	mlt	hl
+	ld	(iy - 9), l
+	ld	d, c
+	ld	e, (iy - 8)
+	mlt	de
+	ld	l, h
+	ld	h, b
+	add	hl, de
+	ld	(iy - 8), l
+	ld	d, c
+	ld	e, (iy - 7)
+	mlt	de
+	ld	l, h
+	ld	h, b
+	add	hl, de
+	ld	(iy - 7), l
+	ld	d, c
+	ld	e, (iy - 6)
+	mlt	de
+	ld	l, h
+	ld	h, b
+	add	hl, de
+	ld	(iy - 6), l
+	ld	d, c
+	ld	e, (iy - 5)
+	mlt	de
+	ld	l, h
+	ld	h, b
+	add	hl, de
+	ld	(iy - 5), l
+	ld	d, c
+	ld	e, (iy - 4)
+	mlt	de
+	ld	l, h
+	ld	h, b
+	add	hl, de
+	ld	(iy - 4), l
+	ld	d, c
+	ld	e, (iy - 3)
+	mlt	de
+	ld	l, h
+	ld	h, b
+	add	hl, de
+	ld	(iy - 3), l
+	ld	d, c
+	ld	e, (iy - 2)
+	mlt	de
+	ld	l, h
+	ld	h, b
+	add	hl, de
+	ld	(iy - 2), l
+	ld	d, c
+	ld	e, (iy - 1)
+	mlt	de
+	ld	l, h
+	ld	h, b
+	add	hl, de
+	ld	(iy - 1), l
+	pop	hl
+	pop	de
+	pop	bc
+	pop	iy
+	ret
