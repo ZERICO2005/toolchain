@@ -17,44 +17,24 @@ __llmulhu:
 	ld	(ix - 6), de
 	ld	(ix - 9), hl
 
-	ld	(ix - 1), 0
-
 	ld	bc, 0
 	ld	(ix - 30), bc
 	ld	c, (ix + 12)
 	ld	(ix - 33), bc
 	ld	iy, (ix + 9)
 	ld	(ix - 36), iy
-	
+
 	; x_lo * y_lo
 	ld	c, b
 	ld	d, b
 	inc	de
 	dec.s	de
 	call	__llmulu
-	; -10 0
-	; -11 0
-	; -12 0
-	;
-	; -13 0
-	; -14 0
-	; -15 B
-	;
-	; -16 C
-	; -17 UDE
-	; -18 D
-	; -19 0
-	; -20 0
-	; -21
-	; -22
-	; -23
-	; -24
 	ld	(ix - 16), bc
 	ld	(ix - 19), de
-	ld	(ix - 19), 0
 	ld	bc, 0
 	ld	(ix - 14), bc
-	ld	(ix - 12), bc
+	ld	(ix - 11), b
 
 	; x_hi * y_lo
 	inc.s	de
@@ -84,11 +64,10 @@ __llmulhu:
 	call	__llmulhu_add
 	ld	(ix - 16), bc
 	ld	(ix - 19), de
-	ld	(ix - 19), 0
 	ld	bc, 0
 	ld	(ix - 14), bc
-	ld	(ix - 12), bc
-	
+	ld	(ix - 11), b
+
 	; x_hi * y_hi
 	inc.s	de
 	ld	d, b
@@ -118,17 +97,6 @@ __llmulhu_add:
 	ld	iy, (iy + 6)
 	add	iy, bc
 	lea	bc, iy
-	ret
-
-__set_de_to_ude_zext:
-	push	hl
-	push	de
-	ld	de, 0
-	ld	hl, 2
-	add	hl, sp
-	ld	e, (hl)
-	pop	hl
-	pop	hl
 	ret
 
 	extern	__llmulu
