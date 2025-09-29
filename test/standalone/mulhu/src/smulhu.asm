@@ -6,6 +6,7 @@
 
 ; HL = ((uint32_t)HL * (uint32_t)BC) >> 16
 __smulhu:
+; CC: 26 bytes | 120F + 27R + 27W + 42
 	push	af, de
 	xor	a, a
 	ld	e, a

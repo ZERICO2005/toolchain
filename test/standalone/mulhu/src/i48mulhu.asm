@@ -6,6 +6,9 @@
 
 ; UDE:UHL = ((uint96_t)UDE:UHL * (uint96_t)UIY:UBC) >> 48
 __i48mulhu:
+; CC: 89 bytes
+; excluding __i48mulu:  90F +  39R +  39W + [  1,   3]
+; including __i48mulu: 898F + 243R + 179W + [341, 343]
 	push	ix
 	push	iy
 	push	bc

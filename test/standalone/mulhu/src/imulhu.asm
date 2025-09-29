@@ -6,6 +6,7 @@
 
 ; UHL = ((uint48_t)UHL * (uint48_t)UBC) >> 24
 __imulhu:
+; CC: 20 bytes | 223F + 60R + 44W + 86
 	push	iy, de
 	ld	iy, 0
 	lea	de, iy
