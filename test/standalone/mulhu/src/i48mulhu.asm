@@ -10,23 +10,20 @@ __i48mulhu:
 	push	iy
 	push	bc
 	ld	ix, 0
+	lea	iy, ix
 	add	ix, sp
 	push	de
 	push	hl
-	push	af
-	ld	iy, 0
 
 	; x_lo * y_lo
 	lea	de, iy
 	call	__i48mulu
-	ld	(ix - 9), de	; (uint24_t)(UDE:UHL >> 24)
+	push	de		; UHL * UBC (low carry)
 
 	; x_hi * y_lo
 	lea	de, iy
 	ld	hl, (ix - 3)
 	call	__i48mulu
-	; ld	(ix - 12), de
-	; ld	(ix - 15), hl
 	push	de		; hi24
 	push	hl		; lo24
 
@@ -35,33 +32,30 @@ __i48mulhu:
 	ld	bc, (ix + 3)
 	ld	hl, (ix - 6)
 	call	__i48mulu
-	; ld	(ix - 18), de
-	; ld	(ix - 21), hl
-
-	ld	bc, (ix - 9)
-	add	hl, bc
-	jr	nc, .no_carry_1
-	inc	de
-.no_carry_1:
-	; ld	bc, (ix - 15)
 	pop	bc		; lo24
 	add	hl, bc
 	ex	de, hl
 	pop	bc		; hi24
-	; ld	bc, (ix - 12)
 	adc	hl, bc
-	push	hl		; low order terms
+
+	pop	bc		; UHL * UBC (low carry)
+	ex	de, hl
+	add	hl, bc
+	jr	nc, .no_low_carry
+	inc	de
+.no_low_carry:
+	push	de		; high carry
 
 	; x_hi * y_hi
 	lea	de, iy
 	ld	bc, (ix + 3)
 	ld	hl, (ix - 3)
 	call	__i48mulu
-	pop	bc		; low order terms
+	pop	bc		; high carry
 	add	hl, bc
-	jr	nc, .no_carry_2
+	jr	nc, .no_high_carry
 	inc	de
-.no_carry_2:
+.no_high_carry:
 	ld	sp, ix
 	pop	bc
 	pop	iy
