@@ -6,25 +6,29 @@
 
 ; HL = ((uint32_t)HL * (uint32_t)BC) >> 16
 __smulhu:
-; CC: 26 bytes | 120F + 27R + 27W + 42
-	push	af, de
-	xor	a, a
-	ld	e, a
-	inc	hl
-	dec.s	hl
-	inc	bc
-	dec.s	bc
-	call	__lmulu
-
-	dec	sp
-	push	hl
-	inc	sp
-	pop	hl
-	ld	l, h
-	ld	h, e
-	inc	hl
-	dec.s	hl
-	pop	de, af
+; CC: 32 bytes | 33F + 12R + 9W + 17
+	push	af
+	push	de
+	push	bc
+	ld	d, l
+	ld	e, c
+	mlt	de	; L * C
+	ld	a, d
+	ld	d, l
+	ld	e, b
+	mlt	de	; L * B
+	ld	l, b
+	ld	b, h
+	mlt	bc	; H * C
+	mlt	hl	; H * B
+	add	a, c
+	ld	c, b
+	ld	b, 0
+	adc	hl, bc
+	add	a, e
+	ld	c, d
+	adc	hl, bc	; result is [0, $FFFE]
+	pop	bc
+	pop	de
+	pop	af
 	ret
-
-	extern	__lmulu
