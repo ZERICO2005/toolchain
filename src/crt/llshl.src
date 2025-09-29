@@ -3,29 +3,68 @@
 	section	.text
 	public	__llshl
 __llshl:
-; Suboptimal for large shift amounts
+; CC:
+; overhead: 25F + 11R + 6W + 1
+; per loop: 11F + 1
+; maximum : 264F + 11
 	push	af
-	ld	a, b
-
 	push	hl
 	ld	hl, 9
 	add	hl, sp
+	ld	a, (hl)
+	cp	a, 24
+	jr	nc, .shift_24_63
+; .shift_0_23:
+	ld	a, b
 	ld	b, (hl)
 	pop	hl
-
 	inc	b
-	jr	.begin
-
-.loop:
+	jr	.start_0_23
+.loop_0_23:
 	add	hl, hl
 	ex	de, hl
 	adc	hl, hl
 	ex	de, hl
 	rl	c
 	rla
-.begin:
-	djnz	.loop
-
+.start_0_23:
+	djnz	.loop_0_23
 	ld	b, a
 	pop	af
 	ret
+
+.shift_24_63:
+	pop	hl
+	sub	a, 48
+	jr	nc, .shift_48_63
+	add	a, 24
+	ld	b, a
+	ld	a, d
+	jr	z, .finish_24_47
+.loop_24_47:
+	add	hl, hl
+	rl	e
+	rla
+	djnz	.loop_24_47
+.finish_24_47:
+	ld	b, a
+	ld	c, e
+	ex	de, hl
+	or	a, a
+	sbc	hl, hl
+	pop	af
+	ret
+
+.shift_48_63:
+	ld	c, a
+	call	__ishl
+	ld	b, h
+	ld	c, l
+	or	a, a
+	sbc	hl, hl
+	ex	de, hl
+	sbc	hl, hl
+	pop	af
+	ret
+
+	extern	__ishl
