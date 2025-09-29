@@ -18,6 +18,7 @@ __llmulhu:
 	ld	(ix - 9), hl
 
 	ld	bc, 0
+	ld	(ix - 13), bc
 	ld	(ix - 30), bc
 	ld	c, (ix + 12)
 	ld	(ix - 33), bc
@@ -33,8 +34,7 @@ __llmulhu:
 	ld	(ix - 16), bc
 	ld	(ix - 19), de
 	ld	bc, 0
-	ld	(ix - 14), bc
-	ld	(ix - 11), b
+	ld	(ix - 14), b
 
 	; x_hi * y_lo
 	inc.s	de
@@ -65,8 +65,7 @@ __llmulhu:
 	ld	(ix - 16), bc
 	ld	(ix - 19), de
 	ld	bc, 0
-	ld	(ix - 14), bc
-	ld	(ix - 11), b
+	ld	(ix - 14), b
 
 	; x_hi * y_hi
 	inc.s	de
