@@ -54,53 +54,37 @@
 
 static_assert(RAND_MAX == INT_MAX, "RAND_MAX has changed");
 
-#define rand8() ((uint8_t)rand())
+#define rand8() ((uint8_t)random())
 
-#define rand16() ((uint16_t)rand())
+#define rand16() ((uint16_t)random())
 
-__attribute__((__unused__)) static uint24_t rand24(void) {
-    union {
-        uint24_t u24;
-        struct {
-            uint16_t lo16;
-            uint8_t hi8;
-        } part;
-    } split;
-    split.part.lo16 = (uint16_t)rand();
-    split.part.hi8 = (uint8_t)rand();
-    return split.u24;
-}
+#define rand24() ((uint24_t)random())
 
-__attribute__((__unused__)) static uint32_t rand32(void) {
-    union {
-        uint32_t u32;
-        uint16_t u16[2];
-    } split;
-    split.u16[0] = (uint16_t)rand();
-    split.u16[1] = (uint16_t)rand();
-    return split.u32;
-}
+#define rand32() ((uint32_t)random())
 
 __attribute__((__unused__)) static uint48_t rand48(void) {
     union {
         uint48_t u48;
-        uint16_t u16[3];
+        struct {
+            uint32_t lo32;
+            uint16_t hi16;
+        };
     } split;
-    split.u16[0] = (uint16_t)rand();
-    split.u16[1] = (uint16_t)rand();
-    split.u16[2] = (uint16_t)rand();
+    split.lo32 = (uint32_t)random();
+    split.hi16 = (uint16_t)random();
     return split.u48;
 }
 
 __attribute__((__unused__)) static uint64_t rand64(void) {
     union {
         uint64_t u64;
-        uint16_t u16[4];
+        struct {
+            uint32_t lo32;
+            uint32_t hi32;
+        };
     } split;
-    split.u16[0] = (uint16_t)rand();
-    split.u16[1] = (uint16_t)rand();
-    split.u16[2] = (uint16_t)rand();
-    split.u16[3] = (uint16_t)rand();
+    split.lo32 = (uint32_t)random();
+    split.hi32 = (uint32_t)random();
     return split.u64;
 }
 
@@ -320,7 +304,7 @@ int test_llmulhu(void) {
 }
 
 int run_tests(void) {
-    srand(AUTOTEST_SEED);
+    srandom(AUTOTEST_SEED);
     int ret = 0;
     TEST(test_smulhu());
     TEST(test_imulhu());
