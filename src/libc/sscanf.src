@@ -1,0 +1,9 @@
+	assume	adl=1
+
+	section	.text
+
+	public	_sscanf
+	public	_vsscanf
+
+_sscanf := __sscanf_c
+_vsscanf := __vsscanf_c

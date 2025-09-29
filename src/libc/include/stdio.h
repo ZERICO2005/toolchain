@@ -113,6 +113,12 @@ int asprintf(char **__restrict p_buffer, const char *__restrict format, ...)
 int vasprintf(char **__restrict p_buffer, const char *__restrict format, va_list va)
     __attribute__((format(__printf__, 2, 0))) __attribute__((nonnull(1)));
 
+int sscanf(const char *buffer, const char *format, ...)
+    __attribute__((format(__scanf__, 2, 3)));
+
+int vsscanf(const char *buffer, const char *format, va_list va)
+    __attribute__((format(__scanf__, 2, 0)));
+
 void perror(const char *str);
 
 __END_DECLS
