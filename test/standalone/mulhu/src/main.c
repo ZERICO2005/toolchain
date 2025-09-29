@@ -326,7 +326,7 @@ int run_tests(void) {
     TEST(test_imulhu());
     TEST(test_lmulhu());
     TEST(test_i48mulhu());
-    // TEST(test_llmulhu());
+    TEST(test_llmulhu());
 
     return ret;
 }

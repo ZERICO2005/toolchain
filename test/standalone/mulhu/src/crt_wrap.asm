@@ -78,10 +78,10 @@ _CRT_lmulhu:
 _CRT_i48mulhu:
 	ld	iy, 0
 	add	iy, sp
-	ld	hl, (iy + 6)
-	ld	de, (iy + 9)
-	ld	bc, (iy + 12)
-	ld	iy, (iy + 15)
+	ld	hl, (iy + 3)
+	ld	de, (iy + 6)
+	ld	bc, (iy + 9)
+	ld	iy, (iy + 12)
 	call	_set_prev_reg
 	call	__i48mulhu
 	jq	_set_next_reg
@@ -90,15 +90,15 @@ _CRT_i48mulhu:
 _CRT_llmulhu:
 	ld	iy, 0
 	add	iy, sp
-	ld	hl, (iy + 21)
-	push	hl
 	ld	hl, (iy + 18)
 	push	hl
 	ld	hl, (iy + 15)
 	push	hl
-	ld	bc, (iy + 12)
-	ld	de, (iy + 9)
-	ld	hl, (iy + 6)
+	ld	hl, (iy + 12)
+	push	hl
+	ld	bc, (iy + 9)
+	ld	de, (iy + 6)
+	ld	hl, (iy + 3)
 	call	_set_prev_reg
 	call	__llmulhu
 	ld	sp, iy

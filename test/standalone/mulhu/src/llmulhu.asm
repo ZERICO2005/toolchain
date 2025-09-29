@@ -17,6 +17,8 @@ __llmulhu:
 	ld	(ix - 6), de
 	ld	(ix - 9), hl
 
+	ld	(ix - 1), 0
+
 	ld	bc, 0
 	ld	(ix - 30), bc
 	ld	c, (ix + 12)
@@ -30,13 +32,31 @@ __llmulhu:
 	inc	de
 	dec.s	de
 	call	__llmulu
-	ld	(ix - 17), bc
-	ld	(ix - 20), de
-
-	; x_hi * y_lo
+	; -10 0
+	; -11 0
+	; -12 0
+	;
+	; -13 0
+	; -14 0
+	; -15 B
+	;
+	; -16 C
+	; -17 UDE
+	; -18 D
+	; -19 0
+	; -20 0
+	; -21
+	; -22
+	; -23
+	; -24
+	ld	(ix - 16), bc
+	ld	(ix - 19), de
+	ld	(ix - 19), 0
 	ld	bc, 0
 	ld	(ix - 14), bc
-	ld	(ix - 10), b
+	ld	(ix - 12), bc
+
+	; x_hi * y_lo
 	inc.s	de
 	ld	d, b
 	ld	e, (ix - 2)
@@ -62,11 +82,14 @@ __llmulhu:
 	call	__llmulhu_add
 	lea	iy, ix - 18
 	call	__llmulhu_add
-	ld	(ix - 17), bc
-	ld	(ix - 20), de
+	ld	(ix - 16), bc
+	ld	(ix - 19), de
+	ld	(ix - 19), 0
+	ld	bc, 0
+	ld	(ix - 14), bc
+	ld	(ix - 12), bc
 	
 	; x_hi * y_hi
-	ld	bc, 0
 	inc.s	de
 	ld	d, b
 	ld	e, (ix - 2)
@@ -82,19 +105,30 @@ __llmulhu:
 __llmulhu_add:
 	; similar to __lladd, except iy points to the stack and is destroyed
 	push	bc
-	ld	bc, (iy + 6)
+	ld	bc, (iy + 0)
 	add	hl, bc
 	ex	de, hl
-	ld	bc, (iy + 9)
+	ld	bc, (iy + 3)
 	adc	hl, bc
 	ex	de, hl
 	pop	bc
-	jr	nc, .nc48
+	jr	nc, .no_carry48
 	inc	bc
-.nc48:
-	ld	iy, (iy + 12)
+.no_carry48:
+	ld	iy, (iy + 6)
 	add	iy, bc
 	lea	bc, iy
+	ret
+
+__set_de_to_ude_zext:
+	push	hl
+	push	de
+	ld	de, 0
+	ld	hl, 2
+	add	hl, sp
+	ld	e, (hl)
+	pop	hl
+	pop	hl
 	ret
 
 	extern	__llmulu
