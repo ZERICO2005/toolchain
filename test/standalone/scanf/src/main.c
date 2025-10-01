@@ -41,12 +41,15 @@ bool double_equals(double x, double y, double absolute_difference) {
     return (fabs(x - y) <= absolute_difference);
 }
 
+int _my_sscanf_c(const char *__restrict buffer, const char *__restrict format, ...);
+#define sscanf _my_sscanf_c
+
 int basic_test(void) {
     int i, j;
     float x, y;
-    char str1[10], str2[4];
+    char str1[10] = "ZZZZZZZZZ", str2[4] = "FFF";
 
-    char input[] = "25 54.32E-1 Thompson 56789 0123 56";
+    char input[] = "25 54.32E-1 Thompson 56789 0123 40";
     /**
      * https://en.cppreference.com/w/c/io/fscanf
      * parse as follows:
@@ -60,16 +63,17 @@ int basic_test(void) {
      * %3[0-9]: a string of at most 3 decimal digits (digits 5 and 6)
      */
     int ret = sscanf(
-        input, "%d%f%9s%2d%f%*d %3[0-9]",
+        input, "%d%f%9s%2d%f%*d %3[0123456789]",
         &i, &x, str1, &j, &y, str2
     );
-    printf("Converted %d fields:\n"
-        "i = %d\n"
-        "x = %f\n"
-        "str1 = %s\n"
-        "j = %d\n"
+    while (!os_GetCSC());
+    printf("Converted %d fields: "
+        "i = %d, "
+        "x = %f, "
+        "str1 = %s, "
+        "j = %d, "
         "y = %f\n"
-        "str2 = %s\n",
+        "str2 = M%sM\n",
         ret, i, x, str1, j, y, str2);
     C(ret == 6);
     C(i == 25);
@@ -78,8 +82,8 @@ int basic_test(void) {
     C(strcmp(str1, "Thompson") == 0);
     C(j == 56);
     C(y == 789.000000);
-    C(strlen(str2) == strlen("56"));
-    C(strcmp(str2, "56") == 0);
+    C(strlen(str2) == strlen("40"));
+    C(strcmp(str2, "40") == 0);
     return 0;
 }
 

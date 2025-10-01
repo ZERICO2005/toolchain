@@ -130,7 +130,7 @@ static STRING_TO_FLOAT_TYPE limit_strtofloat(char const *__restrict str, char **
  *
  * @note `wchar_t` is not supported
  */
-int _vsscanf_c(
+int _my_vsscanf_c(
     char const * const __restrict Buffer,
     char const * const __restrict Format,
     va_list args
@@ -454,11 +454,11 @@ int _vsscanf_c(
     return assignment_count;
 }
 
-int _sscanf_c(const char *__restrict buffer, const char *__restrict format, ...)
+int _my_sscanf_c(const char *__restrict buffer, const char *__restrict format, ...)
 {
     va_list vlist;
     va_start(vlist, format);
-    int ret = _vsscanf_c(buffer, format, vlist);
+    int ret = _my_vsscanf_c(buffer, format, vlist);
     va_end(vlist);
     return ret;
 }
