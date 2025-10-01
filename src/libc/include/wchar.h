@@ -3,6 +3,10 @@
 
 #include <__wchar_def.h>
 
+typedef struct {
+
+} mbstate_t;
+
 __BEGIN_DECLS
 
 wchar_t *wmemcpy(wchar_t *__restrict dest, const wchar_t *__restrict src, size_t n)
