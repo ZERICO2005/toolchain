@@ -17,7 +17,10 @@
 /* Config                                                                     */
 /*============================================================================*/
 
-/* maximum characters to scan in matching sequences (such as "%3[^]^123abc]") */
+/**
+ * maximum characters to scan in matching sequences (such as "%3[^]^123abc]")
+ * also determines the highest maximum field width that can be processed
+ */
 #define SCAN_LIMIT 32
 
 /**
@@ -27,7 +30,7 @@
  * USE_STRTOF  : `strtof`  (speed)
  * USE_STRTOLD : `strtold` (precision)
  */
-#define STRING_TO_FLOAT_ROUTINE USE_STRTOLD
+#define STRING_TO_FLOAT USE_STRTOLD
 
 /* define to 0 or 1. Adds support for C23 '%b' format specifiers */
 #define ENABLE_BINARY_CONVERSION_FORMAT 1
@@ -36,16 +39,30 @@
 /* Code                                                                       */
 /*============================================================================*/
 
-#if SCAN_LIMIT < 4
-#error "SCAN_LIMIT is too small"
+/* minimum size to read "-32768" */
+#if SCAN_LIMIT < 7
+# error "SCAN_LIMIT is too small"
 #endif
 
-#ifndef STRING_TO_FLOAT_ROUTINE
-#error "STRING_TO_FLOAT_ROUTINE must be defined to a value"
+#ifndef STRING_TO_FLOAT
+# error "STRING_TO_FLOAT must be defined to a value"
+#endif
+
+#if STRING_TO_FLOAT == USE_STRTOD
+# define STRING_TO_FLOAT_TYPE double
+# define STRING_TO_FLOAT_FUNC strtod
+#elif STRING_TO_FLOAT == USE_STRTOF
+# define STRING_TO_FLOAT_TYPE float
+# define STRING_TO_FLOAT_FUNC strtof
+#elif STRING_TO_FLOAT == USE_STRTOLD
+# define STRING_TO_FLOAT_TYPE long double
+# define STRING_TO_FLOAT_FUNC strtold
+#else
+# error "invalid STRING_TO_FLOAT value"
 #endif
 
 #ifndef ENABLE_BINARY_CONVERSION_FORMAT
-#error "ENABLE_BINARY_CONVERSION_FORMAT must be defined to 0 or 1"
+# error "ENABLE_BINARY_CONVERSION_FORMAT must be defined to 0 or 1"
 #endif
 
 #define TEST_LENGTH_MODIFIER() do { \
@@ -62,6 +79,48 @@
 #if UINTMAX_MAX < ULLONG_MAX
 #error "UINTMAX_MAX needs to be greater than or equal ULLONG_MAX"
 #endif
+
+static intmax_t limit_strtoimax(char const *__restrict str, char ** endptr, int base, size_t max_len, char *__restrict const scan_buf) {
+    if (max_len == 0) {
+        return strtoimax(str, (char**)endptr, base);
+    }
+    size_t copy_size = ((max_len + 1) > SCAN_LIMIT) ? SCAN_LIMIT : (max_len + 1);
+    strncpy(scan_buf, str, copy_size);
+    /* null terminate */
+    scan_buf[copy_size - 1] = '\0';
+    char* scan_endptr;
+    intmax_t value = strtoimax(scan_buf, &scan_endptr, base);
+    *endptr = (char*)(str + (scan_endptr - scan_buf));
+    return value;
+}
+
+static uintmax_t limit_strtoumax(char const *__restrict str, char ** endptr, int base, size_t max_len, char *__restrict const scan_buf) {
+    if (max_len == 0) {
+        return strtoumax(str, (char**)endptr, base);
+    }
+    size_t copy_size = ((max_len + 1) > SCAN_LIMIT) ? SCAN_LIMIT : (max_len + 1);
+    strncpy(scan_buf, str, copy_size);
+    /* null terminate */
+    scan_buf[copy_size - 1] = '\0';
+    char* scan_endptr;
+    uintmax_t value = strtoumax(scan_buf, &scan_endptr, base);
+    *endptr = (char*)(str + (scan_endptr - scan_buf));
+    return value;
+}
+
+static STRING_TO_FLOAT_TYPE limit_strtofloat(char const *__restrict str, char ** endptr, size_t max_len, char *__restrict const scan_buf) {
+    if (max_len == 0) {
+        return STRING_TO_FLOAT_FUNC(str, (char**)endptr);
+    }
+    size_t copy_size = ((max_len + 1) > SCAN_LIMIT) ? SCAN_LIMIT : (max_len + 1);
+    strncpy(scan_buf, str, copy_size);
+    /* null terminate */
+    scan_buf[copy_size - 1] = '\0';
+    char* scan_endptr;
+    STRING_TO_FLOAT_TYPE value = STRING_TO_FLOAT_FUNC(scan_buf, &scan_endptr);
+    *endptr = (char*)(str + (scan_endptr - scan_buf));
+    return value;
+}
 
 /**
  * @author zerico2005 (Originally based off of https://github.com/tusharjois/bscanf)
@@ -302,7 +361,7 @@ int _vsscanf_c(
                 TEST_LENGTH_MODIFIER();
                 char *endptr;
                 int base = ((*fmt == 'd') ? 10 : 0);
-                intmax_t value = strtoimax(buf, &endptr, base);
+                intmax_t value = limit_strtoimax(buf, &endptr, base, max_width, scan_buf);
                 if (!is_suppressed) {
                     void* ptr = va_arg(args, void*);
                     RETURN_IF_NULL(ptr);
@@ -340,7 +399,7 @@ int _vsscanf_c(
                 } else if (*fmt == 'o') {
                     base = 8;
                 }
-                uintmax_t value = strtoumax(buf, &endptr, base);
+                uintmax_t value = limit_strtoumax(buf, &endptr, base, max_width, scan_buf);
                 if (!is_suppressed) {
                     void* ptr = va_arg(args, void*);
                     RETURN_IF_NULL(ptr);
@@ -354,7 +413,7 @@ int _vsscanf_c(
                 fmt++;
                 assignment_count++;
             } break;
-        #if STRING_TO_FLOAT_ROUTINE
+        #if STRING_TO_FLOAT
             case 'a':
             case 'A':
             case 'e':
@@ -365,15 +424,7 @@ int _vsscanf_c(
             case 'G':
             /* float */ {
                 char *endptr;
-                #if STRING_TO_FLOAT_ROUTINE == USE_STRTOD
-                    double value = strtod(buf, &endptr);
-                #elif STRING_TO_FLOAT_ROUTINE == USE_STRTOF
-                    float value = strtof(buf, &endptr);
-                #elif STRING_TO_FLOAT_ROUTINE == USE_STRTOLD
-                    long double value = strtold(buf, &endptr);
-                #else
-                    #error "invalid STRING_TO_FLOAT_ROUTINE value"
-                #endif
+                STRING_TO_FLOAT_TYPE value = limit_strtofloat(buf, &endptr, max_width, scan_buf);
                 if (!is_suppressed) {
                     void* ptr = va_arg(args, void*);
                     RETURN_IF_NULL(ptr);
@@ -393,7 +444,7 @@ int _vsscanf_c(
                 fmt++;
                 assignment_count++;
             } break;
-        #endif /* STRING_TO_FLOAT_ROUTINE */
+        #endif /* STRING_TO_FLOAT */
             default:
             /* unknown format */ {
                 return assignment_count;

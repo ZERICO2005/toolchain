@@ -7,3 +7,6 @@
 
 _sscanf := __sscanf_c
 _vsscanf := __vsscanf_c
+
+	extern	__sscanf_c
+	extern	__vsscanf_c
