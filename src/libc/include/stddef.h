@@ -24,4 +24,23 @@ typedef struct {
 } max_align_t;
 #endif /* __STDC_VERSION__ >= 199901L || __cplusplus >= 201103L */
 
+#ifdef __cplusplus
+
+using ::ptrdiff_t;
+using ::size_t;
+using ::max_align_t;
+using nullptr_t = decltype(nullptr);
+
+enum class byte : unsigned char {};
+
+constexpr byte  operator| (byte __lhs, byte __rhs) noexcept { return byte(char(__lhs) | char(__rhs)); }
+constexpr byte& operator|=(byte& __lhs, byte __rhs) noexcept { return __lhs = __lhs | __rhs; }
+constexpr byte  operator& (byte __lhs, byte __rhs) noexcept { return byte(char(__lhs) & char(__rhs)); }
+constexpr byte& operator&=(byte& __lhs, byte __rhs) noexcept { return __lhs = __lhs & __rhs; }
+constexpr byte  operator^ (byte __lhs, byte __rhs) noexcept { return byte(char(__lhs) ^ char(__rhs)); }
+constexpr byte& operator^=(byte& __lhs, byte __rhs) noexcept { return __lhs = __lhs ^ __rhs; }
+constexpr byte  operator~ (byte __rhs) noexcept { return byte(~char(__rhs)); }
+
+#endif /* __cplusplus */
+
 #endif /* _STDDEF_H */
