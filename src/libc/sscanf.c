@@ -4,11 +4,357 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <limits.h>
 #include <inttypes.h>
 #include <ctype.h>
 
 /* maximum characters to scan in %3[^]^123abc] type strings*/
 #define SCAN_LIMIT 32
+
+#if SCAN_LIMIT < 4
+#error "SCAN_LIMIT is too small"
+#endif
+
+#define DEFAULT_MAX_WIDTH 65535
+
+#define TEST_LENGTH_MODIFIER() do { \
+    if ( \
+        long_double || \
+        ptr_size == 0 || \
+        ptr_size > sizeof(uintmax_t) \
+    ) { \
+        /* invalid length modifier */ \
+        return assignment_count; \
+    } \
+} while (0)
+
+#define CONSUME_WHITESPACE() while (isspace(*buf)) { buf++; }
+#define RETURN_IF_NULL(ptr) if ((ptr) == NULL) { return assignment_count; }
+
+#if UINTMAX_MAX < ULLONG_MAX
+#error "UINTMAX_MAX needs to be greater than or equal ULLONG_MAX"
+#endif
+
+/**
+ * @author https://github.com/tusharjois/bscanf
+ * @remarks modified version of bscanf that removes the mandatory maximum
+ * field-width feature.
+ */
+int _vsscanf_c(
+    char const * const __restrict Buffer,
+    char const * const __restrict Format,
+    va_list args
+) {
+    __attribute__((__unused__)) char scan_buf[SCAN_LIMIT];
+    int assignment_count = 0;
+    char const *__restrict buf = Buffer;
+    char const *__restrict fmt = Format;
+    if (buf == NULL || fmt == NULL) {
+        return EOF;
+    }
+    while (*fmt != '\0') {
+        if (isspace(*fmt)) {
+            CONSUME_WHITESPACE();
+            fmt++;
+            continue;
+        }
+        if (*fmt != '%') {
+            if (*fmt != *buf) {
+                /* end of format */
+                return assignment_count;
+            }
+            fmt++;
+            buf++;
+            continue;
+        }
+        /* conversion specifier */
+        fmt++;
+        bool is_suppressed = false;
+        bool long_double = false;
+        bool wide_char = false;
+        size_t max_width = 0;
+        size_t ptr_size = 3;
+        if (*fmt == '*') {
+            is_suppressed = true;
+            fmt++;
+        }
+        /* test for digits */
+        if (isdigit(*fmt)) {
+            char *endptr;
+            max_width = (size_t)strtoul(fmt, &endptr, 10);
+            if (max_width == 0 || fmt == endptr) {
+                /* failed */
+                return assignment_count;
+            }
+            fmt = endptr;
+        }
+        /* test for length modifiers */
+        switch (*fmt) {
+            case 'h':
+            {
+                ptr_size = sizeof(short);
+                fmt++;
+                if (*fmt == 'h') {
+                    ptr_size = sizeof(char);
+                    fmt++;
+                }
+            } break;
+            case 'z':
+            {
+                ptr_size = sizeof(size_t);
+                fmt++;
+            } break;
+            case 'l':
+            {
+                ptr_size = sizeof(long);
+                fmt++;
+                if (*fmt == 'l') {
+                    ptr_size = sizeof(long long);
+                    fmt++;
+                } else {
+                    wide_char = true;
+                }
+            } break;
+            case 't':
+            {
+                ptr_size = 4;
+                fmt++;
+            } break;
+            case 'L':
+            {
+                long_double = true;
+                ptr_size = 0;
+                fmt++;
+            } break;
+            case 'j':
+            {
+                ptr_size = sizeof(intmax_t);
+                fmt++;
+            } break;
+            default: break;
+        }
+        /**
+         * @remarks All conversion specifiers other than 'n' 'c' '[' consume
+         * and discard all leading whitespace characters.
+         */
+        if (*fmt != 'n' && *fmt != 'c' && *fmt != '[') {
+            CONSUME_WHITESPACE();
+        }
+        /* test for format type */
+        switch (*fmt) {
+            case '%':
+            /* handle "%%" */ {
+                if (*fmt != *buf) {
+                    return assignment_count;
+                }
+                buf++;
+                fmt++;
+                continue;
+            }
+            case 'n':
+            /* number of characters read so far */ {
+                if (is_suppressed) {
+                    /* "%*n" is undefined behaviour */
+                    return assignment_count;
+                }
+                TEST_LENGTH_MODIFIER();
+                void* ptr = va_arg(args, void*);
+                RETURN_IF_NULL(ptr);
+                unsigned long long diff = buf - Buffer;
+                memcpy(ptr, &diff, ptr_size);
+                fmt++;
+                // assignment_count++;
+                continue;
+            } break;
+            case 'c':
+            case 's':
+            /* string */ {
+                const bool string_format = (*fmt == 's');
+                if (max_width == 0) {
+                    /* enforce bounds checking */
+                    return assignment_count;
+                }
+                if (wide_char) {
+                    /* unimplemented */
+                    return assignment_count;
+                }
+                char const *__restrict const begin = buf;
+                for (; max_width --> 0;) {
+                    if (*buf == '\0') {
+                        break;
+                    }
+                    if (string_format && isspace(*buf)) {
+                        break;
+                    }
+                    buf++;
+                }
+                size_t copy_size = buf - begin;
+                if (!is_suppressed) {
+                    char* ptr = va_arg(args, char*);
+                    RETURN_IF_NULL(ptr);
+                    memcpy(ptr, begin, copy_size);
+                    if (string_format) {
+                        /* null terminate */
+                        *(ptr + copy_size) = '\0';
+                    }
+                }
+                fmt++;
+                continue;
+            } break;
+            case '[':
+            /* match range */ {
+                fmt++;
+                if (max_width == 0) {
+                    /* enforce bounds checking */
+                    return assignment_count;
+                }
+                if (wide_char) {
+                    /* unimplemented */
+                    return assignment_count;
+                }
+                bool invert_match = false;
+                bool starts_with_bracket = false;
+                if (*fmt == '^') {
+                    invert_match = true;
+                    fmt++;
+                }
+                if (*fmt == ']') {
+                    starts_with_bracket = true;
+                    fmt++;
+                }
+                char const *__restrict last_bracket = strchr(fmt, ']');
+                if (last_bracket == NULL) {
+                    if (!(invert_match && starts_with_bracket)) {
+                        return assignment_count;
+                    }
+                    /* special case of "[^]" "*/
+                    scan_buf[0] = '^';
+                    scan_buf[1] = '\0';
+                } else {
+                    if (starts_with_bracket) {
+                        fmt--;
+                        /* *fmt == ']' */
+                    }
+                    /* fmt + scan_length points to the ending ']', so move it back */
+                    size_t scan_length = (last_bracket - fmt) - 1;
+                    if (scan_length >= SCAN_LIMIT) {
+                        /* too many characters */
+                        return assignment_count;
+                    }
+                    memcpy(scan_buf, fmt, scan_length);
+                    /* move format to the character after the ending ']' */
+                    fmt = last_bracket + 1;
+                    /* null terminate */
+                    *(scan_buf + scan_length) = '\0';
+                }
+
+                size_t match_length;
+                if (invert_match) {
+                    match_length = strcspn(buf, scan_buf);
+                } else {
+                    match_length = strspn(buf, scan_buf);
+                }
+                if (!is_suppressed) {
+                    char* ptr = va_arg(args, char*);
+                    RETURN_IF_NULL(ptr);
+                    memcpy(ptr, buf, match_length);
+                    /* null terminate */
+                    *(ptr + match_length) = '\0';
+                }
+                /* move buf to the character after the last matched character */
+                buf += match_length;
+                buf++;
+                continue;
+            } break;
+            case 'i':
+            case 'd':
+            /* signed integer */ {
+                TEST_LENGTH_MODIFIER();
+                char *endptr;
+                int base = ((*fmt == 'd') ? 10 : 0);
+                intmax_t value = strtoimax(buf, &endptr, base);
+                if (!is_suppressed) {
+                    void* ptr = va_arg(args, void*);
+                    RETURN_IF_NULL(ptr);
+                    memcpy(ptr, &value, ptr_size);
+                }
+                if (buf == endptr) {
+                    /* failed */
+                    return assignment_count;
+                }
+                buf = endptr;
+                fmt++;
+                assignment_count++;
+            } break;
+            case 'u':
+            case 'o':
+            case 'x':
+            case 'X':
+            case 'p':
+            /* unsigned integer or pointer */ {
+                TEST_LENGTH_MODIFIER();
+                char *endptr;
+                int base = 10;
+                if (*fmt == 'X' || *fmt == 'x' || *fmt == 'p') {
+                    base = 16;
+                    if (*fmt == 'p') {
+                        ptr_size = 3;
+                    }
+                } else if (*fmt == 'o') {
+                    base = 8;
+                }
+                uintmax_t value = strtoumax(buf, &endptr, base);
+                if (!is_suppressed) {
+                    void* ptr = va_arg(args, void*);
+                    RETURN_IF_NULL(ptr);
+                    memcpy(ptr, &value, ptr_size);
+                }
+                if (buf == endptr) {
+                    /* failed */
+                    return assignment_count;
+                }
+                buf = endptr;
+                fmt++;
+                assignment_count++;
+            } break;
+            case 'a':
+            case 'A':
+            case 'e':
+            case 'E':
+            case 'f':
+            case 'F':
+            case 'g':
+            case 'G':
+            /* float */ {
+                char *endptr;
+                long double value = strtold(buf, &endptr);
+                if (!is_suppressed) {
+                    void* ptr = va_arg(args, void*);
+                    RETURN_IF_NULL(ptr);
+                    if (long_double) {
+                        *(long double*)ptr = (long double)value;
+                    } else {
+                        *(double*)ptr = (double)value;
+                    }
+                }
+                if (buf == endptr) {
+                    /* failed */
+                    return assignment_count;
+                }
+                buf = endptr;
+                fmt++;
+                assignment_count++;
+            } break;
+            default:
+            /* unknown format */ {
+                return assignment_count;
+            } break;
+        }
+    }
+    return assignment_count;
+}
+
+#if 0
 
 #define _BSCANF_CONSUME_WSPACE() while (isspace(*buf_ptr)) {buf_ptr++;}
 #define _BSCANF_CHECK(x) if (!(x)) goto exit;
@@ -80,16 +426,16 @@ int _vsscanf_c(const char *__restrict buffer, const char *__restrict format, va_
             } else {
                 is_suppressed = false;
             }
-            
+
             /* Check for maximum field width. */
             if (isdigit(*fmt_ptr)) {
                 max_width = strtoul(fmt_ptr, &end_ptr, 10);
                 /* Check if the sequence is a number > 0. */
                 _BSCANF_CHECK(fmt_ptr != end_ptr);
                 _BSCANF_CHECK(max_width > 0);
-        
+
                 fmt_ptr = end_ptr;
-            }        
+            }
 
             /* Check for a length modifier. */
             if ('h' == *fmt_ptr || 'l' == *fmt_ptr) {
@@ -293,6 +639,7 @@ int _vsscanf_c(const char *__restrict buffer, const char *__restrict format, va_
  exit:
     return num_args_set;
 }
+#endif
 
 int _sscanf_c(const char *__restrict buffer, const char *__restrict format, ...)
 {
