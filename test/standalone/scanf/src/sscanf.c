@@ -13,6 +13,33 @@
 #define USE_STRTOF  2
 #define USE_STRTOLD 3
 
+#define test_printf(...) sprintf((char*)0xFB0000, __VA_ARGS__)
+
+size_t _strcspn_c(char const *__restrict str, char const *__restrict reject)
+{
+    size_t count = 0;
+
+    while (*str != '\0') {
+        if (strchr (reject, *str++) == NULL) {
+            ++count;
+        } else {
+            return count;
+        }
+    }
+    return count;
+}
+
+size_t _strspn_c(char const *__restrict str, char const *__restrict accept) {
+    char const * ptr = str;
+    while (*ptr != '\0') {
+        if (strchr(accept, *ptr) == NULL) {
+            break;
+        }
+        ptr++;
+    }
+    return (size_t)(ptr - str);
+}
+
 /*============================================================================*/
 /* Config                                                                     */
 /*============================================================================*/
@@ -312,6 +339,8 @@ int _my_vsscanf_c(
                 }
                 bool invert_match = false;
                 bool starts_with_bracket = false;
+                test_printf("B(%s)\n", buf);
+                test_printf("F(%s)\n", fmt);
                 if (*fmt == '^') {
                     invert_match = true;
                     fmt++;
@@ -320,37 +349,74 @@ int _my_vsscanf_c(
                     starts_with_bracket = true;
                     fmt++;
                 }
-                char const *__restrict last_bracket = strchr(fmt, ']');
-                if (last_bracket == NULL) {
-                    if (!(invert_match && starts_with_bracket)) {
-                        return assignment_count;
+                #if 1
+                    char const *__restrict last_bracket = strchr(fmt, ']');
+                    if (last_bracket == NULL) {
+                        if (!(invert_match && starts_with_bracket)) {
+                            return assignment_count;
+                        }
+                        /* special case of "[^]" "*/
+                        scan_buf[0] = '^';
+                        scan_buf[1] = '\0';
+                    } else {
+                        if (starts_with_bracket) {
+                            fmt--;
+                            /* *fmt == ']' */
+                        }
+                        /* fmt + scan_length points to the ending ']', so move it back */
+                        size_t scan_length = (last_bracket - fmt);
+                        test_printf("%zu, F(%s), ", scan_length, fmt);
+                        if (scan_length >= SCAN_LIMIT) {
+                            /* too many characters */
+                            return assignment_count;
+                        }
+                        memset(scan_buf, '\0', SCAN_LIMIT);
+                        memcpy(scan_buf, fmt, scan_length);
+                        /* move format to the character after the ending ']' */
+                        fmt = last_bracket + 1;
+                        /* null terminate */
+                        test_printf("%02X\n", *(scan_buf + scan_length));
+                        *(scan_buf + scan_length) = '\0';
                     }
-                    /* special case of "[^]" "*/
-                    scan_buf[0] = '^';
-                    scan_buf[1] = '\0';
-                } else {
+                #else
+                    size_t index = 0;
                     if (starts_with_bracket) {
-                        fmt--;
-                        /* *fmt == ']' */
+                        scan_buf[index] = ']';
+                        index++;
                     }
-                    /* fmt + scan_length points to the ending ']', so move it back */
-                    size_t scan_length = (last_bracket - fmt) - 1;
-                    if (scan_length >= SCAN_LIMIT) {
-                        /* too many characters */
-                        return assignment_count;
+                    while (*fmt != ']') {
+                        if (index >= SCAN_LIMIT - 1) {
+                            /* too many characters */
+                            return assignment_count;
+                        }
+                        scan_buf[index] = *fmt;
+                        index++;
+                        fmt++;
                     }
-                    memcpy(scan_buf, fmt, scan_length);
-                    /* move format to the character after the ending ']' */
-                    fmt = last_bracket + 1;
-                    /* null terminate */
-                    *(scan_buf + scan_length) = '\0';
-                }
+                    scan_buf[index] = '\0';
+                    fmt++;
+                    test_printf("P(%zu)\n", index);
+                #endif
 
                 size_t match_length;
+                // {
+                //     for (size_t i = 0; i < SCAN_LIMIT; i++) {
+                //         if (scan_buf[i] == '\0') {
+                //             break;
+                //         }
+                //         test_printf("%02X,", scan_buf[i]);
+                //     }
+                //     test_printf("\n");
+                // }
+                test_printf("A(%s)\n", scan_buf);
                 if (invert_match) {
-                    match_length = strcspn(buf, scan_buf);
+                    test_printf("I(%s)(%s)\n", buf, scan_buf);
+                    match_length = _strcspn_c(buf, scan_buf);
+                    test_printf("I(%zu)\n", match_length);
                 } else {
-                    match_length = strspn(buf, scan_buf);
+                    test_printf("L(%s)(%s)\n", buf, scan_buf);
+                    match_length = _strspn_c(buf, scan_buf);
+                    test_printf("L(%zu)\n", match_length);
                 }
                 if (!is_suppressed) {
                     char* ptr = va_arg(args, char*);
@@ -359,10 +425,11 @@ int _my_vsscanf_c(
                     /* null terminate */
                     *(ptr + match_length) = '\0';
                     assignment_count++;
+                    test_printf("W(%s)\n", ptr);
                 }
+                test_printf("\n");
                 /* move buf to the character after the last matched character */
                 buf += match_length;
-                buf++;
                 continue;
             } break;
             case 'i':

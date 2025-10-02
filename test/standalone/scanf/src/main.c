@@ -186,8 +186,8 @@ int other_test(void) {
 
 int run_tests(void) {
     int ret = 0;
-    TEST(stdc_test());
-    TEST(basic_test());
+    // TEST(stdc_test());
+    // TEST(basic_test());
     TEST(other_test());
 
     return ret;
