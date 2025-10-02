@@ -30,7 +30,7 @@
  * USE_STRTOF  : `strtof`  (speed)
  * USE_STRTOLD : `strtold` (precision)
  */
-#define STRING_TO_FLOAT USE_STRTOLD
+#define STRING_TO_FLOAT USE_STRTOD
 
 /* define to 0 or 1. Adds support for C23 '%b' format specifiers */
 #define ENABLE_BINARY_CONVERSION_FORMAT 1
@@ -57,7 +57,7 @@
 #elif STRING_TO_FLOAT == USE_STRTOLD
 # define STRING_TO_FLOAT_TYPE long double
 # define STRING_TO_FLOAT_FUNC strtold
-#else
+#elif STRING_TO_FLOAT != NO_FLOAT
 # error "invalid STRING_TO_FLOAT value"
 #endif
 
@@ -108,6 +108,7 @@ static uintmax_t limit_strtoumax(char const *__restrict str, char ** endptr, int
     return value;
 }
 
+#if STRING_TO_FLOAT
 static STRING_TO_FLOAT_TYPE limit_strtofloat(char const *__restrict str, char ** endptr, size_t max_len, char *__restrict const scan_buf) {
     if (max_len == 0) {
         return STRING_TO_FLOAT_FUNC(str, (char**)endptr);
@@ -121,6 +122,7 @@ static STRING_TO_FLOAT_TYPE limit_strtofloat(char const *__restrict str, char **
     *endptr = (char*)(str + (scan_endptr - scan_buf));
     return value;
 }
+#endif /* STRING_TO_FLOAT */
 
 /**
  * @author zerico2005 (Originally based off of https://github.com/tusharjois/bscanf)
@@ -171,7 +173,13 @@ int _my_vsscanf_c(
         /* test for digits */
         if (isdigit(*fmt)) {
             char *endptr;
-            max_width = (size_t)strtoul(fmt, &endptr, 10);
+            /**
+             * @remarks Either strtoumax or strtoul can be used here.
+             * strtoul might be faster, however it also means that we link
+             * another routine increasing size. So strtoumax is used instead so
+             * use can reduce the amount of routines we need to link to.
+             */
+            max_width = (size_t)strtoumax(fmt, &endptr, 10);
             if (max_width == 0 || fmt == endptr) {
                 /* failed */
                 return assignment_count;
@@ -259,7 +267,7 @@ int _my_vsscanf_c(
             case 's':
             /* string */ {
                 const bool string_format = (*fmt == 's');
-                if (max_width == 0) {
+                if (!is_suppressed && max_width == 0) {
                     /* enforce bounds checking */
                     return assignment_count;
                 }
@@ -286,6 +294,7 @@ int _my_vsscanf_c(
                         /* null terminate */
                         *(ptr + copy_size) = '\0';
                     }
+                    assignment_count++;
                 }
                 fmt++;
                 continue;
@@ -293,7 +302,7 @@ int _my_vsscanf_c(
             case '[':
             /* match range */ {
                 fmt++;
-                if (max_width == 0) {
+                if (!is_suppressed && max_width == 0) {
                     /* enforce bounds checking */
                     return assignment_count;
                 }
@@ -349,6 +358,7 @@ int _my_vsscanf_c(
                     memcpy(ptr, buf, match_length);
                     /* null terminate */
                     *(ptr + match_length) = '\0';
+                    assignment_count++;
                 }
                 /* move buf to the character after the last matched character */
                 buf += match_length;
@@ -362,18 +372,18 @@ int _my_vsscanf_c(
                 char *endptr;
                 int base = ((*fmt == 'd') ? 10 : 0);
                 intmax_t value = limit_strtoimax(buf, &endptr, base, max_width, scan_buf);
-                if (!is_suppressed) {
-                    void* ptr = va_arg(args, void*);
-                    RETURN_IF_NULL(ptr);
-                    memcpy(ptr, &value, ptr_size);
-                }
                 if (buf == endptr) {
                     /* failed */
                     return assignment_count;
                 }
+                if (!is_suppressed) {
+                    void* ptr = va_arg(args, void*);
+                    RETURN_IF_NULL(ptr);
+                    memcpy(ptr, &value, ptr_size);
+                    assignment_count++;
+                }
                 buf = endptr;
                 fmt++;
-                assignment_count++;
             } break;
         #if ENABLE_BINARY_CONVERSION_FORMAT
             case 'b':
@@ -400,18 +410,18 @@ int _my_vsscanf_c(
                     base = 8;
                 }
                 uintmax_t value = limit_strtoumax(buf, &endptr, base, max_width, scan_buf);
-                if (!is_suppressed) {
-                    void* ptr = va_arg(args, void*);
-                    RETURN_IF_NULL(ptr);
-                    memcpy(ptr, &value, ptr_size);
-                }
                 if (buf == endptr) {
                     /* failed */
                     return assignment_count;
                 }
+                if (!is_suppressed) {
+                    void* ptr = va_arg(args, void*);
+                    RETURN_IF_NULL(ptr);
+                    memcpy(ptr, &value, ptr_size);
+                    assignment_count++;
+                }
                 buf = endptr;
                 fmt++;
-                assignment_count++;
             } break;
         #if STRING_TO_FLOAT
             case 'a':
@@ -425,6 +435,10 @@ int _my_vsscanf_c(
             /* float */ {
                 char *endptr;
                 STRING_TO_FLOAT_TYPE value = limit_strtofloat(buf, &endptr, max_width, scan_buf);
+                if (buf == endptr) {
+                    /* failed */
+                    return assignment_count;
+                }
                 if (!is_suppressed) {
                     void* ptr = va_arg(args, void*);
                     RETURN_IF_NULL(ptr);
@@ -435,14 +449,10 @@ int _my_vsscanf_c(
                     } else {
                         *(float*)ptr = (float)value;
                     }
-                }
-                if (buf == endptr) {
-                    /* failed */
-                    return assignment_count;
+                    assignment_count++;
                 }
                 buf = endptr;
                 fmt++;
-                assignment_count++;
             } break;
         #endif /* STRING_TO_FLOAT */
             default:
