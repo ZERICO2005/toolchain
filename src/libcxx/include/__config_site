@@ -49,6 +49,7 @@
 /* define some extra stuff */
 #define _LIBCPP_ENABLE_CXX20_REMOVED_TYPE_TRAITS
 #define _LIBCPP_HAS_NO_LIBRARY_ALIGNED_ALLOCATION
+#define _LIBCPP_HAS_NO_ATOMIC_HEADER
 
 #ifdef __clang__
 #  pragma clang diagnostic pop

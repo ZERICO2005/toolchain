@@ -1,4 +1,3 @@
-#if 0
 #include <__config>
 #include <algorithm>
 #include <bit>
@@ -72,4 +71,3 @@
 #include <wctype.h>
 
 // tests for conflicts
-#endif
