@@ -13,9 +13,7 @@
 #define USE_STRTOF  2
 #define USE_STRTOLD 3
 
-#define test_printf(...) sprintf((char*)0xFB0000, __VA_ARGS__)
-
-size_t _strcspn_c(char const *__restrict str, char const *__restrict reject)
+static size_t _strcspn_c(char const *__restrict str, char const *__restrict reject)
 {
     size_t count = 0;
 
@@ -29,7 +27,7 @@ size_t _strcspn_c(char const *__restrict str, char const *__restrict reject)
     return count;
 }
 
-size_t _strspn_c(char const *__restrict str, char const *__restrict accept)
+static size_t _strspn_c(char const *__restrict str, char const *__restrict accept)
 {
     char const * ptr = str;
     while (*ptr != '\0') {
@@ -154,10 +152,11 @@ static STRING_TO_FLOAT_TYPE limit_strtofloat(char const *__restrict str, char **
 
 /**
  * @author zerico2005 (Originally based off of https://github.com/tusharjois/bscanf)
- * @note All character sequence types must have a maximum field width:
- *  - This looks something like: "%*3c %8s %12[^abc]"
- *  - The following will not work: "%*c %s %[^abc]"
- *
+ * @note All non-suppressed character sequence types must have a maximum field width:
+ *  - Valid   : "%*3c %*8s %*12[^abc]"
+ *  - Valid   : "%3c  %8s  %12[^abc]"
+ *  - Valid   : "%*c  %*s  %*[^abc]"
+ *  - Invalid : "%c   %s   %[^abc]"
  * @note `wchar_t` is not supported
  */
 int _my_vsscanf_c(
@@ -355,9 +354,7 @@ int _my_vsscanf_c(
                 }
                 if (starts_with_bracket) {
                     fmt--;
-                    /* *fmt == ']' */
                 }
-                /* fmt + scan_length points to the ending ']', so move it back */
                 size_t scan_length = (last_bracket - fmt);
                 if (scan_length >= SCAN_LIMIT) {
                     /* too many characters */
@@ -382,8 +379,8 @@ int _my_vsscanf_c(
                     char* ptr = va_arg(args, char*);
                     RETURN_IF_NULL(ptr);
                     memcpy(ptr, buf, match_length);
-                    *(ptr + match_length) = '\0';
                     /* null terminate */
+                    *(ptr + match_length) = '\0';
                     assignment_count++;
                 }
                 /* move buf to the character after the last matched character */

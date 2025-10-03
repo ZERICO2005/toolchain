@@ -13,6 +13,32 @@
 #define USE_STRTOF  2
 #define USE_STRTOLD 3
 
+static size_t _strcspn_c(char const *__restrict str, char const *__restrict reject)
+{
+    size_t count = 0;
+
+    while (*str != '\0') {
+        if (strchr (reject, *str++) == NULL) {
+            ++count;
+        } else {
+            return count;
+        }
+    }
+    return count;
+}
+
+static size_t _strspn_c(char const *__restrict str, char const *__restrict accept)
+{
+    char const * ptr = str;
+    while (*ptr != '\0') {
+        if (strchr(accept, *ptr) == NULL) {
+            break;
+        }
+        ptr++;
+    }
+    return (size_t)(ptr - str);
+}
+
 /*============================================================================*/
 /* Config                                                                     */
 /*============================================================================*/
@@ -30,7 +56,7 @@
  * USE_STRTOF  : `strtof`  (speed)
  * USE_STRTOLD : `strtold` (precision)
  */
-#define STRING_TO_FLOAT USE_STRTOLD
+#define STRING_TO_FLOAT USE_STRTOD
 
 /* define to 0 or 1. Adds support for C23 '%b' format specifiers */
 #define ENABLE_BINARY_CONVERSION_FORMAT 1
@@ -57,7 +83,7 @@
 #elif STRING_TO_FLOAT == USE_STRTOLD
 # define STRING_TO_FLOAT_TYPE long double
 # define STRING_TO_FLOAT_FUNC strtold
-#else
+#elif STRING_TO_FLOAT != NO_FLOAT
 # error "invalid STRING_TO_FLOAT value"
 #endif
 
@@ -108,6 +134,7 @@ static uintmax_t limit_strtoumax(char const *__restrict str, char ** endptr, int
     return value;
 }
 
+#if STRING_TO_FLOAT
 static STRING_TO_FLOAT_TYPE limit_strtofloat(char const *__restrict str, char ** endptr, size_t max_len, char *__restrict const scan_buf) {
     if (max_len == 0) {
         return STRING_TO_FLOAT_FUNC(str, (char**)endptr);
@@ -121,16 +148,18 @@ static STRING_TO_FLOAT_TYPE limit_strtofloat(char const *__restrict str, char **
     *endptr = (char*)(str + (scan_endptr - scan_buf));
     return value;
 }
+#endif /* STRING_TO_FLOAT */
 
 /**
  * @author zerico2005 (Originally based off of https://github.com/tusharjois/bscanf)
- * @note All character sequence types must have a maximum field width:
- *  - This looks something like: "%*3c %8s %12[^abc]"
- *  - The following will not work: "%*c %s %[^abc]"
- *
+ * @note All non-suppressed character sequence types must have a maximum field width:
+ *  - Valid   : "%*3c %*8s %*12[^abc]"
+ *  - Valid   : "%3c  %8s  %12[^abc]"
+ *  - Valid   : "%*c  %*s  %*[^abc]"
+ *  - Invalid : "%c   %s   %[^abc]"
  * @note `wchar_t` is not supported
  */
-int _vsscanf_c(
+int vsscanf(
     char const * const __restrict Buffer,
     char const * const __restrict Format,
     va_list args
@@ -171,7 +200,13 @@ int _vsscanf_c(
         /* test for digits */
         if (isdigit(*fmt)) {
             char *endptr;
-            max_width = (size_t)strtoul(fmt, &endptr, 10);
+            /**
+             * @remarks Either strtoumax or strtoul can be used here.
+             * strtoul might be faster, however it also means that we link
+             * another routine increasing size. So strtoumax is used instead so
+             * use can reduce the amount of routines we need to link to.
+             */
+            max_width = (size_t)strtoumax(fmt, &endptr, 10);
             if (max_width == 0 || fmt == endptr) {
                 /* failed */
                 return assignment_count;
@@ -259,7 +294,7 @@ int _vsscanf_c(
             case 's':
             /* string */ {
                 const bool string_format = (*fmt == 's');
-                if (max_width == 0) {
+                if (!is_suppressed && max_width == 0) {
                     /* enforce bounds checking */
                     return assignment_count;
                 }
@@ -286,6 +321,7 @@ int _vsscanf_c(
                         /* null terminate */
                         *(ptr + copy_size) = '\0';
                     }
+                    assignment_count++;
                 }
                 fmt++;
                 continue;
@@ -293,7 +329,7 @@ int _vsscanf_c(
             case '[':
             /* match range */ {
                 fmt++;
-                if (max_width == 0) {
+                if (!is_suppressed && max_width == 0) {
                     /* enforce bounds checking */
                     return assignment_count;
                 }
@@ -313,35 +349,31 @@ int _vsscanf_c(
                 }
                 char const *__restrict last_bracket = strchr(fmt, ']');
                 if (last_bracket == NULL) {
-                    if (!(invert_match && starts_with_bracket)) {
-                        return assignment_count;
-                    }
-                    /* special case of "[^]" "*/
-                    scan_buf[0] = '^';
-                    scan_buf[1] = '\0';
-                } else {
-                    if (starts_with_bracket) {
-                        fmt--;
-                        /* *fmt == ']' */
-                    }
-                    /* fmt + scan_length points to the ending ']', so move it back */
-                    size_t scan_length = (last_bracket - fmt) - 1;
-                    if (scan_length >= SCAN_LIMIT) {
-                        /* too many characters */
-                        return assignment_count;
-                    }
-                    memcpy(scan_buf, fmt, scan_length);
-                    /* move format to the character after the ending ']' */
-                    fmt = last_bracket + 1;
-                    /* null terminate */
-                    *(scan_buf + scan_length) = '\0';
+                    /* "%[^]" is still considered to be an empty sequence */
+                    return assignment_count;
                 }
+                if (starts_with_bracket) {
+                    fmt--;
+                }
+                size_t scan_length = (last_bracket - fmt);
+                if (scan_length >= SCAN_LIMIT) {
+                    /* too many characters */
+                    return assignment_count;
+                }
+                memcpy(scan_buf, fmt, scan_length);
+                /* null terminate */
+                *(scan_buf + scan_length) = '\0';
+                /* move format to the character after the ending ']' */
+                fmt = last_bracket + 1;
 
                 size_t match_length;
                 if (invert_match) {
-                    match_length = strcspn(buf, scan_buf);
+                    match_length = _strcspn_c(buf, scan_buf);
                 } else {
-                    match_length = strspn(buf, scan_buf);
+                    match_length = _strspn_c(buf, scan_buf);
+                }
+                if (max_width != 0 && match_length > max_width) {
+                    match_length = max_width;
                 }
                 if (!is_suppressed) {
                     char* ptr = va_arg(args, char*);
@@ -349,10 +381,10 @@ int _vsscanf_c(
                     memcpy(ptr, buf, match_length);
                     /* null terminate */
                     *(ptr + match_length) = '\0';
+                    assignment_count++;
                 }
                 /* move buf to the character after the last matched character */
                 buf += match_length;
-                buf++;
                 continue;
             } break;
             case 'i':
@@ -362,18 +394,18 @@ int _vsscanf_c(
                 char *endptr;
                 int base = ((*fmt == 'd') ? 10 : 0);
                 intmax_t value = limit_strtoimax(buf, &endptr, base, max_width, scan_buf);
-                if (!is_suppressed) {
-                    void* ptr = va_arg(args, void*);
-                    RETURN_IF_NULL(ptr);
-                    memcpy(ptr, &value, ptr_size);
-                }
                 if (buf == endptr) {
                     /* failed */
                     return assignment_count;
                 }
+                if (!is_suppressed) {
+                    void* ptr = va_arg(args, void*);
+                    RETURN_IF_NULL(ptr);
+                    memcpy(ptr, &value, ptr_size);
+                    assignment_count++;
+                }
                 buf = endptr;
                 fmt++;
-                assignment_count++;
             } break;
         #if ENABLE_BINARY_CONVERSION_FORMAT
             case 'b':
@@ -400,18 +432,18 @@ int _vsscanf_c(
                     base = 8;
                 }
                 uintmax_t value = limit_strtoumax(buf, &endptr, base, max_width, scan_buf);
-                if (!is_suppressed) {
-                    void* ptr = va_arg(args, void*);
-                    RETURN_IF_NULL(ptr);
-                    memcpy(ptr, &value, ptr_size);
-                }
                 if (buf == endptr) {
                     /* failed */
                     return assignment_count;
                 }
+                if (!is_suppressed) {
+                    void* ptr = va_arg(args, void*);
+                    RETURN_IF_NULL(ptr);
+                    memcpy(ptr, &value, ptr_size);
+                    assignment_count++;
+                }
                 buf = endptr;
                 fmt++;
-                assignment_count++;
             } break;
         #if STRING_TO_FLOAT
             case 'a':
@@ -425,6 +457,10 @@ int _vsscanf_c(
             /* float */ {
                 char *endptr;
                 STRING_TO_FLOAT_TYPE value = limit_strtofloat(buf, &endptr, max_width, scan_buf);
+                if (buf == endptr) {
+                    /* failed */
+                    return assignment_count;
+                }
                 if (!is_suppressed) {
                     void* ptr = va_arg(args, void*);
                     RETURN_IF_NULL(ptr);
@@ -435,14 +471,10 @@ int _vsscanf_c(
                     } else {
                         *(float*)ptr = (float)value;
                     }
-                }
-                if (buf == endptr) {
-                    /* failed */
-                    return assignment_count;
+                    assignment_count++;
                 }
                 buf = endptr;
                 fmt++;
-                assignment_count++;
             } break;
         #endif /* STRING_TO_FLOAT */
             default:
@@ -454,11 +486,11 @@ int _vsscanf_c(
     return assignment_count;
 }
 
-int _sscanf_c(const char *__restrict buffer, const char *__restrict format, ...)
+int sscanf(const char *__restrict buffer, const char *__restrict format, ...)
 {
     va_list vlist;
     va_start(vlist, format);
-    int ret = _vsscanf_c(buffer, format, vlist);
+    int ret = vsscanf(buffer, format, vlist);
     va_end(vlist);
     return ret;
 }
