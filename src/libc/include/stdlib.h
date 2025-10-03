@@ -103,7 +103,9 @@ void _Exit(int) __NOEXCEPT __attribute__((noreturn));
 #ifndef _ABS_INT_DEFINED
 #define _ABS_INT_DEFINED
 
+#ifndef __cplusplus
 int abs(int n);
+#endif /* __cplusplus */
 long labs(long n);
 long long llabs(long long n);
 
@@ -124,5 +126,30 @@ i48div_t i48div(signed __int48 numer, signed __int48 denom) __NOEXCEPT_CONST;
 #endif /* __SIZEOF_INT48__ */
 
 __END_DECLS
+
+#ifdef __cplusplus
+#include <__config>
+
+int abs(int n);
+
+_LIBCPP_BEGIN_NAMESPACE_STD
+
+using ::abs _LIBCPP_USING_IF_EXISTS;
+
+long abs(long n) {
+    return labs(n);
+}
+long long abs(long long n) {
+    return llabs(n);
+}
+#ifdef __SIZEOF_INT48__
+signed __int48 abs(signed __int48 n) {
+    return i48abs(n);
+}
+#endif /* __SIZEOF_INT48__ */
+
+_LIBCPP_END_NAMESPACE_STD
+
+#endif /* __cplusplus */
 
 #endif /* _STDLIB_H */
