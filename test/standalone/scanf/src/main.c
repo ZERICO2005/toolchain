@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
@@ -26,6 +27,8 @@
 #define C(expr) if (!(expr)) { return __LINE__; }
 
 #define TEST(test) { ret = test; if (ret != 0) { return ret; }}
+
+#define ARRAY_LENGTH(x) (sizeof(x) / sizeof((x)[0]))
 
 #ifndef DEBUG_DIAGNOSTICS
 #error "DEBUG_DIAGNOSTICS needs to be defined to 0 or 1"
@@ -157,18 +160,10 @@ int basic_test(void) {
     return 0;
 }
 
-static void tester(const char *data)
-{
-    char text1[20], char2[32], word3[64];
-    memset(text1, '\0', sizeof(text1));
-    memset(char2, '\0', sizeof(char2));
-    memset(word3, '\0', sizeof(word3));
-    int n = sscanf(data, "%19s %31[^, ] %*[,]%63s", text1, char2, word3);
-    sprintf(((char*)0xFB0000),"Test data: <%s>\n", data);
-    sprintf(((char*)0xFB0000),"n = %d; w1 = <%s>, w2 = <%s>, w3 = <%s>\n", n, text1, char2, word3);
-}
-
-int other_test(void) {
+/**
+ * @brief https://stackoverflow.com/questions/9537072/properly-using-sscanf
+ */
+int stackoverflow_test(void) {
     const char *data[] =
     {
         "text1 char2 , word3",
@@ -177,17 +172,117 @@ int other_test(void) {
         "text1 char2,word3",
         "text1 char2       ,       word3",
     };
-    enum { DATA_SIZE = sizeof(data)/sizeof(data[0]) };
-    size_t i;
-    for (i = 0; i < DATA_SIZE; i++)
-        tester(data[i]);
-    return(0);
+    char text1[20]; text1[0] = '\0';
+    char char2[32]; char2[0] = '\0';
+    char word3[48]; word3[0] = '\0';
+    for (size_t i = 0; i < ARRAY_LENGTH(data); i++) {
+        int n = sscanf(data[i], "%19s %31[^, ] %*[,]%47s", text1, char2, word3);
+        C(n == 3);
+        C(strcmp_exact("text1", text1));
+        C(strcmp_exact("char2", char2));
+        C(strcmp_exact("word3", word3));
+    }
+    return 0;
+}
+
+int other_test(void) {
+    const char* text = "abc]]]def]ghi^^]]^^^jklm^^";
+    char buf_1[10] = {'\0'};
+    char buf_2[10] = {'\0'};
+    char buf_3[10] = {'\0','\0','\0', ';', '\0'};
+    char buf_4[10] = {'\0'};
+    char buf_5[10] = {'\0'};
+    char buf_6[10] = {'\0'};
+    char buf_7[10] = {'\0'};
+
+    ptrdiff_t end_1 = 0xE0E0E0;
+    intmax_t end_2 = UINTMAX_C(0xD0D0D0D0D0D0D0D0);
+    int count = sscanf(text,
+        "%9[^]]%1[]]%*[]]%3c%9[^^]%9[^]^]%3[]^]%*4[]^]%tn%4[^]^]%jn",
+        buf_1, buf_2, buf_3, buf_4, buf_5, buf_6, &end_1, buf_7, &end_2
+    );
+    C(count == 7);
+    C(end_1 == 20);
+    C(end_2 == 24);
+    C(strcmp_exact(buf_1, "abc"));
+    C(strcmp_exact(buf_2, "]"));
+    C(memcmp(buf_3, "def;", 4) == 0);
+    C(strcmp_exact(buf_4, "]ghi"));
+    C(*buf_5 == '\0');
+    C(strcmp_exact(buf_6, "^^]"));
+    C(strcmp_exact(buf_7, "jklm"));
+    return 0;
+}
+
+size_t _strcspn_c(char const *__restrict str, char const *__restrict reject);
+size_t _strspn_c(char const *__restrict str, char const *__restrict accept);
+
+#define strcspn _strcspn_c
+#define strspn _strspn_c
+
+/**
+ * @brief Ensure that strspn and strcspn are implemented correctly
+ */
+int libc_test(void) {
+    char const * str = "abcdef";
+    char const * empty = "";
+
+    #if 1
+
+    C(strspn(str, "abc") == 3);
+    C(strspn(str, "cba") == 3);
+    C(strspn(str, "def") == 0);
+    C(strspn(str, "fed") == 0);
+    C(strspn(str, "ABCDEF") == 0);
+    C(strspn(str, "bbeebe") == 0);
+    C(strspn(str, "eebbeb") == 0);
+    C(strspn(str, "aaffaf") == 1);
+    C(strspn(str, "ffaafa") == 1);
+    C(strspn(str, str) == 6);
+    C(strspn(str, empty) == 0);
+    C(strspn(empty, str) == 0);
+    C(strspn(empty, empty) == 0);
+
+    C(strcspn(str, "abc") == 0);
+    C(strcspn(str, "cba") == 0);
+    C(strcspn(str, "def") == 3);
+    C(strcspn(str, "fed") == 3);
+    C(strcspn(str, "ABCDEF") == 6);
+    C(strcspn(str, "bbeebe") == 1);
+    C(strcspn(str, "eebbeb") == 1);
+    C(strcspn(str, "aaffaf") == 0);
+    C(strcspn(str, "ffaafa") == 0);
+    C(strcspn(str, str) == 0);
+    C(strcspn(str, empty) == 6);
+    C(strcspn(empty, str) == 0);
+    C(strcspn(empty, empty) == 0);
+
+    // C(strpbrk(str, "abc") == str + 0);
+    // C(strpbrk(str, "cba") == str + 0);
+    // C(strpbrk(str, "def") == str + 3);
+    // C(strpbrk(str, "fed") == str + 3);
+    // C(strpbrk(str, "ABCDEF") == NULL);
+    // C(strpbrk(str, "bbeebe") == str + 1);
+    // C(strpbrk(str, "eebbeb") == str + 1);
+    // C(strpbrk(str, "aaffaf") == str + 0);
+    // C(strpbrk(str, "ffaafa") == str + 0);
+    // C(strpbrk(str, str) == str);
+    // C(strpbrk(str, empty) == NULL);
+    // C(strpbrk(empty, str) == NULL);
+    // C(strpbrk(empty, empty) == NULL);
+
+    #endif
+
+    return 0;
 }
 
 int run_tests(void) {
     int ret = 0;
-    // TEST(stdc_test());
-    // TEST(basic_test());
+
+    TEST(libc_test());
+    TEST(basic_test());
+    TEST(stdc_test());
+    TEST(stackoverflow_test());
     TEST(other_test());
 
     return ret;
