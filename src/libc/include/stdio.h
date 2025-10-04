@@ -159,6 +159,8 @@ namespace std {
     using ::vfprintf;
     using ::asprintf;
     using ::vasprintf;
+    using ::sscanf;
+    using ::vsscanf;
     using ::perror;
 } /* namespace std */
 #endif /* __cplusplus */
