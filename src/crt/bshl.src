@@ -10,16 +10,31 @@ __bshl := 000100h
 else
 
 __bshl:
-; CC: if B!=0: B*(4*r(PC)+1)+6*r(PC)+(ADL?6*r(SPL)+3*w(SPL):4*r(SPS)+2*w(SPS))+1
-;     if B==0: 4*r(PC)+(ADL?3*r(SPL):2*r(SPS))+2
-	inc	b
-	dec	b
-	ret	z
-	push	bc
-.loop:
+; A = A << B
+; CC: 19 bytes + (ADL ? 3R : 2R)
+; 0: 14F + 4
+; 1: 16F + 4
+; 2: 15F + 3
+; 3: 17F + 3
+; 4: 17F + 3
+; 5: 19F + 3
+; 6: 18F + 2
+; 7: 20F + 2
+	bit	2, b
+	jr	z, .bit2
 	add	a, a
-	djnz	.loop
-	pop	bc
+	add	a, a
+	add	a, a
+	add	a, a
+.bit2:
+	bit	1, b
+	jr	z, .bit1
+	add	a, a
+	add	a, a
+.bit1:
+	bit	0, b
+	ret	z
+	add	a, a
 	ret
 
 end if

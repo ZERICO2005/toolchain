@@ -3,14 +3,29 @@
 	section	.text
 	public	__bshrs
 __bshrs:
-; CC: if B!=0: B*(5*r(PC)+1)+6*r(PC)+(ADL?6*r(SPL)+3*w(SPL):4*r(SPS)+2*w(SPS))+1
-;     if B==0: 4*r(PC)+(ADL?3*r(SPL):2*r(SPS))+2
-	inc	b
-	dec	b
-	ret	z
-	push	bc
-.loop:
+; A = (unsigned)A >> B
+; CC: 26 bytes + (ADL ? 3R : 2R)
+; 0: 14F + 4
+; 1: 17F + 4
+; 2: 17F + 3
+; 3: 20F + 3
+; 4: 21F + 3
+; 5: 24F + 3
+; 6: 24F + 2
+; 7: 27F + 2
+	bit	2, b
+	jr	z, .bit2
 	sra	a
-	djnz	.loop
-	pop	bc
+	sra	a
+	sra	a
+	sra	a
+.bit2:
+	bit	1, b
+	jr	z, .bit1
+	sra	a
+	sra	a
+.bit1:
+	bit	0, b
+	ret	z
+	sra	a
 	ret
