@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <stddef.h>
+#include <string>
 #include <math.h>
 #include <errno.h>
 
@@ -21,6 +22,8 @@ typedef union F32_pun {
     float flt;
     uint32_t bin;
 } F32_pun;
+
+#define c_isdigit(c) ((c) >= '0' && (c) <= '9')
 
 /*************************************************
 *
@@ -39,17 +42,26 @@ typedef union F32_pun {
  * @remarks `*str >= '0' && *str <= '9'` is smaller than calls to `isdigit(*str)`
  * @todo Add support for INF INFINITY NAN NAN(...)
  */
-float _strtof_c(const char *__restrict nptr, char **__restrict endptr)
+float _strtof_c(char const * const __restrict nptr, char **__restrict endptr)
 {
     F32_pun val;
     int frac = 0;
     int exp = 0;
     bool sign = false;
     bool exp_sign = false;
-    char *str = (char*)nptr;
+    const char *str = (const char*)nptr;
 
     while (isspace(*str)) {
         ++str;
+    }
+    {
+        if (strncasecmp(str, "inf", 3) == 0) {
+            str += 3;
+            if (strncasecmp(str, "inity", 5) == 0) {
+                str += 5;
+            }
+
+        }
     }
 
     if (*str == '-') {
@@ -61,14 +73,14 @@ float _strtof_c(const char *__restrict nptr, char **__restrict endptr)
 
     val.flt = 0.0f;
 
-    while (*str >= '0' && *str <= '9') {
+    while (c_isdigit(*str)) {
         val.flt = val.flt * 10.0f + (float)(*str - '0');
         ++str;
     }
 
     if (*str == '.') {
         ++str;
-        while (*str >= '0' && *str <= '9') {
+        while (c_isdigit(*str)) {
             val.flt = val.flt * 10.0f + (float)(*str - '0');
             ++frac;
             ++str;
@@ -84,7 +96,8 @@ float _strtof_c(const char *__restrict nptr, char **__restrict endptr)
             exp_sign = false;
             ++str;
         }
-        while (*str >= '0' && *str <= '9') {
+        if ()
+        while (c_isdigit(*str)) {
             exp = exp * 10 + (*str - '0');
             ++str;
         }

@@ -1,0 +1,87 @@
+	assume	adl=1
+
+	section	.text
+
+	public	_strverscmp
+
+_strverscmp:
+	ld	hl, 3
+	add	hl, sp
+	ld	bc, (hl)
+	inc	hl
+	inc	hl
+	inc	hl
+	ld	hl, (hl)
+.loop:
+	ld	a, (bc)
+	cp	a, (hl)
+	jr	nz, .diff
+	inc	hl
+	inc	bc
+	or	a, a
+	jr	nz, .loop
+.finish:
+	sbc	hl, hl
+	ld	l, a
+	ret
+
+.diff:
+	; ; calculate result if both are non-digits
+	; ex	de, hl
+	; sbc	hl, hl
+	; ld	l, a
+	; ; HL = result if not digit
+	; sub	a, 48
+	; cp	a, 10
+	; ret	nc	; (BC) non-digit
+	; ld	a, (de)
+	; sub	a, 48
+	; cp	a, 10
+	; ret	nc	; (DE) non-digit
+	; ex	de, hl
+
+.loop_bc:
+	; move through bc until no more digits are found
+	ld	a, (bc)
+	inc	bc
+	sub	a, 48
+	cp	a, 10
+	jr	c, .loop_bc
+	dec	bc
+
+.loop_hl:
+	; move through HL until no more digits are found
+	ld	a, (hl)
+	inc	hl
+	sub	a, 48
+	cp	a, 10
+	jr	c, .loop_hl
+	dec	hl
+
+	; *HL =	least significant digit
+	; *BC =	least significant digit
+
+.cmp_loop:
+	ld	a, (bc)
+	cpd
+	jr	z, .cmp_loop
+
+	inc	hl
+	inc	bc
+	ld	a, (bc)
+	sub	a, 48
+	cp	a, 10
+	jr	nc, .bc_non_digit	; (HL) has more digits or leading zeros
+	ld	e, a
+	ld	a, (hl)
+	sub	a, 48
+	cp	a, 10
+	jr	nc, .hl_non_digit	; (BC) has more digits or leading zeros
+	cp	a, c
+.bc_non_digit:
+	ccf
+.hl_non_digit:
+	ccf
+	sbc	hl, hl
+	ld	l, a
+	ret
