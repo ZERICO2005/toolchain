@@ -1,0 +1,113 @@
+	assume	adl=1
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+
+	public	_nonzero_ldir
+
+_nonzero_ldir:
+; Calls LDIR if BC is non-zero.
+; Input:
+; - HL: src
+; - DE: dst
+; - BC: size
+; Output:
+; - Flags: NZ, M, PO
+; - Carry: Set if BC was non-zero. Cleared if BC was zero.
+; - HL: HL + BC
+; - DE: DE + BC
+; - BC: 0
+	scf
+	push	hl
+	sbc	hl, hl
+	add	hl, bc
+	pop	hl
+	ret	nc
+	ldir
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+
+	public	_nonzero_lddr
+
+_nonzero_lddr:
+; Calls LDDR if BC is non-zero.
+; Input:
+; - HL: src
+; - DE: dst
+; - BC: size
+; Output:
+; - Flags: NZ, M, PO
+; - Carry: Set if BC was non-zero. Cleared if BC was zero.
+; - HL: HL - BC
+; - DE: DE - BC
+; - BC: 0
+	scf
+	push	hl
+	sbc	hl, hl
+	add	hl, bc
+	pop	hl
+	ret	nc
+	lddr
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+
+	public	_nonzero_cpir
+
+_nonzero_cpir:
+; Calls CPIR if BC is non-zero.
+; Input:
+; - A: needle
+; - HL: haystack
+; - BC: size
+; Output:
+; - Sign: Sign of the last comparison if BC was non-zero. M if BC was zero.
+; - Zero: NZ if the needle was not found or BC was zero. Z if the needle was found.
+; - Overflow: Cleared if BC is decremented to zero or already was zero.
+; - Carry: Set if BC was non-zero. Cleared if BC was zero.
+; - HL: HL + [0, BC]
+; - BC: [0, BC]
+	scf
+	push	hl
+	sbc	hl, hl
+	add	hl, bc
+	pop	hl
+	ret	nc
+	cpir
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+
+	public	_nonzero_cpdr
+
+_nonzero_cpdr:
+; Calls CPDR if BC is non-zero.
+; Input:
+; - A: needle
+; - HL: haystack
+; - BC: size
+; Output:
+; - Sign: Sign of the last comparison if BC was non-zero. M if BC was zero.
+; - Zero: NZ if the needle was not found or BC was zero. Z if the needle was found.
+; - Overflow: Cleared if BC is decremented to zero or already was zero.
+; - Carry: Set if BC was non-zero. Cleared if BC was zero.
+; - HL: HL - [0, BC]
+; - BC: [0, BC]
+	scf
+	push	hl
+	sbc	hl, hl
+	add	hl, bc
+	pop	hl
+	ret	nc
+	cpdr
+	ret
+
+;-------------------------------------------------------------------------------
