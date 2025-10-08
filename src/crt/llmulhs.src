@@ -1,0 +1,41 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__llmulhs
+
+; BC:UDE:UHL = ((int128_t)BC:UDE:UHL * (int128_t)(SP64)) >> 64
+__llmulhs:
+	push	af
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+
+	; BC:UDE:UHL = abs(BC:UDE:UHL)
+	ld	a, b
+	bit	7, b
+	call	nz, __llneg
+	push	bc, de, hl
+
+	; (SP64) = abs((SP64))
+	ld	hl, (iy + 9)
+	ld	de, (iy + 12)
+	ld	bc, (iy + 15)
+	xor	a, b
+	bit	7, b
+	call	nz, __llneg
+
+	; argument order can be swapped since multiplication is commutative
+	call	__llmulhu
+	ld	sp, iy
+
+	or	a, a
+	call	m, __llnot
+
+	pop	iy
+	pop	af
+	ret
+
+	extern	__llmulhu
+	extern	__llneg
+	extern	__llnot

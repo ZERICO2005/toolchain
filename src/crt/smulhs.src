@@ -1,0 +1,42 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__smulhs
+
+; HL = ((int32_t)HL * (int32_t)BC) >> 16
+__smulhs:
+	push	af, bc
+
+	ld	a, h
+	xor	a, b
+	push	af
+
+	; HL = abs(HL)
+	bit	7, h
+	call	nz, __sneg
+
+	; BC = abs(BC)
+	bit	7, b
+	jr	z, .positve_bc
+
+	or	a, a
+	push	hl
+	sbc	hl, hl
+	sbc	hl, bc
+	ex	(sp), hl
+	pop	bc
+
+.positve_bc:
+
+	call	__smulhu
+
+	pop	af
+	call	m, __snot
+
+	pop	bc, af
+	ret
+
+	extern	__smulhu
+	extern	__sneg
+	extern	__snot

@@ -1,0 +1,47 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__imulhs
+
+; UHL = ((int48_t)UHL * (int48_t)UBC) >> 24
+__imulhs:
+	push	af, bc
+
+	; UHL = abs(UHL)
+	push	hl
+	add	hl, hl
+	sbc	a, a
+	pop	hl
+	call	c, __ineg
+
+	; UBC = abs(UBC)
+	push	hl
+	ld	hl, $800000
+	add	hl, bc
+	rra
+	rlca
+	jr	nc, .positve_ubc
+	or	a, a
+	sbc	hl, hl
+	sbc	hl, bc
+	push	hl
+	pop	bc
+.positve_ubc:
+	pop	hl
+
+	call	__imulhu
+
+	; +HL +BC : A =  0 = PE
+	; +HL -BC : A = +1 = PO
+	; -HL +BC : A = -2 = PO
+	; -HL -BC : A = -1 = PE
+	or	a, a
+	call	po, __inot
+
+	pop	bc, af
+	ret
+
+	extern	__imulhu
+	extern	__ineg
+	extern	__inot

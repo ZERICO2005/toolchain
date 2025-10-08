@@ -1,0 +1,39 @@
+	assume	adl=1
+
+	section	.text
+
+	public	__lmulhs
+
+; E:UHL = ((int64_t)E:UHL * (int64_t)A:UBC) >> 32
+__lmulhs:
+	push	af, bc
+	xor	a, e		; test result sign
+	push	af
+
+	xor	a, e		; test A:UBC sign and restore A
+	; A:UBC = abs(A:UBC)
+	jp	p, .positve_aubc
+	push	hl
+	sbc	hl, hl
+	sbc	hl, bc
+	ex	(sp), hl
+	pop	bc
+	cpl
+	sbc	a, -1
+.positve_aubc:
+
+	; E:UHL = abs(E:UHL)
+	bit	7, e
+	call	nz, __lneg
+
+	call	__lmulhu
+
+	pop	af
+	call	m, __lnot
+
+	pop	bc, af
+	ret
+
+	extern	__lmulhu
+	extern	__lneg
+	extern	__lnot
