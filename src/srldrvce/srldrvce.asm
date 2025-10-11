@@ -316,7 +316,7 @@ srl_Open:
 
 	push	iy
 	ld	bc,.current_config			; get current config
-	push	bc	
+	push	bc
 	ld	bc,(xsrl_device.dev)
 	push	bc
 	call	usb_GetConfiguration
@@ -433,7 +433,7 @@ srl_Open:
 	push	iy,hl
 	call	usb_RefDevice
 	pop	hl,iy
-	
+
 	lea	ix,xsrl_device.rx_buf
 	call	start_read
 
@@ -587,43 +587,47 @@ srl_GetCDCStandardDescriptors:
 ;    }
 ;    return USB_SUCCESS;
 ;}
+
 srl_UsbEventCallback:
 	call	ti._frameset0
 	ld	hl, (ix + 6)
-	ld	bc, 0
-	ld	de, 11
+	ld	de, 11		; USB_DEFAULT_SETUP_EVENT
+	or	a, a
 	sbc	hl, de
-	jq	nz, .BB0_5
-	ld	iy, (ix + 9)
-	ld	a, (iy)
-	cp	a, -95
-	jq	nz, .BB0_2
-	ld	a, (iy + 1)
-	cp	a, 33
-	jq	z, .BB0_4
-	jq	.BB0_5
-.BB0_2:
-	cp	a, 33
-	jq	nz, .BB0_5
-	ld	a, (iy + 1)
-	cp	a, 32
-	jq	nz, .BB0_5
-.BB0_4:
-	ld	de, 0
-	ld	hl, 8
+	ld	e, d		; ld de, 0
+	jr	nz, .ret_USB_SUCCESS
+	; HL = $000000
+	; DE = $0000??
+	ld	bc, (ix + 9)
+
+	ld	a, (bc)		; event_data->bmRequestType
+	cp	a, $A1
+	ld	e, $21
+	jr	z, .type_A1
+	; E = $21
+	cp	a, e
+	jr	nz, .ret_USB_SUCCESS
+	dec	e
+	; E = $20
+.type_A1:
+	inc	bc
+	ld	a, (bc)
+	; E = $21 or $20
+	cp	a, e		; event_data->bRequest
+	jr	nz, .ret_USB_SUCCESS
+
+	ld	e, 8		; ld de, USB_SKIP_HUBS
+	push	de
 	push	hl
-	push	de
-	push	de
+	push	hl
+	; usb_FindDevice(NULL, NULL, USB_SKIP_HUBS)
 	call	usb_FindDevice
-	pop	de
-	pop	de
-	pop	de
+	; ld	sp, ix			; not needed
 	ld	de, 0
 	push	de
 	push	hl
-	call	usb_GetDeviceEndpoint
-	pop	de
-	pop	de
+	call	usb_GetDeviceEndpoint	; usb_GetDeviceEndpoint(HL, (uint8_t)0)
+	; ld	sp, ix			; not needed
 	ld	de, 0
 	push	de
 	push	de
@@ -633,20 +637,15 @@ srl_UsbEventCallback:
 	push	de
 	push	hl
 	call	usb_ScheduleControlTransfer
-	ld	bc, 1
-	pop	hl
-	pop	hl
-	pop	hl
-	pop	hl
-	pop	hl
-.BB0_5:
-	push	bc
-	pop	hl
+	ld	de, 1			; USB_IGNORE
+	ld	sp, ix
+.ret_USB_SUCCESS:
+	ex	de, hl
 	pop	ix
 	ret
+
 .line_coding:
 	rb	7
-
 
 ; Gets the device type and subtype based on the descriptors
 ; Inputs:
@@ -714,7 +713,7 @@ get_device_type:
 	ld	a,c
 	or	a,a
 	jq	z,.process_int
-	
+
 	ld	(xsrl_device.tx_addr),b
 	ld	(xsrl_device.rx_addr),c
 	ld	a,SRL_TYPE_CDC
