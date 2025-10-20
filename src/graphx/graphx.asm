@@ -756,13 +756,13 @@ gfx_FillRectangle:
 	ld	de, (iy + 3)
 	ld	hl, (iy + 9)
 	sbc	hl, de
-	push	hl
-	ld	de, (iy + 6)
-	ld	hl, (iy + 12)
-	sbc	hl, de
+	ex	de, hl
+	push	de
+	ld	e, (iy + 6)
+	ld	a, (iy + 12)
+	sub	a, e			; a = new height
 	pop	bc			; bc = new width
-	ld	a, l			; a = new height
-	ld	hl, (iy + 3)		; hl = new x, de = new y
+	; hl = new x, e = new y
 	jr	_FillRectangle_NoClip
 
 ;-------------------------------------------------------------------------------
@@ -777,13 +777,14 @@ gfx_FillRectangle_NoClip:
 ;  None
 	ld	iy, 0
 	add	iy, sp
+	ld	bc, (iy + 9)		; bc = width
+	ld	a, c
+	or	a, b
+	; We don't need to check UBC since width >= 65536 would be undefined behavior
+	ret	z			; make sure width is not 0
 	ld	a, (iy + 12)		; a = height
 	or	a, a
 	ret	z			; make sure height is not 0
-	ld	bc, (iy + 9)		; bc = width
-	sbc	hl, hl
-	adc	hl, bc
-	ret	z			; make sure width is not 0
 	ld	hl, (iy + 3)		; hl = x coordinate
 	ld	e, (iy + 6)		; e = y coordinate
 _FillRectangle_NoClip:
@@ -794,9 +795,9 @@ _FillRectangle_NoClip:
 	ld	de, (CurrentBuffer)
 	add	hl, de
 	ex	de, hl			; de -> place to begin drawing
+	push	bc
+	pop	iy
 	push	de
-	ld	(.width1), bc
-	ld	(.width2), bc
 	ld	hl, _Color
 	wait_quick
 	ldi				; check if we only need to draw 1 pixel
@@ -812,8 +813,7 @@ _FillRectangle_NoClip:
 	add	hl, bc
 	dec	de
 	ex	de, hl
-.width1 = $ + 1
-	ld	bc, 0
+	lea	bc, iy
 	lddr
 	dec	a
 	ret	z
@@ -821,8 +821,7 @@ _FillRectangle_NoClip:
 	add	hl, bc
 	inc	de
 	ex	de, hl
-.width2 = $ + 1
-	ld	bc, 0
+	lea	bc, iy
 	ldir
 	ld	bc, (2 * ti.lcdWidth) - 1
 	dec	a
@@ -892,13 +891,14 @@ gfx_Rectangle_NoClip:
 ;  None
 	ld	iy, 0
 	add	iy, sp
+	ld	bc, (iy + 9)		; bc = width
+	ld	a, c
+	or	a, b
+	; We don't need to check UBC since width >= 65536 would be undefined behavior
+	ret	z			; abort if width == 0
 	ld	a, (iy + 12)		; a = height
 	or	a, a
 	ret	z			; abort if height == 0
-	ld	bc, (iy + 9)		; bc = width
-	sbc	hl, hl
-	adc	hl, bc
-	ret	z			; abort if width == 0
 	push	bc
 	call	_HorizLine_NoClip_NotDegen_StackXY ; draw top horizontal line
 						   ; hl = &buf[y][x+width-1]
@@ -965,9 +965,9 @@ gfx_HorizLine_NoClip:
 	ld	iy, 0
 	add	iy, sp
 	ld	bc, (iy + 9)		; bc = length
-_HorizLine_NoClip_StackXY:
-	sbc	hl, hl
-	adc	hl, bc
+	ld	a, c
+	or	a, b
+	; We don't need to check UBC since width >= 65536 would be undefined behavior
 	ret	z			; abort if length == 0
 _HorizLine_NoClip_NotDegen_StackXY:
 	ld	hl, (iy + 3)		; hl = x
@@ -1027,9 +1027,10 @@ smcWord _YMax
 	pop	de
 	ld	a, l
 	sub	a, e
-	ret	c			; return if not within y bounds
-	ld	b, a
-	jr	_VertLine_NoClip_MaybeDegen_StackX	; jump to unclipped version
+	; jump to unclipped version
+	jr	nc, _VertLine_NoClip_MaybeDegen_StackX
+	; return if not within y bounds
+	ret
 
 ;-------------------------------------------------------------------------------
 gfx_VertLine_NoClip:
@@ -1043,12 +1044,11 @@ gfx_VertLine_NoClip:
 	ld	iy, 0
 	add	iy, sp
 	ld	e, (iy + 6)		; e = y
-	ld	b, (iy + 9)		; b = length
-_VertLine_NoClip_StackX:
-	xor	a, a
-	or	a, b
+	ld	a, (iy + 9)		; a = length
+	or	a, a
 _VertLine_NoClip_MaybeDegen_StackX:
 	ret	z			; abort if length == 0
+	ld	b, a			; b = length
 _VertLine_NoClip_NotDegen_StackX:
 	ld	hl, (iy + 3)		; hl = x
 	ld	d, ti.lcdWidth / 2
