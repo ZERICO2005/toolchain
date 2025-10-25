@@ -475,404 +475,28 @@ gontlib_SetFont: ; COPIED_FROM_FONTLIBC
 
 
 ;-------------------------------------------------------------------------------
-gontlib_DrawGlyph: ; COPIED_FROM_FONTLIBC
-; Draws a glyph to the current cursor position
-; Arguments:
-;  arg0: codepoint
-; Returns:
-;  New X cursor value
-	ld	hl, arg0
-	add	hl, sp
-	ld	a, (hl)
-	push	ix			; _DrawGlyphRaw destroys IX
-; Compute write pointer
-	ld	hl, (_TextY)
-	ld	h, ti.lcdWidth / 2
-	mlt	hl
-	add	hl, hl
-	ld	de, (_TextX)
-	push	de
-	add	hl, de
-	ld	de, (CurrentBuffer)
-	add	hl, de
-	call	util.DrawGlyphRaw	; Draw glyph
-; Update _TextX
-	lea.sis	de, iy + 0
-	pop	hl
-	add	hl, de
-	ld	a, (_CurrentFontProperties.italicSpaceAdjust)
-	pop	ix
-	ld	e, a
-	sbc	hl, de
-	ld	(_TextX), hl
-	ret
+; gontlib_DrawGlyph:
 
 
 ;-------------------------------------------------------------------------------
-util.DrawGlyphRaw:
-; Handles the actual main work of drawing a glyph.
-; Arguments:
-;  HL: Draw pointer
-;  A: Glyph index
-;  Font properties variables
-; Returns:
-;  IYL: Width of glyph (not including any italicSpaceAdjust)
-;  IYH: Zero
-;  IYU: Untouched
-;  Glyph drawn
-; Destroys:
-;  Basically everything except shadow and configuration registers.
-;  And don't count on that not changing.
-	push	hl
-; Subtract out firstGlyph
-	ld	hl, _CurrentFontProperties.firstGlyph
-	sub	a, (hl)
-; Get glyph width
-	ld	c, a
-	or	a, a
-	sbc	hl, hl
-	ld	l, a
-	ld	de, (_CurrentFontProperties.widthsTablePtr)
-	add	hl, de
-	ld	a, (hl)
-	pop	de
-	call	gfy_Wait
-;	jp	util.DrawGlyphRawKnownWidth
-assert $ = util.DrawGlyphRawKnownWidth
+; util.DrawGlyphRaw:
 
 
 ;-------------------------------------------------------------------------------
-util.DrawGlyphRawKnownWidth:
-; Handles the actual main work of drawing a glyph.
-; Arguments:
-;  DE: Draw pointer
-;  C: Glyph index, with _CurrentFontProperties.firstGlyph subtracted out
-;  A: Glyph width
-;  Font properties variables
-; Returns:
-;  IYL: Width of glyph (not including any italicSpaceAdjust)
-;  IYH: Zero
-;  IYU: Untouched
-;  Glyph drawn
-; Destroys:
-;  Basically everything except shadow and configuration registers.
-;  And don't count on that not changing.
+; util.DrawGlyphRawKnownWidth:
 
-; Update loop controls
-	ld	iyl, a
-	dec	a
-	rra
-	srl	a
-	srl	a
-	inc	a
-	ld	(_TextStraightBytesPerRow), a
-	ld	a, ti.lcdHeight
-	sub	a, iyl
-	ld	(_TextStraightRowDelta - 2), a
-; Get pointer to bitmap
-	ld	hl, (_CurrentFontProperties.bitmapsTablePtr)
-	ld	b, 2
-	mlt	bc			; Performs both the multiply and zeros BCU
-	add	hl, bc
-	ld	ix, (hl)
-	lea.sis	ix, ix + 0		; Truncate to 16-bits
-	ld	bc, (_CurrentFontRoot)
-	add	ix, bc
-; Write SMC
-	ld	a, (_TextTransparentMode)
-	ld	b, a
-	ld	a, .unsetColumnLoopStart - (.unsetColumnLoopJr1 + 2)
-	ld	c, .unsetColumnLoopStart - (.unsetColumnLoopJr2 + 2)
-	djnz	.writeSmc
-	ld	a, .unsetColumnLoopMiddleTransparent - (.unsetColumnLoopJr1 + 2)
-	ld	c, .unsetColumnLoopMiddleTransparent - (.unsetColumnLoopJr2 + 2)
-.writeSmc:
-	ld	(.unsetColumnLoopJr1 + 1), a
-	ld	a, c
-	ld	(.unsetColumnLoopJr2 + 1), a
-	push	bc
-; Now deal with the spaceAbove metric
-	ld	a, (_CurrentFontProperties.spaceAbove)
-	or	a, a
-	call	nz, util.DrawEmptyLines
-	ld	c, TEXT_FG_COLOR	; SMCd to have correct foreground color
+	ld	c,TEXT_FG_COLOR		; SMCd to have correct foreground color
 smcByte _TextStraightForegroundColor
-	ld	a, (_CurrentFontProperties.height)
-	ld	iyh, a
-	ld	a, c
 
-; Registers:
-;  B: Bit counter for each row
-;  C: Foreground color
-;  IYL: Glyph data width
-;  IYH: Row counter
-;  IX: Read pointer
-;  DE: Write pointer
-;  HL: Current line bitmap
-; This is split into three loops: one for set pixels, one for unset pixels that
-; are transparent, and one for unset pixels that are opaque.
-; The idea is that pixels are not randomly black or white; rather, there tend
-; to be horizontal lines in text, giving straight runs of pixels the same color.
-; Thus, we can optimize for that case.
-.rowLoop:
-	ld	hl, (ix)
-	lea	ix, ix + 0		; SMCd to have correct byte count per row
-smcByte _TextStraightBytesPerRow
-	ld	b, iyl
-.columnLoopStart:
-	add	hl, hl
-.unsetColumnLoopJr1:
-	jr	nc, .unsetColumnLoopStart
-
-; For set pixels
-.setColumnLoopStart:
-	ld	a, c
-	ld	(de), a
-	inc	de
-	dec	b
-	jr	z, .columnLoopEnd
-.setColumnLoop:
-	add	hl, hl
-.unsetColumnLoopJr2:
-	jr	nc, .unsetColumnLoopStart
-.setColumnLoopMiddle:
-	ld	(de), a
-	inc	de
-	djnz	.setColumnLoop
-	jr	.columnLoopEnd
-
-; For unset pixels, we use a special loop if transparency is requested
-.unsetColumnLoopTransparent:
-	add	hl, hl
-	jr	c, .setColumnLoopMiddle
-.unsetColumnLoopMiddleTransparent:
-	inc	de
-	djnz	.unsetColumnLoopTransparent
-	jr	.columnLoopEnd
-
-; For unset pixels with opacity on
-.unsetColumnLoopStart:
-	ld	a, TEXT_BG_COLOR	; SMCd to have correct background color
+	ld	a,TEXT_BG_COLOR		; SMCd to have correct background color
 smcByte _TextStraightBackgroundColor
-	ld	(de), a
-	inc	de
-	dec	b
-	jr	z, .columnLoopEnd
-.unsetColumnLoop:
-	add	hl, hl
-	jr	c, .setColumnLoopStart
-.unsetColumnLoopMiddle:
-	ld	(de), a
-	inc	de
-	djnz	.unsetColumnLoop
 
-.columnLoopEnd:
-	ld	hl, ti.lcdHeight - 0	; SMCd to have correct row delta
-smcByte _TextStraightRowDelta
-	add	hl, de
-	ex	de, hl
-	dec	iyh
-	jr	nz, .rowLoop
-
-; OK done with the main work!
-; Now deal with the spaceBelow metric
-	pop	bc
-	ld	a, (_CurrentFontProperties.spaceBelow)
-	or	a, a
-	ret	z
-
-util.DrawEmptyLines:
-; Internal routine that draws empty space for a glyph
-; Arguments:
-;  A: Number of lines to draw (nonzero)
-;  B: -1 = opaque, 0 = transparent
-;  IYL: Width of line to draw
-;  DE: Drawing target
-;  (_TextStraightRowDelta - 2): Row delta
-; Returns:
-;  Lines drawn
-; Destroys:
-;  AF
-;  BC
-;  HL
-	ex	de, hl
-	ld	c, a
-	inc	b
-	jr	nz, .transparentLines
-; Deal with clearing out pixels
-	ld	a, (_TextStraightBackgroundColor)
-	ld	de, (_TextStraightRowDelta - 2)
-.clearLinesLoop:
-	ld	b, iyl
-.clearLinesInnerLoop:
-	ld	(hl), a
-	inc	hl
-	djnz	.clearLinesInnerLoop
-	add	hl, de
-	dec	c
-	jr	nz, .clearLinesLoop
-	pop	de
-	ret
-.transparentLines:
-	ld	b, ti.lcdHeight
-	ld	c, iyl
-	mlt	bc
-	add	hl, bc
-	add	hl, bc
-	ex	de, hl
-	ret
+;-------------------------------------------------------------------------------
+; gontlib_DrawString:
 
 
 ;-------------------------------------------------------------------------------
-gontlib_DrawString: ; COPIED_FROM_FONTLIBC
-; Draws a string, ending when either:
-;  an unknown control code is encountered (or NULL), or there is no more space
-;  left in the window.
-; Arguments:
-;  arg0: Pointer to string
-;  arg1: Maximum number of characters have been printed
-; Returns:
-;  New X cursor value
-	pop	bc
-	ex	(sp), hl
-	push	bc
-	ld	bc, -1
-	jr	_DrawStringL
-
-;-------------------------------------------------------------------------------
-gontlib_DrawStringL: ; COPIED_FROM_FONTLIBC
-; Draws a string, ending when any of the following is true:
-;  arg1 characters have been printed;
-;  an unknown control code is encountered (or NULL); or,
-;  there is no more space left in the window.
-; Arguments:
-;  arg0: Pointer to string
-;  arg1: Maximum number of characters have been printed
-; Returns:
-;  New X cursor value
-	ld	hl, arg1
-	add	hl, sp
-	ld	bc, (hl)
-	dec	hl
-	dec	hl
-	dec	hl
-	ld	hl, (hl)
-_DrawStringL:
-; Since reentrancy isn't likely to be needed. . . .
-; Instead of using stack locals, just access all our local and global
-; variables via the (IX + offset) addressing mode.
-	push	ix
-	ld	ix, DataBaseAddr
-	res	bWasNewline, (ix + newlineControl)
-	ld	(ix + charactersLeft), bc
-	dec	hl			; We're reading the string with pre-increment,
-	ld	(ix + strReadPtr), hl	; so we need an initial pre-decrement
-.restartX:
-; Compute target drawing address
-	ld	hl, (_TextY)
-	ld	h, ti.lcdWidth / 2
-	mlt	hl
-	add	hl, hl
-	ld	bc, (ix + textX)
-	add	hl, bc
-	ld	bc, (CurrentBuffer)
-	add	hl, bc
-	ex	de, hl
-	call	gfy_Wait
-.mainLoop:
-; Check that we haven't exceeded our glyph printing limit
-	ld	bc, (ix + charactersLeft)
-	sbc	hl, hl
-	adc	hl, bc
-	jr	z, .exit
-	dec	bc
-	ld	(ix + charactersLeft), bc
-; Read & validate glyph
-	ld	hl, (ix + strReadPtr)
-	inc	hl
-	ld	(ix + strReadPtr), hl
-; Read character
-	ld	a, (hl)
-; Check if control code
-	cp	a, (ix + firstPrintableCodePoint)
-	jr	nc, .notControlCode
-	or	a, a
-	jr	z, .exit
-	cp	a, (ix + newLineCode)
-	jr	z, .printNewline
-.exit:
-	ld	hl, (ix + textX)
-	pop	ix
-	ret
-.notControlCode:
-	cp	a, (ix + alternateStopCode)
-	jr	z, .exit
-; Check if font has given codepoint
-	sub	a, (ix + strucFont.firstGlyph)
-	jr	c, .exit
-	sbc	hl, hl			; Zero for later
-	ld	l, a
-	sub	a, (ix + strucFont.totalGlyphs)
-	jr	c, .definitelyValid
-	cp	a, l			; 0 = 256 total glyphs, so check for zero
-	jr	nz, .exit		; Z iff L == A, which is true iff totalGlyphs == 0
-.definitelyValid:
-	ld	(ix + readCharacter), l
-; Look up width
-	ld	bc, (ix + strucFont.widthsTablePtr)
-	add	hl, bc
-	ld	a, (hl)
-; Check if glyph will fit in window
-	ld	hl, (ix + textX)
-	ld	bc, 0
-	ld	c, a
-	add	hl, bc
-	ld	bc, (ix + textXMax)
-;	or	a, a			; C should already be reset from ADD HL, BC
-	sbc	hl, bc
-	add	hl, bc
-	jr	z, .colOK
-	jr	nc, .newline
-; Correct for italicness
-.colOK:
-	ld	c, (ix + strucFont.italicSpaceAdjust)
-	ld	b, 0
-	or	a, a
-	sbc	hl, bc
-	ld	(ix + textX), hl
-; OK, ready to draw the glyph
-	ld	c, (ix + readCharacter)
-	push	de
-	call	util.DrawGlyphRawKnownWidth
-	pop	de
-	ld	ix, DataBaseAddr
-; Update write pointer
-	ld	a, iyl
-	sub	a, (ix + strucFont.italicSpaceAdjust)
-	sbc	hl, hl			; Sign-extend A for HL
-	ld	l, a
-	add	hl, de
-	ex	de, hl
-	jr	.mainLoop
-.printNewline:
-; Keep track of whether or not printing the current character needs to be retried
-	set	bWasNewline, (ix + newlineControl)
-.newline:
-	bit	bWasNewline, (ix + newlineControl)
-	jr	nz, .doNewline
-	bit	bEnableAutoWrap, (ix + newlineControl)
-	jr	z, .exit
-.doNewline:
-	call	gontlib_Newline
-	or	a, a
-	jr	nz, .exit
-	bit	bWasNewline, (ix + newlineControl)
-	res	bWasNewline, (ix + newlineControl)
-	jp	nz, .restartX
-	ld	hl, (ix + strReadPtr)
-	dec	hl
-	ld	(ix + strReadPtr), hl
-	jp	.restartX
+; gontlib_DrawStringL:
 
 
 ;-------------------------------------------------------------------------------
@@ -1475,9 +1099,9 @@ gontlib_GetCharactersRemaining: ; COPIED_FROM_FONTLIBC
 ; Arguments:
 ;  None
 ; Returns:
-;  Last internal value of tempCharactersLeft, taken from max_characters param
+;  Last internal value of _TempCharactersLeft, taken from max_characters param
 ;  to GetStringWidth and DrawString.
-	ld	hl, (tempCharactersLeft)
+	ld	hl, (_TempCharactersLeft)
 	ret
 
 
@@ -1999,8 +1623,8 @@ newlineControl := _TextNewlineControl - DataBaseAddr
 _TextLastCharacterRead:
 strReadPtr := _TextLastCharacterRead - DataBaseAddr
 	dl	0
-tempCharactersLeft:
-charactersLeft := tempCharactersLeft - DataBaseAddr
+_TempCharactersLeft:
+charactersLeft := _TempCharactersLeft - DataBaseAddr
 	dl	0
 _TextAlternateStopCode:
 alternateStopCode := _TextAlternateStopCode - DataBaseAddr
@@ -2020,3 +1644,181 @@ currentFontRoot := _CurrentFontRoot - DataBaseAddr
 DataBaseAddr:
 ; Embed the current font's properties as library variables
 _CurrentFontProperties strucFont
+
+;-------------------------------------------------------------------------------
+; aliases
+;-------------------------------------------------------------------------------
+
+_conf := _CurrentFontProperties
+_root := _CurrentFontRoot
+
+;-------------------------------------------------------------------------------
+; libc
+;-------------------------------------------------------------------------------
+
+__bshl      := $000100
+__bshru     := $000104
+__ishl      := $000174
+__ishru     := $000184
+__iand      := $000134
+__ior       := $000168
+__ixor      := $000198
+__inot      := $000164
+__ineg      := $000160
+__idivs     := $00013C
+__idivu     := $000140
+__iremu     := $000170
+__irems     := $00016C
+; __imulu     := $000154
+
+; _memcpy     := $0000A4
+; _memmove    := $0000A8
+; _memset     := $0000AC
+
+__setflag   := $000218
+__frameset  := $00012C
+__frameset0 := $000130
+
+; for debugging
+_boot_sprintf := $0000BC
+
+;-------------------------------------------------------------------------------
+; inlined routines
+;-------------------------------------------------------------------------------
+
+_memcpy:
+	ld	iy, -1
+	add	iy, sp
+	ld	bc, (iy + 10)  ; Load count
+	sbc	hl, hl
+	add	hl, bc
+	jr	nc, .zero
+	ld	de, (iy + 4)  ; Load destination
+	ld	hl, (iy + 7)  ; Load source
+	ldir
+.zero:
+	ld	hl, (iy + 4)  ; Return the destination pointer
+	ret
+
+; Optimized for when src != dst
+_memmove:
+	; src > dst | LDIR | 32F + 15R + 1
+	; src < dst | LDDR | 35F + 12R + 2
+	; src = dst | LDDR | 35F + 12R + 2
+	; zero size |      | 24F + 12R + 2
+
+	ld	iy, -1
+	add	iy, sp
+	ld	bc, (iy + 10)
+	sbc	hl, hl
+	add	hl, bc
+	jr	nc, .zero
+	ld	hl, (iy + 7)
+	ld	de, (iy + 4)
+	sbc	hl, de
+	; src <= dst
+	jr	c, .copy_backwards
+	; src > dst
+; .copy_forwards:
+	add	hl, de
+	inc	hl
+	ldir
+.zero:
+	ld	hl, (iy + 4)
+	ret
+
+.copy_backwards:
+	; move HL and DE to the end
+	ex	de, hl
+	add	hl, bc
+	ex	de, hl	; HL = src - dst - 1, DE = dst + size
+	add	hl, de	; HL = src + size - 1
+	dec	de	; DE = dst + size - 1
+	lddr
+	ex	de, hl
+	inc	hl
+	ret
+
+_memset:
+	ld	iy, 0
+	add	iy, sp
+	ld	hl, (iy + 3)
+	ld	bc, (iy + 9)
+	cpi
+	add	hl, bc
+	ret	c
+	dec	hl
+	ld	e, (iy + 6)
+	ld	(hl), e
+	ret	po
+	push	hl
+	pop	de
+	dec	de
+	lddr
+	ret
+
+__imulu:
+	push	af
+	push	de
+	ld	d, b
+	ld	e, h
+	mlt	de
+	ld	a, e
+	dec	sp
+	push	hl
+	push	bc
+	inc	sp
+	pop	de
+	ld	e, l
+	mlt	de
+	add	a, e
+	pop	de
+	ld	e, c
+	mlt	de
+	add	a, e
+	ld	e, l
+	ld	l, c
+	mlt	hl
+	add	a, h
+	ld	h, a
+	ld	a, e
+	ld	d, b
+	mlt	de
+	add	hl, de
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	ld	d, a
+	ld	e, c
+	mlt	de
+	add	hl, de
+	pop	de
+	pop	af
+	ret
+
+__set_bc_and_mul_hl_by_240:
+	push	hl
+	pop	bc
+	add	hl, hl	; 2
+	add	hl, bc	; 3
+	add	hl, hl	; 6
+	add	hl, bc	; 7
+	add	hl, hl	; 14
+	add	hl, bc	; 15
+	add	hl, hl	; 30
+	add	hl, hl	; 60
+	add	hl, hl	; 120
+	add	hl, hl	; 240
+	ld	bc, 240
+	ret
+
+;-------------------------------------------------------------------------------
+; gontlibc.c.src
+;-------------------------------------------------------------------------------
+
+include 'gontlibc.c.src'
