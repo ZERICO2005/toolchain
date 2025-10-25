@@ -293,7 +293,6 @@ typedef struct fontlib_font_pack_t {
     int24_t font_list[1];
 } fontlib_font_pack_t;
 
-
 /**
  * Sets the bounds of the window all text will appear in to be the full screen.
  * This is the default.
@@ -320,25 +319,25 @@ void fontlib_SetWindow(unsigned int x_min, uint8_t y_min, unsigned int width, ui
  * Returns the starting column of the current text window
  * @return Window X
  */
-unsigned int fontlib_GetWindowXMin(void);
+unsigned int fontlib_GetWindowXMin(void) __attribute__((__pure__));
 
 /**
  * Returns the starting row of the current text window
  * @return Window Y
  */
-uint8_t fontlib_GetWindowYMin(void);
+uint8_t fontlib_GetWindowYMin(void) __attribute__((__pure__));
 
 /**
  * Returns the width of the current text window
  * @return Window width
  */
-unsigned int fontlib_GetWindowWidth(void);
+unsigned int fontlib_GetWindowWidth(void) __attribute__((__pure__));
 
 /**
  * Returns the height of the current text window
  * @return Window height
  */
-uint8_t fontlib_GetWindowHeight(void);
+uint8_t fontlib_GetWindowHeight(void) __attribute__((__pure__));
 
 /**
  * Sets the cursor position.
@@ -353,13 +352,13 @@ void fontlib_SetCursorPosition(unsigned int x, uint8_t y);
  * Returns the cursor column.
  * @return Current cursor X
  */
-unsigned int fontlib_GetCursorX(void);
+unsigned int fontlib_GetCursorX(void) __attribute__((__pure__));
 
 /**
  * Returns the cursor row.
  * @return Current cursor Y
  */
-uint8_t fontlib_GetCursorY(void);
+uint8_t fontlib_GetCursorY(void) __attribute__((__pure__));
 
 /**
  * Adds the given (x,y) to the cursor position.
@@ -373,12 +372,12 @@ void fontlib_ShiftCursorPosition(int x, int y);
 /**
  * Moves the cursor to the upper left corner of the text window.
  */
-void fontlib_HomeUp();
+void fontlib_HomeUp(void);
 
 /**
  * Moves the cursor back to the start of the current line.
  */
-void fontlib_Home();
+void fontlib_Home(void);
 
 /**
  * Sets the current font
@@ -417,14 +416,14 @@ void fontlib_SetColors(uint8_t forecolor, uint8_t backcolor);
  * @note This is NOT the same as GraphX's current color!
  * @return Current foreground color
  */
-uint8_t fontlib_GetForegroundColor(void);
+uint8_t fontlib_GetForegroundColor(void) __attribute__((__pure__));
 
 /**
  * Returns the current background color FontLibC will use for drawing.
  * @note This is NOT the same as GraphX's current color!
  * @return Current background color
  */
-uint8_t fontlib_GetBackgroundColor(void);
+uint8_t fontlib_GetBackgroundColor(void) __attribute__((__pure__));
 
 /**
  * Controls whether FontLibC will use a transparent background for text drawing
@@ -440,7 +439,7 @@ void fontlib_SetTransparency(bool transparency);
  * @note This has nothing to do with GraphX's configured transparent color
  * @return true if background will be transparent, false if background color will be used
  */
-bool fontlib_GetTransparency(void);
+bool fontlib_GetTransparency(void) __attribute__((__pure__));
 
 /**
  * Controls hows much black space will be added above and below each line of
@@ -456,13 +455,13 @@ void fontlib_SetLineSpacing(uint8_t space_above, uint8_t space_below);
  * Returns current padding space above.
  * @return Current padding space above
  */
-uint8_t fontlib_GetSpaceAbove(void);
+uint8_t fontlib_GetSpaceAbove(void) __attribute__((__pure__));
 
 /**
  * Returns current padding space below
  * @return Current padding space below
  */
-uint8_t fontlib_GetSpaceBelow(void);
+uint8_t fontlib_GetSpaceBelow(void) __attribute__((__pure__));
 
 /**
  * Sets current spacing adjustment for italic text.  This causes the cursor to
@@ -477,27 +476,27 @@ void fontlib_SetItalicSpacingAdjustment(uint8_t italic_spacing_adjustment);
  * Returns current spacing adjustment for italic text.
  * @return Current spacing adjustment for italic text
  */
-uint8_t fontlib_GetItalicSpacingAdjustment(void);
+uint8_t fontlib_GetItalicSpacingAdjustment(void) __attribute__((__pure__));
 
 /**
  * Returns the height of the current font, INCLUDING space above/below
  * @return Height in pixels
  */
-uint8_t fontlib_GetCurrentFontHeight(void);
+uint8_t fontlib_GetCurrentFontHeight(void) __attribute__((__pure__));
 
 /**
  * Tests whether the current font has the given code point
  * @param[in] code_point Code point to test
  * @return true if code_point is in current font, false if not
  */
-bool fontlib_ValidateCodePoint(char code_point);
+bool fontlib_ValidateCodePoint(char code_point) __attribute__((__pure__));
 
 /**
  * Returns the total number of printable glyphs in the font.
  * @note This can return 256; no valid font has 0 printable glyphs.
  * @return Total number of printable glyphs
  */
-size_t fontlib_GetTotalGlyphs(void);
+size_t fontlib_GetTotalGlyphs(void) __attribute__((__pure__));
 
 /**
  * Returns the code point of the first printable glyph.
@@ -505,7 +504,7 @@ size_t fontlib_GetTotalGlyphs(void);
  * typecast this to unsigned char before attempting any math with it.
  * @return First print glyph code point
  */
-char fontlib_GetFirstGlyph(void);
+char fontlib_GetFirstGlyph(void) __attribute__((__pure__));
 
 /**
  * Allows you to set the code point that is recognized as being a new line code.
@@ -522,7 +521,7 @@ void fontlib_SetNewlineCode(char code_point);
  * If 0, newlines in strings will not be processed.
  * @return Current newline
  */
-char fontlib_GetNewlineCode(void);
+char fontlib_GetNewlineCode(void) __attribute__((__pure__));
 
 /**
  * Sets an alternate code point to recognize as a stop code.
@@ -539,7 +538,7 @@ void fontlib_SetAlternateStopCode(char code_point);
  * Returns the current alternate stop code.
  * @return Current alternate stop code.
  */
-char fontlib_GetAlternateStopCode(void);
+char fontlib_GetAlternateStopCode(void) __attribute__((__pure__));
 
 /**
  * Sets the first code point considered printable.
@@ -554,7 +553,7 @@ void fontlib_SetFirstPrintableCodePoint(char code_point);
  * Returns the first code point considered printable.
  * @return Current first printable code point
  */
-char fontlib_GetFirstPrintableCodePoint(void);
+char fontlib_GetFirstPrintableCodePoint(void) __attribute__((__pure__));
 
 /**
  * Sets the code points DrawInt and DrawUInt will use for the minus symbol
@@ -569,7 +568,7 @@ void fontlib_SetDrawIntCodePoints(char minus, char zero);
  * Defaults to '-'
  * @return '-' or whatever you set it to
  */
-char fontlib_GetDrawIntMinus(void);
+char fontlib_GetDrawIntMinus(void) __attribute__((__pure__));
 
 /**
  * Returns the code point DrawInt and DrawUInt will use for '0'; it assumes
@@ -577,14 +576,14 @@ char fontlib_GetDrawIntMinus(void);
  * Defaults to '0'
  * @return '0' or whatever you set it to
  */
-char fontlib_GetDrawIntZero(void);
+char fontlib_GetDrawIntZero(void) __attribute__((__pure__));
 
 /**
  * Returns the width of the given glyph
  * @param[in] codepoint Codepoint to test
  * @return Width of glyph, 0 if invalid codepoint
  */
-uint8_t fontlib_GetGlyphWidth(char codepoint);
+uint8_t fontlib_GetGlyphWidth(char codepoint) __attribute__((__pure__));
 
 /**
  * Returns the width of a string printed in the current font.
@@ -594,7 +593,7 @@ uint8_t fontlib_GetGlyphWidth(char codepoint);
  * @param[in] str Pointer to string
  * @return Width of string
  */
-unsigned int fontlib_GetStringWidth(const char *str);
+unsigned int fontlib_GetStringWidth(const char *str) __attribute__((__pure__));
 
 /**
  * Returns the width of a string printed in the current font.
@@ -605,14 +604,14 @@ unsigned int fontlib_GetStringWidth(const char *str);
  * @param[in] max_characters Maximum number of characters to process
  * @return Width of string
  */
-unsigned int fontlib_GetStringWidthL(const char *str, size_t max_characters);
+unsigned int fontlib_GetStringWidthL(const char *str, size_t max_characters) __attribute__((__pure__));
 
 /**
  * Gets the location of the last character processed by GetStringWidth or
  * DrawString
  * @return Pointer to character
  */
-char *fontlib_GetLastCharacterRead(void);
+char *fontlib_GetLastCharacterRead(void) __attribute__((__pure__));
 
 /**
  * Returns 0 if DrawStringL or GetStringWidthL returned because max_characters
@@ -620,7 +619,7 @@ char *fontlib_GetLastCharacterRead(void);
  * @return Either zero, or a non-zero number depending on the reason DrawStringL
  * or GetStringWidthL returned.
  */
-size_t fontlib_GetCharactersRemaining(void);
+size_t fontlib_GetCharactersRemaining(void) __attribute__((__pure__));
 
 /**
  * Draws a glyph.
@@ -633,7 +632,7 @@ size_t fontlib_GetCharactersRemaining(void);
  * @param[in] glyph Codepoint
  * @return The new X value of the cursor
  */
-uint24_t fontlib_DrawGlyph(uint8_t glyph);
+unsigned int fontlib_DrawGlyph(uint8_t glyph);
 
 /**
  * Draws a string.
@@ -655,7 +654,7 @@ uint24_t fontlib_DrawGlyph(uint8_t glyph);
  * @return The new X value of the cursor (probably not useful if a newline was
  * processed.)
  */
-uint24_t fontlib_DrawString(const char *str);
+unsigned int fontlib_DrawString(const char *str);
 
 /**
  * Draws a string, up to a maximum number of characters.
@@ -671,7 +670,7 @@ uint24_t fontlib_DrawString(const char *str);
  * @return The new X value of the cursor (probably not useful if a newline was
  * processed.)
  */
-uint24_t fontlib_DrawStringL(const char *str, size_t max_characters);
+unsigned int fontlib_DrawStringL(const char *str, size_t max_characters);
 
 /**
  * Prints a signed integer
@@ -729,7 +728,7 @@ void fontlib_SetNewlineOptions(uint8_t options);
  * Gets the current newline behavior options.
  * @return Current newline behavior options
  */
-uint8_t fontlib_GetNewlineOptions(void);
+uint8_t fontlib_GetNewlineOptions(void) __attribute__((__pure__));
 
 /**
  * Scrolls the contents of the text window down one line, i.e. everything in
@@ -769,7 +768,7 @@ char *fontlib_GetFontPackName(const char *appvar_name);
  * @param[in] index Index into font table of font pack
  * @return Direct pointer to font, or NULL if the index is invalid.
  */
-fontlib_font_t *fontlib_GetFontByIndexRaw(const fontlib_font_pack_t *font_pack, uint8_t index);
+fontlib_font_t *fontlib_GetFontByIndexRaw(const fontlib_font_pack_t *font_pack, uint8_t index) __attribute__((__pure__));
 
 /**
  * Gets a pointer to a font, suitable for passing to SetFont(), given a font
@@ -799,7 +798,12 @@ fontlib_font_t *fontlib_GetFontByIndex(const char *font_pack_name, uint8_t index
  * FONTLIB_MONOSPACE to REJECT monospaced fonts.
  * @return Direct pointer to font, or NULL if no matching font is found
  */
- fontlib_font_t *fontlib_GetFontByStyleRaw(const fontlib_font_pack_t *font_pack, uint8_t size_min, uint8_t size_max, uint8_t weight_min, uint8_t weight_max, uint8_t style_bits_set, uint8_t style_bits_reset);
+ fontlib_font_t *fontlib_GetFontByStyleRaw(
+    const fontlib_font_pack_t *font_pack,
+    uint8_t size_min, uint8_t size_max,
+    uint8_t weight_min, uint8_t weight_max,
+    uint8_t style_bits_set, uint8_t style_bits_reset
+) __attribute__((__pure__));
 
 /**
  * Gets a pointer to a font, suitable for passing to SetFont(), given a font
@@ -818,11 +822,15 @@ fontlib_font_t *fontlib_GetFontByIndex(const char *font_pack_name, uint8_t index
  * FONTLIB_MONOSPACE to REJECT monospaced fonts.
  * @return Direct pointer to font, or NULL if no matching font is found
  */
-fontlib_font_t *fontlib_GetFontByStyle(const char *font_pack_name, uint8_t size_min, uint8_t size_max, uint8_t weight_min, uint8_t weight_max, uint8_t style_bits_set, uint8_t style_bits_reset);
-
+fontlib_font_t *fontlib_GetFontByStyle(
+    const char *font_pack_name,
+    uint8_t size_min, uint8_t size_max,
+    uint8_t weight_min, uint8_t weight_max,
+    uint8_t style_bits_set, uint8_t style_bits_reset
+);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* _FONTLIBC_H */
