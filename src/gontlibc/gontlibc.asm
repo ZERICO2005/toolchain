@@ -1239,6 +1239,8 @@ assert $ = util.ClearRect
 
 ;-------------------------------------------------------------------------------
 util.ClearRect:
+	xor	a, a ; DEBUG
+	ret	; DEBUG
 ; Internal routine that erases a rectangle at the current cursor location.
 ; Arguments:
 ;  B: Height

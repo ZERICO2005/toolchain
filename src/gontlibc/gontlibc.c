@@ -7,6 +7,14 @@
 
 #define CurrentBuffer (*(uint8_t * volatile *)0xE30014)
 
+#if 1
+#include <stdio.h>
+#include <ti/sprintf.h>
+#define test_printf(...) boot_sprintf((char *__restrict)0xFB0000, __VA_ARGS__)
+#else
+#define test_printf
+#endif
+
 extern int TextXMin;
 extern int TextXMax;
 extern int TextX;
@@ -131,6 +139,9 @@ unsigned int gontlib_DrawGlyph(unsigned char c) {
     #endif
 
     TextX += (width - conf.italic_space_adjust);
+
+    test_printf("%02X %d %d\n", c, TextX, TextY);
+    test_printf("%p %p %p\n", root, &conf, src);
 
     gfy_Wait();
 
