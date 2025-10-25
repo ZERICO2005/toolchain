@@ -1000,11 +1000,14 @@ fontlib_SetColors:
 ;  arg1: Background color
 ; Returns:
 ;  Nothing
-	ld	iy, 0
-	add	iy, sp
-	ld	a, (iy + arg0)
+	ld	hl, arg0
+	add	hl, sp
+	ld	a, (hl)
 	ld	(_TextStraightForegroundColor), a
-	ld	a, (iy + arg1)
+	inc	hl
+	inc	hl
+	inc	hl
+	ld	a, (hl)
 	ld	(_TextStraightBackgroundColor), a
 	ret
 
@@ -1067,11 +1070,14 @@ fontlib_SetLineSpacing:
 ;  arg1: Space below
 ; Returns:
 ;  Nothing
-	ld	iy, 0
-	add	iy, sp
-	ld	a, (iy + arg0)
+	ld	hl, arg0
+	add	hl, sp
+	ld	a, (hl)
 	ld	(_CurrentFontProperties.spaceAbove), a
-	ld	a, (iy + arg1)
+	inc	hl
+	inc	hl
+	inc	hl
+	ld	a, (hl)
 	ld	(_CurrentFontProperties.spaceBelow), a
 	ret
 
@@ -1268,11 +1274,14 @@ fontlib_SetDrawIntCodePoints:
 ;  arg1: Zero glyph code point
 ; Returns:
 ;  Nothing
-	ld	iy, 0
-	add	iy, sp
-	ld	a, (iy + arg0)
+	ld	hl, arg0
+	add	hl, sp
+	ld	a, (hl)
 	ld	(_DrawIntMinus), a
-	ld	a, (iy + arg1)
+	inc	hl
+	inc	hl
+	inc	hl
+	ld	a, (hl)
 	ld	(_DrawIntZero), a
 	ret
 
