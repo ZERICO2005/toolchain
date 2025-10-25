@@ -1140,18 +1140,19 @@ fontlib_ValidateCodePoint:
 	ld	a, (hl)
 	ld	hl, _CurrentFontProperties.firstGlyph
 	sub	a, (hl)
-	ccf
-	jr	nc, .exit
+	jr	c, .ret_zero
 	ld	hl, _CurrentFontProperties.totalGlyphs
-; Check if totalGlyphs is zero
+; Check if totalGlyphs is zero (indicating 256 glyphs)
 	ld	b, (hl)
 	inc	b
 	dec	b
-	jr	z, .exit
+	jr	z, .ret_one
 	sub	a, (hl)
-.exit:
+	ccf
+.ret_zero:
+.ret_one:
 	sbc	a, a
-	and	a, 1
+	inc	a
 	ret
 
 
