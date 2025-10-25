@@ -1667,8 +1667,10 @@ util.ClearRect:
 	lea	de, iy + 1
 	lea	hl, iy + 0
 	ldir
-	ld	de, ti.lcdWidth
-	add	iy, de
+	inc	b
+	ld	c, $40
+	; BC = ti.lcdWidth or 320
+	add	iy, bc
 	dec	a
 	jr	nz, .loop2
 .exit:
