@@ -1826,8 +1826,7 @@ util.GetFontPackData:
 	push	hl
 	call	util.VerifyHeader
 	pop	de
-	jr	nz, .error
-	ret
+	ret	z
 .error:
 	or	a, a
 	sbc	hl, hl
@@ -1843,16 +1842,17 @@ util.VerifyHeader:
 ; Returns:
 ;  Z if the check passes, NZ if not
 ;  HL points to byte after 'K'
+;  Carry = cleared
 ; Destroys:
 ;  A, B, DE
 	ld	de, _FontPackHeaderString
 	ld	b, 8
 .loop:
 	ld	a, (de)
-	inc	de
-	cp	a, (hl)
-	inc	hl
+	xor	a, (hl)
 	ret	nz
+	inc	de
+	inc	hl
 	djnz	.loop
 	ret
 
@@ -1901,10 +1901,9 @@ fontlib_GetFontByIndex:
 	push	iy
 	call	util.GetFontPackData
 	pop	iy
-	ret	c
-	ld	(iy + arg0), de
-; Fall through to GetFontByIndexRaw
-assert $ = fontlib_GetFontByIndexRaw
+	; ld	(iy + arg0), de
+	jr	nc, _GetFontByIndexRaw
+	ret
 
 
 ;-------------------------------------------------------------------------------
@@ -1917,27 +1916,26 @@ fontlib_GetFontByIndexRaw:
 ;  Pointer, or NULL if error
 	ld	iy, 0
 	add	iy, sp
-	ld	hl, (iy + arg0)
+	ld	de, (iy + arg0)
+_GetFontByIndexRaw:
 ; Get font count
-	ld	de, strucFontPackHeader.fontCount
+	ld	hl, strucFontPackHeader.fontCount
 	add	hl, de
-	ld	a, (hl)
-	inc	hl
 ; Validate index
-	ld	c, (iy + arg1)
-	cp	a, c
-	jr	c, .error
-	jr	z, .error
+	ld	a, (iy + arg1)
+	cp	a, (hl)
+	jr	nc, .error
 ; Get offset to font
+	inc	hl
+	ld	c, a
 	ld	b, 3
 	mlt	bc
 	add	hl, bc
 	ld	hl, (hl)
-	ld	de, (iy + arg0)
 	add	hl, de
 	ret
+
 .error:
-	or	a, a
 	sbc	hl, hl
 	ret
 
@@ -1961,11 +1959,9 @@ fontlib_GetFontByStyle:
 	push	iy
 	call	util.GetFontPackData
 	pop	iy
-	ret	c
-	ld	(iy + arg0), de
-; Fall through to fontlib_GetFontRaw
-assert $ = fontlib_GetFontByStyleRaw
-
+	; ld	(iy + arg0), de
+	jr	nc, _GetFontByStyleRaw
+	ret
 
 ;-------------------------------------------------------------------------------
 fontlib_GetFontByStyleRaw:
@@ -1982,63 +1978,56 @@ fontlib_GetFontByStyleRaw:
 ;  Pointer, or NULL if error
 	ld	iy, 0
 	add	iy, sp
-	push	ix
-; Cache pointer to font pack start
 	ld	de, (iy + arg0)
-	or	a, a
-	sbc	hl, hl
+_GetFontByStyleRaw:
+	; DE = Cached pointer to font pack start
+	push	ix
+	; Get pointer to fonts table
+	ld	hl, strucFontPackHeader.fontCount
 	add	hl, de
-; Get pointer to fonts table
-	ld	bc, strucFontPackHeader.fontCount
-	add	hl, bc
 	ld	b, (hl)
 	inc	hl
 .checkLoop:
 	ld	ix, (hl)
 	add	ix, de
 	call	.checkStyle
-	jr	c, .goodFont
 	inc	hl
 	inc	hl
 	inc	hl
 	djnz	.checkLoop
-	sbc	hl, hl			; Carry must be reset from above
-	jr	.badFont
-.goodFont:
-	lea	hl, ix + 0
 .badFont:
 	pop	ix
+	or	a, a
+	sbc	hl, hl
 	ret
+
 .checkStyle:
 	ld	a, (ix + strucFont.height)
 	cp	a, (iy + arg1)
-	ccf
-	ret	nc
+	ret	c
 	cp	a, (iy + arg2)
 	jr	z, .sizeOK
 	ret	nc
 .sizeOK:
 	ld	a, (ix + strucFont.weight)
 	cp	a, (iy + arg3)
-	ccf
-	ret	nc
+	ret	c
 	cp	a, (iy + arg4)
 	jr	z, .weightOK
 	ret	nc
 .weightOK:
-; TODO: I think the CP here might sometimes SET carry when it shouldn't be?
-	ld	a, (ix + strucFont.style)
-	ld	c, (iy + arg5)
-	and	a, c
-	cp	a, c
-	ret	nz
-	ld	a, (ix + strucFont.style)
-	ld	c, (iy + arg6)
+	ld	c, (ix + strucFont.style)
+	ld	a, (iy + arg5)
 	and	a, c
 	xor	a, c
-	cp	a, c
 	ret	nz
-	scf
+	ld	a, (iy + arg6)
+	and	a, c
+	ret	z
+.goodFont:
+	pop	bc			; reset SP
+	lea	hl, ix + 0
+	pop	ix
 	ret
 
 
