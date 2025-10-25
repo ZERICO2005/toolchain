@@ -431,11 +431,10 @@ fontlib_SetFont:
 	pop	bc
 	ld	iy, _CurrentFontProperties
 ; Verify height at least looks semi-reasonable
-	ld	a, (iy + strucFont.height)
-	or	a, a
+	or	a, (iy + strucFont.height)
 	ret	z			; Also unreasonable: a zero-height font
-	and	a, $80
-	jr	nz, .false
+	rla
+	jr	c, .false		; font height >= 128
 	ld	a, 63
 	cp	a, (iy + strucFont.spaceAbove)
 	jr	c, .false
@@ -458,19 +457,17 @@ fontlib_SetFont:
 	add	hl, de
 	add	hl, bc
 	ld	(iy + strucFont.bitmapsTablePtr), hl
-; Check for the ignore ling spacing flag
-	ld	hl, arg0
+; Check for the ignore line spacing flag
+	ld	hl, arg1
 	add	hl, sp
-	ld	a, (hl)
-	or	a, a
-	jr	z, .true
+	or	a, (hl)
+	jr	z, .true		; (HL) == 0
 	lea	hl, iy + strucFont.spaceAbove
-	xor	a, a
 	ld	(hl), a
 	inc	hl
 	ld	(hl), a
 .true:
-	ld	a, 1
+	inc	a
 	ret
 .false:
 	xor	a, a
