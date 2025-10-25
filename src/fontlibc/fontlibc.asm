@@ -465,11 +465,12 @@ fontlib_SetFont:
 	or	a, a
 	jr	z, .true
 	lea	hl, iy + strucFont.spaceAbove
-	xor	a
+	xor	a, a
 	ld	(hl), a
 	inc	hl
 	ld	(hl), a
-.true:	ld	a, 1
+.true:
+	ld	a, 1
 	ret
 .false:
 	xor	a, a
@@ -804,7 +805,8 @@ fontlib_DrawStringL:
 	jr	z, .exit
 	cp	a, (ix + newLineCode)
 	jr	z, .printNewline
-.exit:	ld	hl, (ix + textX)
+.exit:
+	ld	hl, (ix + textX)
 	pop	ix
 	ret
 .notControlCode:
@@ -837,7 +839,8 @@ fontlib_DrawStringL:
 	jr	z, .colOK
 	jr	nc, .newline
 ; Correct for italicness
-.colOK:	ld	c, (ix + strucFont.italicSpaceAdjust)
+.colOK:
+	ld	c, (ix + strucFont.italicSpaceAdjust)
 	ld	b, 0
 	or	a, a
 	sbc	hl, bc
@@ -1164,7 +1167,8 @@ fontlib_ValidateCodePoint:
 	dec	b
 	jr	z, .exit
 	sub	a, (hl)
-.exit:	sbc	a, a
+.exit:
+	sbc	a, a
 	and	a, 1
 	ret
 
@@ -1720,7 +1724,8 @@ fontlib_ScrollWindowDown:
 	ret	c			; then there's no point in scrolling
 ; Now copy some pixels
 	call	gfx_Wait
-.copy:	lea	bc, iy + 0
+.copy:
+	lea	bc, iy + 0
 	ldir
 	ld	bc, 0			; SMC
 .delta := $ - 3
@@ -1848,9 +1853,10 @@ util.VerifyHeader:
 ;  A, B, DE
 	ld	de, _FontPackHeaderString
 	ld	b, 8
-.loop:	ld	a, (de)
+.loop:
+	ld	a, (de)
 	inc	de
-	cp	(hl)
+	cp	a, (hl)
 	inc	hl
 	ret	nz
 	djnz	.loop
@@ -1925,7 +1931,7 @@ fontlib_GetFontByIndexRaw:
 	inc	hl
 ; Validate index
 	ld	c, (iy + arg1)
-	cp	c
+	cp	a, c
 	jr	c, .error
 	jr	z, .error
 ; Get offset to font
@@ -1937,7 +1943,7 @@ fontlib_GetFontByIndexRaw:
 	add	hl, de
 	ret
 .error:
-	or	a
+	or	a, a
 	sbc	hl, hl
 	ret
 
@@ -2011,18 +2017,18 @@ fontlib_GetFontByStyleRaw:
 	ret
 .checkStyle:
 	ld	a, (ix + strucFont.height)
-	cp	(iy + arg1)
+	cp	a, (iy + arg1)
 	ccf
 	ret	nc
-	cp	(iy + arg2)
+	cp	a, (iy + arg2)
 	jr	z, .sizeOK
 	ret	nc
 .sizeOK:
 	ld	a, (ix + strucFont.weight)
-	cp	(iy + arg3)
+	cp	a, (iy + arg3)
 	ccf
 	ret	nc
-	cp	(iy + arg4)
+	cp	a, (iy + arg4)
 	jr	z, .weightOK
 	ret	nc
 .weightOK:
