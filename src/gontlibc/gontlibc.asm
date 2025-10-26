@@ -1242,12 +1242,12 @@ assert $ = util.ClearRect
 
 ;-------------------------------------------------------------------------------
 util.ClearRect:
-	xor	a, a ; DEBUG
-	ret	; DEBUG
 ; Internal routine that erases a rectangle at the current cursor location.
 ; Arguments:
 ;  B: Height
 ;  DE: Width
+; Returns:
+;  A = 0
 ; Destroys:
 ;  AF, BC, DE, HL, IY
 
@@ -1317,13 +1317,15 @@ util.ClearRect:
 	jr	nz, .loop
 	pop	af			; restore carry
 .final:
-	ret	nc
+	jr	nc, .finish
 	ld	c, ti.lcdHeight - 1
 	ex	de, hl
 	add	hl, bc
 	ex	de, hl
 	ld	c, a
 	lddr
+.finish:
+	xor	a, a
 	ret
 
 ;-------------------------------------------------------------------------------
