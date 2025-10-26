@@ -7,7 +7,7 @@
 
 #define CurrentBuffer (*(uint8_t * volatile *)0xE30014)
 
-#if 1
+#if 0
 #include <stdio.h>
 #include <ti/sprintf.h>
 #define test_printf(...) boot_sprintf((char *__restrict)0xFB0000, __VA_ARGS__)
@@ -46,9 +46,11 @@ static bool is_newline(char c) {
 }
 
 static bool is_printable(char c) {
-    /* TEMP */ if (c == '\0') {
-        return false;
-    }
+    #if 0
+        if (c == '\0') {
+            return false;
+        }
+    #endif
     if (c < TextFirstPrintableCodePoint) {
         return false;
     }
@@ -132,25 +134,9 @@ unsigned int gontlib_DrawGlyph(unsigned char c) {
     uint16_t const *__restrict const bitmap_table_ptr = (uint16_t const *__restrict)conf.bitmaps;
     uint8_t const *__restrict src = bitmap_table_ptr[(unsigned char)c] + (uint8_t *__restrict)root;
 
-    #if 0
-        const uint8_t font_jump = ((uint8_t)(width - 1) >> 3) + 1;
-    #else
-        const uint8_t font_jump = 1;
-    #endif
+    const uint8_t font_jump = ((uint8_t)(width - 1) >> 3) + 1;
 
     TextX += (width - conf.italic_space_adjust);
-
-    test_printf("%02X: %d %d | %d %d\n", c, TextX, TextY, width, width - conf.italic_space_adjust);
-    test_printf(
-        "R %p %p | S %p %04X %p | B %p %p %p\nD %02X %02X, %02X %02X %02X %02X %02X, %02X\n%06X %06X %06X\n",
-        root, &root,
-        src, bitmap_table_ptr[(unsigned char)c], &bitmap_table_ptr[(unsigned char)c],
-        bitmap_table_ptr, (void*)conf.bitmaps, &conf.bitmaps,
-        src[0], src[1], src[2], src[3], src[4], src[5], src[6], src[7],
-        *(uint24_t const *__restrict)(src - 1),
-        *(uint24_t const *__restrict)(src + 0),
-        *(uint24_t const *__restrict)(src + 1)
-    );
 
     gfy_Wait();
 
@@ -161,7 +147,7 @@ unsigned int gontlib_DrawGlyph(unsigned char c) {
         dst += space_above;
 
         for (uint8_t y = 0; y < height; y++) {
-            uint24_t HL = *((uint24_t const *__restrict)src);
+            uint24_t HL = *(uint24_t const *__restrict)src;
             for (uint8_t x = 0; x < width; x++) {
                 if (HL & 0x800000) {
                     *dst = fg_color;
