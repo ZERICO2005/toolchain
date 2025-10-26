@@ -41,25 +41,6 @@ extern uint8_t TextNewLineCode;
 extern uint8_t* root;
 extern gontlib_font_t conf;
 
-static bool is_newline(char c) {
-    return (c == TextNewlineControl);
-}
-
-static bool is_printable(char c) {
-    #if 0
-        if (c == '\0') {
-            return false;
-        }
-    #endif
-    if (c < TextFirstPrintableCodePoint) {
-        return false;
-    }
-    if (!gontlib_ValidateCodePoint(c)) {
-        return false;
-    }
-    return true;
-}
-
 unsigned int gontlib_DrawStringL(char const *__restrict str, size_t length_remaining) {
     if (*str == '\0') {
         goto finish;
@@ -74,28 +55,45 @@ unsigned int gontlib_DrawStringL(char const *__restrict str, size_t length_remai
         }
         char c = *str++;
         length_remaining--;
-        if (!is_printable(c)) {
+
+        /* control character */
+        if (c < TextFirstPrintableCodePoint) {
+            #if 1
+                // This is probably not needed
+                if (c == '\0') {
+                    goto finish;
+                }
+            #endif
+            if (c == TextNewLineCode) {
+                if (!gontlib_Newline()) {
+                    continue;
+                }
+                // text window is full
+                goto finish;
+            }
+            // non-printable character
             goto finish;
         }
-        if (is_newline(c)) {
+
+        /* printable character */
+        if (c == TextAlternateStopCode) {
+            goto finish;
+        }
+        if (!gontlib_ValidateCodePoint(c)) {
+            goto finish;
+        }
+        const uint8_t width = width_table_ptr[(unsigned char)c];
+        if (TextX + width > TextXMax) {
+            if (!auto_wrap) {
+                // can't print character
+                goto finish;
+            }
             if (gontlib_Newline()) {
                 // text window is full
                 goto finish;
             }
-        } else {
-            const uint8_t width = width_table_ptr[(unsigned char)c];
-            if (TextX + width > TextXMax) {
-                if (!auto_wrap) {
-                    // can't print character
-                    goto finish;
-                }
-                if (gontlib_Newline()) {
-                    // text window is full
-                    goto finish;
-                }
-            }
-            gontlib_DrawGlyph(c);
         }
+        gontlib_DrawGlyph(c);
     }
 finish:
     TextLastCharacterRead = str;
