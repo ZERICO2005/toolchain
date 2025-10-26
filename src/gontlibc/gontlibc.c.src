@@ -10,37 +10,30 @@ gontlib_DrawStringL:
 	ld	sp, hl
 	ld	iy, (ix + 6)
 	ld	bc, (ix + 9)
+	ld	de, 0
 	ld	a, (iy)
 	or	a, a
 	jq	z, BB0_17
-	push	bc
-	pop	de
-	ld	bc, 65535
 	ld	a, (_TextNewlineControl)
 	and	a, 1
-	ld	hl, (_conf+4)
-	call	__iand
-	push	de
-	pop	bc
-	ex	de, hl
-	ld	hl, (_root)
-	add	hl, de
-	ld	(ix - 3), hl
 	push	bc
 	pop	hl
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
 	jr	nz, BB0_3
-	ld	bc, 0
+	push	de
+	pop	bc
 	jq	BB0_17
 BB0_3:
 	ld	(ix - 13), a
+	ld	hl, (_conf+4)
+	ld	(ix - 9), hl
 	inc	iy
 	push	bc
 	pop	hl
 	dec	hl
-	ld	(ix - 9), hl
+	ld	(ix - 6), hl
 BB0_4:
 	ld	e, (iy - 1)
 	dec	bc
@@ -52,7 +45,7 @@ BB0_4:
 	rlc	a
 	sbc	hl, hl
 	ld	l, e
-	ld	(ix - 6), hl
+	ld	(ix - 3), hl
 	ld	a, (_TextFirstPrintableCodePoint)
 	ld	iy, 0
 	ld	iyl, a
@@ -60,7 +53,7 @@ BB0_4:
 	ld	a, e
 	ex	de, hl
 	add	iy, de
-	ld	hl, (ix - 6)
+	ld	hl, (ix - 3)
 	add	hl, de
 	lea	de, iy
 	or	a, a
@@ -79,7 +72,7 @@ BB0_4:
 	push	bc
 	pop	de
 	ld	e, a
-	ld	hl, (ix - 6)
+	ld	hl, (ix - 3)
 	or	a, a
 	sbc	hl, de
 	jr	nz, BB0_9
@@ -90,7 +83,7 @@ BB0_4:
 BB0_9:
 	ld	a, (ix - 17)
 	ld	c, a
-	ld	hl, (ix - 3)
+	ld	hl, (ix - 9)
 	add	hl, bc
 	ld	c, (hl)
 	ld	iy, (_TextX)
@@ -119,9 +112,9 @@ BB0_13:
 	push	de
 	pop	iy
 	inc	iy
-	ld	hl, (ix - 9)
+	ld	hl, (ix - 6)
 	dec	hl
-	ld	(ix - 9), hl
+	ld	(ix - 6), hl
 	ld	bc, -1
 	or	a, a
 	sbc	hl, bc
@@ -147,7 +140,7 @@ BB0_17:
 	pop	ix
 	ret
 BB0_18:
-	ld	bc, (ix - 9)
+	ld	bc, (ix - 6)
 	ld	iy, (ix - 12)
 	jr	BB0_17
 ;	section	.text,"ax",@progbits
@@ -158,58 +151,49 @@ gontlib_DrawGlyph:
 	push	ix
 	ld	ix, 0
 	add	ix, sp
-	lea	hl, ix - 32
+	lea	hl, ix - 63
 	ld	sp, hl
 	xor	a, a
-	ld	(ix - 7), a
+	ld	(ix - 10), a
 	ld	l, (ix + 6)
 	push	hl
 	call	gontlib_ValidateCodePoint
 	pop	hl
 	bit	0, a
 	jq	z, BB1_24
-	ld	bc, 65535
 	ld	a, (_conf+3)
 	ld	l, a
 	ld	a, (ix + 6)
 	sub	a, l
 	ld	hl, (_conf+4)
-	call	__iand
-	ex	de, hl
-	ld	hl, (_root)
-	ld	(ix - 3), hl
-	add	hl, de
-	ld	bc, 0
-	push	bc
-	pop	de
+	ld	iy, 0
+	lea	de, iy
 	ld	e, a
-	ld	(ix - 20), de
+	ld	(ix - 16), de
 	add	hl, de
 	ld	a, (hl)
-	ld	(ix - 4), a
+	ld	(ix - 1), a
 	ld	a, (_conf+11)
-	ld	(ix - 27), a
+	ld	(ix - 58), a
 	ld	a, (_conf+12)
-	ld	(ix - 32), a
+	ld	(ix - 63), a
 	ld	a, (_conf+1)
-	ld	(ix - 14), a
+	ld	(ix - 23), a
 	ld	a, (_TextStraightBackgroundColor)
 	ld	l, a
-	ld	(ix - 30), hl
+	ld	(ix - 61), hl
 	ld	a, (_TextStraightForegroundColor)
-	ld	(ix - 31), a
+	ld	(ix - 62), a
 	ld	a, (_TextTransparentMode)
-	ld	(ix - 17), a
+	ld	(ix - 24), a
 	ld	hl, (_TextX)
-	ld	(ix - 23), hl
+	ld	(ix - 30), hl
 	ld	a, (_TextY)
-	push	bc
-	pop	de
+	lea	de, iy
 	ld	e, a
-	ld	(ix - 13), de
+	ld	(ix - 22), de
 	ld	a, (_conf+10)
-	push	bc
-	pop	de
+	lea	de, iy
 	ld	e, a
 	or	a, a
 	sbc	hl, de
@@ -218,67 +202,150 @@ gontlib_DrawGlyph:
 	push	hl
 	pop	bc
 	add	iy, bc
-	ld	bc, (ix - 13)
+	ld	bc, (ix - 22)
 	add	iy, bc
-	ld	(ix - 10), iy
+	ld	(ix - 7), iy
 	ld	hl, (_conf+7)
-	ld	bc, 65535
-	inc	hl
-	dec.s	hl
+	ld	(ix - 13), hl
 	ld	c, 1
-	add	hl, hl
+	ld	hl, (ix - 16)
+	call	__ishl
 	push	hl
 	pop	bc
-	ld	iy, (ix - 3)
-	lea	hl, iy
+	ld	hl, (ix - 13)
 	add	hl, bc
+	ld	(ix - 19), hl
 	ld	hl, (hl)
-	ld	bc, 0
+	ld	iy, 0
+	lea	bc, iy
 	ld	c, l
 	ld	b, h
-	add	iy, bc
-	ld	(ix - 3), iy
+	ld	hl, (_root)
+	add	hl, bc
+	ld	(ix - 4), hl
+	lea	hl, iy
+	ld	l, (ix - 1)
+	push	hl
+	pop	bc
+	ld	(ix - 27), bc
 	or	a, a
-	sbc	hl, hl
-	ld	l, (ix - 4)
-	ld	(ix - 26), hl
 	sbc	hl, de
-	ld	de, (ix - 23)
+	push	hl
+	pop	iy
+	ld	de, (ix - 30)
 	add	hl, de
 	ld	(_TextX), hl
-	ld	de, (ix - 13)
+	push	iy
+	push	bc
+	ld	de, (ix - 22)
 	push	de
 	push	hl
-	ld	hl, (ix - 20)
+	ld	hl, (ix - 16)
 	push	hl
 	ld	hl, _.str
 	push	hl
 	ld	hl, -327680
 	push	hl
 	call	_boot_sprintf
-	ld	hl, 15
+	ld	hl, 21
 	add	hl, sp
 	ld	sp, hl
 	ld	hl, (_root)
-	ld	de, (ix - 3)
+	ld	(ix - 16), hl
+	ld	hl, (ix - 19)
+	ld	hl, (hl)
+	ld	de, 0
 	push	de
-	ld	de, _conf
+	pop	bc
+	ld	c, l
+	ld	b, h
+	ld	(ix - 22), bc
+	ld	hl, (_conf+7)
+	ld	(ix - 30), hl
 	push	de
+	pop	hl
+	ld	iy, (ix - 4)
+	ld	l, (iy)
+	ld	(ix - 33), hl
+	push	de
+	pop	hl
+	ld	l, (iy + 1)
+	ld	(ix - 36), hl
+	push	de
+	pop	hl
+	ld	l, (iy + 2)
+	ld	(ix - 39), hl
+	push	de
+	pop	hl
+	ld	l, (iy + 3)
+	ld	(ix - 42), hl
+	push	de
+	pop	hl
+	ld	l, (iy + 4)
+	ld	(ix - 45), hl
+	push	de
+	pop	hl
+	ld	l, (iy + 5)
+	ld	(ix - 51), hl
+	ld	e, (iy + 6)
+	or	a, a
+	sbc	hl, hl
+	ld	l, (iy + 7)
+	ld	bc, (iy - 1)
+	ld	(ix - 48), bc
+	ld	bc, (iy)
+	ld	(ix - 57), bc
+	ld	bc, (iy + 1)
+	ld	(ix - 54), bc
+	ld	bc, (ix - 54)
+	push	bc
+	ld	bc, (ix - 57)
+	push	bc
+	ld	bc, (ix - 48)
+	push	bc
+	push	hl
+	push	de
+	ld	hl, (ix - 51)
+	push	hl
+	ld	hl, (ix - 45)
+	push	hl
+	ld	hl, (ix - 42)
+	push	hl
+	ld	hl, (ix - 39)
+	push	hl
+	ld	hl, (ix - 36)
+	push	hl
+	ld	hl, (ix - 33)
+	push	hl
+	ld	hl, _conf+7
+	push	hl
+	ld	hl, (ix - 30)
+	push	hl
+	ld	hl, (ix - 13)
+	push	hl
+	ld	hl, (ix - 19)
+	push	hl
+	ld	hl, (ix - 22)
+	push	hl
+	push	iy
+	ld	hl, _root
+	push	hl
+	ld	hl, (ix - 16)
 	push	hl
 	ld	hl, _.str.1
 	push	hl
 	ld	hl, -327680
 	push	hl
 	call	_boot_sprintf
-	ld	hl, 15
+	ld	hl, 63
 	add	hl, sp
 	ld	sp, hl
 	call	gfy_Wait
-	ld	hl, (ix - 26)
+	ld	hl, (ix - 27)
 	ld	bc, -240
 	call	__imulu
 	ld	(ix - 13), hl
-	ld	a, (ix - 17)
+	ld	a, (ix - 24)
 	or	a, a
 	jq	nz, BB1_16
 	or	a, a
@@ -287,36 +354,36 @@ gontlib_DrawGlyph:
 	pop	bc
 	push	bc
 	pop	de
-	ld	e, (ix - 27)
-	ld	hl, (ix - 10)
-	ld	(ix - 20), de
+	ld	e, (ix - 58)
+	ld	hl, (ix - 7)
+	ld	(ix - 19), de
 	add	hl, de
-	ld	(ix - 17), hl
-	ld	d, (ix - 14)
+	ld	(ix - 16), hl
+	ld	d, (ix - 23)
 	ld	a, d
 	or	a, a
 	jr	z, BB1_10
-	ld	iy, (ix - 17)
+	ld	iy, (ix - 16)
 BB1_4:
-	ld	e, (ix - 4)
+	ld	e, (ix - 1)
 	ld	a, e
 	or	a, a
 	jr	z, BB1_9
-	ld	hl, (ix - 3)
+	ld	hl, (ix - 4)
 	ld	hl, (hl)
 BB1_6:
-	ld	(ix - 23), hl
+	ld	(ix - 22), hl
 	ld	bc, -8388608
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	ld	a, (ix - 31)
+	ld	a, (ix - 62)
 	jr	c, BB1_8
-	ld	hl, (ix - 30)
+	ld	hl, (ix - 61)
 	ld	a, l
 BB1_8:
 	ld	(iy), a
-	ld	hl, (ix - 23)
+	ld	hl, (ix - 22)
 	ld	c, 1
 	add	hl, hl
 	ld	bc, 240
@@ -327,9 +394,9 @@ BB1_8:
 	ld	bc, 0
 	jr	nz, BB1_6
 BB1_9:
-	ld	hl, (ix - 3)
+	ld	hl, (ix - 4)
 	inc	hl
-	ld	(ix - 3), hl
+	ld	(ix - 4), hl
 	push	bc
 	pop	hl
 	ld	bc, (ix - 13)
@@ -337,66 +404,67 @@ BB1_9:
 	push	hl
 	pop	bc
 	inc	iy
-	ld	a, (ix - 7)
+	ld	a, (ix - 10)
 	inc	a
-	ld	(ix - 7), a
+	ld	(ix - 10), a
 	cp	a, d
 	jr	nz, BB1_4
 BB1_10:
-	ld	e, (ix - 4)
+	ld	e, (ix - 1)
 	ld	a, e
 	or	a, a
 	jq	z, BB1_24
 	ld	c, d
-	ld	(ix - 7), bc
-	ld	hl, (ix - 10)
+	ld	(ix - 10), bc
+	ld	hl, (ix - 7)
 BB1_12:
-	ld	(ix - 3), e
-	ld	(ix - 10), hl
-	ld	de, (ix - 20)
+	ld	(ix - 4), e
+	ld	(ix - 7), hl
+	ld	de, (ix - 19)
 	push	de
-	ld	de, (ix - 30)
+	ld	de, (ix - 61)
 	push	de
 	push	hl
 	call	_memset
-	ld	e, (ix - 3)
+	ld	e, (ix - 4)
 	ld	hl, 9
 	add	hl, sp
 	ld	sp, hl
-	ld	hl, (ix - 10)
+	ld	hl, (ix - 7)
 	ld	bc, 240
 	add	hl, bc
 	dec	e
 	ld	a, e
 	or	a, a
 	jr	nz, BB1_12
-	ld	c, (ix - 4)
+	ld	c, (ix - 1)
 	ld	a, c
 	or	a, a
+	ld	a, (ix - 63)
 	jq	z, BB1_24
-	ld	de, (ix - 7)
-	ld	hl, (ix - 17)
+	ld	de, (ix - 10)
+	ld	hl, (ix - 16)
 	add	hl, de
 	ex	de, hl
 	or	a, a
 	sbc	hl, hl
-	ld	l, (ix - 32)
-	ld	(ix - 3), hl
+	ld	l, a
+	ld	(ix - 4), hl
 BB1_15:
-	ld	(ix - 4), c
-	ld	hl, (ix - 3)
+	ld	(ix - 1), c
+	ld	hl, (ix - 4)
 	push	hl
-	ld	hl, (ix - 30)
+	ld	hl, (ix - 61)
 	push	hl
-	ld	(ix - 17), de
+	ld	(ix - 16), de
 	push	de
 	call	_memset
 	ld	hl, 9
 	add	hl, sp
 	ld	sp, hl
-	ld	c, (ix - 4)
+	ld	c, (ix - 1)
 	ld	de, 240
-	ld	hl, (ix - 17)
+	ld	hl, (ix - 16)
 	add	hl, de
 	ex	de, hl
 	dec	c
@@ -405,55 +473,61 @@ BB1_15:
 	jr	nz, BB1_15
 	jr	BB1_24
 BB1_16:
-	ld	c, (ix - 27)
-	ld	de, 0
-	ld	iy, (ix - 10)
-	ld	l, (ix - 14)
-	ld	a, l
+	ld	iy, 0
+	ld	c, (ix - 58)
+	ld	hl, (ix - 7)
+	ld	e, (ix - 23)
+	ld	a, e
 	or	a, a
-	ld	b, (ix - 4)
+	ld	d, (ix - 1)
 	jr	z, BB1_24
-	ld	e, c
-	add	iy, de
+	ld	iyl, c
+	lea	bc, iy
+	add	hl, bc
 	ld	c, 1
 BB1_18:
-	ld	a, b
+	ld	a, d
 	or	a, a
 	jr	z, BB1_23
-	ld	hl, (ix - 3)
-	ld	hl, (hl)
+	ld	iy, (ix - 4)
+	ld	iy, (iy)
+	ld	b, d
 BB1_20:
-	ld	(ix - 10), hl
+	ld	(ix - 7), hl
+	lea	hl, iy
 	ld	de, -8388608
 	add	hl, de
 	or	a, a
 	sbc	hl, de
 	jr	nc, BB1_22
-	lea	hl, iy
-	ld	a, (ix - 31)
+	ld	hl, (ix - 7)
+	ld	a, (ix - 62)
 	ld	(hl), a
 BB1_22:
-	ld	hl, (ix - 10)
+	lea	hl, iy
 	call	__ishl
+	push	hl
+	pop	iy
 	ld	de, 240
-	add	iy, de
+	ld	hl, (ix - 7)
+	add	hl, de
 	dec	b
 	ld	a, b
 	or	a, a
 	jr	nz, BB1_20
 BB1_23:
-	ld	hl, (ix - 3)
-	inc	hl
-	ld	(ix - 3), hl
+	ld	de, (ix - 4)
+	inc	de
+	ld	(ix - 4), de
 	ld	de, (ix - 13)
-	add	iy, de
-	inc	iy
-	ld	a, (ix - 7)
+	add	hl, de
+	inc	hl
+	ld	a, (ix - 10)
 	inc	a
-	ld	(ix - 7), a
-	ld	l, (ix - 14)
-	cp	a, l
-	ld	b, (ix - 4)
+	ld	(ix - 10), a
+	ld	e, (ix - 23)
+	cp	a, e
+	ld	d, (ix - 1)
 	jr	nz, BB1_18
 BB1_24:
 	ld	hl, (_TextX)
@@ -671,12 +745,12 @@ BB4_5:
 ;	section	.rodata,"a",@progbits
 ;	private	_.str
 _.str:
-	db	"%02X %d %d", 10, 0
+	db	"%02X: %d %d | %d %d", 10, 0
 
 ;	section	.rodata,"a",@progbits
 ;	private	_.str.1
 _.str.1:
-	db	"%p %p %p", 10, 0
+	db	"R %p %p | S %p %04X %p | B %p %p %p", 10, "D %02X %02X, %02X %02X %02X %02X %02X, %02X", 10, "%06X %06X %06X", 10, 0
 
 ;	ident	"clang version 15.0.7 (https://github.com/CE-Programming/llvm-project db91fd729cd188daf925aaf5043a6ca0d3660655)"
 ;	extern	_root
@@ -684,12 +758,12 @@ _.str.1:
 ;	extern	_memset
 ;	extern	__Unwind_SjLj_Register
 ;	extern	_boot_sprintf
+;	extern	_TextX
 ;	extern	_TextY
 ;	extern	gontlib_GetCurrentFontHeight
 ;	extern	_TextXMax
 ;	extern	_TextXMin
 ;	extern	_conf
-;	extern	_TextX
 ;	extern	_memmove
 ;	extern	gfy_Wait
 ;	extern	__ishl
@@ -698,7 +772,6 @@ _.str.1:
 ;	extern	_TextYMin
 ;	extern	_TextYMax
 ;	extern	__Unwind_SjLj_Unregister
-;	extern	__iand
 ;	extern	gontlib_Newline
 ;	extern	__imulu
 ;	extern	_TextFirstPrintableCodePoint
