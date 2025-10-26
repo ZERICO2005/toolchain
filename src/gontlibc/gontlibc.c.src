@@ -6,82 +6,91 @@ gontlib_DrawStringL:
 	push	ix
 	ld	ix, 0
 	add	ix, sp
-	lea	hl, ix - 17
+	lea	hl, ix - 14
 	ld	sp, hl
 	ld	iy, (ix + 6)
-	ld	bc, (ix + 9)
+	ld	hl, (ix + 9)
 	ld	de, 0
 	ld	a, (iy)
 	or	a, a
-	jq	z, BB0_16
+	jq	z, BB0_19
 	ld	a, (_TextNewlineControl)
 	and	a, 1
-	push	bc
-	pop	hl
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
 	jr	nz, BB0_3
-	push	de
-	pop	bc
-	jq	BB0_16
+	ex	de, hl
+	jq	BB0_19
 BB0_3:
 	ld	(ix - 14), a
-	ld	hl, (_conf+4)
-	ld	(ix - 13), hl
+	ld	de, (_conf+4)
+	ld	(ix - 13), de
 	inc	iy
-	push	bc
-	pop	hl
-	dec	hl
-	ld	(ix - 10), hl
-BB0_4:
-	ld	(ix - 3), iy
-	ld	e, (iy - 1)
+	push	hl
+	pop	bc
 	dec	bc
-	ld	a, e
+BB0_4:
+	ld	(ix - 10), bc
+	ld	(ix - 3), iy
+	ld	c, (iy - 1)
+	dec	hl
+	ld	(ix - 7), hl
+	ld	a, c
 	rlc	a
 	sbc	hl, hl
-	ld	(ix - 4), e
-	ld	l, e
+	push	hl
+	pop	de
+	ld	(ix - 4), c
+	ld	e, c
 	ld	a, (_TextFirstPrintableCodePoint)
 	ld	iy, 0
 	ld	iyl, a
-	ld	de, -8388608
-	add	iy, de
-	ld	(ix - 7), hl
-	add	hl, de
-	lea	de, iy
+	ld	bc, -8388608
+	add	iy, bc
+	push	de
+	pop	hl
+	add	hl, bc
+	lea	bc, iy
+	or	a, a
+	sbc	hl, bc
+	jr	nc, BB0_8
+	ex	de, hl
+	ld	de, 0
+	ld	a, (ix - 4)
+	or	a, a
+	jq	z, BB0_17
+	ld	a, (_TextNewLineCode)
+	ld	e, a
 	or	a, a
 	sbc	hl, de
-	jq	c, BB0_14
-	ld	(ix - 17), bc
+	jq	nz, BB0_16
+	call	gontlib_Newline
+	bit	0, a
+	jr	nz, BB0_16
+	jr	BB0_14
+BB0_8:
+	ld	a, (_TextAlternateStopCode)
+	ld	bc, 0
+	ld	c, a
+	ex	de, hl
+	or	a, a
+	sbc	hl, bc
+	jr	z, BB0_16
 	ld	l, (ix - 4)
 	push	hl
 	call	gontlib_ValidateCodePoint
 	pop	hl
 	bit	0, a
-	jr	z, BB0_15
-	ld	a, (_TextNewlineControl)
-	ld	bc, 0
-	push	bc
-	pop	de
-	ld	e, a
-	ld	hl, (ix - 7)
-	or	a, a
-	sbc	hl, de
-	jr	nz, BB0_8
-	call	gontlib_Newline
-	bit	0, a
-	jr	nz, BB0_15
-	jr	BB0_12
-BB0_8:
+	jr	z, BB0_16
+	ld	de, 0
 	ld	a, (ix - 4)
-	ld	c, a
+	ld	e, a
 	ld	hl, (ix - 13)
-	add	hl, bc
-	ld	c, (hl)
+	add	hl, de
+	ld	e, (hl)
 	ld	iy, (_TextX)
-	add	iy, bc
+	add	iy, de
 	ld	hl, (_TextXMax)
 	ld	de, -8388608
 	add	iy, de
@@ -89,46 +98,48 @@ BB0_8:
 	lea	de, iy
 	or	a, a
 	sbc	hl, de
-	jr	nc, BB0_11
+	jr	nc, BB0_13
 	bit	0, (ix - 14)
-	jr	z, BB0_15
+	jr	z, BB0_16
 	call	gontlib_Newline
 	bit	0, a
 	ld	a, (ix - 4)
-	jr	nz, BB0_17
-BB0_11:
+	jr	nz, BB0_16
+BB0_13:
 	ld	l, a
 	push	hl
 	call	gontlib_DrawGlyph
 	pop	hl
-BB0_12:
+BB0_14:
 	ld	iy, (ix - 3)
 	inc	iy
-	ld	hl, (ix - 10)
-	dec	hl
-	ld	(ix - 10), hl
+	ld	bc, (ix - 10)
+	dec	bc
+	push	bc
+	pop	hl
 	ld	de, -1
 	or	a, a
 	sbc	hl, de
-	ld	bc, (ix - 17)
+	ld	hl, (ix - 7)
 	jq	nz, BB0_4
-	ld	bc, 0
-BB0_14:
-	ld	iy, (ix - 3)
-	jr	BB0_16
-BB0_15:
-	ld	iy, (ix - 3)
-	ld	bc, (ix - 17)
+	or	a, a
+	sbc	hl, hl
+	jr	BB0_18
 BB0_16:
+	ld	iy, (ix - 3)
+	ld	hl, (ix - 7)
+	jr	BB0_19
+BB0_17:
+	ld	hl, (ix - 10)
+BB0_18:
+	ld	iy, (ix - 3)
+BB0_19:
 	ld	(_TextLastCharacterRead), iy
-	ld	(_TempCharactersLeft), bc
+	ld	(_TempCharactersLeft), hl
 	ld	hl, (_TextX)
 	ld	sp, ix
 	pop	ix
 	ret
-BB0_17:
-	ld	bc, (ix - 10)
-	jr	BB0_14
 ;	section	.text,"ax",@progbits
 
 ;	section	.text,"ax",@progbits
@@ -650,12 +661,12 @@ BB4_5:
 ;	extern	_TextStraightForegroundColor
 ;	extern	_memset
 ;	extern	__Unwind_SjLj_Register
-;	extern	_TextX
 ;	extern	_TextY
 ;	extern	gontlib_GetCurrentFontHeight
 ;	extern	_TextXMax
 ;	extern	_TextXMin
 ;	extern	_conf
+;	extern	_TextX
 ;	extern	_memmove
 ;	extern	gfy_Wait
 ;	extern	__ishl
@@ -663,6 +674,7 @@ BB4_5:
 ;	extern	_TempCharactersLeft
 ;	extern	_TextYMin
 ;	extern	_TextYMax
+;	extern	_TextAlternateStopCode
 ;	extern	__Unwind_SjLj_Unregister
 ;	extern	gontlib_Newline
 ;	extern	__imulu
@@ -672,4 +684,5 @@ BB4_5:
 ;	extern	__bshru
 ;	extern	gontlib_GetWindowWidth
 ;	extern	_TextStraightBackgroundColor
+;	extern	_TextNewLineCode
 ;	extern	_TextTransparentMode

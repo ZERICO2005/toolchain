@@ -426,10 +426,7 @@ gontlib_SetFont: ; COPIED_FROM_FONTLIBC
 	ld	(_CurrentFontRoot), hl
 	push	hl
 	ld	de, _CurrentFontProperties
-	; ld	bc, strucFont.fontPropertiesSize
-	; DEBUG
-	ld	bc, 15
-	; assert(strucFont.fontPropertiesSize = 10)
+	ld	bc, strucFont.fontPropertiesSize
 	ldir
 	pop	bc
 	ld	iy, _CurrentFontProperties
@@ -1548,12 +1545,11 @@ _GetFontByStyleRaw:
 	ld	hl, strucFontPackHeader.fontCount
 	add	hl, de
 	ld	b, (hl)
-	inc	hl
 .checkLoop:
+	inc	hl
 	ld	ix, (hl)
 	add	ix, de
 	call	.checkStyle
-	inc	hl
 	inc	hl
 	inc	hl
 	djnz	.checkLoop
@@ -1585,7 +1581,7 @@ _GetFontByStyleRaw:
 	ret	nz
 	ld	a, (iy + arg6)
 	and	a, c
-	ret	z
+	ret	nz
 .goodFont:
 	pop	bc			; reset SP
 	lea	hl, ix + 0
@@ -1652,8 +1648,6 @@ DataBaseAddr:
 ; Embed the current font's properties as library variables
 _CurrentFontProperties strucFont
 
-	; DEBUG
-	rb	16
 
 ;-------------------------------------------------------------------------------
 ; aliases
