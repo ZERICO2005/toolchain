@@ -426,7 +426,10 @@ gontlib_SetFont: ; COPIED_FROM_FONTLIBC
 	ld	(_CurrentFontRoot), hl
 	push	hl
 	ld	de, _CurrentFontProperties
-	ld	bc, strucFont.fontPropertiesSize
+	; ld	bc, strucFont.fontPropertiesSize
+	; DEBUG
+	ld	bc, 15
+	; assert(strucFont.fontPropertiesSize = 10)
 	ldir
 	pop	bc
 	ld	iy, _CurrentFontProperties
@@ -1646,6 +1649,9 @@ currentFontRoot := _CurrentFontRoot - DataBaseAddr
 DataBaseAddr:
 ; Embed the current font's properties as library variables
 _CurrentFontProperties strucFont
+
+	; DEBUG
+	rb	16
 
 ;-------------------------------------------------------------------------------
 ; aliases

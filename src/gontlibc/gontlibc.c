@@ -65,7 +65,7 @@ unsigned int gontlib_DrawStringL(char const *__restrict str, size_t length_remai
 
     const bool auto_wrap = (TextNewlineControl & FONTLIB_ENABLE_AUTO_WRAP);
 
-    uint8_t const *__restrict const width_table_ptr = (uint16_t)conf.widths_table + root;
+    uint8_t const *__restrict const width_table_ptr = (uint8_t const *__restrict)conf.widths_table;
     for (;;) {
         if (length_remaining == 0) {
             goto finish;
@@ -113,7 +113,7 @@ unsigned int gontlib_DrawGlyph(unsigned char c) {
 
     c -= conf.first_glyph;
 
-    uint8_t const *__restrict const width_table_ptr = (uint16_t)conf.widths_table + root;
+    uint8_t const *__restrict const width_table_ptr = (uint8_t const *__restrict)conf.widths_table;
     const uint8_t width = width_table_ptr[c];
 
     const uint8_t space_above = conf.space_above;
@@ -129,8 +129,8 @@ unsigned int gontlib_DrawGlyph(unsigned char c) {
     x_pos -= conf.italic_space_adjust;
     uint8_t *__restrict const buf = (uint8_t *__restrict)(CurrentBuffer + (x_pos * GFY_LCD_HEIGHT) + y_pos);
 
-    uint16_t const *__restrict const font_table_ptr = (uint16_t)conf.bitmaps + (uint16_t *__restrict)root;
-    uint8_t const *__restrict src = *font_table_ptr + (uint8_t *__restrict)root;
+    uint16_t const *__restrict const bitmap_table_ptr = (uint16_t const *__restrict)conf.bitmaps;
+    uint8_t const *__restrict src = bitmap_table_ptr[(unsigned char)c] + (uint8_t *__restrict)root;
 
     #if 0
         const uint8_t font_jump = ((uint8_t)(width - 1) >> 3) + 1;
@@ -140,8 +140,17 @@ unsigned int gontlib_DrawGlyph(unsigned char c) {
 
     TextX += (width - conf.italic_space_adjust);
 
-    test_printf("%02X %d %d\n", c, TextX, TextY);
-    test_printf("%p %p %p\n", root, &conf, src);
+    test_printf("%02X: %d %d | %d %d\n", c, TextX, TextY, width, width - conf.italic_space_adjust);
+    test_printf(
+        "R %p %p | S %p %04X %p | B %p %p %p\nD %02X %02X, %02X %02X %02X %02X %02X, %02X\n%06X %06X %06X\n",
+        root, &root,
+        src, bitmap_table_ptr[(unsigned char)c], &bitmap_table_ptr[(unsigned char)c],
+        bitmap_table_ptr, (void*)conf.bitmaps, &conf.bitmaps,
+        src[0], src[1], src[2], src[3], src[4], src[5], src[6], src[7],
+        *(uint24_t const *__restrict)(src - 1),
+        *(uint24_t const *__restrict)(src + 0),
+        *(uint24_t const *__restrict)(src + 1)
+    );
 
     gfy_Wait();
 
@@ -152,7 +161,7 @@ unsigned int gontlib_DrawGlyph(unsigned char c) {
         dst += space_above;
 
         for (uint8_t y = 0; y < height; y++) {
-            uint24_t HL = *(uint24_t const *__restrict)src;
+            uint24_t HL = *((uint24_t const *__restrict)src);
             for (uint8_t x = 0; x < width; x++) {
                 if (HL & 0x800000) {
                     *dst = fg_color;
