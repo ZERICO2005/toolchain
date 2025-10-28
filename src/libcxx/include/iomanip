@@ -2,8 +2,118 @@
 #ifndef _EZCXX_IOMANIP
 #define _EZCXX_IOMANIP
 
-
+#include <ios>
+#include <cstdint>
 
 #pragma clang system_header
+
+namespace std {
+	// setiosflags
+	class _SetIosFlags {
+		ios_base::fmtflags m;
+	public:
+		explicit _SetIosFlags(ios_base::fmtflags f): m(f) {}
+		template<class CharT, class Traits>
+		friend basic_ostream<CharT,Traits>& operator<<(basic_ostream<CharT,Traits>& os, _SetIosFlags m) {
+			os.setf(m.m);
+			return os;
+		}
+	};
+	inline _SetIosFlags setiosflags(ios_base::fmtflags f) { return _SetIosFlags(f); }
+
+	// resetiosflags
+	class _ResetIosFlags {
+		ios_base::fmtflags m;
+	public:
+		explicit _ResetIosFlags(ios_base::fmtflags f): m(f) {}
+		template<class CharT, class Traits>
+		friend basic_ostream<CharT,Traits>& operator<<(basic_ostream<CharT,Traits>& os, _ResetIosFlags r) {
+			os.setf(ios_base::fmtflags(0), r.m); // clear mask
+			return os;
+		}
+	};
+	inline _ResetIosFlags resetiosflags(ios_base::fmtflags f) { return _ResetIosFlags(f); }
+
+	// setbase
+	class _SetBase {
+		uint8_t base_;
+	public:
+		explicit _SetBase(int b): base_(b) {}
+		template<class CharT, class Traits>
+		friend basic_ostream<CharT,Traits>& operator<<(basic_ostream<CharT,Traits>& os, _SetBase b) {
+			ios_base::fmtflags f = ios_base::dec;
+			if(b.base_==8) f = ios_base::oct;
+			else if(b.base_==16) f = ios_base::hex;
+			os.setf(f, ios_base::basefield);
+			return os;
+		}
+	};
+	inline _SetBase setbase(int b) { return _SetBase(b); }
+
+	// setprecision
+	class _SetPrecision { int n; public: explicit _SetPrecision(int v) : n(v) {}
+		template<class CharT,class Traits>
+		friend basic_ostream<CharT,Traits>& operator<<(basic_ostream<CharT,Traits>& os, _SetPrecision p) {
+			os.precision(p.n); return os;
+		}
+	};
+	inline _SetPrecision setprecision(int n) { return _SetPrecision(n); }
+
+	// setw
+	class _SetWidth { int n; public: explicit _SetWidth(int v) : n(v) {}
+		template<class CharT,class Traits>
+		friend basic_ostream<CharT,Traits>& operator<<(basic_ostream<CharT,Traits>& os, _SetWidth w) {
+			os.width(w.n); return os;
+		}
+		template<class CharT,class Traits>
+		friend basic_istream<CharT,Traits>& operator>>(basic_istream<CharT,Traits>& is, _SetWidth w) {
+			is.width(w.n);
+			return is;
+		}
+	};
+	inline _SetWidth setw(int n) { return _SetWidth(n); }
+
+	// setfill
+	template<class CharT>
+	class _SetFill {
+		CharT c;
+	public:
+		explicit _SetFill(CharT ch): c(ch) {}
+		template<class C2,class Traits>
+		friend basic_ostream<C2,Traits>& operator<<(basic_ostream<C2,Traits>& os, _SetFill f) {
+			os.fill(static_cast<typename basic_ostream<C2,Traits>::char_type>(f.c));
+			return os;
+		}
+	};
+	template<class CharT> inline _SetFill<CharT> setfill(CharT c) { return _SetFill<CharT>(c); }
+
+	// quoted: sketch for output-only const char*
+	template<class CharT>
+	class _Quoted {
+		const CharT* s;
+		CharT delim; CharT esc;
+	public:
+		_Quoted(const CharT* sp, CharT d, CharT e): s(sp), delim(d), esc(e) {}
+		template<class C2,class Traits>
+		friend basic_ostream<C2,Traits>& operator<<(basic_ostream<C2,Traits>& os, const _Quoted& q) {
+			using O = basic_ostream<C2,Traits>;
+			// write delim
+			os.put(q.delim);
+			for(const CharT* p = q.s; *p; ++p) {
+				if(*p==q.delim || *p==q.esc) os.put(q.esc);
+				os.put(*p);
+			}
+			os.put(q.delim);
+			return os;
+		}
+	};
+	template<class CharT>
+	inline _Quoted<CharT> quoted(const CharT* s, CharT delim = CharT('"'), CharT escape = CharT('\\')) {
+		return _Quoted<CharT>(s, delim, escape);
+	}
+
+	// More complete implementations (string overloads, input parsing, money/time using facets)
+	// should use locale facets: use money_put/money_get and time_put/time_get for proper behavior.
+} // namespace std
 
 #endif // _EZCXX_IOMANIP

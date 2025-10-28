@@ -9,4 +9,16 @@
 
 #pragma clang system_header
 
+namespace std {
+	extern istream cin;
+	extern ostream cout;
+	extern ostream cerr;
+	extern ostream clog;
+
+	extern wistream wcin;
+	extern wostream wcout;
+	extern wostream wcerr;
+	extern wostream wclog;
+}
+
 #endif // _EZCXX_IOSTREAM

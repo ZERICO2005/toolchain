@@ -9,12 +9,6 @@
 namespace std {
     template<class CharT> struct char_traits;
 
-    template<> struct char_traits<char>;
-    template<> struct char_traits<char8_t>;
-    template<> struct char_traits<char16_t>;
-    template<> struct char_traits<char32_t>;
-    template<> struct char_traits<wchar_t>;
-
     template<class T> class allocator;
 
     template<class CharT, class Traits = char_traits<CharT>>
@@ -154,11 +148,6 @@ namespace std {
     using wspanstream  = basic_spanstream<wchar_t>;
 
     template<class State> class fpos;
-    using streampos = fpos<char_traits<char>::state_type>;
-    using wstreampos = fpos<char_traits<wchar_t>::state_type>;
-    using u8streampos = fpos<char_traits<char8_t>::state_type>;
-    using u16streampos = fpos<char_traits<char16_t>::state_type>;
-    using u32streampos = fpos<char_traits<char32_t>::state_type>;
 } // namespace std
 
 // deprecated

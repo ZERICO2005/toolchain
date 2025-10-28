@@ -7,9 +7,14 @@
 #include <ti/sprintf.h>
 #include <cstdio>
 #include <cstdlib>
+#include <__char_traits>
 #include <EASTL/string.h>
 
 #pragma clang system_header
+
+namespace std {
+
+} // namespace std
 
 namespace std {
 

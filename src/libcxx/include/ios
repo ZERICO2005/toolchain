@@ -14,8 +14,6 @@ namespace std {
     template<class StateT> class fpos;
 
     class ios_base;
-    template<class CharT, class Traits = char_traits<CharT>>
-        class basic_ios;
 
     // manipulators
     ios_base& boolalpha   (ios_base& str);
@@ -194,7 +192,7 @@ private:
 } // namespace std
 
 namespace std {
-template<class CharT, class Traits = char_traits<CharT>>
+template<class CharT, class Traits>
 class basic_ios : public ios_base {
 public:
     using char_type   = CharT;

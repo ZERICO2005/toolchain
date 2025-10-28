@@ -1,0 +1,147 @@
+// -*- C++ -*-
+#ifndef _EZCXX_CHAR_TRAITS
+#define _EZCXX_CHAR_TRAITS
+
+#include <cstddef>
+#include <cstdint>
+
+#pragma clang system_header
+
+namespace std {
+	// character traits
+	template<class CharT> struct char_traits; // freestanding
+	template<> struct char_traits<char>;      // freestanding
+	template<> struct char_traits<char8_t>;   // freestanding
+	template<> struct char_traits<char16_t>;  // freestanding
+	template<> struct char_traits<char32_t>;  // freestanding
+	template<> struct char_traits<wchar_t>;   // freestanding
+} // namespace std
+
+namespace std {
+template<> struct char_traits<char> {
+	using char_type  = char;
+	using int_type   = int;
+	using off_type   = ptrdiff_t;
+	using pos_type   = ptrdiff_t;
+
+	static constexpr void assign(char_type& c1, const char_type& c2) noexcept;
+	static constexpr bool eq(char_type c1, char_type c2) noexcept;
+	static constexpr bool lt(char_type c1, char_type c2) noexcept;
+
+	static constexpr int compare(const char_type* s1, const char_type* s2, size_t n);
+	static constexpr size_t length(const char_type* s);
+	static constexpr const char_type* find(const char_type* s, size_t n,
+											const char_type& a);
+	static constexpr char_type* move(char_type* s1, const char_type* s2, size_t n);
+	static constexpr char_type* copy(char_type* s1, const char_type* s2, size_t n);
+	static constexpr char_type* assign(char_type* s, size_t n, char_type a);
+
+	static constexpr int_type not_eof(int_type c) noexcept;
+	static constexpr char_type to_char_type(int_type c) noexcept;
+	static constexpr int_type to_int_type(char_type c) noexcept;
+	static constexpr bool eq_int_type(int_type c1, int_type c2) noexcept;
+	static constexpr int_type eof() noexcept;
+};
+
+template<> struct char_traits<char8_t> {
+	using char_type  = char8_t;
+	using int_type   = unsigned int;
+	using off_type   = ptrdiff_t;
+	using pos_type   = ptrdiff_t;
+
+	static constexpr void assign(char_type& c1, const char_type& c2) noexcept;
+	static constexpr bool eq(char_type c1, char_type c2) noexcept;
+	static constexpr bool lt(char_type c1, char_type c2) noexcept;
+
+	static constexpr int compare(const char_type* s1, const char_type* s2, size_t n);
+	static constexpr size_t length(const char_type* s);
+	static constexpr const char_type* find(const char_type* s, size_t n,
+											const char_type& a);
+	static constexpr char_type* move(char_type* s1, const char_type* s2, size_t n);
+	static constexpr char_type* copy(char_type* s1, const char_type* s2, size_t n);
+	static constexpr char_type* assign(char_type* s, size_t n, char_type a);
+	static constexpr int_type not_eof(int_type c) noexcept;
+	static constexpr char_type to_char_type(int_type c) noexcept;
+	static constexpr int_type to_int_type(char_type c) noexcept;
+	static constexpr bool eq_int_type(int_type c1, int_type c2) noexcept;
+	static constexpr int_type eof() noexcept;
+};
+
+template<> struct char_traits<char16_t> {
+	using char_type  = char16_t;
+	using int_type   = uint_least16_t;
+	using off_type   = ptrdiff_t;
+	using pos_type   = ptrdiff_t;
+
+	static constexpr void assign(char_type& c1, const char_type& c2) noexcept;
+	static constexpr bool eq(char_type c1, char_type c2) noexcept;
+	static constexpr bool lt(char_type c1, char_type c2) noexcept;
+
+	static constexpr int compare(const char_type* s1, const char_type* s2, size_t n);
+	static constexpr size_t length(const char_type* s);
+	static constexpr const char_type* find(const char_type* s, size_t n,
+											const char_type& a);
+	static constexpr char_type* move(char_type* s1, const char_type* s2, size_t n);
+	static constexpr char_type* copy(char_type* s1, const char_type* s2, size_t n);
+	static constexpr char_type* assign(char_type* s, size_t n, char_type a);
+
+	static constexpr int_type not_eof(int_type c) noexcept;
+	static constexpr char_type to_char_type(int_type c) noexcept;
+	static constexpr int_type to_int_type(char_type c) noexcept;
+	static constexpr bool eq_int_type(int_type c1, int_type c2) noexcept;
+	static constexpr int_type eof() noexcept;
+};
+
+template<> struct char_traits<char32_t> {
+	using char_type  = char32_t;
+	using int_type   = uint_least32_t;
+	using off_type   = ptrdiff_t;
+	using pos_type   = ptrdiff_t;
+
+	static constexpr void assign(char_type& c1, const char_type& c2) noexcept;
+	static constexpr bool eq(char_type c1, char_type c2) noexcept;
+	static constexpr bool lt(char_type c1, char_type c2) noexcept;
+
+	static constexpr int compare(const char_type* s1, const char_type* s2, size_t n);
+	static constexpr size_t length(const char_type* s);
+	static constexpr const char_type* find(const char_type* s, size_t n,
+											const char_type& a);
+	static constexpr char_type* move(char_type* s1, const char_type* s2, size_t n);
+	static constexpr char_type* copy(char_type* s1, const char_type* s2, size_t n);
+	static constexpr char_type* assign(char_type* s, size_t n, char_type a);
+
+	static constexpr int_type not_eof(int_type c) noexcept;
+	static constexpr char_type to_char_type(int_type c) noexcept;
+	static constexpr int_type to_int_type(char_type c) noexcept;
+	static constexpr bool eq_int_type(int_type c1, int_type c2) noexcept;
+	static constexpr int_type eof() noexcept;
+};
+
+template<> struct char_traits<wchar_t> {
+	using char_type  = wchar_t;
+	using int_type   = __WINT_TYPE__;
+	using off_type   = ptrdiff_t;
+	using pos_type   = ptrdiff_t;
+
+	static constexpr void assign(char_type& c1, const char_type& c2) noexcept;
+	static constexpr bool eq(char_type c1, char_type c2) noexcept;
+	static constexpr bool lt(char_type c1, char_type c2) noexcept;
+
+	static constexpr int compare(const char_type* s1, const char_type* s2, size_t n);
+	static constexpr size_t length(const char_type* s);
+	static constexpr const char_type* find(const char_type* s, size_t n,
+											const char_type& a);
+	static constexpr char_type* move(char_type* s1, const char_type* s2, size_t n);
+	static constexpr char_type* copy(char_type* s1, const char_type* s2, size_t n);
+	static constexpr char_type* assign(char_type* s, size_t n, char_type a);
+
+	static constexpr int_type not_eof(int_type c) noexcept;
+	static constexpr char_type to_char_type(int_type c) noexcept;
+	static constexpr int_type to_int_type(char_type c) noexcept;
+	static constexpr bool eq_int_type(int_type c1, int_type c2) noexcept;
+	static constexpr int_type eof() noexcept;
+};
+
+} // namespace std
+
+#endif // _EZCXX_CHAR_TRAITS

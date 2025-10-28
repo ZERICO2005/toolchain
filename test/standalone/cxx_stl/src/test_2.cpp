@@ -1,5 +1,4 @@
-#include "fake_iostream.h"
-
+#include <iostream>
 #include <algorithm>
 #include <unordered_set>
 
