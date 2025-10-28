@@ -32,8 +32,14 @@
 #include <deque>
 #include <exception>
 #include <expected>
+#include <fstream>
 #include <functional>
 #include <initializer_list>
+#include <iomanip>
+#include <ios>
+#include <iosfwd>
+#include <iostream>
+#include <istream>
 #include <iterator>
 #include <limits>
 #include <list>
@@ -51,9 +57,12 @@
 #include <source_location>
 #endif // __cplusplus >= 201907L
 #include <span>
+#include <sstream>
 #include <stack>
+#include <streambuf>
 #include <string>
 #include <string_view>
+#include <strstream>
 #include <tuple>
 #include <type_traits>
 #include <typeinfo>

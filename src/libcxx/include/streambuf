@@ -1,0 +1,9 @@
+// -*- C++ -*-
+#ifndef _EZCXX_STREAMBUF
+#define _EZCXX_STREAMBUF
+
+
+
+#pragma clang system_header
+
+#endif // _EZCXX_STREAMBUF

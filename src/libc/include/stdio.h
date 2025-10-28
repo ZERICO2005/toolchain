@@ -121,7 +121,7 @@ __END_DECLS
 namespace std {
     using ::size_t;
     using ::FILE;
-    
+
     using ::fopen;
     using ::fclose;
     using ::fflush;

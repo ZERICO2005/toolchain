@@ -1,0 +1,9 @@
+// -*- C++ -*-
+#ifndef _EZCXX_STRSTREAM
+#define _EZCXX_STRSTREAM
+
+
+
+#pragma clang system_header
+
+#endif // _EZCXX_STRSTREAM

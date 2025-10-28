@@ -1,0 +1,252 @@
+// -*- C++ -*-
+#ifndef _EZCXX_IOS
+#define _EZCXX_IOS
+
+#include <iosfwd>
+#include <cstddef>
+#include <cstdint>
+
+#pragma clang system_header
+
+namespace std {
+    using streamoff  = ptrdiff_t;
+    using streamsize = ptrdiff_t;
+    template<class StateT> class fpos;
+
+    class ios_base;
+    template<class CharT, class Traits = char_traits<CharT>>
+        class basic_ios;
+
+    // manipulators
+    ios_base& boolalpha   (ios_base& str);
+    ios_base& noboolalpha (ios_base& str);
+
+    ios_base& showbase    (ios_base& str);
+    ios_base& noshowbase  (ios_base& str);
+
+    ios_base& showpoint   (ios_base& str);
+    ios_base& noshowpoint (ios_base& str);
+
+    ios_base& showpos     (ios_base& str);
+    ios_base& noshowpos   (ios_base& str);
+
+    ios_base& skipws      (ios_base& str);
+    ios_base& noskipws    (ios_base& str);
+
+    ios_base& uppercase   (ios_base& str);
+    ios_base& nouppercase (ios_base& str);
+
+    ios_base& unitbuf     (ios_base& str);
+    ios_base& nounitbuf   (ios_base& str);
+
+    // adjustfield
+    ios_base& internal    (ios_base& str);
+    ios_base& left        (ios_base& str);
+    ios_base& right       (ios_base& str);
+
+    // basefield
+    ios_base& dec         (ios_base& str);
+    ios_base& hex         (ios_base& str);
+    ios_base& oct         (ios_base& str);
+
+    // floatfield
+    ios_base& fixed       (ios_base& str);
+    ios_base& scientific  (ios_base& str);
+    ios_base& hexfloat    (ios_base& str);
+    ios_base& defaultfloat(ios_base& str);
+
+#if 0
+    // error reporting
+    enum class io_errc {
+        stream = 1
+    };
+
+    template<> struct is_error_code_enum<io_errc> : public true_type { };
+    error_code make_error_code(io_errc e) noexcept;
+    error_condition make_error_condition(io_errc e) noexcept;
+    const error_category& iostream_category() noexcept;
+#endif
+}
+
+namespace std {
+class ios_base {
+public:
+    class failure;              // see description
+
+    // fmtflags
+    using fmtflags = unsigned int;
+
+    static constexpr fmtflags internal    = (1U <<  0);
+    static constexpr fmtflags left        = (1U <<  1);
+    static constexpr fmtflags right       = (1U <<  2);
+
+    static constexpr fmtflags dec         = (1U <<  3);
+    static constexpr fmtflags hex         = (1U <<  4);
+    static constexpr fmtflags oct         = (1U <<  5);
+
+    static constexpr fmtflags fixed       = (1U <<  6);
+    static constexpr fmtflags scientific  = (1U <<  7);
+
+    static constexpr fmtflags boolalpha   = (1U <<  8);
+    static constexpr fmtflags showbase    = (1U <<  9);
+    static constexpr fmtflags showpoint   = (1U << 10);
+    static constexpr fmtflags showpos     = (1U << 11);
+    static constexpr fmtflags skipws      = (1U << 12);
+    static constexpr fmtflags unitbuf     = (1U << 13);
+    static constexpr fmtflags uppercase   = (1U << 14);
+
+    static constexpr fmtflags adjustfield = internal | left | right;
+    static constexpr fmtflags basefield   = dec | hex | oct;
+    static constexpr fmtflags floatfield  = fixed | scientific;
+
+    // iostate
+    using iostate = uint8_t;
+    static constexpr iostate eofbit  = (1U << 0);
+    static constexpr iostate badbit  = (1U << 1);
+    static constexpr iostate failbit = (1U << 2);
+    static constexpr iostate goodbit = 0;
+
+    // openmode
+    using openmode = uint8_t;
+    static constexpr openmode app       = (1U << 0);
+    static constexpr openmode ate       = (1U << 1);
+    static constexpr openmode binary    = (1U << 2);
+    static constexpr openmode in        = (1U << 3);
+    static constexpr openmode out       = (1U << 4);
+    static constexpr openmode trunc     = (1U << 5);
+    static constexpr openmode noreplace = (1U << 6);
+
+    // seekdir
+    using seekdir = uint8_t;
+    static constexpr seekdir beg = 0;
+    static constexpr seekdir cur = 1;
+    static constexpr seekdir end = 2;
+
+    class Init;
+
+    // fmtflags state
+    fmtflags flags() const;
+    fmtflags flags(fmtflags fmtfl);
+    fmtflags setf(fmtflags fmtfl);
+    fmtflags setf(fmtflags fmtfl, fmtflags mask);
+    void unsetf(fmtflags mask);
+
+    streamsize precision() const;
+    streamsize precision(streamsize prec);
+    streamsize width() const;
+    streamsize width(streamsize wide);
+
+    // storage
+    static int xalloc();
+    long&  iword(int idx);
+    void*& pword(int idx);
+
+    // destructor
+    virtual ~ios_base();
+
+    // callbacks
+    enum event { erase_event, imbue_event, copyfmt_event };
+    using event_callback = void (*)(event, ios_base&, int idx);
+    void register_callback(event_callback fn, int idx);
+
+    ios_base(const ios_base&) = delete;
+    ios_base& operator=(const ios_base&) = delete;
+
+    static bool sync_with_stdio(bool sync = true);
+
+protected:
+    ios_base();
+
+#if 0
+    private:
+        static int index;           // exposition only
+        long*  iarray;              // exposition only
+        void** parray;              // exposition only
+#endif
+};
+} // namespace std
+
+namespace std {
+class ios_base::Init {
+public:
+    Init();
+    Init(const Init&) = default;
+    ~Init();
+    Init& operator=(const Init&) = default;
+private:
+#if 0
+    static int init_cnt;        // exposition only
+#endif
+};
+} // namespace std
+
+namespace std {
+template<class StateT> class fpos {
+public:
+    // members
+    StateT state() const;
+    void state(StateT);
+private:
+#if 0
+    StateT st;                  // exposition only
+#endif
+};
+} // namespace std
+
+namespace std {
+template<class CharT, class Traits = char_traits<CharT>>
+class basic_ios : public ios_base {
+public:
+    using char_type   = CharT;
+    using int_type    = typename Traits::int_type;
+    using pos_type    = typename Traits::pos_type;
+    using off_type    = typename Traits::off_type;
+    using traits_type = Traits;
+
+    // flags functions
+    explicit operator bool() const;
+    bool operator!() const;
+    iostate rdstate() const;
+    void clear(iostate state = goodbit);
+    void setstate(iostate state);
+    bool good() const;
+    bool eof()  const;
+    bool fail() const;
+    bool bad()  const;
+
+    iostate exceptions() const;
+    void exceptions(iostate except);
+
+    // constructor/destructor
+    explicit basic_ios(basic_streambuf<CharT, Traits>* sb);
+    virtual ~basic_ios();
+
+    // members
+    basic_ostream<CharT, Traits>* tie() const;
+    basic_ostream<CharT, Traits>* tie(basic_ostream<CharT, Traits>* tiestr);
+
+    basic_streambuf<CharT, Traits>* rdbuf() const;
+    basic_streambuf<CharT, Traits>* rdbuf(basic_streambuf<CharT, Traits>* sb);
+
+    basic_ios& copyfmt(const basic_ios& rhs);
+
+    char_type fill() const;
+    char_type fill(char_type ch);
+
+    char      narrow(char_type c, char dfault) const;
+    char_type widen(char c) const;
+
+    basic_ios(const basic_ios&) = delete;
+    basic_ios& operator=(const basic_ios&) = delete;
+
+protected:
+    basic_ios();
+    void init(basic_streambuf<CharT, Traits>* sb);
+    void move(basic_ios& rhs);
+    void move(basic_ios&& rhs);
+    void swap(basic_ios& rhs) noexcept;
+    void set_rdbuf(basic_streambuf<CharT, Traits>* sb);
+};
+} // namespace std
+
+#endif // _EZCXX_IOS

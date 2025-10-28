@@ -1,0 +1,9 @@
+// -*- C++ -*-
+#ifndef _EZCXX_FSTREAM
+#define _EZCXX_FSTREAM
+
+
+
+#pragma clang system_header
+
+#endif // _EZCXX_FSTREAM

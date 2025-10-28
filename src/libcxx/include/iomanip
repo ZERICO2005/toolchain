@@ -1,0 +1,9 @@
+// -*- C++ -*-
+#ifndef _EZCXX_IOMANIP
+#define _EZCXX_IOMANIP
+
+
+
+#pragma clang system_header
+
+#endif // _EZCXX_IOMANIP

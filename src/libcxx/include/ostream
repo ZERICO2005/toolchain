@@ -1,0 +1,9 @@
+// -*- C++ -*-
+#ifndef _EZCXX_OSTREAM
+#define _EZCXX_OSTREAM
+
+
+
+#pragma clang system_header
+
+#endif // _EZCXX_OSTREAM
