@@ -9,6 +9,7 @@
 #include <cerrno>
 #include <cfenv>
 #include <cfloat>
+#include <chrono>
 #include <cinttypes>
 #include <ciso646>
 #include <climits>
