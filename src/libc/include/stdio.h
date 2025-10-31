@@ -36,12 +36,14 @@ typedef struct
 __BEGIN_DECLS
 
 /* weak user-defined functions */
+
 int inchar(void);
 
 void outchar(char character);
 
-FILE *fopen(const char *__restrict filename,
-    const char *__restrict mode);
+int ungetc(int ch, FILE *stream);
+
+FILE *fopen(const char *__restrict filename, const char *__restrict mode);
 
 int fclose(FILE *stream);
 
@@ -57,8 +59,7 @@ int fputs(const char *__restrict str, FILE *__restrict stream);
 
 size_t fread(void *ptr, size_t size, size_t count, FILE *__restrict stream);
 
-size_t fwrite(const void *__restrict ptr, size_t size, size_t count,
-    FILE *__restrict stream);
+size_t fwrite(const void *__restrict ptr, size_t size, size_t count, FILE *__restrict stream);
 
 long int ftell(FILE *stream) __attribute__((__warn_unused_result__));
 
@@ -74,9 +75,12 @@ char *fgets(char *__restrict str, int num, FILE *__restrict stream);
 
 int remove(const char *filename);
 
+int rename(const char *old_filename, const char *new_filename);
+
 void rewind(FILE *stream);
 
 /* standard impls */
+
 int getchar(void);
 
 int putchar(int character);
@@ -121,7 +125,7 @@ __END_DECLS
 namespace std {
     using ::size_t;
     using ::FILE;
-    
+
     using ::fopen;
     using ::fclose;
     using ::fflush;
