@@ -138,9 +138,9 @@ unsigned int gontlib_DrawGlyph(unsigned char c) {
 
     gfy_Wait();
 
+#if 1
     if (is_transparent) {
         uint8_t *__restrict dst = buf;
-        // const size_t line_jump = GFY_LCD_HEIGHT - height;
         const size_t line_jump = 1 - (GFY_LCD_HEIGHT * width);
         dst += space_above;
 
@@ -160,7 +160,6 @@ unsigned int gontlib_DrawGlyph(unsigned char c) {
     }
     /* opaque */ {
         uint8_t *__restrict dst = buf;
-        // const size_t line_jump = GFY_LCD_HEIGHT - height;
         const size_t line_jump = 1 - (GFY_LCD_HEIGHT * width);
         dst += space_above;
         for (uint8_t y = 0; y < height; y++) {
@@ -178,6 +177,47 @@ unsigned int gontlib_DrawGlyph(unsigned char c) {
             dst += line_jump;
         }
     }
+#else
+    if (is_transparent) {
+        uint8_t *__restrict dst = buf;
+        const size_t line_jump = GFY_LCD_HEIGHT - height;
+        dst += space_above;
+
+        for (uint8_t x = 0; x < width; x++) {
+            uint24_t HL = *(uint24_t const *__restrict)src;
+            for (uint8_t y = 0; y < height; y++) {
+                if (HL & 0x800000) {
+                    *dst = fg_color;
+                }
+                HL <<= 1;
+                dst++;
+            }
+            src += font_jump;
+            dst += line_jump;
+        }
+        return TextX;
+    }
+    /* opaque */ {
+        uint8_t *__restrict dst = buf;
+        const size_t line_jump = GFY_LCD_HEIGHT - height;
+        dst += space_above;
+        for (uint8_t x = 0; x < width; x++) {
+            uint24_t HL = *(uint24_t const *__restrict)src;
+            for (uint8_t y = 0; y < height; y++) {
+                if (HL & 0x800000) {
+                    *dst = fg_color;
+                } else {
+                    *dst = bg_color;
+                }
+                HL <<= 1;
+                dst++;
+            }
+            src += font_jump;
+            dst += line_jump;
+        }
+    }
+#endif
+
     /* draw empty lines above */ {
         uint8_t *__restrict above = buf;
         for (uint8_t x = 0; x < width; x++) {
