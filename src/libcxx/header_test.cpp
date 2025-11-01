@@ -49,6 +49,7 @@
 #include <optional>
 #include <queue>
 #include <ratio>
+#include <scoped_allocator>
 #include <set>
 #if __cplusplus >= 201907L
 #include <source_location>
@@ -60,10 +61,12 @@
 #include <string_view>
 #include <tuple>
 #include <type_traits>
+#include <typeindex>
 #include <typeinfo>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <valarray>
 #include <variant>
 #include <vector>
 #include <version>
