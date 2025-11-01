@@ -3,6 +3,11 @@
 
 #include <cdefs.h>
 #include <stdbool.h>
+#include <__math_abs.h>
+
+#ifdef __cplusplus
+#include <__cxx_abs.h>
+#endif
 
 #define NAN          __builtin_nanf("")
 #define INFINITY     __builtin_inff()
