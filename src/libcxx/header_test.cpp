@@ -32,28 +32,37 @@
 #include <cwchar>
 #include <cwctype>
 #include <cxxabi.h>
+#include <deque>
 #include <exception>
+#include <forward_list>
 #include <functional>
 #include <initializer_list>
 #include <iosfwd>
 #include <iterator>
 #include <limits>
+#include <list>
+#include <map>
 #include <memory>
 #include <new>
 #include <numbers>
 #include <numeric>
 #include <optional>
+#include <queue>
 #include <ratio>
+#include <set>
 #if __cplusplus >= 201907L
 #include <source_location>
 #endif // __cplusplus >= 201907L
+#include <span>
 #include <stdexcept>
+#include <stack>
 #include <string>
 #include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <typeinfo>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <variant>
 #include <vector>
