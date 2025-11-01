@@ -33,12 +33,14 @@
 #include <memory>
 #include <new>
 #include <numbers>
+#include <numeric>
 #if __cplusplus >= 201907L
 #include <source_location>
 #endif // __cplusplus >= 201907L
 #include <type_traits>
 #include <typeinfo>
 #include <utility>
+#include <vector>
 #include <version>
 
 #include <alloca.h>
