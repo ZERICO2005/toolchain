@@ -13,6 +13,7 @@
 #include <cinttypes>
 #include <ciso646>
 #include <climits>
+#include <clocale>
 #include <cmath>
 #include <compare>
 #include <complex>
@@ -84,6 +85,7 @@
 #include <inttypes.h>
 #include <iso646.h>
 #include <limits.h>
+#include <locale.h>
 #include <math.h>
 #include <setjmp.h>
 #include <stdalign.h>
