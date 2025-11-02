@@ -9,12 +9,14 @@
 #include <cerrno>
 #include <cfenv>
 #include <cfloat>
+#include <charconv>
 #include <chrono>
 #include <cinttypes>
 #include <ciso646>
 #include <climits>
 #include <clocale>
 #include <cmath>
+#include <codecvt>
 #include <compare>
 #include <complex>
 #if __cplusplus >= 201907L
@@ -58,7 +60,9 @@
 #include <optional>
 #include <ostream>
 #include <queue>
+#include <regex>
 #include <random>
+#include <ranges>
 #include <ratio>
 #include <scoped_allocator>
 #include <set>
