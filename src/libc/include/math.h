@@ -4,8 +4,7 @@
 #ifdef __cplusplus
 
 #include <__math_def.h>
-#include <__type_traits/enable_if.h>
-#include <__type_traits/is_integral.h>
+#include <type_traits>
 
 inline constexpr bool signbit(float __x) {
     if (__builtin_constant_p(__x)) {
@@ -26,7 +25,7 @@ inline constexpr bool signbit(long double __x) {
     return _signbitl(__x);
 }
 template<typename _Tp> inline constexpr
-std::__enable_if_t<std::is_integral_v<_Tp>, bool>
+std::__enable_if_t<std::is_integral<_Tp>::value, bool>
 signbit(_Tp __x) { return (__x < 0); }
 
 inline constexpr bool issignaling(float __x) {
@@ -39,7 +38,7 @@ inline constexpr bool issignaling(long double __x) {
     return _issignalingl(__x);
 }
 template<typename _Tp> inline constexpr
-std::__enable_if_t<std::is_integral_v<_Tp>, bool>
+std::__enable_if_t<std::is_integral<_Tp>::value, bool>
 issignaling(_Tp __x) { return false; }
 
 inline constexpr bool isnan(float __x) {
@@ -61,7 +60,7 @@ inline constexpr bool isnan(long double __x) {
     return _isnanl(__x);
 }
 template<typename _Tp> inline constexpr
-std::__enable_if_t<std::is_integral_v<_Tp>, bool>
+std::__enable_if_t<std::is_integral<_Tp>::value, bool>
 isnan(_Tp __x) { return false; }
 
 inline constexpr bool isinf(float __x) {
@@ -83,7 +82,7 @@ inline constexpr bool isinf(long double __x) {
     return _isinfl(__x);
 }
 template<typename _Tp> inline constexpr
-std::__enable_if_t<std::is_integral_v<_Tp>, bool>
+std::__enable_if_t<std::is_integral<_Tp>::value, bool>
 isinf(_Tp __x) { return false; }
 
 inline constexpr bool isfinite(float __x) {
@@ -105,7 +104,7 @@ inline constexpr bool isfinite(long double __x) {
     return _isfinitel(__x);
 }
 template<typename _Tp> inline constexpr
-std::__enable_if_t<std::is_integral_v<_Tp>, bool>
+std::__enable_if_t<std::is_integral<_Tp>::value, bool>
 isfinite(_Tp __x) { return true; }
 
 inline constexpr bool isnormal(float __x) {
@@ -127,7 +126,7 @@ inline constexpr bool isnormal(long double __x) {
     return _isnormall(__x);
 }
 template<typename _Tp> inline constexpr
-std::__enable_if_t<std::is_integral_v<_Tp>, bool>
+std::__enable_if_t<std::is_integral<_Tp>::value, bool>
 isnormal(_Tp __x) { return (__x != 0); }
 
 inline constexpr bool issubnormal(float __x) {
@@ -149,7 +148,7 @@ inline constexpr bool issubnormal(long double __x) {
     return _issubnormall(__x);
 }
 template<typename _Tp> inline constexpr
-std::__enable_if_t<std::is_integral_v<_Tp>, bool>
+std::__enable_if_t<std::is_integral<_Tp>::value, bool>
 issubnormal(_Tp __x) { return false; }
 
 inline constexpr bool iszero(float __x) {
@@ -171,7 +170,7 @@ inline constexpr bool iszero(long double __x) {
     return _iszerol(__x);
 }
 template<typename _Tp> inline constexpr
-std::__enable_if_t<std::is_integral_v<_Tp>, bool>
+std::__enable_if_t<std::is_integral<_Tp>::value, bool>
 iszero(_Tp __x) { return (__x == 0); }
 
 inline constexpr int fpclassify(float __x) {
@@ -196,7 +195,7 @@ inline constexpr int fpclassify(long double __x) {
     }
 }
 template<typename _Tp> inline constexpr
-std::__enable_if_t<std::is_integral_v<_Tp>, int>
+std::__enable_if_t<std::is_integral<_Tp>::value, int>
 fpclassify(_Tp __x) { return (__x != 0) ? FP_NORMAL : FP_ZERO; }
 
 #else /* __cplusplus */
