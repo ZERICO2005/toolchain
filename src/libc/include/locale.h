@@ -33,7 +33,8 @@ struct lconv {
 #define LC_MONETARY (0x040)
 #define LC_NUMERIC  (0x080)
 #define LC_TIME     (0x100)
-#define LC_ALL      (LC_COLLATE | LC_CTYPE | LC_MONETARY | LC_NUMERIC | LC_TIME)
+#define LC_MESSAGES (0x200)
+#define LC_ALL      (LC_COLLATE | LC_CTYPE | LC_MONETARY | LC_NUMERIC | LC_TIME | LC_MESSAGES)
 
 #ifdef __cplusplus
 extern "C" {

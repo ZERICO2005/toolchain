@@ -6,14 +6,6 @@
 #include <time.h>
 
 typedef struct {
-    int __count;
-    union {
-        wint_t __value;
-        unsigned char __bytes[sizeof(wint_t)];
-    };
-} mbstate_t;
-
-typedef struct {
 
 } mbstate_t;
 
