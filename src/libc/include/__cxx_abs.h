@@ -1,8 +1,8 @@
 #ifndef _CXX_ABS_H
 #define _CXX_ABS_H
 
-#include <__math_abs.h>
 #include <__stdlib_abs.h>
+#include <__math_abs.h>
 
 namespace std {
 using ::abs;
