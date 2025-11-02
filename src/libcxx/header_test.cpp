@@ -9,6 +9,7 @@
 #include <cinttypes>
 #include <ciso646>
 #include <climits>
+#include <clocale>
 #include <cmath>
 #if __cplusplus >= 201907L
 #include <concepts>
@@ -24,6 +25,7 @@
 #include <cstring>
 #include <ctime>
 #include <ctgmath>
+#include <cuchar>
 #include <cwchar>
 #include <cwctype>
 #include <cxxabi.h>
@@ -52,6 +54,7 @@
 #include <inttypes.h>
 #include <iso646.h>
 #include <limits.h>
+#include <locale.h>
 #include <math.h>
 #include <setjmp.h>
 #include <stdalign.h>
@@ -67,6 +70,7 @@
 #include <string.h>
 #include <tgmath.h>
 #include <time.h>
+#include <uchar.h>
 #include <wchar.h>
 #include <wctype.h>
 

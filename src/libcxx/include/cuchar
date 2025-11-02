@@ -1,0 +1,23 @@
+// -*- C++ -*-
+#ifndef _EZCXX_CUCHAR
+#define _EZCXX_CUCHAR
+
+#include <uchar.h>
+
+#pragma clang system_header
+
+namespace std {
+using ::size_t;
+using ::mbstate_t;
+
+#if __cplusplus >= 202002L
+using ::mbrtoc8;
+using ::c8rtomb;
+#endif // __cplusplus >= 202002L
+using ::mbrtoc16;
+using ::c16rtomb;
+using ::mbrtoc32;
+using ::c32rtomb;
+} // namespace std
+
+#endif // _EZCXX_CUCHAR
