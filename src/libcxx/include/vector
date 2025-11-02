@@ -858,13 +858,21 @@ private:
                     __alloc_traits::propagate_on_container_move_assignment::value>());}
 
   _LIBCPP_NORETURN _LIBCPP_HIDE_FROM_ABI
-  void __throw_length_error() const {
-      _VSTD::__throw_length_error("vector");
+  void __throw_length_error(void) const {
+        #ifndef _EZ80
+            _VSTD::__throw_length_error("vector");
+        #else // _EZ80
+            _VSTD::abort();
+        #endif // _EZ80
   }
 
   _LIBCPP_NORETURN _LIBCPP_HIDE_FROM_ABI
   void __throw_out_of_range() const {
-      _VSTD::__throw_out_of_range("vector");
+        #ifndef _EZ80
+            _VSTD::__throw_out_of_range("vector");
+        #else // _EZ80
+            _VSTD::abort();
+        #endif // _EZ80
   }
 
   _LIBCPP_CONSTEXPR_AFTER_CXX17 _LIBCPP_INLINE_VISIBILITY
@@ -2363,12 +2371,20 @@ public:
 private:
     _LIBCPP_NORETURN _LIBCPP_HIDE_FROM_ABI
     void __throw_length_error() const {
-        _VSTD::__throw_length_error("vector");
+        #ifndef _EZ80
+            _VSTD::__throw_length_error("vector");
+        #else // _EZ80
+            _VSTD::abort();
+        #endif // _EZ80
     }
 
     _LIBCPP_NORETURN _LIBCPP_HIDE_FROM_ABI
     void __throw_out_of_range() const {
-        _VSTD::__throw_out_of_range("vector");
+        #ifndef _EZ80
+            _VSTD::__throw_out_of_range("vector");
+        #else // _EZ80
+            _VSTD::abort();
+        #endif // _EZ80
     }
 
     //  Allocate space for __n objects

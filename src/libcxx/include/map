@@ -1650,8 +1650,13 @@ map<_Key, _Tp, _Compare, _Allocator>::at(const key_type& __k)
 {
     __parent_pointer __parent;
     __node_base_pointer& __child = __tree_.__find_equal(__parent, __k);
-    if (__child == nullptr)
-        __throw_out_of_range("map::at:  key not found");
+    if (__child == nullptr) {
+        #ifndef _EZ80
+            _VSTD::__throw_out_of_range("map::at:  key not found");
+        #else // _EZ80
+            _VSTD::abort();
+        #endif // _EZ80
+    }
     return static_cast<__node_pointer>(__child)->__value_.__get_value().second;
 }
 
@@ -1661,8 +1666,13 @@ map<_Key, _Tp, _Compare, _Allocator>::at(const key_type& __k) const
 {
     __parent_pointer __parent;
     __node_base_pointer __child = __tree_.__find_equal(__parent, __k);
-    if (__child == nullptr)
-        __throw_out_of_range("map::at:  key not found");
+    if (__child == nullptr) {
+        #ifndef _EZ80
+            _VSTD::__throw_out_of_range("map::at:  key not found");
+        #else // _EZ80
+            _VSTD::abort();
+        #endif // _EZ80
+    }
     return static_cast<__node_pointer>(__child)->__value_.__get_value().second;
 }
 

@@ -1802,12 +1802,20 @@ private:
 
     _LIBCPP_NORETURN _LIBCPP_HIDE_FROM_ABI
     void __throw_length_error() const {
-        std::__throw_length_error("basic_string");
+        #ifndef _EZ80
+            _VSTD::__throw_length_error("basic_string");
+        #else // _EZ80
+            _VSTD::abort();
+        #endif // _EZ80
     }
 
     _LIBCPP_NORETURN _LIBCPP_HIDE_FROM_ABI
     void __throw_out_of_range() const {
-        std::__throw_out_of_range("basic_string");
+        #ifndef _EZ80
+            _VSTD::__throw_out_of_range("basic_string");
+        #else // _EZ80
+            _VSTD::abort();
+        #endif // _EZ80
     }
 
     friend _LIBCPP_CONSTEXPR_AFTER_CXX17 basic_string operator+<>(const basic_string&, const basic_string&);
