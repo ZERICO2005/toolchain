@@ -48,4 +48,7 @@
 #define  ULLONG_MAX  __ULONG_LONG_MAX__
 #define  ULLONG_WIDTH     __LLONG_WIDTH__
 
+#define  MB_LEN_MAX (4)
+#define  MB_CUR_MAX MB_LEN_MAX
+
 #endif /* _LIMITS_H */
