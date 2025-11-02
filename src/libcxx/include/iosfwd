@@ -235,7 +235,7 @@ typedef fpos<mbstate_t>    u8streampos;
 typedef fpos<mbstate_t>    u16streampos;
 typedef fpos<mbstate_t>    u32streampos;
 
-#if defined(_NEWLIB_VERSION)
+#if defined(_NEWLIB_VERSION) || defined(_EZ80)
 // On newlib, off_t is 'long int'
 typedef long int streamoff;         // for char_traits in <string>
 #else
