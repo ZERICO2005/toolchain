@@ -1877,8 +1877,13 @@ inline
 typename deque<_Tp, _Allocator>::reference
 deque<_Tp, _Allocator>::at(size_type __i)
 {
-    if (__i >= __base::size())
-        _VSTD::__throw_out_of_range("deque");
+    if (__i >= __base::size()) {
+        #ifndef _EZ80
+            _VSTD::__throw_out_of_range("deque");
+        #else // _EZ80
+            _VSTD::abort();
+        #endif // _EZ80
+    }
     size_type __p = __base::__start_ + __i;
     return *(*(__base::__map_.begin() + __p / __base::__block_size) + __p % __base::__block_size);
 }
@@ -1888,8 +1893,13 @@ inline
 typename deque<_Tp, _Allocator>::const_reference
 deque<_Tp, _Allocator>::at(size_type __i) const
 {
-    if (__i >= __base::size())
-        _VSTD::__throw_out_of_range("deque");
+    if (__i >= __base::size()) {
+        #ifndef _EZ80
+            _VSTD::__throw_out_of_range("deque");
+        #else // _EZ80
+            _VSTD::abort();
+        #endif // _EZ80
+    }
     size_type __p = __base::__start_ + __i;
     return *(*(__base::__map_.begin() + __p / __base::__block_size) + __p % __base::__block_size);
 }

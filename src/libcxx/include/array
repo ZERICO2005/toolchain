@@ -228,15 +228,25 @@ struct _LIBCPP_TEMPLATE_VIS array
 
     _LIBCPP_CONSTEXPR_AFTER_CXX14 reference at(size_type __n)
     {
-        if (__n >= _Size)
-            __throw_out_of_range("array::at");
+        if (__n >= _Size) {
+          #ifndef _EZ80
+              _VSTD::__throw_out_of_range("array::at");
+          #else // _EZ80
+              _VSTD::abort();
+          #endif // _EZ80
+        }
         return __elems_[__n];
     }
 
     _LIBCPP_CONSTEXPR_AFTER_CXX11 const_reference at(size_type __n) const
     {
-        if (__n >= _Size)
-            __throw_out_of_range("array::at");
+        if (__n >= _Size) {
+          #ifndef _EZ80
+              _VSTD::__throw_out_of_range("array::at");
+          #else // _EZ80
+              _VSTD::abort();
+          #endif // _EZ80
+        }
         return __elems_[__n];
     }
 
@@ -343,13 +353,21 @@ struct _LIBCPP_TEMPLATE_VIS array<_Tp, 0>
 
     _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX14
     reference at(size_type) {
-      __throw_out_of_range("array<T, 0>::at");
+      #ifndef _EZ80
+        _VSTD::__throw_out_of_range("array<T, 0>::at");
+      #else // _EZ80
+        _VSTD::abort();
+      #endif // _EZ80
       __libcpp_unreachable();
     }
 
     _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX11
     const_reference at(size_type) const {
-      __throw_out_of_range("array<T, 0>::at");
+      #ifndef _EZ80
+        _VSTD::__throw_out_of_range("array<T, 0>::at");
+      #else // _EZ80
+        _VSTD::abort();
+      #endif // _EZ80
       __libcpp_unreachable();
     }
 
