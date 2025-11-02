@@ -6,7 +6,7 @@
 #include <time.h>
 
 typedef struct {
-
+    int __count;
 } mbstate_t;
 
 __BEGIN_DECLS
