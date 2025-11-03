@@ -120,4 +120,8 @@
 #include <wchar.h>
 #include <wctype.h>
 
+void func(int i) {
+    std::cout << i << std::endl;
+}
+
 // tests for conflicts

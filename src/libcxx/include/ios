@@ -244,15 +244,15 @@ public:
     class _LIBCPP_EXCEPTION_ABI failure;
 
     typedef unsigned int fmtflags;
-    static const fmtflags boolalpha   = 0x0001;
-    static const fmtflags dec         = 0x0002;
-    static const fmtflags fixed       = 0x0004;
-    static const fmtflags hex         = 0x0008;
-    static const fmtflags internal    = 0x0010;
-    static const fmtflags left        = 0x0020;
-    static const fmtflags oct         = 0x0040;
-    static const fmtflags right       = 0x0080;
-    static const fmtflags scientific  = 0x0100;
+    static const fmtflags left        = 0x0001;
+    static const fmtflags right       = 0x0002;
+    static const fmtflags internal    = 0x0004;
+    static const fmtflags dec         = 0x0008;
+    static const fmtflags oct         = 0x0010;
+    static const fmtflags hex         = 0x0020;
+    static const fmtflags fixed       = 0x0040;
+    static const fmtflags scientific  = 0x0080;
+    static const fmtflags boolalpha   = 0x0100;
     static const fmtflags showbase    = 0x0200;
     static const fmtflags showpoint   = 0x0400;
     static const fmtflags showpos     = 0x0800;
