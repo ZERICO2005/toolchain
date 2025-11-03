@@ -4530,6 +4530,8 @@ _LIBCPP_FUNC_VIS string to_string(int __val);
 _LIBCPP_FUNC_VIS string to_string(unsigned __val);
 _LIBCPP_FUNC_VIS string to_string(long __val);
 _LIBCPP_FUNC_VIS string to_string(unsigned long __val);
+_LIBCPP_FUNC_VIS string to_string(signed __int48 value);
+_LIBCPP_FUNC_VIS string to_string(unsigned __int48 value);
 _LIBCPP_FUNC_VIS string to_string(long long __val);
 _LIBCPP_FUNC_VIS string to_string(unsigned long long __val);
 _LIBCPP_FUNC_VIS string to_string(float __val);
