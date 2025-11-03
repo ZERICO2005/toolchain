@@ -231,9 +231,14 @@ inline long double as_float(const string& func, const wstring& s, size_t* idx) {
 
 }  // unnamed namespace
 
+/**
+ * @brief Similar to strtol, except that it will raise ERANGE and return INT_MIN/INT_MAX when out of range
+ */
+extern "C" int __strtoi(const char *__restrict nptr, char **__restrict endptr, int base) __attribute__((nonnull(1)));
+
 int stoi(const string& str, size_t* pos, int base) {
     char* end_ptr;
-    int result = static_cast<int>(std::strtol(str.c_str(), &end_ptr, base));
+    int result = __strtoi(str.c_str(), &end_ptr, base);
     if (pos != nullptr) {
         *pos = static_cast<size_t>(end_ptr - str.c_str());
     }
