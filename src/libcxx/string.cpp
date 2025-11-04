@@ -16,10 +16,6 @@
 #include <string>
 #include <ti/sprintf.h>
 
-// DEBUG
-#define _LIBCPP_HAS_NO_WIDE_CHARACTERS 1
-// DEBUG
-
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
 #  include <cwchar>
 #endif

@@ -46,7 +46,8 @@ int main(void) {
         std::fputs("All tests passed", stdout);
     }
 
-    func();
+    // func();
+    std::cout << failed_test;
 
     while (!os_GetCSC());
 
