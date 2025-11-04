@@ -45,7 +45,7 @@
 #elif defined(_LIBCPP_HAS_MUSL_LIBC)
 # include <__support/musl/xlocale.h>
 #elif defined(_EZ80)
-# include <__support/ez80/xlocale.h>
+# include <__support/xlocale.h>
 #endif
 
 #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)

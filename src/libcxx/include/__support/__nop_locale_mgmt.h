@@ -36,12 +36,21 @@ uselocale(locale_t) {
   return NULL;
 }
 
+#ifndef _EZ80
 #define LC_COLLATE_MASK  (1 << LC_COLLATE)
 #define LC_CTYPE_MASK    (1 << LC_CTYPE)
 #define LC_MESSAGES_MASK (1 << LC_MESSAGES)
 #define LC_MONETARY_MASK (1 << LC_MONETARY)
 #define LC_NUMERIC_MASK  (1 << LC_NUMERIC)
 #define LC_TIME_MASK     (1 << LC_TIME)
+#else // _EZ80
+#define LC_COLLATE_MASK  LC_COLLATE
+#define LC_CTYPE_MASK    LC_CTYPE
+#define LC_MESSAGES_MASK LC_MESSAGES
+#define LC_MONETARY_MASK LC_MONETARY
+#define LC_NUMERIC_MASK  LC_NUMERIC
+#define LC_TIME_MASK     LC_TIME
+#endif // _EZ80
 #define LC_ALL_MASK (LC_COLLATE_MASK|\
                      LC_CTYPE_MASK|\
                      LC_MONETARY_MASK|\
