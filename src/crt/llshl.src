@@ -15,11 +15,11 @@ __llshl:
 	cp	a, 24
 	jr	nc, .shift_24_63
 ; .shift_0_23:
+	or	a, a
+	jr	z, .shift_0
 	ld	a, b
 	ld	b, (hl)
 	pop	hl
-	inc	b
-	jr	.start_0_23
 .loop_0_23:
 	add	hl, hl
 	ex	de, hl
@@ -27,9 +27,9 @@ __llshl:
 	ex	de, hl
 	rl	c
 	rla
-.start_0_23:
 	djnz	.loop_0_23
 	ld	b, a
+.shift_0:
 	pop	af
 	ret
 
@@ -57,7 +57,7 @@ __llshl:
 
 .shift_48_63:
 	ld	c, a
-	call	__ishl
+	call	__sshl
 	ld	b, h
 	ld	c, l
 	or	a, a
@@ -67,4 +67,4 @@ __llshl:
 	pop	af
 	ret
 
-	extern	__ishl
+	extern	__sshl

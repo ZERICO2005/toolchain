@@ -1,5 +1,7 @@
 	assume	adl=1
 
+;-------------------------------------------------------------------------------
+
 	section	.text
 
 	public	__llshru
@@ -12,7 +14,7 @@ __llshru:
 	add	iy, sp
 	ld	a, (iy + 9)
 	cp	a, 48
-	jr	nc, .shift_48_63
+	jr	nc, __llshr_common.shift_48_63_unsigned
 	or	a, a
 	jr	z, __llshr_common.finish
 	push	de
@@ -20,19 +22,7 @@ __llshru:
 	srl	b
 	jr	__llshr_common.hijack_llshru
 
-.shift_48_63:
-	sub	a, 48
-	sbc	hl, hl
-	ex.s	de, hl
-	ld	h, b
-	ld	l, c
-	ld	c, a
-	call	__sshru
-	ld	b, d
-	ld	c, d
-	pop	iy
-	pop	af
-	ret
+;-------------------------------------------------------------------------------
 
 	section	.text
 
@@ -45,10 +35,14 @@ __llshrs:
 	ld	iy, 0
 	add	iy, sp
 	ld	a, (iy + 9)
+	cp	a, 48
+	jr	nc, __llshr_common.shift_48_63_signed
 	or	a, a
 	jr	z, __llshr_common.finish
 	push	de
 	push	hl
+
+;-------------------------------------------------------------------------------
 
 	section	.text
 
@@ -81,4 +75,23 @@ __llshr_common:
 	pop	af
 	ret
 
-	extern	__sshru
+.shift_48_63_signed:
+	; test signbit
+	rrc	b
+	rlc	b
+.shift_48_63_unsigned:	; <-- carry is clear
+	sbc	hl, hl
+	ex	de, hl
+	sbc	hl, hl
+	sub	a, 48
+	ld	h, b
+	ld	l, c
+	ld	c, a
+	call	__ishrs
+	ld	b, d
+	ld	c, d
+	pop	iy
+	pop	af
+	ret
+
+	extern	__ishrs
