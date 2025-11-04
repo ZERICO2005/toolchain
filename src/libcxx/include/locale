@@ -231,17 +231,23 @@ template <class charT> class messages_byname;
 # endif
 #else // _EZ80
 
+#include <cwchar>
+#include <cwctype>
+
+#define wcsnrtombs(...) (1)
+#define mbsnrtowcs(...) (1)
+
 #define __libcpp_mb_cur_max_l(loc)                          MB_CUR_MAX(loc)
-#define __libcpp_btowc_l(ch, loc)                           btowc(ch, loc)
-#define __libcpp_wctob_l(wch, loc)                          wctob(wch, loc)
-#define __libcpp_wcsnrtombs_l(dst, src, nwc, len, ps, loc)  wcsnrtombs(dst, src, nwc, len, ps, loc)
-#define __libcpp_wcrtomb_l(src, wc, ps, loc)                wcrtomb(src, wc, ps, loc)
-#define __libcpp_mbsnrtowcs_l(dst, src, nms, len, ps, loc)  mbsnrtowcs(dst, src, nms, len, ps, loc)
-#define __libcpp_mbrtowc_l(pwc, s, n, ps, l)                mbrtowc(pwc, s, n, ps, l)
-#define __libcpp_mbtowc_l(pwc, pmb, max, l)                 mbtowc(pwc, pmb, max, l)
-#define __libcpp_mbrlen_l(s, n, ps, l)                      mbrlen(s, n, ps, l)
-#define __libcpp_localeconv_l(l)                            localeconv(l)
-#define __libcpp_mbsrtowcs_l(dest, src, len, ps, l)         mbsrtowcs(dest, src, len, ps, l)
+#define __libcpp_btowc_l(ch, loc)                           btowc(ch)
+#define __libcpp_wctob_l(wch, loc)                          wctob(wch)
+#define __libcpp_wcsnrtombs_l(dst, src, nwc, len, ps, loc)  wcsnrtombs(dst, src, nwc, len, ps)
+#define __libcpp_wcrtomb_l(src, wc, ps, loc)                wcrtomb(src, wc, ps)
+#define __libcpp_mbsnrtowcs_l(dst, src, nms, len, ps, loc)  mbsnrtowcs(dst, src, nms, len, ps)
+#define __libcpp_mbrtowc_l(pwc, s, n, ps, loc)              mbrtowc(pwc, s, n, ps)
+#define __libcpp_mbtowc_l(pwc, pmb, max, loc)               mbtowc(pwc, pmb, max)
+#define __libcpp_mbrlen_l(s, n, ps, loc)                    mbrlen(s, n, ps)
+#define __libcpp_localeconv_l(loc)                          localeconv()
+#define __libcpp_mbsrtowcs_l(dest, src, len, ps, loc)       mbsrtowcs(dest, src, len, ps)
 #define __libcpp_snprintf_l(...)                            snprintf(__VA_ARGS__)
 #define __libcpp_asprintf_l(...)                            asprintf(__VA_ARGS__)
 #define __libcpp_sscanf_l(...)                              sscanf(__VA_ARGS__)

@@ -49,6 +49,7 @@
 #define  ULLONG_WIDTH     __LLONG_WIDTH__
 
 #define  MB_LEN_MAX (4)
-#define  MB_CUR_MAX MB_LEN_MAX
+static int __mb_cur_max(void) { return MB_LEN_MAX; }
+#define  MB_CUR_MAX(...) __mb_cur_max()
 
 #endif /* _LIMITS_H */

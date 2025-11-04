@@ -37,18 +37,6 @@
 #   define _CTYPE_DISABLE_MACROS
 #endif
 
-#define __libcpp_wcsnrtombs_l(...) (1)
-#define __libcpp_mbrlen_l(...) (1)
-#define __libcpp_mb_cur_max_l(...) (MB_CUR_MAX)
-#define __libcpp_localeconv_l(...) localeconv()
-#define __libcpp_wctob_l(w, l) wctob(w)
-#define __libcpp_btowc_l(c, l) btowc(c)
-#define __libcpp_mbsrtowcs_l(dst, src, len, ps, loc) mbsrtowcs(dst, src, len, ps)
-#define __libcpp_mbrtowc_l(pwc, s, n, ps, loc) mbrtowc(pwc, s, n, ps)
-#define __libcpp_mbtowc_l(...) (0)
-#define __libcpp_mbsnrtowcs_l(...) (1)
-#define __libcpp_wcrtomb_l(a, b, c, l) wcrtomb(a, b, c)
-
 #ifndef _EZ80
 #if defined(_LIBCPP_MSVCRT) || defined(__MINGW32__)
 #   include "__support/win32/locale_win32.h"
