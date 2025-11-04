@@ -5,15 +5,17 @@
 #include <cstdlib>
 #include <exception>
 
+#include <ti/sprintf.h>
+
 namespace std {
 
 void __terminate_message(const char *message) {
-    dbg_sprintf(dbgerr, "libezc++: %s\n", message);
+    boot_sprintf(dbgerr, "libezc++: %s\n", message);
     std::terminate();
 }
 
 void __abort_message(const char *message) {
-    dbg_sprintf(dbgerr, "libezc++: %s\n", message);
+    boot_sprintf(dbgerr, "libezc++: %s\n", message);
     abort();
 }
 

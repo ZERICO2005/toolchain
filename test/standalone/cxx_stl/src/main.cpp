@@ -8,6 +8,7 @@
 
 int test();
 
+#if 0
 void func() {
     using namespace std::literals;
 
@@ -34,6 +35,7 @@ void func() {
     str1[0] = 'W';
     std::cout << str1 << '\n';
 }
+#endif
 
 int main(void) {
     os_ClrHome();

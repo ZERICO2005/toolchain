@@ -595,11 +595,19 @@ locale::locale() noexcept
     __locale_->__add_shared();
 }
 
+#ifndef _EZ80
 locale::locale(const locale& l) noexcept
     : __locale_(l.__locale_)
 {
     __locale_->__add_shared();
 }
+#else // _EZ80
+locale::locale(const locale&) noexcept
+    : __locale_(__global().__locale_)
+{
+    __locale_->__add_shared();
+}
+#endif // _EZ80
 
 locale::~locale()
 {
@@ -4578,7 +4586,7 @@ __widen_from_utf8<32>::~__widen_from_utf8()
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
 static bool checked_string_to_wchar_convert(wchar_t& dest,
                                             const char* ptr,
-                                            locale_t loc) {
+                                            __attribute__((__unused__)) locale_t loc) {
   if (*ptr == '\0')
     return false;
   mbstate_t mb = {};

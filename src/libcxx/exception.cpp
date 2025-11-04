@@ -43,4 +43,9 @@ void terminate() noexcept {
     __abort_message("terminate_handler unexpectedly returned");
 }
 
+bool uncaught_exception() noexcept {
+    __abort_message("uncaught_exception");
+    return false;
+}
+
 } // namespace std
