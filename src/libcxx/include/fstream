@@ -584,6 +584,7 @@ basic_filebuf<_CharT, _Traits>::open(const char* __s, ios_base::openmode __mode)
     return __rt;
 }
 
+#ifndef _EZ80
 template <class _CharT, class _Traits>
 inline
 basic_filebuf<_CharT, _Traits>*
@@ -608,6 +609,7 @@ basic_filebuf<_CharT, _Traits>::__open(int __fd, ios_base::openmode __mode) {
   }
   return __rt;
 }
+#endif // _EZ80
 
 #ifdef _LIBCPP_HAS_OPEN_WITH_WCHAR
 // This is basically the same as the char* overload except that it uses _wfopen

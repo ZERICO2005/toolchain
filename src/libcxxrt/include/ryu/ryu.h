@@ -52,9 +52,15 @@
 #include <cstring>
 #include <type_traits>
 
+#ifndef _EZ80
 #include "include/ryu/f2s.h"
 #include "include/ryu/d2s.h"
 #include "include/ryu/d2fixed.h"
+#else // _EZ80
+#include "ryu/f2s.h"
+#include "ryu/d2s.h"
+#include "ryu/d2fixed.h"
+#endif // _EZ80
 
 #if defined(_MSC_VER)
 #include <intrin.h> // for _umul128(), __shiftright128(), _BitScanForward{,64}
@@ -77,11 +83,11 @@ _LIBCPP_HIDE_FROM_ABI inline unsigned char _BitScanForward64(unsigned long* __in
   return true;
 }
 
-_LIBCPP_HIDE_FROM_ABI inline unsigned char _BitScanForward(unsigned long* __index, unsigned int __mask) {
+_LIBCPP_HIDE_FROM_ABI inline unsigned char _BitScanForward(unsigned long* __index, unsigned long __mask) {
   if (__mask == 0) {
     return false;
   }
-  *__index = __builtin_ctz(__mask);
+  *__index = __builtin_ctzl(__mask);
   return true;
 }
 #endif  // !_MSC_VER
@@ -98,7 +104,7 @@ template <class _Floating>
 
 template <class _Floating>
 [[nodiscard]] _LIBCPP_HIDE_FROM_ABI to_chars_result _Floating_to_chars_scientific_precision(
-    char* const _First, char* const _Last, const _Floating _Value, int _Precision) noexcept {
+    char* const _First, char* const _Last, const _Floating _Value, long _Precision) noexcept {
 
     // C11 7.21.6.1 "The fprintf function"/5:
     // "A negative precision argument is taken as if the precision were omitted."
@@ -119,7 +125,7 @@ template <class _Floating>
 
 template <class _Floating>
 [[nodiscard]] _LIBCPP_HIDE_FROM_ABI to_chars_result _Floating_to_chars_fixed_precision(
-    char* const _First, char* const _Last, const _Floating _Value, int _Precision) noexcept {
+    char* const _First, char* const _Last, const _Floating _Value, long _Precision) noexcept {
 
     // C11 7.21.6.1 "The fprintf function"/5:
     // "A negative precision argument is taken as if the precision were omitted."

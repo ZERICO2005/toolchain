@@ -30,7 +30,11 @@
 #include <cfloat>
 #include <climits>
 
+#ifndef _EZ80
 #include "include/ryu/ryu.h"
+#else // _EZ80
+#include "ryu/ryu.h"
+#endif // _EZ80
 
 _LIBCPP_BEGIN_NAMESPACE_STD
 
@@ -60,21 +64,21 @@ struct _Floating_type_traits<float> {
 
     using _Uint_type = uint32_t;
 
-    static constexpr uint32_t _Exponent_mask             = (1u << _Exponent_bits) - 1;
-    static constexpr uint32_t _Normal_mantissa_mask      = (1u << _Mantissa_bits) - 1;
-    static constexpr uint32_t _Denormal_mantissa_mask    = (1u << (_Mantissa_bits - 1)) - 1;
-    static constexpr uint32_t _Special_nan_mantissa_mask = 1u << (_Mantissa_bits - 2);
-    static constexpr uint32_t _Shifted_sign_mask         = 1u << _Sign_shift;
+    static constexpr uint32_t _Exponent_mask             = (UINT32_C(1) << _Exponent_bits) - 1;
+    static constexpr uint32_t _Normal_mantissa_mask      = (UINT32_C(1) << _Mantissa_bits) - 1;
+    static constexpr uint32_t _Denormal_mantissa_mask    = (UINT32_C(1) << (_Mantissa_bits - 1)) - 1;
+    static constexpr uint32_t _Special_nan_mantissa_mask = UINT32_C(1) << (_Mantissa_bits - 2);
+    static constexpr uint32_t _Shifted_sign_mask         = UINT32_C(1) << _Sign_shift;
     static constexpr uint32_t _Shifted_exponent_mask     = _Exponent_mask << _Exponent_shift;
 };
 
 template <>
-struct _Floating_type_traits<double> {
-    static constexpr int32_t _Mantissa_bits = DBL_MANT_DIG;
-    static constexpr int32_t _Exponent_bits = sizeof(double) * CHAR_BIT - DBL_MANT_DIG;
+struct _Floating_type_traits<long double> {
+    static constexpr int32_t _Mantissa_bits = LDBL_MANT_DIG;
+    static constexpr int32_t _Exponent_bits = sizeof(long double) * CHAR_BIT - LDBL_MANT_DIG;
 
-    static constexpr int32_t _Maximum_binary_exponent = DBL_MAX_EXP - 1;
-    static constexpr int32_t _Minimum_binary_exponent = DBL_MIN_EXP - 1;
+    static constexpr int32_t _Maximum_binary_exponent = LDBL_MAX_EXP - 1;
+    static constexpr int32_t _Minimum_binary_exponent = LDBL_MIN_EXP - 1;
 
     static constexpr int32_t _Exponent_bias = 1023;
 
@@ -97,16 +101,16 @@ struct _Floating_type_traits<double> {
 template <class _Floating>
 [[nodiscard]] _LIBCPP_HIDE_FROM_ABI
 to_chars_result _Floating_to_chars_hex_precision(
-    char* _First, char* const _Last, const _Floating _Value, int _Precision) noexcept {
+    char* _First, char* const _Last, const _Floating _Value, long _Precision) noexcept {
 
     // * Determine the effective _Precision.
     // * Later, we'll decrement _Precision when printing each hexit after the decimal point.
 
     // The hexits after the decimal point correspond to the explicitly stored fraction bits.
     // float explicitly stores 23 fraction bits. 23 / 4 == 5.75, which is 6 hexits.
-    // double explicitly stores 52 fraction bits. 52 / 4 == 13, which is 13 hexits.
-    constexpr int _Full_precision         = _IsSame<_Floating, float>::value ? 6 : 13;
-    constexpr int _Adjusted_explicit_bits = _Full_precision * 4;
+    // long double explicitly stores 52 fraction bits. 52 / 4 == 13, which is 13 hexits.
+    constexpr long _Full_precision         = _IsSame<_Floating, float>::value ? 6 : 13;
+    constexpr long _Adjusted_explicit_bits = _Full_precision * 4;
 
     if (_Precision < 0) {
         // C11 7.21.6.1 "The fprintf function"/5: "A negative precision argument is taken as if the precision were
@@ -150,7 +154,7 @@ to_chars_result _Floating_to_chars_hex_precision(
         _Unbiased_exponent = _Ieee_exponent - _Traits::_Exponent_bias;
     }
 
-    // _Unbiased_exponent is within [-126, 127] for float, [-1022, 1023] for double.
+    // _Unbiased_exponent is within [-126, 127] for float, [-1022, 1023] for long double.
 
     // * Decompose _Unbiased_exponent into _Sign_character and _Absolute_exponent.
     char _Sign_character;
@@ -164,7 +168,7 @@ to_chars_result _Floating_to_chars_hex_precision(
         _Absolute_exponent = static_cast<uint32_t>(_Unbiased_exponent);
     }
 
-    // _Absolute_exponent is within [0, 127] for float, [0, 1023] for double.
+    // _Absolute_exponent is within [0, 127] for float, [0, 1023] for long double.
 
     // * Perform a single bounds check.
     {
@@ -204,10 +208,10 @@ to_chars_result _Floating_to_chars_hex_precision(
 
     // * Perform rounding when we've been asked to omit hexits.
     if (_Precision < _Full_precision) {
-        // _Precision is within [0, 5] for float, [0, 12] for double.
+        // _Precision is within [0, 5] for float, [0, 12] for long double.
 
-        // _Dropped_bits is within [4, 24] for float, [4, 52] for double.
-        const int _Dropped_bits = (_Full_precision - _Precision) * 4;
+        // _Dropped_bits is within [4, 24] for float, [4, 52] for long double.
+        const long _Dropped_bits = (_Full_precision - _Precision) * 4;
 
         // Perform rounding by adding an appropriately-shifted bit.
 
@@ -285,7 +289,7 @@ to_chars_result _Floating_to_chars_hex_precision(
     if (_Precision > 0) {
         *_First++ = '.';
 
-        int32_t _Number_of_bits_remaining = _Adjusted_explicit_bits; // 24 for float, 52 for double
+        int32_t _Number_of_bits_remaining = _Adjusted_explicit_bits; // 24 for float, 52 for long double
 
         for (;;) {
             _LIBCPP_ASSERT_UNCATEGORIZED(_Number_of_bits_remaining >= 4, "");
@@ -340,7 +344,7 @@ to_chars_result _Floating_to_chars_hex_shortest(
 
     // This prints "1.728p+0" instead of "2.e5p-1".
     // This prints "0.000002p-126" instead of "1p-149" for float.
-    // This prints "0.0000000000001p-1022" instead of "1p-1074" for double.
+    // This prints "0.0000000000001p-1022" instead of "1p-1074" for long double.
     // This prioritizes being consistent with printf's de facto behavior (and hex-precision's behavior)
     // over minimizing the number of characters printed.
 
@@ -397,7 +401,7 @@ to_chars_result _Floating_to_chars_hex_shortest(
 
         // The hexits after the decimal point correspond to the explicitly stored fraction bits.
         // float explicitly stores 23 fraction bits. 23 / 4 == 5.75, so we'll print at most 6 hexits.
-        // double explicitly stores 52 fraction bits. 52 / 4 == 13, so we'll print at most 13 hexits.
+        // long double explicitly stores 52 fraction bits. 52 / 4 == 13, so we'll print at most 13 hexits.
         _Uint_type _Adjusted_mantissa;
         int32_t _Number_of_bits_remaining;
 
@@ -441,7 +445,7 @@ to_chars_result _Floating_to_chars_hex_shortest(
     // Performance note: We should take advantage of the known ranges of possible exponents.
 
     // float: _Unbiased_exponent is within [-126, 127].
-    // double: _Unbiased_exponent is within [-1022, 1023].
+    // long double: _Unbiased_exponent is within [-1022, 1023].
 
     if (_Last - _First < 2) {
         return {_Last, errc::value_too_large};
@@ -480,16 +484,16 @@ to_chars_result _Floating_to_chars_hex_shortest(
 
 // Floating-point is slightly more complicated.
 
-// The ordinary lookup tables are for X within [-5, 38] for float, and [-5, 308] for double.
+// The ordinary lookup tables are for X within [-5, 38] for float, and [-5, 308] for long double.
 // (-5 absorbs too-negative exponents, outside the P > X >= -4 criterion. 38 and 308 are the maximum exponents.)
 // Due to the P > X condition, we can use a subset of the table for X within [-5, P - 1], suitably clamped.
 
 // When P is small, rounding can affect X. For example:
-// For P == 1, the largest double with X == 0 is: 9.4999999999999982236431605997495353221893310546875
-// For P == 2, the largest double with X == 0 is: 9.949999999999999289457264239899814128875732421875
-// For P == 3, the largest double with X == 0 is: 9.9949999999999992184029906638897955417633056640625
+// For P == 1, the largest long double with X == 0 is: 9.4999999999999982236431605997495353221893310546875
+// For P == 2, the largest long double with X == 0 is: 9.949999999999999289457264239899814128875732421875
+// For P == 3, the largest long double with X == 0 is: 9.9949999999999992184029906638897955417633056640625
 
-// Exponent adjustment is a concern for P within [1, 7] for float, and [1, 15] for double (determined via
+// Exponent adjustment is a concern for P within [1, 7] for float, and [1, 15] for long double (determined via
 // brute force). While larger values of P still perform rounding, they can't trigger exponent adjustment.
 // This is because only values with repeated '9' digits can undergo exponent adjustment during rounding,
 // and floating-point granularity limits the number of consecutive '9' digits that can appear.
@@ -553,7 +557,7 @@ template <typename UInt, typename Pred>
 }
 
 template <typename Floating>
-[[nodiscard]] int scientific_exponent_X(const int P, const Floating flt) {
+[[nodiscard]] long scientific_exponent_X(const long P, const Floating flt) {
     char buf[400]; // more than enough
 
     // C11 7.21.6.1 "The fprintf function"/8 performs trial formatting with scientific precision P - 1.
@@ -569,7 +573,7 @@ template <typename Floating>
         ++exp_ptr; // advance past '+' which from_chars() won't parse
     }
 
-    int X;
+    long X;
     const auto from_result = from_chars(exp_ptr, to_result.ptr, X);
     assert(from_result.ec == errc{});
     return X;
@@ -599,12 +603,12 @@ void generate_tables(const Mode mode) {
     using Limits = numeric_limits<Floating>;
     using UInt   = conditional_t<_IsSame<Floating, float>::value, uint32_t, uint64_t>;
 
-    map<int, map<int, UInt>> P_X_LargestValWithX;
+    map<long, map<long, UInt>> P_X_LargestValWithX;
 
-    constexpr int MaxP = Limits::max_exponent10 + 1; // MaxP performs no rounding during trial formatting
+    constexpr long MaxP = Limits::max_exponent10 + 1; // MaxP performs no rounding during trial formatting
 
-    for (int P = 1; P <= MaxP; ++P) {
-        for (int X = -5; X < P; ++X) {
+    for (long P = 1; P <= MaxP; ++P) {
+        for (long X = -5; X < P; ++X) {
             constexpr Floating first = static_cast<Floating>(9e-5); // well below 9.5e-5, otherwise arbitrary
             constexpr Floating last  = Limits::infinity(); // one bit above Limits::max()
 
@@ -616,20 +620,20 @@ void generate_tables(const Mode mode) {
         }
     }
 
-    constexpr const char* FloatingName = _IsSame<Floating, float>::value ? "float" : "double";
+    constexpr const char* FloatingName = _IsSame<Floating, float>::value ? "float" : "long double";
 
-    constexpr int MaxSpecialP = _IsSame<Floating, float>::value ? 7 : 15; // MaxSpecialP is affected by exponent adjustment
+    constexpr long MaxSpecialP = _IsSame<Floating, float>::value ? 7 : 15; // MaxSpecialP is affected by exponent adjustment
 
     if (mode == Mode::Tables) {
         printf("template <>\n");
         printf("struct _General_precision_tables<%s> {\n", FloatingName);
 
-        printf("static constexpr int _Max_special_P = %d;\n", MaxSpecialP);
+        printf("static constexpr long _Max_special_P = %d;\n", MaxSpecialP);
 
         vector<UInt> special;
 
-        for (int P = 1; P <= MaxSpecialP; ++P) {
-            for (int X = -5; X < P; ++X) {
+        for (long P = 1; P <= MaxSpecialP; ++P) {
+            for (long X = -5; X < P; ++X) {
                 const UInt val = P_X_LargestValWithX[P][X];
                 special.push_back(val);
             }
@@ -637,18 +641,18 @@ void generate_tables(const Mode mode) {
 
         print_table(special, "_Special_X_table");
 
-        for (int P = MaxSpecialP + 1; P < MaxP; ++P) {
-            for (int X = -5; X < P; ++X) {
+        for (long P = MaxSpecialP + 1; P < MaxP; ++P) {
+            for (long X = -5; X < P; ++X) {
                 const UInt val = P_X_LargestValWithX[P][X];
                 assert(val == P_X_LargestValWithX[MaxP][X]);
             }
         }
 
-        printf("static constexpr int _Max_P = %d;\n", MaxP);
+        printf("static constexpr long _Max_P = %d;\n", MaxP);
 
         vector<UInt> ordinary;
 
-        for (int X = -5; X < MaxP; ++X) {
+        for (long X = -5; X < MaxP; ++X) {
             const UInt val = P_X_LargestValWithX[MaxP][X];
             ordinary.push_back(val);
         }
@@ -660,11 +664,11 @@ void generate_tables(const Mode mode) {
         printf("==========\n");
         printf("Test cases for %s:\n", FloatingName);
 
-        constexpr int Hexits         = _IsSame<Floating, float>::value ? 6 : 13;
+        constexpr long Hexits         = _IsSame<Floating, float>::value ? 6 : 13;
         constexpr const char* Suffix = _IsSame<Floating, float>::value ? "f" : "";
 
-        for (int P = 1; P <= MaxP; ++P) {
-            for (int X = -5; X < P; ++X) {
+        for (long P = 1; P <= MaxP; ++P) {
+            for (long X = -5; X < P; ++X) {
                 if (P <= MaxSpecialP || P == 25 || P == MaxP || X == P - 1) {
                     const UInt val1   = P_X_LargestValWithX[P][X];
                     const Floating f1 = reinterpret_cast<const Floating&>(val1);
@@ -681,13 +685,13 @@ void generate_tables(const Mode mode) {
     }
 }
 
-int main() {
+long main() {
     printf("template <class _Floating>\n");
     printf("struct _General_precision_tables;\n");
     generate_tables<float>(Mode::Tables);
-    generate_tables<double>(Mode::Tables);
+    generate_tables<long double>(Mode::Tables);
     generate_tables<float>(Mode::Tests);
-    generate_tables<double>(Mode::Tests);
+    generate_tables<long double>(Mode::Tests);
 }
 #endif // 0
 
@@ -696,7 +700,7 @@ struct _General_precision_tables;
 
 template <>
 struct _General_precision_tables<float> {
-    static constexpr int _Max_special_P = 7;
+    static constexpr long _Max_special_P = 7;
 
     static constexpr uint32_t _Special_X_table[63] = {0x38C73ABCu, 0x3A79096Bu, 0x3C1BA5E3u, 0x3DC28F5Cu, 0x3F733333u,
         0x4117FFFFu, 0x38D0AAA7u, 0x3A826AA8u, 0x3C230553u, 0x3DCBC6A7u, 0x3F7EB851u, 0x411F3333u, 0x42C6FFFFu,
@@ -708,7 +712,7 @@ struct _General_precision_tables<float> {
         0x3C23D709u, 0x3DCCCCCCu, 0x3F7FFFFFu, 0x411FFFFFu, 0x42C7FFFFu, 0x4479FFFFu, 0x461C3FFFu, 0x47C34FFFu,
         0x497423FFu, 0x4B18967Fu};
 
-    static constexpr int _Max_P = 39;
+    static constexpr long _Max_P = 39;
 
     static constexpr uint32_t _Ordinary_X_table[44] = {0x38D1B717u, 0x3A83126Eu, 0x3C23D70Au, 0x3DCCCCCCu, 0x3F7FFFFFu,
         0x411FFFFFu, 0x42C7FFFFu, 0x4479FFFFu, 0x461C3FFFu, 0x47C34FFFu, 0x497423FFu, 0x4B18967Fu, 0x4CBEBC1Fu,
@@ -719,8 +723,8 @@ struct _General_precision_tables<float> {
 };
 
 template <>
-struct _General_precision_tables<double> {
-    static constexpr int _Max_special_P = 15;
+struct _General_precision_tables<long double> {
+    static constexpr long _Max_special_P = 15;
 
     static constexpr uint64_t _Special_X_table[195] = {0x3F18E757928E0C9Du, 0x3F4F212D77318FC5u, 0x3F8374BC6A7EF9DBu,
         0x3FB851EB851EB851u, 0x3FEE666666666666u, 0x4022FFFFFFFFFFFFu, 0x3F1A1554FBDAD751u, 0x3F504D551D68C692u,
@@ -763,7 +767,7 @@ struct _General_precision_tables<double> {
         0x41CDCD64FFFFFFFBu, 0x4202A05F1FFFFFFDu, 0x42374876E7FFFFFCu, 0x426D1A94A1FFFFFBu, 0x42A2309CE53FFFFDu,
         0x42D6BCC41E8FFFFCu, 0x430C6BF52633FFFBu};
 
-    static constexpr int _Max_P = 309;
+    static constexpr long _Max_P = 309;
 
     static constexpr uint64_t _Ordinary_X_table[314] = {0x3F1A36E2EB1C432Cu, 0x3F50624DD2F1A9FBu, 0x3F847AE147AE147Au,
         0x3FB9999999999999u, 0x3FEFFFFFFFFFFFFFu, 0x4023FFFFFFFFFFFFu, 0x4058FFFFFFFFFFFFu, 0x408F3FFFFFFFFFFFu,
@@ -834,7 +838,7 @@ struct _General_precision_tables<double> {
 template <class _Floating>
 [[nodiscard]] _LIBCPP_HIDE_FROM_ABI
 to_chars_result _Floating_to_chars_general_precision(
-    char* _First, char* const _Last, const _Floating _Value, int _Precision) noexcept {
+    char* _First, char* const _Last, const _Floating _Value, long _Precision) noexcept {
 
     using _Traits    = _Floating_type_traits<_Floating>;
     using _Uint_type = typename _Traits::_Uint_type;
@@ -906,7 +910,7 @@ to_chars_result _Floating_to_chars_general_precision(
     }();
 
     const ptrdiff_t _Table_index     = _Table_lower_bound - _Table_begin;
-    const int _Scientific_exponent_X = static_cast<int>(_Table_index - 5);
+    const long _Scientific_exponent_X = static_cast<long>(_Table_index - 5);
     const bool _Use_fixed_notation   = _Precision > _Scientific_exponent_X && _Scientific_exponent_X >= -4;
 
     // Performance note: it might (or might not) be faster to modify Ryu Printf to perform zero-trimming.
@@ -916,11 +920,11 @@ to_chars_result _Floating_to_chars_general_precision(
     // the output range. The necessary buffer size is reasonably small, the zero-trimming logic is simple and fast,
     // and the final copying is also fast.
 
-    constexpr int _Max_output_length =
+    constexpr long _Max_output_length =
         _IsSame<_Floating, float>::value ? 117 : 773; // cases: 0x1.fffffep-126f and 0x1.fffffffffffffp-1022
-    constexpr int _Max_fixed_precision =
+    constexpr long _Max_fixed_precision =
         _IsSame<_Floating, float>::value ? 37 : 66; // cases: 0x1.fffffep-14f and 0x1.fffffffffffffp-14
-    constexpr int _Max_scientific_precision =
+    constexpr long _Max_scientific_precision =
         _IsSame<_Floating, float>::value ? 111 : 766; // cases: 0x1.fffffep-126f and 0x1.fffffffffffffp-1022
 
     // Note that _Max_output_length is determined by scientific notation and is more than enough for fixed notation.
@@ -932,7 +936,7 @@ to_chars_result _Floating_to_chars_general_precision(
     const char* _Significand_last        = nullptr;
     const char* _Exponent_first          = nullptr; // e.g. "e-05"
     const char* _Exponent_last           = nullptr;
-    int _Effective_precision; // number of digits printed after the decimal point, before trimming
+    long _Effective_precision; // number of digits printed after the decimal point, before trimming
 
     // Write into the local buffer.
     // Clamping _Effective_precision allows _Buffer to be as small as possible, and increases efficiency.
@@ -989,7 +993,7 @@ enum class _Floating_to_chars_overload { _Plain, _Format_only, _Format_precision
 template <_Floating_to_chars_overload _Overload, class _Floating>
 [[nodiscard]] _LIBCPP_HIDE_FROM_ABI
 to_chars_result _Floating_to_chars(
-    char* _First, char* const _Last, _Floating _Value, const chars_format _Fmt, const int _Precision) noexcept {
+    char* _First, char* const _Last, _Floating _Value, const chars_format _Fmt, const long _Precision) noexcept {
 
     if constexpr (_Overload == _Floating_to_chars_overload::_Plain) {
         _LIBCPP_ASSERT_UNCATEGORIZED(_Fmt == chars_format{}, ""); // plain overload must pass chars_format{} internally

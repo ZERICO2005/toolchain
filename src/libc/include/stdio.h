@@ -65,10 +65,12 @@ long int ftell(FILE *stream) __attribute__((__warn_unused_result__));
 int fseek(FILE *stream, long int offset, int origin);
 
 int fgetc(FILE *stream);
-#define getc(...) fgetc(__VA_ARGS__)
+
+inline int getc(FILE *stream) { return fgetc(stream); }
 
 int fputc(int c, FILE *stream);
-#define putc(...) fputc(__VA_ARGS__)
+
+inline int putc(int c, FILE *stream) { return fputc(c, stream); }
 
 char *fgets(char *__restrict str, int num, FILE *__restrict stream);
 

@@ -50,6 +50,6 @@
 
 #define  MB_LEN_MAX (4)
 static int __mb_cur_max(void) { return MB_LEN_MAX; }
-#define  MB_CUR_MAX(...) __mb_cur_max()
+#define  MB_CUR_MAX __mb_cur_max()
 
 #endif /* _LIMITS_H */

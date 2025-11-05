@@ -15,11 +15,11 @@ inline signed __int48 abs(signed __int48 __x) { return i48abs(__x); }
 
 inline constexpr long long abs(long long __x) { return llabs(__x); }
 
-inline constexpr float abs(float __x) { return fabsf(__x); }
+// inline constexpr float abs(float __x) { return fabsf(__x); }
 
-inline constexpr double abs(double __x) { return fabs(__x); }
+// inline constexpr double abs(double __x) { return fabs(__x); }
 
-inline constexpr long double abs(long double __x) { return fabsl(__x); }
+// inline constexpr long double abs(long double __x) { return fabsl(__x); }
 
 } // namespace std
 

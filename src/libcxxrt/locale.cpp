@@ -34,7 +34,7 @@
 
 #if defined(_LIBCPP_MSVCRT) || defined(__MINGW32__)
 #   include "__support/win32/locale_win32.h"
-#elif !defined(__BIONIC__) && !defined(__NuttX__)
+#elif !defined(__BIONIC__) && !defined(__NuttX__) && !defined(_EZ80)
 #   include <langinfo.h>
 #endif
 

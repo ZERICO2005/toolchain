@@ -151,6 +151,10 @@ size_t mbsrtowcs(wchar_t * __restrict dst, const char** __restrict src, size_t l
 
 size_t wcsrtombs(char* __restrict dst, const wchar_t** __restrict src, size_t len, mbstate_t * __restrict ps);
 
+size_t wcsnrtombs(char *__restrict dest, const wchar_t **__restrict src, size_t nwc, size_t size, mbstate_t *__restrict ps);
+
+size_t mbsnrtowcs(wchar_t *__restrict dest, const char **__restrict src, size_t nms, size_t size, mbstate_t *__restrict ps);
+
 __END_DECLS
 
 #endif /* _WCHAR_H */

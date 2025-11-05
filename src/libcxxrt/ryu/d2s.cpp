@@ -353,7 +353,7 @@ struct __floating_decimal_64 {
 }
 
 [[nodiscard]] _LIBCPP_HIDE_FROM_ABI inline to_chars_result __to_chars(char* const _First, char* const _Last, const __floating_decimal_64 __v,
-  chars_format _Fmt, const double __f) {
+  chars_format _Fmt, const long double __f) {
   // Step 5: Print the decimal representation.
   uint64_t _Output = __v.__mantissa;
   int32_t _Ryu_exponent = __v.__exponent;
@@ -448,7 +448,7 @@ struct __floating_decimal_64 {
     if (_Ryu_exponent > 0) { // case "172900"
       bool _Can_use_ryu;
 
-      if (_Ryu_exponent > 22) { // 10^22 is the largest power of 10 that's exactly representable as a double.
+      if (_Ryu_exponent > 22) { // 10^22 is the largest power of 10 that's exactly representable as a long double.
         _Can_use_ryu = false;
       } else {
         // Ryu generated X: __v.__mantissa * 10^_Ryu_exponent
@@ -456,19 +456,19 @@ struct __floating_decimal_64 {
         // 10^_Ryu_exponent == 2^_Ryu_exponent * 5^_Ryu_exponent
 
         // _Trailing_zero_bits is [0, 56] (aside: because 2^56 is the largest power of 2
-        // with 17 decimal digits, which is double's round-trip limit.)
+        // with 17 decimal digits, which is long double's round-trip limit.)
         // _Ryu_exponent is [1, 22].
         // Normalization adds [2, 52] (aside: at least 2 because the pre-normalized mantissa is at least 5).
-        // This adds up to [3, 130], which is well below double's maximum binary exponent 1023.
+        // This adds up to [3, 130], which is well below long double's maximum binary exponent 1023.
 
         // Therefore, we just need to consider (__v.__mantissa >> _Trailing_zero_bits) * 5^_Ryu_exponent.
 
-        // If that product would exceed 53 bits, then X can't be exactly represented as a double.
-        // (That's not a problem for round-tripping, because X is close enough to the original double,
-        // but X isn't mathematically equal to the original double.) This requires a high-precision fallback.
+        // If that product would exceed 53 bits, then X can't be exactly represented as a long double.
+        // (That's not a problem for round-tripping, because X is close enough to the original long double,
+        // but X isn't mathematically equal to the original long double.) This requires a high-precision fallback.
 
-        // If the product is 53 bits or smaller, then X can be exactly represented as a double (and we don't
-        // need to re-synthesize it; the original double must have been X, because Ryu wouldn't produce the
+        // If the product is 53 bits or smaller, then X can be exactly represented as a long double (and we don't
+        // need to re-synthesize it; the original long double must have been X, because Ryu wouldn't produce the
         // same output for two different doubles X and Y). This allows Ryu's output to be used (zero-filled).
 
         // (2^53 - 1) / 5^0 (for indexing), (2^53 - 1) / 5^1, ..., (2^53 - 1) / 5^22
@@ -700,11 +700,11 @@ struct __floating_decimal_64 {
   return true;
 }
 
-[[nodiscard]] to_chars_result __d2s_buffered_n(char* const _First, char* const _Last, const double __f,
+[[nodiscard]] to_chars_result __d2s_buffered_n(char* const _First, char* const _Last, const long double __f,
   const chars_format _Fmt) {
 
   // Step 1: Decode the floating-point number, and unify normalized and subnormal cases.
-  const uint64_t __bits = __double_to_bits(__f);
+  const uint64_t __bits = __long_double_to_bits(__f);
 
   // Case distinction; exit early for the easy cases.
   if (__bits == 0) {

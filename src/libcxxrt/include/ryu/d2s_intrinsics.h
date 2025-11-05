@@ -58,7 +58,7 @@ _LIBCPP_BEGIN_NAMESPACE_STD
 [[nodiscard]] _LIBCPP_HIDE_FROM_ABI inline uint64_t __ryu_shiftright128(const uint64_t __lo, const uint64_t __hi, const uint32_t __dist) {
   // For the __shiftright128 intrinsic, the shift value is always
   // modulo 64.
-  // In the current implementation of the double-precision version
+  // In the current implementation of the long double-precision version
   // of Ryu, the shift value is always < 64.
   // (The shift value is in the range [49, 58].)
   // Check this here in case a future change requires larger shift
@@ -80,7 +80,7 @@ _LIBCPP_BEGIN_NAMESPACE_STD
 }
 
 [[nodiscard]] _LIBCPP_HIDE_FROM_ABI inline uint64_t __ryu_shiftright128(const uint64_t __lo, const uint64_t __hi, const uint32_t __dist) {
-  // In the current implementation of the double-precision version
+  // In the current implementation of the long double-precision version
   // of Ryu, the shift value is always < 64.
   // (The shift value is in the range [49, 58].)
   // Check this here in case a future change requires larger shift
