@@ -140,26 +140,29 @@ Types:
 }  // std
 */
 
-#include <__assert> // all public C++ headers provide the assertion handler
-#include <__config>
-#include <stdint.h>
+#if __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+#  include <__cxx03/cstdint>
+#else
+#  include <__config>
 
-#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
+#  if __has_include(<stdint.h>)
+#    include <stdint.h>
+#  endif
+
+#  if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+#    pragma GCC system_header
+#  endif
 
 _LIBCPP_BEGIN_NAMESPACE_STD
 
 using ::int8_t _LIBCPP_USING_IF_EXISTS;
 using ::int16_t _LIBCPP_USING_IF_EXISTS;
 using ::int32_t _LIBCPP_USING_IF_EXISTS;
-using ::int48_t _LIBCPP_USING_IF_EXISTS;
 using ::int64_t _LIBCPP_USING_IF_EXISTS;
 
 using ::uint8_t _LIBCPP_USING_IF_EXISTS;
 using ::uint16_t _LIBCPP_USING_IF_EXISTS;
 using ::uint32_t _LIBCPP_USING_IF_EXISTS;
-using ::uint48_t _LIBCPP_USING_IF_EXISTS;
 using ::uint64_t _LIBCPP_USING_IF_EXISTS;
 
 using ::int_least8_t _LIBCPP_USING_IF_EXISTS;
@@ -189,5 +192,7 @@ using ::intmax_t _LIBCPP_USING_IF_EXISTS;
 using ::uintmax_t _LIBCPP_USING_IF_EXISTS;
 
 _LIBCPP_END_NAMESPACE_STD
+
+#endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
 
 #endif // _LIBCPP_CSTDINT

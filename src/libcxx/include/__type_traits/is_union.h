@@ -11,7 +11,6 @@
 
 #include <__config>
 #include <__type_traits/integral_constant.h>
-#include <__type_traits/remove_cv.h>
 
 #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
 #  pragma GCC system_header
@@ -19,12 +18,12 @@
 
 _LIBCPP_BEGIN_NAMESPACE_STD
 
-template <class _Tp> struct _LIBCPP_TEMPLATE_VIS is_union
-    : public integral_constant<bool, __is_union(_Tp)> {};
-
-#if _LIBCPP_STD_VER > 14
 template <class _Tp>
-inline constexpr bool is_union_v = __is_union(_Tp);
+struct _LIBCPP_NO_SPECIALIZATIONS is_union : integral_constant<bool, __is_union(_Tp)> {};
+
+#if _LIBCPP_STD_VER >= 17
+template <class _Tp>
+_LIBCPP_NO_SPECIALIZATIONS inline constexpr bool is_union_v = __is_union(_Tp);
 #endif
 
 _LIBCPP_END_NAMESPACE_STD
