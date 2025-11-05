@@ -20,8 +20,10 @@ BUILD_SRC := $(patsubst %,build/%.src,$(wildcard *.c *.cpp))
 
 EZCFLAGS := -S -ffreestanding -Wall -Wextra -Wimplicit-float-conversion -Wimplicit-int-float-conversion -Oz
 EZCFLAGS += -D_EZ80 -isystem ../libc/include -isystem ../ce/include -isystem ../fileioc -mllvm -profile-guided-section-prefix=false
-EZCXXFLAGS := $(EZCFLAGS) -fno-exceptions -fno-rtti -std=c++20 -D_LIBCPP_BUILDING_LIBRARY
-EZCXXFLAGS += -isystem ../libcxx/include
+EZCXXFLAGS := -S -ffreestanding -Wall -Wextra -Wimplicit-float-conversion -Wimplicit-int-float-conversion -Oz
+EZCXXFLAGS += -D_EZ80 -isystem ../libcxx/include
+EZCXXFLAGS += -isystem ../libc/include -isystem ../ce/include -isystem ../fileioc -mllvm -profile-guided-section-prefix=false
+EZCXXFLAGS += -fno-exceptions -fno-rtti -std=c++20 -D_LIBCPP_BUILDING_LIBRARY
 
 WILDCARD_SRC = $(wildcard *.src) $(BUILD_SRC)
 LIBCXX_H := include/

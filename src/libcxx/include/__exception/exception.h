@@ -21,7 +21,7 @@
 #  pragma GCC system_header
 #endif
 
-_LIBCPP_BEGIN_UNVERSIONED_NAMESPACE_STD
+namespace std { // purposefully not using versioning namespace
 
 #if defined(_LIBCPP_ABI_VCRUNTIME) && (!defined(_HAS_EXCEPTIONS) || _HAS_EXCEPTIONS != 0)
 // The std::exception class was already included above, but we're explicit about this condition here for clarity.
@@ -72,8 +72,7 @@ public:
 class _LIBCPP_EXPORTED_FROM_ABI exception {
 public:
   _LIBCPP_HIDE_FROM_ABI exception() _NOEXCEPT {}
-  _LIBCPP_HIDE_FROM_ABI exception(const exception&) _NOEXCEPT            = default;
-  _LIBCPP_HIDE_FROM_ABI exception& operator=(const exception&) _NOEXCEPT = default;
+  _LIBCPP_HIDE_FROM_ABI exception(const exception&) _NOEXCEPT = default;
 
   virtual ~exception() _NOEXCEPT;
   virtual const char* what() const _NOEXCEPT;
@@ -82,13 +81,11 @@ public:
 class _LIBCPP_EXPORTED_FROM_ABI bad_exception : public exception {
 public:
   _LIBCPP_HIDE_FROM_ABI bad_exception() _NOEXCEPT {}
-  _LIBCPP_HIDE_FROM_ABI bad_exception(const bad_exception&) _NOEXCEPT            = default;
-  _LIBCPP_HIDE_FROM_ABI bad_exception& operator=(const bad_exception&) _NOEXCEPT = default;
   ~bad_exception() _NOEXCEPT override;
   const char* what() const _NOEXCEPT override;
 };
 #endif // !_LIBCPP_ABI_VCRUNTIME
 
-_LIBCPP_END_UNVERSIONED_NAMESPACE_STD
+} // namespace std
 
 #endif // _LIBCPP___EXCEPTION_EXCEPTION_H
