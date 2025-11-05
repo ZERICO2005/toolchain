@@ -27,3 +27,40 @@ __llcmpu:
 	pop	hl
 	pop	iy
 	ret
+
+	section	.text
+	public	__llcmpeq
+
+if PREFER_OS_CRT
+
+__llcmpeq := __llcmpu
+
+else
+
+__llcmpeq:
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	hl
+	ld	hl, (iy + 9)
+	sbc	hl, de
+	jr	nz, .ne_1
+	ld	hl, (iy + 12)
+	sbc.s	hl, bc
+	pop	hl
+	jr	nz, .ne_2
+	push	bc
+	ld	bc, (iy + 6)
+	sbc	hl, bc
+	add	hl, bc
+	pop	bc
+	pop	iy
+	ret
+
+.ne_1:
+	pop	hl
+.ne_2:
+	pop	iy
+	ret
+
+end if

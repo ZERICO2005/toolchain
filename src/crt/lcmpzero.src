@@ -3,6 +3,9 @@
 	section	.text
 	public	__lcmpzero
 __lcmpzero:
+	; Flags:
+	; M if negative
+	; Z if zero
 	inc	e
 	dec	e
 	ret	nz
@@ -12,4 +15,17 @@ __lcmpzero:
 	ret	p
 	inc	e
 	dec	de
+	ret
+
+	section	.text
+	public	__lequzero
+__lequzero:
+	; Flags:
+	; Z if zero
+	inc	e
+	dec	e
+	ret	nz
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
 	ret

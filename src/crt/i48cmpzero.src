@@ -26,3 +26,17 @@ __i48cmpzero:
 	inc	e	; reset z and s flags
 	dec	de
 	ret
+
+	section	.text
+	public	__i48equzero
+__i48equzero:
+; CC: 9 bytes
+; Minimum: 6F + 3R + 2
+; Maximum: 9F + 3R + 2
+	add	hl, de
+	or	a, a
+	sbc	hl, de
+	ret	nz
+	sbc	hl, de
+	add	hl, de
+	ret
