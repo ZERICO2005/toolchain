@@ -41,7 +41,7 @@ clean:
 	$(Q)$(call RMDIR,build)
 
 install: all
-	$(Q)$(call MKDIR,$(INSTALL_LIBCXX))
-	$(Q)$(call COPY,$(call NATIVEPATH,$(WILDCARD_SRC)),$(INSTALL_LIBCXX))
+	$(Q)$(call MKDIR,$(INSTALL_LIBCXXRT))
+	$(Q)$(call COPY,$(call NATIVEPATH,$(WILDCARD_SRC)),$(INSTALL_LIBCXXRT))
 
 .PHONY: all clean

@@ -29,6 +29,8 @@ WILDCARD_SRC = $(wildcard *.src) $(BUILD_SRC)
 LIBCXX_H := include/
 
 ALGORITHM_H := include/__algorithm
+ALGORITHM_PSTL_H := include/__algorithm/pstl_backends
+ALGORITHM_PSTL_CPU_H := include/__algorithm/pstl_backends/cpu_backends
 ATOMIC_H := include/__atomic
 BIT_H := include/__bit
 CHARCONV_H := include/__charconv
@@ -51,7 +53,7 @@ FUNCTIONAL_H := include/__functional
 FWD_H := include/__fwd
 IOS_H := include/__ios
 ITERATOR_H := include/__iterator
-LOCALE_DIR_H := include/__locale_dir
+LOCALE_BASE_API_H := include/__locale_dir/locale_base_api
 MATH_H := include/__math
 MDSPAN_H := include/__mdspan
 MEMORY_H := include/__memory
@@ -117,6 +119,7 @@ install: all
 	$(Q)$(call MKDIR,$(INSTALL_IOS))
 	$(Q)$(call MKDIR,$(INSTALL_ITERATOR))
 	$(Q)$(call MKDIR,$(INSTALL_LOCALE_DIR))
+	$(Q)$(call MKDIR,$(INSTALL_LOCALE_BASE_API))
 	$(Q)$(call MKDIR,$(INSTALL_MATH))
 	$(Q)$(call MKDIR,$(INSTALL_MDSPAN))
 	$(Q)$(call MKDIR,$(INSTALL_MEMORY))
@@ -143,6 +146,8 @@ install: all
 	$(Q)$(call COPY,$(call NATIVEPATH,$(WILDCARD_SRC)),$(INSTALL_LIBCXX))
 	$(Q)$(call COPY,$(call NATIVEPATH,$(LIBCXX_H)),$(INSTALL_CXX_H))
 	$(Q)$(call COPY,$(call NATIVEPATH,$(ALGORITHM_H)),$(INSTALL_ALGORITHM))
+	$(Q)$(call COPY,$(call NATIVEPATH,$(ALGORITHM_PSTL_H)),$(INSTALL_ALGORITHM_PSTL))
+	$(Q)$(call COPY,$(call NATIVEPATH,$(ALGORITHM_PSTL_CPU_H)),$(INSTALL_ALGORITHM_PSTL_CPU))
 	$(Q)$(call COPY,$(call NATIVEPATH,$(ATOMIC_H)),$(INSTALL_ATOMIC))
 	$(Q)$(call COPY,$(call NATIVEPATH,$(BIT_H)),$(INSTALL_BIT))
 	$(Q)$(call COPY,$(call NATIVEPATH,$(CHARCONV_H)),$(INSTALL_CHARCONV))
@@ -165,7 +170,7 @@ install: all
 	$(Q)$(call COPY,$(call NATIVEPATH,$(FWD_H)),$(INSTALL_FWD))
 	$(Q)$(call COPY,$(call NATIVEPATH,$(IOS_H)),$(INSTALL_IOS))
 	$(Q)$(call COPY,$(call NATIVEPATH,$(ITERATOR_H)),$(INSTALL_ITERATOR))
-	$(Q)$(call COPY,$(call NATIVEPATH,$(LOCALE_DIR_H)),$(INSTALL_LOCALE_DIR))
+	$(Q)$(call COPY,$(call NATIVEPATH,$(LOCALE_BASE_API_H)),$(INSTALL_LOCALE_BASE_API))
 	$(Q)$(call COPY,$(call NATIVEPATH,$(MATH_H)),$(INSTALL_MATH))
 	$(Q)$(call COPY,$(call NATIVEPATH,$(MDSPAN_H)),$(INSTALL_MDSPAN))
 	$(Q)$(call COPY,$(call NATIVEPATH,$(MEMORY_H)),$(INSTALL_MEMORY))

@@ -95,6 +95,8 @@ INSTALL_CXX_HW_H := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c+
 INSTALL_META := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/meta))
 
 INSTALL_ALGORITHM := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c++/__algorithm))
+INSTALL_ALGORITHM_PSTL := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c++/__algorithm/pstl_backends))
+INSTALL_ALGORITHM_PSTL_CPU := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c++/__algorithm/pstl_backends/cpu_backends))
 INSTALL_ATOMIC := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c++/__atomic))
 INSTALL_BIT := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c++/__bit))
 INSTALL_CHARCONV := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c++/__charconv))
@@ -118,6 +120,7 @@ INSTALL_FWD := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c++/__f
 INSTALL_IOS := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c++/__ios))
 INSTALL_ITERATOR := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c++/__iterator))
 INSTALL_LOCALE_DIR := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c++/__locale_dir))
+INSTALL_LOCALE_BASE_API := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c++/__locale_dir/locale_base_api))
 INSTALL_MATH := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c++/__math))
 INSTALL_MDSPAN := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c++/__mdspan))
 INSTALL_MEMORY := $(call QUOTE_ARG,$(call NATIVEPATH,$(INSTALL_DIR)/include/c++/__memory))

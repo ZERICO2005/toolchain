@@ -1,0 +1,172 @@
+	assume	adl=1
+
+	section	.text
+
+	public _wcscpy
+	public _wcsncpy
+	public _wcscat
+	public _wcsncat
+	public _wcschr
+	public _wcsrchr
+	public _wcspbrk
+	public _wcsstr
+	public _wcstok
+	public _wcscspn
+	public _wcsspn
+	public _wcscmp
+	public _wcsncmp
+	public _wprintf
+	public _vwprintf
+	public _swprintf
+	public _vswprintf
+	public _fwprintf
+	public _vfwprintf
+	public _wscanf
+	public _vwscanf
+	public _swscanf
+	public _vswscanf
+	public _fwscanf
+	public _vfwscanf
+	public _fgetwc
+	public _fgetws
+	public _fputwc
+	public _fputws
+	public _fwide
+	public _getwc
+	public _getwchar
+	public _putwc
+	public _putwchar
+	public _ungetwc
+	public _wcstof
+	public _wcstod
+	public _wcstold
+	public _wcstol
+	public _wcstoll
+	public _wcstoul
+	public _wcstoull
+
+	public _mblen
+	public _mbtowc
+	public _wctomb
+	public _mbstowcs
+	public _wcstombs
+
+	public	_iswalnum
+	public	_iswalpha
+	public	_iswblank
+	public	_iswcntrl
+	public	_iswdigit
+	public	_iswgraph
+	public	_iswlower
+	public	_iswprint
+	public	_iswpunct
+	public	_iswspace
+	public	_iswupper
+	public	_iswxdigit
+	public	_towlower
+	public	_towupper
+	public	_towctrans
+	public	_wctrans
+	public	_iswctype
+	public	_wctype
+
+	public	_wcsftime
+	public	_wcscoll
+	public	_wcsxfrm
+	public	_btowc
+	public	_wctob
+	public	_mbsinit
+	public	_mbrlen
+	public	_mbrtowc
+	public	_wcrtomb
+	public	_mbsrtowcs
+	public	_wcsrtombs
+	public	_wcsnrtombs
+	public	_mbsnrtowcs
+
+_wcscpy:
+_wcsncpy:
+_wcscat:
+_wcsncat:
+_wcschr:
+_wcsrchr:
+_wcspbrk:
+_wcsstr:
+_wcstok:
+_wcscspn:
+_wcsspn:
+_wcscmp:
+_wcsncmp:
+_wprintf:
+_vwprintf:
+_swprintf:
+_vswprintf:
+_fwprintf:
+_vfwprintf:
+_wscanf:
+_vwscanf:
+_swscanf:
+_vswscanf:
+_fwscanf:
+_vfwscanf:
+_fgetwc:
+_fgetws:
+_fputwc:
+_fputws:
+_fwide:
+_getwc:
+_getwchar:
+_putwc:
+_putwchar:
+_ungetwc:
+_wcstof:
+_wcstod:
+_wcstold:
+_wcstol:
+_wcstoll:
+_wcstoul:
+_wcstoull:
+
+_mblen:
+_mbtowc:
+_wctomb:
+_mbstowcs:
+_wcstombs:
+
+_iswalnum:
+_iswalpha:
+_iswblank:
+_iswcntrl:
+_iswdigit:
+_iswgraph:
+_iswlower:
+_iswprint:
+_iswpunct:
+_iswspace:
+_iswupper:
+_iswxdigit:
+_towlower:
+_towupper:
+_towctrans:
+_wctrans:
+_iswctype:
+_wctype:
+
+_wcsftime:
+_wcscoll:
+_wcsxfrm:
+_btowc:
+_wctob:
+_mbsinit:
+_mbrlen:
+_mbrtowc:
+_wcrtomb:
+_mbsrtowcs:
+_wcsrtombs:
+_wcsnrtombs:
+_mbsnrtowcs:
+	xor	a, a
+	ld	bc, 0
+	ld	de, 0
+	ld	hl, 0
+	ret
