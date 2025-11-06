@@ -5,10 +5,11 @@
 #include <cstdio>
 
 #include <iostream>
+#include <string>
 
 int test();
 
-#if 0
+#if 1
 void func() {
     using namespace std::literals;
 
@@ -22,18 +23,18 @@ void func() {
     std::string str3 = str1 + " " + str2;
 
     // Print out the result
-    std::cout << str3 << '\n';
+    puts(str3.c_str()); // std::cout << str3 << '\n';
 
     std::string::size_type pos = str3.find(" ");
     str1 = str3.substr(pos + 1); // the part after the space
     str2 = str3.substr(0, pos);  // the part till the space
 
-    std::cout << str1 << ' ' << str2 << '\n';
+    puts(str1.c_str()); puts(str2.c_str()); // std::cout << str1 << ' ' << str2 << '\n';
 
     // Accessing an element using subscript operator[]
-    std::cout << str1[0] << '\n';
+    // std::cout << str1[0] << '\n';
     str1[0] = 'W';
-    std::cout << str1 << '\n';
+    puts(str1.c_str()); // std::cout << str1 << '\n';
 }
 #endif
 
@@ -48,8 +49,8 @@ int main(void) {
         std::fputs("All tests passed", stdout);
     }
 
-    // func();
-    std::cout << failed_test;
+    func();
+    // std::cout << failed_test;
 
     while (!os_GetCSC());
 

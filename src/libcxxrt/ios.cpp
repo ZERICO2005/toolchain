@@ -128,12 +128,10 @@ ios_base::imbue(const locale& newloc)
     return oldloc;
 }
 
-static locale loc_storage = locale();
-
 locale
 ios_base::getloc() const
 {
-    // const locale& loc_storage = *reinterpret_cast<const locale*>(&__loc_);
+    const locale& loc_storage = *reinterpret_cast<const locale*>(&__loc_);
     return loc_storage;
 }
 

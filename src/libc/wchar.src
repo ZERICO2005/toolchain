@@ -2,6 +2,9 @@
 
 	section	.text
 
+; DEBUG: enable to ignore linker errors
+if 0
+
 	public _wcscpy
 	public _wcsncpy
 	public _wcscat
@@ -170,3 +173,5 @@ _mbsnrtowcs:
 	ld	de, 0
 	ld	hl, 0
 	ret
+
+end if
