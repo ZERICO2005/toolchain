@@ -14,9 +14,9 @@
 #include <cinttypes>
 #include <ciso646>
 #include <climits>
-#include <clocale>
+// #include <clocale>
 #include <cmath>
-#include <codecvt>
+// #include <codecvt>
 #include <compare>
 #include <complex>
 #if __cplusplus >= 201907L
@@ -40,27 +40,27 @@
 #include <exception>
 #include <format>
 #include <forward_list>
-#include <fstream>
+// #include <fstream>
 #include <functional>
 #include <initializer_list>
-#include <iomanip>
-#include <ios>
+// #include <iomanip>
+// #include <ios>
 #include <iosfwd>
-#include <iostream>
-#include <istream>
+// #include <iostream>
+// #include <istream>
 #include <iterator>
 #include <limits>
 #include <list>
-#include <locale>
+// #include <locale>
 #include <map>
 #include <memory>
 #include <new>
 #include <numbers>
 #include <numeric>
 #include <optional>
-#include <ostream>
+// #include <ostream>
 #include <queue>
-#include <regex>
+// #include <regex>
 #include <random>
 #include <ranges>
 #include <ratio>
@@ -70,13 +70,13 @@
 #include <source_location>
 #endif // __cplusplus >= 201907L
 #include <span>
-#include <sstream>
+// #include <sstream>
 #include <stdexcept>
 #include <stack>
-#include <streambuf>
+// #include <streambuf>
 #include <string>
 #include <string_view>
-#include <strstream>
+// #include <strstream>
 #include <system_error>
 #include <tuple>
 #include <type_traits>
@@ -101,7 +101,7 @@
 #include <inttypes.h>
 #include <iso646.h>
 #include <limits.h>
-#include <locale.h>
+// #include <locale.h>
 #include <math.h>
 #include <setjmp.h>
 #include <stdalign.h>
