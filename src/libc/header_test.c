@@ -26,6 +26,7 @@
 #include <string.h>
 #include <tgmath.h>
 #include <time.h>
+#include <unistd.h>
 #include <wchar.h>
 #include <wctype.h>
 

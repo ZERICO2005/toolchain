@@ -1,0 +1,26 @@
+	assume	adl=1
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+
+	weak	_isatty
+
+; user definable function
+_isatty:
+	; return (int)0 or (char)0 or (bool)false by default
+	xor	a, a
+	sbc	hl, hl
+	ret
+
+;-------------------------------------------------------------------------------
+
+	section	.text
+
+	public	__exit
+
+__exit := __Exit
+
+;-------------------------------------------------------------------------------
+
+	extern __Exit
