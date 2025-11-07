@@ -32,7 +32,7 @@ const struct lconv __c_locale = {
     .int_n_sign_posn =     CHAR_MAX,
 };
 
-static locale_t __current_locale = NULL;
+static struct __locale_struct __global_locale;
 
 //------------------------------------------------------------------------------
 // LIBC locale.h
@@ -74,12 +74,46 @@ struct lconv *localeconv(void) {
 
 locale_t uselocale(locale_t new_locale) {
     // query the current locale_t without modifiying it
-    locale_t old_locale = __current_locale;
     if (new_locale == (locale_t)0) {
-        return old_locale;
+        return LC_GLOBAL_LOCALE;
     }
-    __current_locale = new_locale;
-    return old_locale;
+    if (new_locale == LC_GLOBAL_LOCALE) {
+        return LC_GLOBAL_LOCALE;
+    }
+    if (new_locale == &__global_locale) {
+        return LC_GLOBAL_LOCALE;
+    }
+    // EINVAL: new_locale does not refer to a valid locale object
+    errno = EINVAL;
+    return (locale_t)0;
+}
+
+locale_t duplocale(locale_t locale_obj) {
+    if (locale_obj == NULL) {
+        return (locale_t)0;
+    }
+    if (locale_obj == LC_GLOBAL_LOCALE) {
+        locale_obj = &__global_locale;
+    }
+    locale_t locale_dup = (locale_t)malloc(sizeof(struct __locale_struct));
+    // ENOMEM: insufficient memory
+    if (locale_dup == NULL) {
+        errno = ENOMEM;
+        return (locale_t)0;
+    }
+    locale_dup->__name = locale_obj->__name;
+    locale_dup->__data = locale_obj->__data;
+    return locale_dup;
+}
+
+void freelocale(locale_t locale_obj) {
+    if (locale_obj == LC_GLOBAL_LOCALE) {
+        return;
+    }
+    if (locale_obj == &__global_locale) {
+        return;
+    }
+    free(locale_obj);
 }
 
 locale_t newlocale(int category_mask, const char *locale, locale_t base) {
@@ -95,7 +129,7 @@ locale_t newlocale(int category_mask, const char *locale, locale_t base) {
         return (locale_t)0;
     }
 
-    // ENOENT: not a valid locale.
+    // ENOENT: not a valid locale
     if (__get_locale(locale) == NULL) {
         errno = ENOENT;
         return (locale_t)0;
@@ -107,30 +141,16 @@ locale_t newlocale(int category_mask, const char *locale, locale_t base) {
         errno = ENOMEM;
         return (locale_t)0;
     }
-    if (base != (locale_t)0) {
-        locale_obj->name = base->name;
-        locale_obj->data = base->data;
+    if (base == (locale_t)0) {
+        locale_obj->__name = __global_locale.__name;
+        locale_obj->__data = __global_locale.__data;
         return locale_obj;
     }
-    locale_obj->name = "C";
-    locale_obj->data = (struct lconv*)&__c_locale;
+    if (base == LC_GLOBAL_LOCALE) {
+        base = &__global_locale;
+    }
+    locale_obj->__name = base->__name;
+    locale_obj->__data = base->__data;
+    freelocale(base);
     return locale_obj;
-}
-
-void freelocale(locale_t locale_obj) {
-    free(locale_obj);
-}
-
-locale_t duplocale(locale_t locale_obj) {
-    if (locale_obj == NULL) {
-        return NULL;
-    }
-    locale_t dup = malloc(sizeof(struct __locale_struct));
-    if (dup == NULL) {
-        errno = ENOMEM;
-        return NULL;
-    }
-    dup->name = locale_obj->name;
-    dup->data = locale_obj->data;
-    return dup;
 }
