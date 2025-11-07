@@ -3,11 +3,6 @@
 
 #include <cdefs.h>
 #include <__wchar_def.h>
-#include <__stdlib_abs.h>
-
-#ifdef __cplusplus
-#include <__cxx_abs.h>
-#endif
 
 typedef struct {
     int quot;
@@ -105,6 +100,16 @@ int at_quick_exit(void (*)(void)) __NOEXCEPT;
 void quick_exit(int) __NOEXCEPT __attribute__((noreturn));
 
 void _Exit(int) __NOEXCEPT __attribute__((noreturn));
+
+int abs(int);
+
+long labs(long);
+
+long long llabs(long long);
+
+#ifdef __SIZEOF_INT48__
+signed __int48 i48abs(signed __int48 n) __NOEXCEPT_CONST;
+#endif /* __SIZEOF_INT48__ */
 
 div_t div(int numer, int denom);
 

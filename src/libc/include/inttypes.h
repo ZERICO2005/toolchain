@@ -4,10 +4,6 @@
 #include <cdefs.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-#include <__cxx_abs.h>
-#endif
-
 #define PRId8               __INT8_FMTd__
 #define PRIi8               __INT8_FMTi__
 #define PRIo8              __UINT8_FMTo__

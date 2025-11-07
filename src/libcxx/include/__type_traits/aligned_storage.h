@@ -40,6 +40,9 @@ typedef __type_list<__align_type<unsigned char>,
         __type_list<__align_type<unsigned short>,
         __type_list<__align_type<unsigned int>,
         __type_list<__align_type<unsigned long>,
+#ifdef _EZ80
+        __type_list<__align_type<unsigned __int48>,
+#endif // _EZ80
         __type_list<__align_type<unsigned long long>,
         __type_list<__align_type<double>,
         __type_list<__align_type<long double>,
@@ -47,6 +50,9 @@ typedef __type_list<__align_type<unsigned char>,
         __type_list<__align_type<__struct_double4>,
         __type_list<__align_type<int*>,
         __nat
+#ifdef _EZ80
+        >
+#endif // _EZ80
         > > > > > > > > > > __all_types;
 // clang-format on
 

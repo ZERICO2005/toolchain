@@ -28,6 +28,9 @@ template <>          struct __libcpp_is_signed_integer<signed long long> : publi
 #ifndef _LIBCPP_HAS_NO_INT128
 template <>          struct __libcpp_is_signed_integer<__int128_t>       : public true_type {};
 #endif
+#ifdef _EZ80
+template <>          struct __libcpp_is_signed_integer<signed __int48>   : public true_type {};
+#endif // _EZ80
 // clang-format on
 
 _LIBCPP_END_NAMESPACE_STD

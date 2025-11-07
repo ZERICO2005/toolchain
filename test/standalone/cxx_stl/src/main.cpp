@@ -4,7 +4,6 @@
 #include <ti/sprintf.h>
 #include <cstdio>
 
-#include <iostream>
 #include <string>
 
 int test();
@@ -50,7 +49,7 @@ int main(void) {
     }
 
     func();
-    // std::cout << failed_test;
+    printf("%s", std::to_string(failed_test).c_str());
 
     while (!os_GetCSC());
 

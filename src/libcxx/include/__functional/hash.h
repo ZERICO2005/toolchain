@@ -483,6 +483,9 @@ struct _LIBCPP_TEMPLATE_VIS hash<char16_t>
     size_t operator()(char16_t __v) const _NOEXCEPT {return static_cast<size_t>(__v);}
 };
 
+
+#ifndef _EZ80
+
 template <>
 struct _LIBCPP_TEMPLATE_VIS hash<char32_t>
     : public __unary_function<char32_t, size_t>
@@ -490,6 +493,16 @@ struct _LIBCPP_TEMPLATE_VIS hash<char32_t>
     _LIBCPP_HIDE_FROM_ABI
     size_t operator()(char32_t __v) const _NOEXCEPT {return static_cast<size_t>(__v);}
 };
+
+#else // _EZ80
+
+template <>
+struct _LIBCPP_TEMPLATE_VIS hash<char32_t>
+    : public __scalar_hash<char32_t>
+{
+};
+
+#endif // _EZ80
 
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
 template <>
@@ -533,6 +546,8 @@ struct _LIBCPP_TEMPLATE_VIS hash<unsigned int>
     size_t operator()(unsigned int __v) const _NOEXCEPT {return static_cast<size_t>(__v);}
 };
 
+#ifndef _EZ80
+
 template <>
 struct _LIBCPP_TEMPLATE_VIS hash<long>
     : public __unary_function<long, size_t>
@@ -548,6 +563,38 @@ struct _LIBCPP_TEMPLATE_VIS hash<unsigned long>
     _LIBCPP_HIDE_FROM_ABI
     size_t operator()(unsigned long __v) const _NOEXCEPT {return static_cast<size_t>(__v);}
 };
+
+#else // _EZ80
+
+template <>
+struct _LIBCPP_TEMPLATE_VIS hash<long>
+    : public __scalar_hash<long>
+{
+};
+
+template <>
+struct _LIBCPP_TEMPLATE_VIS hash<unsigned long>
+    : public __scalar_hash<unsigned long>
+{
+};
+
+#endif // _EZ80
+
+#ifdef _EZ80
+
+template <>
+struct _LIBCPP_TEMPLATE_VIS hash<signed __int48>
+    : public __scalar_hash<signed __int48>
+{
+};
+
+template <>
+struct _LIBCPP_TEMPLATE_VIS hash<unsigned __int48>
+    : public __scalar_hash<unsigned __int48>
+{
+};
+
+#endif // _EZ80
 
 template <>
 struct _LIBCPP_TEMPLATE_VIS hash<long long>
