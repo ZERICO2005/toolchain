@@ -3,6 +3,7 @@
 #include <any>
 #include <array>
 #include <bit>
+#include <bitset>
 #include <cassert>
 #include <ccomplex>
 #include <cctype>
@@ -22,6 +23,8 @@
 #if __cplusplus >= 201907L
 #include <concepts>
 #endif // __cplusplus >= 201907L
+#include <condition_variable>
+#include <coroutine>
 #include <csetjmp>
 // #include <cstdalign>
 #include <cstdarg>
@@ -38,6 +41,9 @@
 #include <cxxabi.h>
 #include <deque>
 #include <exception>
+#include <execution>
+#include <expected>
+#include <filesystem>
 #include <format>
 #include <forward_list>
 // #include <fstream>
@@ -53,12 +59,16 @@
 #include <list>
 // #include <locale>
 #include <map>
+#include <mdspan>
 #include <memory>
+#include <memory_resource>
+#include <mutex>
 #include <new>
 #include <numbers>
 #include <numeric>
 #include <optional>
 // #include <ostream>
+#include <print>
 #include <queue>
 // #include <regex>
 #include <random>
@@ -71,8 +81,8 @@
 #endif // __cplusplus >= 201907L
 #include <span>
 // #include <sstream>
-#include <stdexcept>
 #include <stack>
+#include <stdexcept>
 // #include <streambuf>
 #include <string>
 #include <string_view>
@@ -94,6 +104,7 @@
 #include <assert.h>
 #include <byteswap.h>
 #include <cdefs.h>
+#include <complex.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fenv.h>
