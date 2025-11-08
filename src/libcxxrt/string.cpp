@@ -14,6 +14,11 @@
 #include <stdexcept>
 #include <string>
 
+#ifdef _EZ80
+#include <ti/sprintf.h>
+extern "C" int __strtoi(const char *__restrict nptr, char **__restrict endptr, int base) __attribute__((nonnull(1)));
+#endif // _EZ80
+
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
 #  include <cwchar>
 #endif
@@ -91,6 +96,7 @@ template<typename V, typename S>
 inline V as_integer(const string& func, const S& s, size_t* idx, int base);
 
 // string
+#ifndef _EZ80
 template<>
 inline int as_integer(const string& func, const string& s, size_t* idx, int base) {
     // Use long as no Standard string to integer exists.
@@ -119,6 +125,7 @@ template<>
 inline unsigned long long as_integer(const string& func, const string& s, size_t* idx, int base) {
     return as_integer_helper<unsigned long long>(func, s, idx, base, strtoull);
 }
+#endif // _EZ80
 
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
 // wstring
@@ -177,6 +184,7 @@ inline V as_float_helper(const string& func, const S& str, size_t* idx, F f) {
 template<typename V, typename S>
 inline V as_float(const string& func, const S& s, size_t* idx = nullptr);
 
+#ifndef _EZ80
 template<>
 inline float as_float(const string& func, const string& s, size_t* idx) {
     return as_float_helper<float>(func, s, idx, strtof);
@@ -191,6 +199,7 @@ template<>
 inline long double as_float(const string& func, const string& s, size_t* idx) {
     return as_float_helper<long double>(func, s, idx, strtold);
 }
+#endif // _EZ80
 
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
 template<>
@@ -210,6 +219,8 @@ inline long double as_float(const string& func, const wstring& s, size_t* idx) {
 #endif // _LIBCPP_HAS_NO_WIDE_CHARACTERS
 
 }  // unnamed namespace
+
+#ifndef _EZ80
 
 int stoi(const string& str, size_t* idx, int base) {
     return as_integer<int>("stoi", str, idx, base);
@@ -242,6 +253,82 @@ double stod(const string& str, size_t* idx) {
 long double stold(const string& str, size_t* idx) {
     return as_float<long double>("stold", str, idx);
 }
+
+#else // _EZ80
+
+int stoi(const string& str, size_t *pos, int base) {
+    char *end_ptr;
+    int result = static_cast<int>(__strtoi(str.c_str(), &end_ptr, base));
+    if (pos != nullptr) {
+        *pos = static_cast<size_t>(end_ptr - str.c_str());
+    }
+    return result;
+}
+
+long stol(const string& str, size_t *pos, int base) {
+    char *end_ptr;
+    long result = std::strtol(str.c_str(), &end_ptr, base);
+    if (pos != nullptr) {
+        *pos = static_cast<size_t>(end_ptr - str.c_str());
+    }
+    return result;
+}
+
+long long stoll(const string& str, size_t *pos, int base) {
+    char *end_ptr;
+    long long result = std::strtoll(str.c_str(), &end_ptr, base);
+    if (pos != nullptr) {
+        *pos = static_cast<size_t>(end_ptr - str.c_str());
+    }
+    return result;
+}
+
+unsigned long stoul(const string& str, size_t *pos, int base) {
+    char *end_ptr;
+    unsigned long result = std::strtoul(str.c_str(), &end_ptr, base);
+    if (pos != nullptr) {
+        *pos = static_cast<size_t>(end_ptr - str.c_str());
+    }
+    return result;
+}
+
+unsigned long long stoull(const string& str, size_t *pos, int base) {
+    char *end_ptr;
+    unsigned long long result = std::strtoull(str.c_str(), &end_ptr, base);
+    if (pos != nullptr) {
+        *pos = static_cast<size_t>(end_ptr - str.c_str());
+    }
+    return result;
+}
+
+float stof(const string& str, size_t *pos) {
+    char *end_ptr;
+    float result = std::strtof(str.c_str(), &end_ptr);
+    if (pos != nullptr) {
+        *pos = static_cast<size_t>(end_ptr - str.c_str());
+    }
+    return result;
+}
+
+double stod(const string& str, size_t *pos) {
+    char *end_ptr;
+    double result = std::strtod(str.c_str(), &end_ptr);
+    if (pos != nullptr) {
+        *pos = static_cast<size_t>(end_ptr - str.c_str());
+    }
+    return result;
+}
+
+long double stold(const string& str, size_t *pos) {
+    char *end_ptr;
+    long double result = std::strtold(str.c_str(), &end_ptr);
+    if (pos != nullptr) {
+        *pos = static_cast<size_t>(end_ptr - str.c_str());
+    }
+    return result;
+}
+
+#endif // _EZ80
 
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
 int stoi(const wstring& str, size_t* idx, int base) {
