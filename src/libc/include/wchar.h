@@ -2,12 +2,9 @@
 #define _WCHAR_H
 
 #include <__wchar_def.h>
+#include <__mbstate.h>
 #include <stdio.h>
 #include <time.h>
-
-typedef struct {
-    int __count;
-} mbstate_t;
 
 __BEGIN_DECLS
 

@@ -34,8 +34,6 @@
 #include <cstring>
 #include <ctgmath>
 #include <ctime>
-#include <cwchar>
-#include <cwctype>
 #include <cxxabi.h>
 #include <deque>
 #include <exception>
@@ -105,6 +103,16 @@
 
 #endif
 
+#if 0
+
+#include <cwchar>
+#include <cwctype>
+
+#include <wchar.h>
+#include <wctype.h>
+
+#endif
+
 #include <alloca.h>
 #include <assert.h>
 #include <byteswap.h>
@@ -133,7 +141,5 @@
 #include <string.h>
 #include <tgmath.h>
 #include <time.h>
-#include <wchar.h>
-#include <wctype.h>
 
 // tests for conflicts

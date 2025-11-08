@@ -13,7 +13,9 @@
 
 #include <cstdlib>
 #include <clocale>
+#ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
 #include <cwctype>
+#endif // _LIBCPP_HAS_NO_WIDE_CHARACTERS
 #include <ctype.h>
 #include <__support/__posix_l_fallback.h>
 #include <__support/__strtonum_fallback.h>

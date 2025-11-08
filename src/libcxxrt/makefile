@@ -18,9 +18,9 @@ include $(CURDIR)/../common.mk
 
 BUILD_SRC := $(patsubst %,build/%.src,$(wildcard *.c *.cpp))
 
-EZCFLAGS := -S -ffreestanding -Wall -Wextra -Wimplicit-float-conversion -Wimplicit-int-float-conversion -Oz
+EZCFLAGS := -S -ffreestanding -Wall -Wextra -Wimplicit-float-conversion -Wimplicit-int-float-conversion -fno-inline -O0
 EZCFLAGS += -D_EZ80 -isystem ../libc/include -isystem ../ce/include -isystem ../fileioc -mllvm -profile-guided-section-prefix=false
-EZCXXFLAGS := -S -ffreestanding -Wall -Wextra -Wimplicit-float-conversion -Wimplicit-int-float-conversion -Oz
+EZCXXFLAGS := -S -ffreestanding -Wall -Wextra -Wimplicit-float-conversion -Wimplicit-int-float-conversion -fno-inline -O0
 EZCXXFLAGS += -D_EZ80 -isystem ../libcxxrt/include -isystem ../libcxx/include
 EZCXXFLAGS += -isystem ../libc/include -isystem ../ce/include -isystem ../fileioc -mllvm -profile-guided-section-prefix=false
 EZCXXFLAGS += -fno-exceptions -fno-rtti -std=c++20 -D_LIBCPP_BUILDING_LIBRARY
