@@ -85,7 +85,7 @@
 #include <vector>
 #include <version>
 
-#if 1
+#if 0
 
 #include <clocale>
 #include <codecvt>
@@ -103,7 +103,7 @@
 
 #endif
 
-#if 0
+#if 1
 
 #include <cwchar>
 #include <cwctype>
