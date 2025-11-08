@@ -15,9 +15,7 @@
 #include <cinttypes>
 #include <ciso646>
 #include <climits>
-// #include <clocale>
 #include <cmath>
-// #include <codecvt>
 #include <compare>
 #include <complex>
 #if __cplusplus >= 201907L
@@ -46,18 +44,12 @@
 #include <filesystem>
 #include <format>
 #include <forward_list>
-// #include <fstream>
 #include <functional>
 #include <initializer_list>
-// #include <iomanip>
-// #include <ios>
 #include <iosfwd>
-// #include <iostream>
-// #include <istream>
 #include <iterator>
 #include <limits>
 #include <list>
-// #include <locale>
 #include <map>
 #include <mdspan>
 #include <memory>
@@ -67,10 +59,8 @@
 #include <numbers>
 #include <numeric>
 #include <optional>
-// #include <ostream>
 #include <print>
 #include <queue>
-// #include <regex>
 #include <random>
 #include <ranges>
 #include <ratio>
@@ -80,13 +70,10 @@
 #include <source_location>
 #endif // __cplusplus >= 201907L
 #include <span>
-// #include <sstream>
 #include <stack>
 #include <stdexcept>
-// #include <streambuf>
 #include <string>
 #include <string_view>
-// #include <strstream>
 #include <system_error>
 #include <tuple>
 #include <type_traits>
@@ -99,6 +86,24 @@
 #include <variant>
 #include <vector>
 #include <version>
+
+#if 1
+
+#include <clocale>
+#include <codecvt>
+#include <fstream>
+#include <iomanip>
+#include <ios>
+#include <iostream>
+#include <istream>
+#include <locale>
+#include <ostream>
+#include <regex>
+#include <sstream>
+#include <streambuf>
+#include <strstream>
+
+#endif
 
 #include <alloca.h>
 #include <assert.h>

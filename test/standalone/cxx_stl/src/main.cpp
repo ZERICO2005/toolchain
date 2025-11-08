@@ -5,6 +5,7 @@
 #include <cstdio>
 
 #include <string>
+#include <iostream>
 
 int test();
 
@@ -49,7 +50,11 @@ int main(void) {
     }
 
     func();
-    printf("%s", std::to_string(failed_test).c_str());
+
+    std::ios_base::Init();
+
+    printf("E %s\nD:", std::to_string(failed_test).c_str());
+    std::cout << failed_test << std::endl;
 
     while (!os_GetCSC());
 

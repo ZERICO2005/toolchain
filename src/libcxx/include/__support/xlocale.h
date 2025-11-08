@@ -15,7 +15,6 @@
 #include <clocale>
 #include <cwctype>
 #include <ctype.h>
-#include <__support/__nop_locale_mgmt.h>
 #include <__support/__posix_l_fallback.h>
 #include <__support/__strtonum_fallback.h>
 

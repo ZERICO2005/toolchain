@@ -352,12 +352,66 @@ S i_to_string(V v) {
 
 }  // unnamed namespace
 
+#ifndef _EZ80
+
 string  to_string (int val)                { return i_to_string< string>(val); }
 string  to_string (long val)               { return i_to_string< string>(val); }
 string  to_string (long long val)          { return i_to_string< string>(val); }
 string  to_string (unsigned val)           { return i_to_string< string>(val); }
 string  to_string (unsigned long val)      { return i_to_string< string>(val); }
 string  to_string (unsigned long long val) { return i_to_string< string>(val); }
+
+#else // _EZ80
+
+string to_string(int value) {
+    char buf[sizeof("-8388608")];
+    boot_sprintf(buf, "%d", value);
+    return string(buf);
+}
+
+string to_string(unsigned int value) {
+    char buf[sizeof("16777215")];
+    boot_sprintf(buf, "%u", value);
+    return string(buf);
+}
+
+string to_string(long value) {
+    char buf[sizeof("-2147483648")];
+    std::sprintf(buf, "%ld", value);
+    return string(buf);
+}
+
+string to_string(unsigned long value) {
+    char buf[sizeof("4294967295")];
+    std::sprintf(buf, "%lu", value);
+    return string(buf);
+}
+
+string to_string(signed __int48 value) {
+    char buf[sizeof("-140737488355328")];
+    std::sprintf(buf, "%lld", static_cast<long long>(value));
+    return string(buf);
+}
+
+string to_string(unsigned __int48 value) {
+    char buf[sizeof("281474976710655")];
+    std::sprintf(buf, "%llu", static_cast<unsigned long long>(value));
+    return string(buf);
+}
+
+string to_string(long long value) {
+    char buf[sizeof("-9223372036854775808")];
+    std::sprintf(buf, "%lld", value);
+    return string(buf);
+}
+
+string to_string(unsigned long long value) {
+    char buf[sizeof("18446744073709551615")];
+    std::sprintf(buf, "%llu", value);
+    return string(buf);
+}
+
+#endif // _EZ80
 
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
 wstring to_wstring(int val)                { return i_to_string<wstring>(val); }
@@ -368,9 +422,33 @@ wstring to_wstring(unsigned long val)      { return i_to_string<wstring>(val); }
 wstring to_wstring(unsigned long long val) { return i_to_string<wstring>(val); }
 #endif
 
+#ifndef _EZ80
+
 string  to_string (float val)       { return as_string(snprintf,       initial_string< string>()(),   "%f", val); }
 string  to_string (double val)      { return as_string(snprintf,       initial_string< string>()(),   "%f", val); }
 string  to_string (long double val) { return as_string(snprintf,       initial_string< string>()(),  "%Lf", val); }
+
+#else // _EZ80
+
+string to_string(float value) {
+    char buf[64];
+    std::snprintf(buf, sizeof(buf), "%f", value);
+    return string(buf);
+}
+
+string to_string(double value) {
+    char buf[64];
+    std::snprintf(buf, sizeof(buf), "%f", value);
+    return string(buf);
+}
+
+string to_string(long double value) {
+    char buf[64];
+    std::snprintf(buf, sizeof(buf), "%Lf", value);
+    return string(buf);
+}
+
+#endif // _EZ80
 
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
 wstring to_wstring(float val)       { return as_string(get_swprintf(), initial_string<wstring>()(),  L"%f", val); }

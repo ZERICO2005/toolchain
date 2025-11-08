@@ -32,6 +32,8 @@ enum {
 
 #define LC_GLOBAL_LOCALE ((locale_t)0xFFFFFF)
 
+#define LC_C_LOCALE LC_GLOBAL_LOCALE
+
 struct lconv {
     char* decimal_point;        /* "."      */
     char* thousands_sep;        /* ""       */

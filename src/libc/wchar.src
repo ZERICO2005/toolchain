@@ -3,7 +3,7 @@
 	section	.text
 
 ; DEBUG: enable to ignore linker errors
-if 0
+if 1
 
 	public _wcscpy
 	public _wcsncpy
