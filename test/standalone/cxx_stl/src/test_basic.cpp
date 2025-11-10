@@ -2,9 +2,9 @@
 #include <algorithm>
 #include <numeric>
 
-#define C(expr) if (!(expr)) { return __LINE__; }
+#include "common.h"
 
-int test() {
+int test_basic() {
     std::vector<int> x = {8, 4, 5, 9};
     x.push_back(std::move(6));
     x.push_back(9);
@@ -22,7 +22,7 @@ int test() {
     C((y.size() == x_truth.size() - 2));
     C((std::accumulate(x.begin(), x.end(), decltype(x)::value_type(0)) == x_sum));
     C((std::equal(x.begin(), x.end(), x_truth.begin())));
-    C((std::equal(y.rbegin(), y.rend(), x_truth.begin() + 2)));
+    C((std::equal(y.crbegin(), y.crend(), x_truth.cbegin() + 2)));
 
     return 0;
 }

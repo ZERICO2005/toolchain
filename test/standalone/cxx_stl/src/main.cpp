@@ -4,43 +4,33 @@
 #include <ti/sprintf.h>
 #include <cstdio>
 
-#include <string>
-#include <iostream>
+#define TEST(test) { ret = test; if (ret != 0) { return ret; }}
 
-int test();
+int test_basic();
+int test_apply();
+int test_tuple();
+int test_span();
 
-#if 1
-void func() {
-    using namespace std::literals;
-
-    // Creating a string from const char*
-    std::string str1 = "hello";
-
-    // Creating a string using string literal
-    auto str2 = "world"s;
-
-    // Concatenating strings
-    std::string str3 = str1 + " " + str2;
-
-    // Print out the result
-    puts(str3.c_str()); // std::cout << str3 << '\n';
-
-    std::string::size_type pos = str3.find(" ");
-    str1 = str3.substr(pos + 1); // the part after the space
-    str2 = str3.substr(0, pos);  // the part till the space
-
-    puts(str1.c_str()); puts(str2.c_str()); // std::cout << str1 << ' ' << str2 << '\n';
-
-    // Accessing an element using subscript operator[]
-    // std::cout << str1[0] << '\n';
-    str1[0] = 'W';
-    puts(str1.c_str()); // std::cout << str1 << '\n';
+extern "C" void outchar(char ch) {
+    char *ptr = (char*)0xFB0000;
+    *ptr++ = ch;
+    *ptr++ = '\0';
 }
-#endif
+
+int run_tests(void) {
+    int ret = 0;
+
+    TEST(test_basic());
+    TEST(test_apply());
+    TEST(test_tuple());
+    TEST(test_span());
+
+    return ret;
+}
 
 int main(void) {
     os_ClrHome();
-    int failed_test = test();
+    int failed_test = run_tests();
     if (failed_test != 0) {
         char buf[sizeof("Failed test L-8388608\n")];
         boot_sprintf(buf, "Failed test L%d\n", failed_test);
@@ -49,14 +39,7 @@ int main(void) {
         std::fputs("All tests passed", stdout);
     }
 
-    func();
-
-    std::ios_base::Init();
-
-    printf("E %s\nD:", std::to_string(failed_test).c_str());
-    std::cout << failed_test << std::endl;
-
-    while (!os_GetCSC());
+    // while (!os_GetCSC());
 
     return 0;
 }
