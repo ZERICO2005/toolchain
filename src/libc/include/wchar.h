@@ -88,17 +88,17 @@ int swscanf(const wchar_t *__restrict s, const wchar_t *__restrict format, ...);
 
 int vswscanf(const wchar_t *__restrict s, const wchar_t *__restrict format, va_list arg);
 
-int fwscanf(FILE*__restrict stream, const wchar_t *__restrict format, ...);
+int fwscanf(FILE *__restrict stream, const wchar_t *__restrict format, ...);
 
-int vfwscanf(FILE*__restrict stream, const wchar_t *__restrict format, va_list arg);
+int vfwscanf(FILE *__restrict stream, const wchar_t *__restrict format, va_list arg);
 
 wint_t fgetwc(FILE *stream);
 
-wchar_t *fgetws(wchar_t *__restrict s, int n, FILE*__restrict stream);
+wchar_t *fgetws(wchar_t *__restrict s, int n, FILE *__restrict stream);
 
 wint_t fputwc(wchar_t c, FILE *stream);
 
-int fputws(const wchar_t *__restrict s, FILE*__restrict stream);
+int fputws(const wchar_t *__restrict s, FILE *__restrict stream);
 
 int fwide(FILE *stream, int mode);
 
@@ -126,7 +126,7 @@ unsigned long wcstoul(const wchar_t *__restrict nptr, wchar_t **__restrict endpt
 
 unsigned long long wcstoull(const wchar_t *__restrict nptr, wchar_t **__restrict endptr, int base);
 
-size_t wcsftime(wchar_t *__restrict s, size_t maxsize, const wchar_t *__restrict format, const struct tm*__restrict timeptr);
+size_t wcsftime(wchar_t *__restrict s, size_t maxsize, const wchar_t *__restrict format, const struct tm *__restrict timeptr);
 
 int wcscoll(const wchar_t *s1, const wchar_t *s2);
 
@@ -146,7 +146,7 @@ size_t wcrtomb(char *__restrict s, wchar_t wc, mbstate_t *__restrict ps);
 
 size_t mbsrtowcs(wchar_t *__restrict dst, const char **__restrict src, size_t len, mbstate_t *__restrict ps);
 
-size_t wcsrtombs(char*__restrict dst, const wchar_t **__restrict src, size_t len, mbstate_t *__restrict ps);
+size_t wcsrtombs(char *__restrict dst, const wchar_t **__restrict src, size_t len, mbstate_t *__restrict ps);
 
 size_t mbsnrtowcs(wchar_t *__restrict dest, const char **__restrict src, size_t nms, size_t size, mbstate_t *__restrict ps);
 
