@@ -1,0 +1,35 @@
+	assume	adl=1
+
+	public	_wcschr
+
+; wchar_t *wcschr(const wchar_t *str, int ch)
+_wcschr:
+	pop	bc
+	pop	hl
+	pop	de
+	push	de
+	push	hl
+	push	bc
+	ld	bc, 0		; calculate wcslen(str) + 1
+	xor	a, a
+	push	hl
+	dec	hl
+.loop:
+	inc	hl
+	cpi
+	jr	nz, .loop
+	cp	a, (hl)
+	jr	nz, .loop
+	sbc	hl, hl
+	sbc	hl, bc
+
+	ex	(sp), hl	; wcslen(str) + 1
+	push	de		; ch
+	push	hl		; str
+	call	_wmemchr
+	pop	bc
+	pop	bc
+	pop	bc
+	ret
+	
+	extern	_wmemchr
