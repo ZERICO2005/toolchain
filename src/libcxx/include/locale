@@ -3959,7 +3959,7 @@ wbuffer_convert<_Codecvt, _Elem, _Tr>::
       __owns_ib_(false),
       __always_noconv_(__cv_ ? __cv_->always_noconv() : false)
 {
-    setbuf(0, 4096);
+    setbuf(0, 256);
 }
 
 template <class _Codecvt, class _Elem, class _Tr>
