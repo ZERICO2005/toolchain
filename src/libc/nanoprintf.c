@@ -106,7 +106,6 @@ int _asprintf_c(char **__restrict p_str, const char *__restrict format, ...) {
   return ret;
 }
 
-__attribute__((__always_inline__))
 int _vfprintf_c(FILE* __restrict stream, const char* __restrict format, va_list vlist)
 {
   return npf_vpprintf(npf_fputc_std, (void*)stream, format, vlist);
@@ -121,16 +120,15 @@ int _fprintf_c(FILE* __restrict stream, const char* __restrict format, ...)
   return ret;
 }
 
-__attribute__((__always_inline__))
 int _vprintf_c(const char *__restrict format, va_list vlist)
 {
-  return npf_vpprintf(npf_fputc_std, (void*)stdout, format, vlist);
+  return _vfprintf_c(stdout, format, vlist);
 }
 
 int _printf_c(char const *__restrict format, ...) {
   va_list va;
   va_start(va, format);
-  int const rv = _vprintf_c(format, va);
+  const int ret = _vprintf_c(format, va);
   va_end(va);
-  return rv;
+  return ret;
 }
