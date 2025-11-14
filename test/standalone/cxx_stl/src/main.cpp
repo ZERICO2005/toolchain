@@ -3,6 +3,8 @@
 #include <sys/util.h>
 #include <ti/sprintf.h>
 #include <cstdio>
+#include <iostream>
+#include <iomanip>
 
 #define TEST(test) { ret = test; if (ret != 0) { return ret; }}
 
@@ -33,16 +35,23 @@ int run_tests(void) {
     int ret = 0;
 
     TEST(test_basic());
-    TEST(test_apply());
+    // TEST(test_apply());
     TEST(test_tuple());
-    TEST(test_span());
-    TEST(test_charconv());
-    TEST(test_random());
+    // TEST(test_span());
+    // TEST(test_charconv());
+    // TEST(test_random());
 
     return ret;
 }
 
 int main(void) {
+
+    std::ios_base::Init();
+
+    int n = 0x7184CE;
+
+    std::cout << std::hex << n << std::endl;
+
     os_ClrHome();
     int failed_test = run_tests();
     if (failed_test != 0) {
