@@ -3,6 +3,8 @@
 
 #include <__wchar_def.h>
 
-typedef struct mbstate_t mbstate_t;
+typedef struct {
+    void *__data;
+} mbstate_t;
 
 #endif /* _MBSTATE_H */

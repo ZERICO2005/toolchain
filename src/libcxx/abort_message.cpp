@@ -8,8 +8,6 @@
 #include <ti/sprintf.h>
 #include <__config>
 
-_LIBCPP_BEGIN_NAMESPACE_STD
-
 void __terminate_message(const char *message) {
     boot_sprintf(dbgerr, "libezc++: %s\n", message);
     std::terminate();
@@ -19,6 +17,8 @@ void __abort_message(const char *message) {
     boot_sprintf(dbgerr, "libezc++: %s\n", message);
     abort();
 }
+
+_LIBCPP_BEGIN_NAMESPACE_STD
 
 void __libcpp_verbose_abort(char const* format, ...) {
     va_list list;

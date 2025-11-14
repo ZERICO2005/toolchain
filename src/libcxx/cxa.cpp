@@ -12,12 +12,12 @@ int __cxa_guard_abort(long long *);
 
 __attribute__((__cold__))
 void __cxa_pure_virtual() {
-    std::__abort_message("__cxa_pure_virtual");
+    __abort_message("__cxa_pure_virtual");
 }
 
 __attribute__((__cold__))
 void __cxa_deleted_virtual() {
-    std::__abort_message("__cxa_deleted_virtual");
+    __abort_message("__cxa_deleted_virtual");
 }
 
 __attribute__((__cold__))
@@ -41,5 +41,5 @@ int __cxa_guard_release(long long *guard_object) {
 
 __attribute__((__cold__))
 int __cxa_guard_abort(__attribute__((__unused__)) long long *guard_object) {
-    std::__abort_message("__cxa_guard_abort");
+    __abort_message("__cxa_guard_abort");
 }

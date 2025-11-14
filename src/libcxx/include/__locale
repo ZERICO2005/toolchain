@@ -50,6 +50,9 @@
 # include <__support/musl/xlocale.h>
 #elif defined(_LIBCPP_HAS_MUSL_LIBC)
 # include <__support/musl/xlocale.h>
+#elif defined(_EZ80)
+# include <__support/xlocale/__strtonum_fallback.h>
+# include <__support/xlocale/__posix_l_fallback.h>
 #endif
 
 #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
