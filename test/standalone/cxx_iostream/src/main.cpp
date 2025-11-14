@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cstdarg>
 
-#if 1
+#if 0
 extern "C" void outchar(char ch) {
     char *ptr = (char*)0xFB0000;
     *ptr++ = ch;
@@ -13,30 +13,15 @@ extern "C" void outchar(char ch) {
 }
 #endif
 
-extern "C" {
-    int main(void);
-}
-
-int my_vprintf(const char *__restrict format, va_list vlist)
-{
-  return vfprintf(stdout, format, vlist);
-}
-
-int my_printf(char const *__restrict format, ...) {
-  va_list va;
-  va_start(va, format);
-  const int ret = my_vprintf(format, va);
-  va_end(va);
-  return ret;
-}
+extern "C" int init_foo(void);
 
 int main(void) {
-    std::ios_base::Init();
+    init_foo();
 
     int n = 123;
     std::cout << n << std::endl;
-    // fprintf(stdout, "hello %d\n", n);
-    my_printf("hello %d\n", n);
+    printf("hello %d\n", n);
+
 
     return 0;
 }
