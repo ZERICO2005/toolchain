@@ -15,6 +15,11 @@
  */
 #define NANOPRINTF_CONVERSION_BUFFER_SIZE 36
 
+static void npf_putc_std(int c, void *ctx) {
+  (void)ctx;
+  outchar(c);
+}
+
 static void npf_fputc_std(int c, void *ctx) {
   fputc(c, (FILE*)ctx);
 }
@@ -106,6 +111,7 @@ int _asprintf_c(char **__restrict p_str, const char *__restrict format, ...) {
   return ret;
 }
 
+__attribute__((__always_inline__))
 int _vfprintf_c(FILE* __restrict stream, const char* __restrict format, va_list vlist)
 {
   return npf_vpprintf(npf_fputc_std, (void*)stream, format, vlist);
@@ -120,15 +126,16 @@ int _fprintf_c(FILE* __restrict stream, const char* __restrict format, ...)
   return ret;
 }
 
+__attribute__((__always_inline__))
 int _vprintf_c(const char *__restrict format, va_list vlist)
 {
-  return _vfprintf_c(stdout, format, vlist);
+  return npf_vpprintf(npf_putc_std, NULL, format, vlist);
 }
 
 int _printf_c(char const *__restrict format, ...) {
   va_list va;
   va_start(va, format);
-  const int ret = _vprintf_c(format, va);
+  int const rv = _vprintf_c(format, va);
   va_end(va);
-  return ret;
+  return rv;
 }

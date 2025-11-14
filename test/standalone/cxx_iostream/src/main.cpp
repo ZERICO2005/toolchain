@@ -13,15 +13,12 @@ extern "C" void outchar(char ch) {
 }
 #endif
 
-extern "C" int init_foo(void);
-
 int main(void) {
-    init_foo();
+    init_iostream();
 
     int n = 123;
     std::cout << n << std::endl;
     printf("hello %d\n", n);
-
 
     return 0;
 }

@@ -2,17 +2,16 @@
 
 	section	.text
 
-	public	_init_foo
-
-	public	___dtor_foo
-___dtor_foo:
+	public	___fini_iostream
+___fini_iostream:
 	ret
 
-_init_foo:
+	public	_init_iostream
+_init_iostream:
 	push	hl
 	call	__ZNSt3__18ios_base4InitC2Ev
 	pop	hl
-	ld	hl, ___dtor_foo
+	ld	hl, ___fini_iostream
 	push	hl
 	call	_atexit
 	pop	hl

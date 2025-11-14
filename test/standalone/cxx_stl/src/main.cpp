@@ -21,7 +21,6 @@ extern "C" void outchar(char ch) {
     *ptr++ = '\0';
 }
 
-
 extern "C" void ti_outchar(char ch);
 
 void ti_puts(const char* str) {
@@ -45,14 +44,7 @@ int run_tests(void) {
 }
 
 int main(void) {
-
-    std::ios_base::Init();
-    std::ios_base::sync_with_stdio(false);
-    std::cin.tie(nullptr);
-
-    int n = 0x7184CE;
-
-    std::cout << std::hex << n << std::endl;
+    init_iostream();
 
     os_ClrHome();
     int failed_test = run_tests();

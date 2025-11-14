@@ -161,4 +161,6 @@ public:
 
 _LIBCPP_END_NAMESPACE_STD
 
+extern "C" void init_iostream(void);
+
 #endif // _LIBCPP_IOSFWD
