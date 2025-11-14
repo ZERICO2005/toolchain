@@ -2,7 +2,7 @@
 #include <cstddef>
 #include <span>
 
-#include "common.h"
+#include <iostream>
 
 template<class T, std::size_t N>
 [[nodiscard]]
@@ -32,11 +32,11 @@ constexpr bool contains(std::span<T, N> span, std::span<T, M> sub)
     return std::ranges::search(span, sub).begin() != span.end();
 }
 
-void println(const auto& seq)
+static void println(const auto& seq)
 {
     for (const auto& elem : seq)
-        cout << elem << ' ';
-    cout << '\n';
+        std::cout << elem << ' ';
+    std::cout << '\n';
 }
 
 int test_span()

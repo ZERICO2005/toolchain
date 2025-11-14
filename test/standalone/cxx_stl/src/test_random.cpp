@@ -3,7 +3,7 @@
 #include <string>
 #include <chrono>
 
-#include "common.h"
+#include <iostream>
 
 int test_random()
 {
@@ -22,7 +22,7 @@ int test_random()
     }
 
     for (auto [x, y] : hist) {
-        printf("%2d %s\n", x, std::string(y, '*').c_str());
+        std::cout << std::hex << x << ' ' << std::string(y, '*') << '\n';
     }
     return 0;
 }

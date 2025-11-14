@@ -2,7 +2,7 @@
 #include <string_view>
 #include <system_error>
 
-#include "common.h"
+#include <iostream>
 
 void show_to_chars(auto... format_args) {
     const size_t buf_size = 10;
@@ -10,10 +10,10 @@ void show_to_chars(auto... format_args) {
     std::to_chars_result result = std::to_chars(buf, buf + buf_size, format_args...);
 
     if (result.ec != std::errc()) {
-        cout << std::make_error_code(result.ec).message() << '\n';
+        std::cout << std::make_error_code(result.ec).message() << '\n';
     } else {
         std::string_view str(buf, result.ptr - buf);
-        cout << str << '\n';
+        std::cout << str << '\n';
     }
 }
 

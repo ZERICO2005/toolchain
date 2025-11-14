@@ -1,6 +1,8 @@
-#include "common.h"
+#include <iostream>
+#include <tuple>
+#include <utility>
 
-static int add(int first, int second) { return first + second; }
+int add(int first, int second) { return first + second; }
 
 template<typename T>
 T add_generic(T first, T second) { return first + second; }
@@ -8,7 +10,7 @@ T add_generic(T first, T second) { return first + second; }
 auto add_lambda = [](auto first, auto second) { return first + second; };
 
 template<typename... Ts>
-ostream& operator<<(ostream& os, std::tuple<Ts...> const& theTuple)
+std::ostream& operator<<(std::ostream& os, std::tuple<Ts...> const& theTuple)
 {
     std::apply
     (
@@ -26,16 +28,16 @@ ostream& operator<<(ostream& os, std::tuple<Ts...> const& theTuple)
 int test_apply()
 {
     // OK
-    cout << std::apply(add, std::pair(1, 2)) << '\n';
+    std::cout << std::apply(add, std::pair(1, 2)) << '\n';
 
     // Error: can't deduce the function type
-    // cout << std::apply(add_generic, std::make_pair(2.0f, 3.0f)) << '\n';
+    // std::cout << std::apply(add_generic, std::make_pair(2.0f, 3.0f)) << '\n';
 
     // OK
-    cout << std::apply(add_lambda, std::pair(2.0f, 3.0f)) << '\n';
+    std::cout << std::apply(add_lambda, std::pair(2.0f, 3.0f)) << '\n';
 
     // advanced example
-    std::tuple myTuple{25, "Hello", 9.31f, 'c'};
-    cout << myTuple << '\n';
-	return 0;
+    std::tuple myTuple{27, "Hello", 9.31f, 'c'};
+    std::cout << myTuple << '\n';
+    return 0;
 }

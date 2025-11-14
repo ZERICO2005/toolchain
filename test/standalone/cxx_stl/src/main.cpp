@@ -35,11 +35,11 @@ int run_tests(void) {
     int ret = 0;
 
     TEST(test_basic());
-    // TEST(test_apply());
+    TEST(test_apply());
     TEST(test_tuple());
-    // TEST(test_span());
-    // TEST(test_charconv());
-    // TEST(test_random());
+    TEST(test_span());
+    TEST(test_charconv());
+    TEST(test_random());
 
     return ret;
 }
@@ -47,6 +47,8 @@ int run_tests(void) {
 int main(void) {
 
     std::ios_base::Init();
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(nullptr);
 
     int n = 0x7184CE;
 
