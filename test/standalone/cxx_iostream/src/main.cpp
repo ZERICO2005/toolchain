@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cstdarg>
 
-#if 0
+#if 1
 extern "C" void outchar(char ch) {
     char *ptr = (char*)0xFB0000;
     *ptr++ = ch;

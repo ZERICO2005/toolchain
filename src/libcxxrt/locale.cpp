@@ -189,14 +189,6 @@ locale::__imp::__imp(size_t refs)
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
     install(&make<codecvt<wchar_t, char, mbstate_t> >(1u));
 #endif
-_LIBCPP_SUPPRESS_DEPRECATED_PUSH
-    install(&make<codecvt<char16_t, char, mbstate_t> >(1u));
-    install(&make<codecvt<char32_t, char, mbstate_t> >(1u));
-_LIBCPP_SUPPRESS_DEPRECATED_POP
-#ifndef _LIBCPP_HAS_NO_CHAR8_T
-    install(&make<codecvt<char16_t, char8_t, mbstate_t> >(1u));
-    install(&make<codecvt<char32_t, char8_t, mbstate_t> >(1u));
-#endif
     install(&make<numpunct<char> >(1u));
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
     install(&make<numpunct<wchar_t> >(1u));
@@ -261,14 +253,6 @@ locale::__imp::__imp(const string& name, size_t refs)
         install(new codecvt_byname<char, char, mbstate_t>(name_));
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
         install(new codecvt_byname<wchar_t, char, mbstate_t>(name_));
-#endif
-_LIBCPP_SUPPRESS_DEPRECATED_PUSH
-        install(new codecvt_byname<char16_t, char, mbstate_t>(name_));
-        install(new codecvt_byname<char32_t, char, mbstate_t>(name_));
-_LIBCPP_SUPPRESS_DEPRECATED_POP
-#ifndef _LIBCPP_HAS_NO_CHAR8_T
-        install(new codecvt_byname<char16_t, char8_t, mbstate_t>(name_));
-        install(new codecvt_byname<char32_t, char8_t, mbstate_t>(name_));
 #endif
         install(new numpunct_byname<char>(name_));
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
@@ -341,14 +325,6 @@ locale::__imp::__imp(const __imp& other, const string& name, locale::category c)
             install(new codecvt_byname<char, char, mbstate_t>(name));
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
             install(new codecvt_byname<wchar_t, char, mbstate_t>(name));
-#endif
-_LIBCPP_SUPPRESS_DEPRECATED_PUSH
-            install(new codecvt_byname<char16_t, char, mbstate_t>(name));
-            install(new codecvt_byname<char32_t, char, mbstate_t>(name));
-_LIBCPP_SUPPRESS_DEPRECATED_POP
-#ifndef _LIBCPP_HAS_NO_CHAR8_T
-            install(new codecvt_byname<char16_t, char8_t, mbstate_t>(name));
-            install(new codecvt_byname<char32_t, char8_t, mbstate_t>(name));
 #endif
         }
         if (c & locale::monetary)
@@ -431,14 +407,6 @@ locale::__imp::__imp(const __imp& other, const __imp& one, locale::category c)
             install_from<_VSTD::ctype<wchar_t> >(one);
 #endif
             install_from<_VSTD::codecvt<char, char, mbstate_t> >(one);
-_LIBCPP_SUPPRESS_DEPRECATED_PUSH
-            install_from<_VSTD::codecvt<char16_t, char, mbstate_t> >(one);
-            install_from<_VSTD::codecvt<char32_t, char, mbstate_t> >(one);
-_LIBCPP_SUPPRESS_DEPRECATED_POP
-#ifndef _LIBCPP_HAS_NO_CHAR8_T
-            install_from<_VSTD::codecvt<char16_t, char8_t, mbstate_t> >(one);
-            install_from<_VSTD::codecvt<char32_t, char8_t, mbstate_t> >(one);
-#endif
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
             install_from<_VSTD::codecvt<wchar_t, char, mbstate_t> >(one);
 #endif
