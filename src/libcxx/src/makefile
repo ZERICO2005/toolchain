@@ -14,58 +14,75 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-include $(CURDIR)/../common.mk
+include $(CURDIR)/../../common.mk
 
 EZCXXFLAGS += -std=gnu++23
 EZCXXFLAGS += -Oz
 EZCXXFLAGS += -D_LIBCPP_BUILDING_LIBRARY -DLIBCXX_BUILDING_LIBCXXABI
 EZCXXFLAGS += -fno-use-cxa-atexit
+EZCXXFLAGS += -D_LIBPCPP_DEFINE_NEW_HANDLER
+EZCXXFLAGS += -Iinclude
+EZCXXFLAGS += -I./
 
 OBJECTS =
-OBJECTS += $(patsubst %.c,build/%.c.o,$(wildcard *.c))
-OBJECTS += $(patsubst %.cpp,build/%.cpp.o,$(wildcard *.cpp))
 OBJECTS += $(patsubst %.src,build/%.o,$(wildcard *.src))
 
-CXX_LIB := build/libcxx.a
+# libcxxrt base
+
+OBJECTS += build/algorithm.cpp.o
+OBJECTS += build/any.cpp.o
+OBJECTS += build/bind.cpp.o
+OBJECTS += build/call_once.cpp.o
+OBJECTS += build/charconv.cpp.o
+OBJECTS += build/chrono.cpp.o
+OBJECTS += build/error_category.cpp.o
+OBJECTS += build/exception.cpp.o
+OBJECTS += build/expected.cpp.o
+OBJECTS += build/functional.cpp.o
+OBJECTS += build/hash.cpp.o
+OBJECTS += build/memory.cpp.o
+OBJECTS += build/memory_resource.cpp.o
+OBJECTS += build/new_handler.cpp.o
+OBJECTS += build/new_helpers.cpp.o
+OBJECTS += build/optional.cpp.o
+OBJECTS += build/print.cpp.o
+OBJECTS += build/random_shuffle.cpp.o
+OBJECTS += build/stdexcept.cpp.o
+OBJECTS += build/string.cpp.o
+OBJECTS += build/system_error.cpp.o
+OBJECTS += build/typeinfo.cpp.o
+OBJECTS += build/valarray.cpp.o
+OBJECTS += build/variant.cpp.o
+OBJECTS += build/vector.cpp.o
+OBJECTS += build/verbose_abort.cpp.o
+
+# LIBCXX_ENABLE_NEW_DELETE_DEFINITIONS
+
+OBJECTS += build/new.cpp.o
+
+CXXRT_LIB := build/libcxxrt.a
 
 .SECONDARY:
 
-all: $(CXX_LIB)
-	$(MAKE) -C src
+all: $(CXXRT_LIB)
 
-$(CXX_LIB): $(OBJECTS)
+$(CXXRT_LIB): $(OBJECTS)
 	$(Q)$(call MKDIR,build)
 	$(Q)$(EZAR) rcs $@ $^
-
-build/%.c.src: %.c
-	$(Q)$(call MKDIR,build)
-	$(Q)$(EZCC) $(EZCFLAGS) $< -o $@
-
-build/%.cpp.src: %.cpp
-	$(Q)$(call MKDIR,build)
-	$(Q)$(EZCC) $(EZCXXFLAGS) $< -o $@
-
-build/%.c.o: build/%.c.src
-	$(Q)$(call MKDIR,build)
-	$(Q)$(EZAS) $(EZASFLAGS) $< -o $@
 
 build/%.cpp.o: build/%.cpp.src
 	$(Q)$(call MKDIR,build)
 	$(Q)$(EZAS) $(EZASFLAGS) $< -o $@
 
-build/%.o: %.src
+build/%.cpp.src: %.cpp
 	$(Q)$(call MKDIR,build)
-	$(Q)$(EZAS) $(EZASFLAGS) $< -o $@
+	$(Q)$(EZCC) $(EZCXXFLAGS) $< -o $@
 
 clean:
 	$(Q)$(call RMDIR,build)
 
 install: all
-	$(Q)$(call MKDIR,$(INSTALL_H))
-	$(Q)$(call MKDIR,$(INSTALL_CXX_H))
 	$(Q)$(call MKDIR,$(INSTALL_LIBCXX))
-	$(Q)$(call COPY,$(call NATIVEPATH,$(CXX_LIB)),$(INSTALL_LIBCXX))
-	$(Q)$(call COPYDIR,$(call NATIVEPATH,include),$(INSTALL_CXX_H))
-	$(MAKE) -C src install
+	$(Q)$(call COPY,$(call NATIVEPATH,$(CXXRT_LIB)),$(INSTALL_LIBCXX))
 
 .PHONY: all clean install
