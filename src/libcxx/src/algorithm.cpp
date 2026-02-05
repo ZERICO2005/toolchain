@@ -12,7 +12,7 @@
 _LIBCPP_BEGIN_NAMESPACE_STD
 
 template <class Comp, class RandomAccessIterator>
-void __sort(RandomAccessIterator first, RandomAccessIterator last, Comp comp) {
+void __sort(RandomAccessIterator first, RandomAccessIterator last, __attribute__((__unused__)) Comp comp) {
   if (first == last) // log(0) is undefined, so don't try computing the depth
     return;
 

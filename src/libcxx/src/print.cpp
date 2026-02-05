@@ -20,7 +20,7 @@
 #  define NOMINMAX
 #  include <io.h>
 #  include <windows.h>
-#elif __has_include(<unistd.h>)
+#elif !defined(_EZ80) && __has_include(<unistd.h>)
 #  include <unistd.h>
 #  if defined(_NEWLIB_VERSION)
 #    if defined(_POSIX_C_SOURCE) && __has_include(<stdio.h>)

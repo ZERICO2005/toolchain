@@ -1,123 +1,197 @@
-// -*- C++ -*-
-#ifndef _EZCXX_CXXABI_H
-#define _EZCXX_CXXABI_H
+//===----------------------------------------------------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 
-#include <cstddef>
-#include <typeinfo>
+#ifndef __CXXABI_H
+#define __CXXABI_H
 
-#pragma clang system_header
+/*
+ * This header provides the interface to the C++ ABI as defined at:
+ *       https://itanium-cxx-abi.github.io/cxx-abi/
+ */
 
+#include <stddef.h>
+#include <stdint.h>
+
+#include <__cxxabi_config.h>
+
+#define _LIBCPPABI_VERSION 15000
+#define _LIBCXXABI_NORETURN  __attribute__((noreturn))
+#define _LIBCXXABI_ALWAYS_COLD __attribute__((cold))
+
+#ifdef __cplusplus
+
+namespace std {
+#if defined(_WIN32)
+class _LIBCXXABI_TYPE_VIS type_info; // forward declaration
+#else
+class type_info; // forward declaration
+#endif
+}
+
+
+// runtime routines use C calling conventions, but are in __cxxabiv1 namespace
 namespace __cxxabiv1 {
-struct __dynamic_cast_info;
 
-class __fundamental_type_info : public std::type_info {
-public:
-    ~__fundamental_type_info();
-};
+struct __cxa_exception;
 
-class __array_type_info : public std::type_info {
-public:
-    ~__array_type_info();
-};
+extern "C"  {
 
-class __function_type_info : public std::type_info {
-public:
-    ~__function_type_info();
-};
+// 2.4.2 Allocating the Exception Object
+extern _LIBCXXABI_FUNC_VIS void *
+__cxa_allocate_exception(size_t thrown_size) _LIBCXXABI_NOEXCEPT;
+extern _LIBCXXABI_FUNC_VIS void
+__cxa_free_exception(void *thrown_exception) _LIBCXXABI_NOEXCEPT;
+// This function is an LLVM extension, which mirrors the same extension in libsupc++ and libcxxrt
+extern _LIBCXXABI_FUNC_VIS __cxa_exception*
+#ifdef __wasm__
+// In Wasm, a destructor returns its argument
+__cxa_init_primary_exception(void* object, std::type_info* tinfo, void*(_LIBCXXABI_DTOR_FUNC* dest)(void*)) _LIBCXXABI_NOEXCEPT;
+#else
+__cxa_init_primary_exception(void* object, std::type_info* tinfo, void(_LIBCXXABI_DTOR_FUNC* dest)(void*)) _LIBCXXABI_NOEXCEPT;
+#endif
 
-class __enum_type_info : public std::type_info {
-public:
-    ~__enum_type_info();
-};
+// 2.4.3 Throwing the Exception Object
+extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void
+__cxa_throw(void *thrown_exception, std::type_info *tinfo,
+#ifdef __wasm__
+            void *(_LIBCXXABI_DTOR_FUNC *dest)(void *));
+#else
+            void (_LIBCXXABI_DTOR_FUNC *dest)(void *));
+#endif
 
-class __class_type_info : public std::type_info {
-public:
-    ~__class_type_info();
-    virtual void __search_above_target(__dynamic_cast_info *, const void *, const void *, bool) const noexcept;
-    virtual void __search_below_target(__dynamic_cast_info *, const void *, bool) const noexcept;
-};
+// 2.5.3 Exception Handlers
+extern _LIBCXXABI_FUNC_VIS void *
+__cxa_get_exception_ptr(void *exceptionObject) _LIBCXXABI_NOEXCEPT;
+extern _LIBCXXABI_FUNC_VIS void *
+__cxa_begin_catch(void *exceptionObject) _LIBCXXABI_NOEXCEPT;
+extern _LIBCXXABI_FUNC_VIS void __cxa_end_catch();
+#if defined(_LIBCXXABI_ARM_EHABI)
+extern _LIBCXXABI_FUNC_VIS bool
+__cxa_begin_cleanup(void *exceptionObject) _LIBCXXABI_NOEXCEPT;
+extern _LIBCXXABI_FUNC_VIS void __cxa_end_cleanup();
+#endif
+extern _LIBCXXABI_FUNC_VIS std::type_info *__cxa_current_exception_type();
 
-class __si_class_type_info : public __class_type_info {
-public:
-    const __class_type_info *__base_type;
+// GNU extension
+// Calls `terminate` with the current exception being caught. This function is used by GCC when a `noexcept` function
+// throws an exception inside a try/catch block and doesn't catch it.
+extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void __cxa_call_terminate(void*) _LIBCXXABI_NOEXCEPT;
 
-    ~__si_class_type_info();
-    void __search_above_target(__dynamic_cast_info *, const void *, const void *, bool) const noexcept;
-    void __search_below_target(__dynamic_cast_info *, const void *, bool) const noexcept;
-};
+// 2.5.4 Rethrowing Exceptions
+extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void __cxa_rethrow();
 
-struct __base_class_type_info {
-public:
-    const __class_type_info *__base_type;
-    enum __offset_flags_masks : long {
-        __virtual_mask = 0x1,
-        __public_mask  = 0x2,
-    } __offset_flags;
+// 2.6 Auxiliary Runtime APIs
+extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void __cxa_bad_cast(void);
+extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void __cxa_bad_typeid(void);
+extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void
+__cxa_throw_bad_array_new_length(void);
 
-    std::ptrdiff_t __offset() const noexcept { return __offset_flags >> 8; }
-    const void *__adjust_current_pointer(const void *) const noexcept;
-    void __search_above_target(__dynamic_cast_info *, const void *, const void *, bool) const noexcept;
-    void __search_below_target(__dynamic_cast_info *, const void *, bool) const noexcept;
-};
+// 3.2.6 Pure Virtual Function API
+extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void __cxa_pure_virtual(void);
 
-class __vmi_class_type_info : public __class_type_info {
-public:
-    enum __flags_masks : unsigned {
-        __non_diamond_repeat_mask = 1 << 0,
-        __diamond_shaped_mask     = 1 << 1,
-    } __flags;
-    std::size_t __base_count;
-    __base_class_type_info __base_info[];
+// 3.2.7 Deleted Virtual Function API
+extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void __cxa_deleted_virtual(void);
 
-    ~__vmi_class_type_info();
-    void __search_above_target(__dynamic_cast_info *, const void *, const void *, bool) const noexcept;
-    void __search_below_target(__dynamic_cast_info *, const void *, bool) const noexcept;
-};
+// 3.3.2 One-time Construction API
+#if defined(_LIBCXXABI_GUARD_ABI_ARM)
+extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_ALWAYS_COLD int __cxa_guard_acquire(uint32_t *);
+extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_ALWAYS_COLD void __cxa_guard_release(uint32_t *);
+extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_ALWAYS_COLD void __cxa_guard_abort(uint32_t *);
+#else
+extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_ALWAYS_COLD int __cxa_guard_acquire(uint64_t *);
+extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_ALWAYS_COLD void __cxa_guard_release(uint64_t *);
+extern _LIBCXXABI_FUNC_VIS _LIBCXXABI_ALWAYS_COLD void __cxa_guard_abort(uint64_t *);
+#endif
 
-class __pbase_type_info : public std::type_info {
-public:
-    enum __masks : unsigned {
-        __const_mask            = 1 << 0,
-        __volatile_mask         = 1 << 1,
-        __restrict_mask         = 1 << 2,
-        __incomplete_mask       = 1 << 3,
-        __incomplete_class_mask = 1 << 4,
-        __transaction_safe_mask = 1 << 5,
-        __noexcept_mask         = 1 << 6,
-    } __flags;
-    const std::type_info *__pointee;
+// 3.3.3 Array Construction and Destruction API
+extern _LIBCXXABI_FUNC_VIS void *
+__cxa_vec_new(size_t element_count, size_t element_size, size_t padding_size,
+              void (*constructor)(void *), void (*destructor)(void *));
 
-    ~__pbase_type_info();
-};
+extern _LIBCXXABI_FUNC_VIS void *
+__cxa_vec_new2(size_t element_count, size_t element_size, size_t padding_size,
+               void (*constructor)(void *), void (*destructor)(void *),
+               void *(*alloc)(size_t), void (*dealloc)(void *));
 
-class __pointer_type_info : public __pbase_type_info {
-public:
-    ~__pointer_type_info();
-};
+extern _LIBCXXABI_FUNC_VIS void *
+__cxa_vec_new3(size_t element_count, size_t element_size, size_t padding_size,
+               void (*constructor)(void *), void (*destructor)(void *),
+               void *(*alloc)(size_t), void (*dealloc)(void *, size_t));
 
-class __pointer_to_member_type_info : public __pbase_type_info {
-public:
-    const __class_type_info *__context;
+extern _LIBCXXABI_FUNC_VIS void
+__cxa_vec_ctor(void *array_address, size_t element_count, size_t element_size,
+               void (*constructor)(void *), void (*destructor)(void *));
 
-    ~__pointer_to_member_type_info();
-};
+extern _LIBCXXABI_FUNC_VIS void __cxa_vec_dtor(void *array_address,
+                                               size_t element_count,
+                                               size_t element_size,
+                                               void (*destructor)(void *));
 
-extern "C" {
+extern _LIBCXXABI_FUNC_VIS void __cxa_vec_cleanup(void *array_address,
+                                                  size_t element_count,
+                                                  size_t element_size,
+                                                  void (*destructor)(void *));
 
-void *__dynamic_cast(const void *sub,
-                     const __class_type_info *src,
-                     const __class_type_info *dst,
-                     std::ptrdiff_t src2dst_offset);
+extern _LIBCXXABI_FUNC_VIS void __cxa_vec_delete(void *array_address,
+                                                 size_t element_size,
+                                                 size_t padding_size,
+                                                 void (*destructor)(void *));
 
-[[noreturn]] void __cxa_bad_cast();
-[[noreturn]] void __cxa_bad_typeid();
-[[noreturn]] void __cxa_pure_virtual();
-[[noreturn]] void __cxa_deleted_virtual();
+extern _LIBCXXABI_FUNC_VIS void
+__cxa_vec_delete2(void *array_address, size_t element_size, size_t padding_size,
+                  void (*destructor)(void *), void (*dealloc)(void *));
+
+extern _LIBCXXABI_FUNC_VIS void
+__cxa_vec_delete3(void *__array_address, size_t element_size,
+                  size_t padding_size, void (*destructor)(void *),
+                  void (*dealloc)(void *, size_t));
+
+extern _LIBCXXABI_FUNC_VIS void
+__cxa_vec_cctor(void *dest_array, void *src_array, size_t element_count,
+                size_t element_size, void (*constructor)(void *, void *),
+                void (*destructor)(void *));
+
+// 3.3.5.3 Runtime API
+// These functions are part of the C++ ABI, but they are not defined in libc++abi:
+//    int __cxa_atexit(void (*)(void *), void *, void *);
+//    void __cxa_finalize(void *);
+
+// 3.4 Demangler API
+extern _LIBCXXABI_FUNC_VIS char *__cxa_demangle(const char *mangled_name,
+                                                char *output_buffer,
+                                                size_t *length, int *status);
+
+// Apple additions to support C++ 0x exception_ptr class
+// These are primitives to wrap a smart pointer around an exception object
+extern _LIBCXXABI_FUNC_VIS void *__cxa_current_primary_exception() _LIBCXXABI_NOEXCEPT;
+extern _LIBCXXABI_FUNC_VIS void
+__cxa_rethrow_primary_exception(void *primary_exception);
+extern _LIBCXXABI_FUNC_VIS void
+__cxa_increment_exception_refcount(void *primary_exception) _LIBCXXABI_NOEXCEPT;
+extern _LIBCXXABI_FUNC_VIS void
+__cxa_decrement_exception_refcount(void *primary_exception) _LIBCXXABI_NOEXCEPT;
+
+// Apple extension to support std::uncaught_exception()
+extern _LIBCXXABI_FUNC_VIS bool __cxa_uncaught_exception() _LIBCXXABI_NOEXCEPT;
+extern _LIBCXXABI_FUNC_VIS unsigned int __cxa_uncaught_exceptions() _LIBCXXABI_NOEXCEPT;
+
+#if defined(__linux__) || defined(__Fuchsia__)
+// Linux and Fuchsia TLS support. Not yet an official part of the Itanium ABI.
+// https://sourceware.org/glibc/wiki/Destructor%20support%20for%20thread_local%20variables
+extern _LIBCXXABI_FUNC_VIS int __cxa_thread_atexit(void (*)(void *), void *,
+                                                   void *) _LIBCXXABI_NOEXCEPT;
+#endif
 
 } // extern "C"
-
 } // namespace __cxxabiv1
 
 namespace abi = __cxxabiv1;
 
-#endif // _EZCXX_CXXABI_H
+#endif // __cplusplus
+
+#endif // __CXXABI_H

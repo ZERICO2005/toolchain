@@ -23,6 +23,9 @@
 #elif defined(__GLIBCXX__)
 #  include "support/runtime/exception_glibcxx.ipp"
 #  include "support/runtime/exception_pointer_glibcxx.ipp"
+#elif defined(_EZ80)
+#  include "support/runtime/exception_ezcxx.ipp"
+#  include "support/runtime/exception_pointer_ezcxx.ipp"
 #else
 #  include "include/atomic_support.h"
 #  include "support/runtime/exception_fallback.ipp"

@@ -23,11 +23,11 @@
 #include "include/apple_availability.h"
 #include <time.h> // clock_gettime and CLOCK_{MONOTONIC,REALTIME,MONOTONIC_RAW}
 
-#if __has_include(<unistd.h>)
+#if !defined(_EZ80) && __has_include(<unistd.h>)
 #  include <unistd.h> // _POSIX_TIMERS
 #endif
 
-#if __has_include(<sys/time.h>)
+#if !defined(_EZ80) && __has_include(<sys/time.h>)
 #  include <sys/time.h> // for gettimeofday and timeval
 #endif
 
@@ -55,7 +55,7 @@
 #  include <zircon/syscalls.h>
 #endif
 
-#if __has_include(<mach/mach_time.h>)
+#if !defined(_EZ80) && __has_include(<mach/mach_time.h>)
 #  include <mach/mach_time.h>
 #endif
 
@@ -135,6 +135,15 @@ static system_clock::time_point __libcpp_system_clock_now() {
   if (0 != clock_gettime(CLOCK_REALTIME, &tp))
     std::__throw_system_error(errno, "clock_gettime(CLOCK_REALTIME) failed");
   return system_clock::time_point(seconds(tp.tv_sec) + microseconds(tp.tv_nsec / 1000));
+}
+
+#elif defined(_EZ80)
+
+static system_clock::time_point __libcpp_system_clock_now() {
+  uint64_t t = clock();
+  uint64_t sec = t / CLOCKS_PER_SEC;
+  uint64_t frac = t % CLOCKS_PER_SEC;
+  return system_clock::time_point(seconds(sec) + microseconds((uint64_t)(((float)frac / (float)CLOCKS_PER_SEC) * 1000000.0f)));
 }
 
 #else

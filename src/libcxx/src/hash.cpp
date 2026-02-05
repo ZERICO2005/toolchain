@@ -55,6 +55,9 @@ inline void __check_for_overflow(size_t N) {
   if constexpr (sizeof(size_t) == 4) {
     if (N > 0xFFFFFFFB)
       std::__throw_overflow_error("__next_prime overflow");
+  } else if constexpr (sizeof(size_t) == 3) {
+    if (N > 0xFFFFFD)
+      std::__throw_overflow_error("__next_prime overflow");
   } else {
     if (N > 0xFFFFFFFFFFFFFFC5ull)
       std::__throw_overflow_error("__next_prime overflow");
