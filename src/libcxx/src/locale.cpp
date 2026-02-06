@@ -155,6 +155,7 @@ locale::__imp::__imp(size_t refs) : facet(refs), facets_(N), name_("C") {
 #if _LIBCPP_HAS_WIDE_CHARACTERS
   install(&make<codecvt<wchar_t, char, mbstate_t> >(1u));
 #endif
+#ifndef _EZ80
   _LIBCPP_SUPPRESS_DEPRECATED_PUSH
   install(&make<codecvt<char16_t, char, mbstate_t> >(1u));
   install(&make<codecvt<char32_t, char, mbstate_t> >(1u));
@@ -163,6 +164,7 @@ locale::__imp::__imp(size_t refs) : facet(refs), facets_(N), name_("C") {
   install(&make<codecvt<char16_t, char8_t, mbstate_t> >(1u));
   install(&make<codecvt<char32_t, char8_t, mbstate_t> >(1u));
 #endif
+#endif // _EZ80
   install(&make<numpunct<char> >(1u));
 #if _LIBCPP_HAS_WIDE_CHARACTERS
   install(&make<numpunct<wchar_t> >(1u));
@@ -225,6 +227,7 @@ locale::__imp::__imp(const string& name, size_t refs) : facet(refs), facets_(N),
 #if _LIBCPP_HAS_WIDE_CHARACTERS
   install(new codecvt_byname<wchar_t, char, mbstate_t>(name_));
 #endif
+#ifndef _EZ80
   _LIBCPP_SUPPRESS_DEPRECATED_PUSH
   install(new codecvt_byname<char16_t, char, mbstate_t>(name_));
   install(new codecvt_byname<char32_t, char, mbstate_t>(name_));
@@ -233,6 +236,7 @@ locale::__imp::__imp(const string& name, size_t refs) : facet(refs), facets_(N),
   install(new codecvt_byname<char16_t, char8_t, mbstate_t>(name_));
   install(new codecvt_byname<char32_t, char8_t, mbstate_t>(name_));
 #endif
+#endif // _EZ80
   install(new numpunct_byname<char>(name_));
 #if _LIBCPP_HAS_WIDE_CHARACTERS
   install(new numpunct_byname<wchar_t>(name_));
@@ -291,6 +295,7 @@ locale::__imp::__imp(const __imp& other, const string& name, locale::category c)
 #if _LIBCPP_HAS_WIDE_CHARACTERS
     install(new codecvt_byname<wchar_t, char, mbstate_t>(name));
 #endif
+#ifndef _EZ80
     _LIBCPP_SUPPRESS_DEPRECATED_PUSH
     install(new codecvt_byname<char16_t, char, mbstate_t>(name));
     install(new codecvt_byname<char32_t, char, mbstate_t>(name));
@@ -299,6 +304,7 @@ locale::__imp::__imp(const __imp& other, const string& name, locale::category c)
     install(new codecvt_byname<char16_t, char8_t, mbstate_t>(name));
     install(new codecvt_byname<char32_t, char8_t, mbstate_t>(name));
 #endif
+#endif // _EZ80
   }
   if (c & locale::monetary) {
     install(new moneypunct_byname<char, false>(name));
@@ -363,6 +369,7 @@ locale::__imp::__imp(const __imp& other, const __imp& one, locale::category c)
     install_from<std::ctype<wchar_t> >(one);
 #endif
     install_from<std::codecvt<char, char, mbstate_t> >(one);
+#ifdef _EZ80
     _LIBCPP_SUPPRESS_DEPRECATED_PUSH
     install_from<std::codecvt<char16_t, char, mbstate_t> >(one);
     install_from<std::codecvt<char32_t, char, mbstate_t> >(one);
@@ -371,6 +378,7 @@ locale::__imp::__imp(const __imp& other, const __imp& one, locale::category c)
     install_from<std::codecvt<char16_t, char8_t, mbstate_t> >(one);
     install_from<std::codecvt<char32_t, char8_t, mbstate_t> >(one);
 #endif
+#endif // _EZ80
 #if _LIBCPP_HAS_WIDE_CHARACTERS
     install_from<std::codecvt<wchar_t, char, mbstate_t> >(one);
 #endif
