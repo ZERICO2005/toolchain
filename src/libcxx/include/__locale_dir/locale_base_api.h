@@ -132,6 +132,14 @@
 #      include <__locale_dir/locale_base_api/ibm.h>
 #    elif defined(__OpenBSD__)
 #      include <__locale_dir/locale_base_api/openbsd.h>
+#    elif defined(_EZ80)
+#      include <wchar.h>
+#      include <locale.h>
+// #      include <__locale_dir/support/no_locale/characters.h>
+// #      include <__locale_dir/support/no_locale/strtonum.h>
+// #      include <__support/xlocale/__nop_locale_mgmt.h>
+#      include <__support/xlocale/__posix_l_fallback.h>
+#      include <__support/xlocale/__strtonum_fallback.h>
 #    endif
 
 #    include <__locale_dir/locale_base_api/bsd_locale_fallbacks.h>

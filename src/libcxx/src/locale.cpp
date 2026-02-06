@@ -3848,7 +3848,7 @@ static bool is_non_breaking_space(const char* ptr) {
 }
 #endif // _LIBCPP_HAS_WIDE_CHARACTERS
 
-static bool checked_string_to_char_convert(char& dest, const char* ptr, __locale::__locale_t __loc) {
+static bool checked_string_to_char_convert(char& dest, const char* ptr, __attribute__((__unused__)) __locale::__locale_t __loc) {
   if (*ptr == '\0')
     return false;
   if (!ptr[1]) {
