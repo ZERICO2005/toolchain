@@ -238,9 +238,6 @@ double stod(const string& str, size_t* idx) { return as_float<double>("stod", st
 
 long double stold(const string& str, size_t* idx) { return as_float<long double>("stold", str, idx); }
 
-<<<<<<< HEAD
-#if _LIBCPP_HAS_WIDE_CHARACTERS
-=======
 #else // _EZ80
 
 int stoi(const string& str, size_t *pos, int base) {
@@ -317,8 +314,8 @@ long double stold(const string& str, size_t *pos) {
 
 #endif // _EZ80
 
-#ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
->>>>>>> 1fc19d93 (added std::string size optimizations)
+#if _LIBCPP_HAS_WIDE_CHARACTERS
+
 int stoi(const wstring& str, size_t* idx, int base) { return as_integer<int>("stoi", str, idx, base); }
 
 long stol(const wstring& str, size_t* idx, int base) { return as_integer<long>("stol", str, idx, base); }
@@ -422,9 +419,6 @@ string to_string(unsigned val) { return i_to_string< string>(val); }
 string to_string(unsigned long val) { return i_to_string< string>(val); }
 string to_string(unsigned long long val) { return i_to_string< string>(val); }
 
-<<<<<<< HEAD
-#if _LIBCPP_HAS_WIDE_CHARACTERS
-=======
 #else // _EZ80
 
 string to_string(int value) {
@@ -465,8 +459,7 @@ string to_string(unsigned long long value) {
 
 #endif // _EZ80
 
-#ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
->>>>>>> 1fc19d93 (added std::string size optimizations)
+#if _LIBCPP_HAS_WIDE_CHARACTERS
 wstring to_wstring(int val) { return i_to_string<wstring>(val); }
 wstring to_wstring(long val) { return i_to_string<wstring>(val); }
 wstring to_wstring(long long val) { return i_to_string<wstring>(val); }
@@ -481,9 +474,6 @@ string to_string(float val) { return as_string(snprintf, initial_string< string>
 string to_string(double val) { return as_string(snprintf, initial_string< string>()(), "%f", val); }
 string to_string(long double val) { return as_string(snprintf, initial_string< string>()(), "%Lf", val); }
 
-<<<<<<< HEAD
-#if _LIBCPP_HAS_WIDE_CHARACTERS
-=======
 #else // _EZ80
 
 string to_string(float value) {
@@ -506,8 +496,7 @@ string to_string(long double value) {
 
 #endif // _EZ80
 
-#ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
->>>>>>> 1fc19d93 (added std::string size optimizations)
+#if _LIBCPP_HAS_WIDE_CHARACTERS
 wstring to_wstring(float val) { return as_string(get_swprintf(), initial_string<wstring>()(), L"%f", val); }
 wstring to_wstring(double val) { return as_string(get_swprintf(), initial_string<wstring>()(), L"%f", val); }
 wstring to_wstring(long double val) { return as_string(get_swprintf(), initial_string<wstring>()(), L"%Lf", val); }

@@ -68,13 +68,8 @@ _LIBCPP_EXPORTED_FROM_ABI bool __is_windows_terminal(FILE* __stream);
 //
 // Note the function is only implemented on the Windows platform.
 _LIBCPP_EXPORTED_FROM_ABI void __write_to_windows_console(FILE* __stream, wstring_view __view);
-<<<<<<< HEAD
-#    endif // _LIBCPP_HAS_WIDE_CHARACTERS
-#  elif __has_include(<unistd.h>)
-=======
-#  endif // _LIBCPP_HAS_NO_WIDE_CHARACTERS
-#elif !defined(_EZ80) && __has_include(<unistd.h>)
->>>>>>> 26c6d659 (fixed __has_include in CI/autotest)
+#    endif // _LIBCPP_HAS_NO_WIDE_CHARACTERS
+#  elif !defined(_EZ80) && __has_include(<unistd.h>)
 _LIBCPP_EXPORTED_FROM_ABI bool __is_posix_terminal(FILE* __stream);
 #  endif // _LIBCPP_WIN32API
 
