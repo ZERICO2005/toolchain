@@ -1,0 +1,34 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_nanf
+	.type	_nanf, @function
+	.global	_nan
+	.type	_nan, @function
+
+_nan:
+_nanf:
+	; return strtol(tag, NULL, 0) & Float32_nan_mask) | Float32_pos_qnan;
+	; return strtol(tag, NULL, 0) & 0x3FFFFF) | 0x7FC00000;
+	pop	bc
+	ex	(sp), hl
+	push	bc
+	ld	bc, 0
+	push	bc
+	push	bc
+	push	hl
+	call	_strtol
+	ex	sp, (hl)
+	ld	hl, 2
+	add	hl, sp
+	; set bits 22 and 23 in UHL
+	ld	a, $C0
+	or	a, (hl)
+	ld	(hl), a
+	pop	hl
+	pop	af
+	pop	af
+	ld	e, $7F
+	ret
+
+	.extern	_strtol

@@ -1,0 +1,28 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_nanl
+	.type	_nanl, @function
+
+_nanl:
+	; return strtoll(tag, NULL, 0) & Float64_nan_mask) | Float64_pos_qnan;
+	; return strtoll(tag, NULL, 0) & 0x0007FFFFFFFFFFFF) | 0x7FF8000000000000;
+	pop	bc
+	ex	(sp), hl
+	push	bc
+	ld	bc, 0
+	push	bc
+	push	bc
+	push	hl
+	call	_strtoll
+	pop	af
+	pop	af
+	pop	af
+	; set bits 51-55 in C
+	ld	a, $F8
+	or	a, c
+	ld	c, a
+	ld	b, $7F
+	ret
+
+	.extern	_strtoll
