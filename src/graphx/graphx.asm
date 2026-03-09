@@ -4964,8 +4964,9 @@ _RSS_NC:
 	sbc	hl, hl
 	ccf
 	sbc	hl, de
-	ld	(iy + (.dsrs_sinf_0A - .dsrs_base_address)), hl	; write smc
-	ld	(iy + (.dsrs_sinf_0B - .dsrs_base_address)), hl	; write smc
+	; ld	(iy + (.dsrs_sinf_0A - .dsrs_base_address)), hl	; write smc
+	; ld	(iy + (.dsrs_sinf_0B - .dsrs_base_address)), hl	; write smc
+	ld.s	sp, hl
 
 	; dxs = sinf * -(size * scale / 128);
 	call	_CalcDXS	; uses (iy + 0)
@@ -5042,12 +5043,15 @@ _RSS_NC:
 	; DE = HL * C(width)
 	call	_set_DE_to_HL_mul_C
 	ld	hl, (iy + (.dsrs_sinf_1_plus_offset_ix - .dsrs_base_address))
-	or	a, a
+	xor	a, a
 	sbc	hl, de
 	ld	(iy + (.dsrs_sinf_1_plus_offset_ix - .dsrs_base_address)), hl
 
 	; calculate y-loop offset for HL
-	ld	hl, (iy + (.dsrs_sinf_0A - .dsrs_base_address))
+	; ld	hl, (iy + (.dsrs_sinf_0A - .dsrs_base_address))
+	ld	h, a
+	ld	l, a
+	add.s	hl, sp
 	; DE = HL * C(width)
 	call	_set_DE_to_HL_mul_C
 	ld	hl, (iy + (.dsrs_cosf_0A - .dsrs_base_address))
@@ -5111,9 +5115,10 @@ _RSS_NC:
 	ldi
 	pop	hl			; restore ys
 
-	ld	bc, 0			; smc = -sinf
-.dsrs_sinf_0B := $-3
-	add	hl, bc			; ys += -sinf
+; 	ld	bc, 0			; smc = -sinf
+; .dsrs_sinf_0B := $-3
+; 	add	hl, bc			; ys += -sinf
+	add.s	hl, sp			; ys += -sinf
 
 	ld	bc, 0			; smc = cosf
 .dsrs_cosf_0B := $-3
@@ -5176,9 +5181,11 @@ smcByte _TransparentColor
 	pop	hl			; restore ys
 .skip_pixel:
 	inc	de			; x++s
-	ld	bc, 0			; smc = -sinf
-.dsrs_sinf_0A := $-3
-	add	hl, bc			; ys += -sinf
+
+; 	ld	bc, 0			; smc = -sinf
+; .dsrs_sinf_0A := $-3
+; 	add	hl, bc			; ys += -sinf
+	add.s	hl, sp			; ys += -sinf
 
 	ld	bc, 0			; smc = cosf
 .dsrs_cosf_0A := $-3
@@ -5313,7 +5320,10 @@ smcWord _XMin
 	push	hl
 
 	; Starting HL offset X
-	ld	hl, (iy + (_RSS_NC.dsrs_sinf_0A - _RSS_NC.dsrs_base_address))
+	; ld	hl, (iy + (_RSS_NC.dsrs_sinf_0A - _RSS_NC.dsrs_base_address))
+	or	a, a
+	sbc	hl, hl
+	add.s	hl, sp
 	; DE = HL * C(width)
 	call	_set_DE_to_HL_mul_C
 	; ld	hl, (iy + (_RSS_NC.dsrs_size128_1_minus_dys_0 - _RSS_NC.dsrs_base_address))
@@ -5407,8 +5417,9 @@ gfx_RotateScaleSprite:
 	sbc	hl, hl
 	ccf
 	sbc	hl, de
-	ld	(iy + (_smc_dsrs_sinf_0A - _smc_dsrs_base_address)), hl ; write smc
-	ld	(iy + (_smc_dsrs_sinf_0B - _smc_dsrs_base_address)), hl ; write smc
+	; ld	(iy + (_smc_dsrs_sinf_0A - _smc_dsrs_base_address)), hl ; write smc
+	; ld	(iy + (_smc_dsrs_sinf_0B - _smc_dsrs_base_address)), hl ; write smc
+	ld.s	sp, hl
 
 	; dxs = sinf * -(size * scale / 128);
 	call	_CalcDXS	; uses (iy + 0)
@@ -5463,12 +5474,15 @@ gfx_RotateScaleSprite:
 	; DE = HL * C
 	call	_set_DE_to_HL_mul_C
 	ld	hl, (ix - 0)	; _smc_dsrs_sinf_1_plus_offset_ix
-	or	a, a
+	xor	a, a
 	sbc.s	hl, de	; make sure UHL is zero
 	ld	(iy + (_smc_dsrs_sinf_1_plus_offset_ix - _smc_dsrs_base_address)), hl
 
 	; calculate y-loop offset for HL
-	ld	hl, (iy + (_smc_dsrs_sinf_0A - _smc_dsrs_base_address))
+	; ld	hl, (iy + (_smc_dsrs_sinf_0A - _smc_dsrs_base_address))
+	ld	h, a
+	ld	l, a
+	add.s	hl, sp
 	; DE = HL * C
 	call	_set_DE_to_HL_mul_C
 	ld	hl, (iy + (_smc_dsrs_cosf_0A - _smc_dsrs_base_address))
@@ -5515,9 +5529,10 @@ smcByte _TransparentColor
 	ex	de, hl
 	inc	de			; x++s
 
-	ld	bc, 0			; smc = -sinf
-_smc_dsrs_sinf_0B := $-3
-	add	hl, bc			; ys += -sinf
+; 	ld	bc, 0			; smc = -sinf
+; _smc_dsrs_sinf_0B := $-3
+; 	add	hl, bc			; ys += -sinf
+	add.s	hl, sp			; ys += -sinf
 
 	ld	bc, 0			; smc = cosf
 _smc_dsrs_cosf_0B := $-3
@@ -5565,9 +5580,10 @@ _smc_dsrs_sprptr_0 := $-3
 	ldi
 
 	pop	hl			; restore ys
-	ld	bc, $000000		; smc = -sinf
-_smc_dsrs_sinf_0A := $-3
-	add	hl, bc			; ys += -sinf
+	; ld	bc, $000000		; smc = -sinf
+; _smc_dsrs_sinf_0A := $-3
+	; add	hl, bc			; ys += -sinf
+	add.s	hl, sp			; ys += -sinf
 
 	ld	bc, $000000		; smc = cosf
 _smc_dsrs_cosf_0A := $-3
