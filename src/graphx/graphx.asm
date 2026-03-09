@@ -8,6 +8,9 @@ library GRAPHX, 13
 ; no dependencies
 ;-------------------------------------------------------------------------------
 
+; set to 0 or 1 to preserve SP.S (at a cost of 34 bytes)
+PRESERVE_SP16 := 0
+
 ;-------------------------------------------------------------------------------
 ; v1 functions
 ;-------------------------------------------------------------------------------
@@ -4923,6 +4926,12 @@ _RSS_NC:
 	ld	(iy + (.dsrs_jump_1 - .dsrs_base_address)), a
 	ld	(iy + (.dsrs_jump_2 - .dsrs_base_address - 1)), bc
 	ld	(iy + (.dsrs_clip_call - .dsrs_base_address)), h
+if PRESERVE_SP16
+	xor	a, a
+	sbc	hl, hl
+	add.s	hl, sp
+	ld	(.preserve_sp16), hl
+end if
 	push	ix
 	ld	ix, 0
 	lea	bc, ix + 0	; ld bc, 0
@@ -5201,6 +5210,11 @@ smcByte _TransparentColor
 	ld	a, 0	; return value should be [1, 255]
 .dsrs_ret_size := $-1
 	pop	ix
+if PRESERVE_SP16
+	ld	hl, $000000
+.preserve_sp16 := $-3
+	ld.s	sp, hl
+end if
 	ret
 
 ;-------------------------------------------------------------------------------
@@ -5375,6 +5389,12 @@ gfx_RotateScaleSprite:
 ;  arg3 : Scale factor (64 = 100%)
 ; Returns:
 ;  arg1 : Pointer to sprite struct output
+if PRESERVE_SP16
+	xor	a, a
+	sbc	hl, hl
+	add.s	hl, sp
+	ld	(drawSpriteRotateScale_Finish.preserve_sp16), hl
+end if
 	push	ix
 	; aligning ix with gfx_RotatedScaledSprite allows for code sharing
 	ld	ix, -3
@@ -5595,6 +5615,11 @@ _smc_dsrs_cosf_0A := $-3
 	dec	iyh
 	jr	nz, _yloop		; y loop
 drawSpriteRotateScale_Finish:
+if PRESERVE_SP16
+	ld	hl, $000000
+.preserve_sp16 := $-3
+	ld.s	sp, hl
+end if
 	pop	hl			; sprite out ptr
 	pop	ix
 	ret
