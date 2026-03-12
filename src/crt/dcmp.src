@@ -44,7 +44,7 @@ __dcmp:
 	sub	a, e
 	ld	a, l	; restore A
 .L.equal:
-.finish_zero:
+.L.finish_zero:
 	pop	hl
 	pop	bc
 	pop	iy

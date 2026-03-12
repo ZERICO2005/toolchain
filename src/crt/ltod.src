@@ -215,7 +215,7 @@ __int_to_f64_shl:
 	ld	b, h
 	pop	hl		; restore shifted HL
 .L.no_round:
-.finish:
+.L.finish:
 	pop	af
 	ret	z
 	set	7, b

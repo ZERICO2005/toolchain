@@ -111,7 +111,7 @@ __llshrs_fast:
 	pop	hl
 	ld	e, b
 .L.shr33_40:
-.shr41_48:
+.L.shr41_48:
 	rl	b
 	pop	bc
 	sbc	hl, hl

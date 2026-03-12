@@ -100,7 +100,7 @@ __dtof:
 	rla
 	and	a, $1F
 .L.round_up:
-.round_down:
+.L.round_down:
 	call	__llshru
 	; B, C, and UDE are zero here
 	or	a, a
@@ -115,7 +115,7 @@ __dtof:
 	add	hl, bc	; the result might be rounded to infinity here
 	adc	a, c	; adc a, 0 ; wont overflow
 .L.even_exponent:
-.subnormal_no_round:
+.L.subnormal_no_round:
 .L.ret_copysign:
 	pop	de
 	ld	e, a
