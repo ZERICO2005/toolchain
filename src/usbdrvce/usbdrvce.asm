@@ -763,6 +763,7 @@ if DEBUG
 	ld	(alloc64Align256),hl;0
 end if
 	ret
+
 .initFreeList:
 	call	_Free64Align256.uninit
 	ld	a,32
@@ -861,6 +862,7 @@ usb_HandleEvents:
 ;.resetCycles := 12+8+(4+(4+13)*256-5+4+13)*256-5+13
 ;	inc	a ; zf = false
 ;	jq	usb_Init.timeout
+;
 ;.reset:
 ;
 ;	ld	(hl),ti.bmUsbAsyncSchedEn or 2 shl ti.bUsbFrameListSize or ti.bmUsbRunStop; or ti.bmUsbPeriodicSchedEn
@@ -1002,6 +1004,7 @@ usb_FindDevice:
 	jq	c,.forceChild
 	ld	iy.device,rootHub
 	jq	.check
+
 .child:
 	bitmsk	IS_ATTACHED,c
 	jq	nz,.sibling
@@ -1010,12 +1013,14 @@ usb_FindDevice:
 	jq	nz,.sibling
 	ld	iy.device,(iy.device.child)
 	jq	.check
+
 .check:
 	ld	a,(iy.device.find)
 	and	a,c
 	jq	nz,.child
 	lea	hl,iy
 	ret
+
 .hub:
 	ld	iy.device,(iy.device.hub)
 	lea	hl,iy.device
@@ -1052,6 +1057,7 @@ usb_ResetDevice:
 	res	ti.bUsbPortReset-8,(hl)
 	ld	a,12 ; WARNING: This assumes flash wait states port is 3, to get at least 10ms per spec... jk 100ms for non-conforming devices!
 	jq	ti.DelayTenTimesAms
+
 .hub:
 	call	_Alloc32Align32
 	jq	nz,_Error.NO_MEMORY
@@ -1097,6 +1103,7 @@ iterate value, HOST_TO_DEVICE or CLASS_REQUEST or RECIPIENT_OTHER,SET_FEATURE_RE
 end iterate
 	ld	hl,(iy.device.hub)
 	jq	usb_SetConfiguration.schedule
+
 .handler:
 	call	_Error.check
 	ld	a,(ix+12)
@@ -1111,6 +1118,7 @@ end iterate
 	ld	(iy),de
 	call	_Free32Align32
 	jq	.next
+
 ; Input:
 ;  cf = false
 ;  de = device
@@ -1147,6 +1155,7 @@ assert iy.hub.setup.bmRequestType+2 = iy.hub.setup.wValue+0
 	call	z,usb_ScheduleControlTransfer
 	pop	bc,bc,bc,bc,bc
 	ret
+
 .descriptor:
 	call	_Error.check
 	ld	a,(ix+12)
@@ -1209,6 +1218,7 @@ end virtual
 	djnz	.address.search
 .address.abort:
 	jq	.abort
+
 .enable:
 	call	_Error.check
 	ld	a,(ix+9)
@@ -1577,6 +1587,7 @@ end iterate
 	resmsk	iy.endpoint.overlay.remaining.dt
 .return:
 	jq	usb_Transfer.return
+
 .device:
 	or	a,a
 	jq	z,_Error.INVALID_PARAM
@@ -1587,6 +1598,7 @@ end iterate
 	and	a,not ti.bmUsbEpStall shr 8
 	ld	(hl),a
 	ret
+
 .set:
 	and	a,not ti.bmUsbEpReset shr 8
 	ld	(hl),a
@@ -1891,6 +1903,7 @@ usb_ScheduleControlTransfer.min:
 	call	_ExecuteDma
 	ret	nc
 	jq	usb_Transfer.return
+
 usb_ScheduleControlTransfer.zlp:
 	ld	hl,ti.mpUsbCxFifo
 	ld	(hl),ti.bmCxFifoFin
@@ -1900,6 +1913,7 @@ usb_ScheduleControlTransfer.zlp:
 	ld	hl,(ix+15)
 _DispatchEvent.dispatch:
 	jp	(hl)
+
 usb_ScheduleControlTransfer:
 	call	_Error.check
 .enter:
@@ -1931,12 +1945,14 @@ assert ~CONTROL_TRANSFER
 	xor	a,10001101b
 	ld	bc,transfer.remaining.dt
 	jq	.queueStage
+
 .queueStage:
 	call	_CreateDummyTransfer
 assert (endpoint-1) and 1
 	dec	iy.endpoint
 	jq	z,_FillTransfer
 	jq	_Error.NO_MEMORY
+
 .check:
 	ld	hl,(ix+9)
 	add	hl,de
@@ -1971,6 +1987,7 @@ usb_ScheduleTransfer.control:
 	lea	de,iy.setup+sizeof iy.setup
 	ld	(ix+12),de
 	jq	usb_ScheduleControlTransfer.control
+
 usb_ScheduleTransfer:
 	call	_Error.check
 .enter:
@@ -1992,6 +2009,7 @@ assert ~ISOCHRONOUS_TRANSFER-1
 	dec	a
 	jq	nz,.queue
 	jq	_Error.NOT_SUPPORTED
+
 .device:
 	jq	nc,.queue
 	ld	a,(iy.endpoint.overlay.fifo)
@@ -2063,6 +2081,7 @@ _QueueTransfer:
 	djnz	.modLoop
 	pop	de,bc
 	jq	.modDone
+
 .modPo2:
 	ld	a,l
 	add	a,a
@@ -2075,6 +2094,7 @@ _QueueTransfer:
 	ld	h,a
 	ld	l,e
 	jq	.modDone
+
 .modPo2Byte:
 	dec	a
 	and	a,e
@@ -2201,6 +2221,7 @@ assert INTERRUPT_TRANSFER and 1
 	ld	l,ti.usbCmd
 	set	ti.bUsbAsyncSchedEn,(hl)
 	ret
+
 .async.sync:
 	xor	a,a				;+4
 .async.sync.loop:
@@ -2208,6 +2229,7 @@ assert INTERRUPT_TRANSFER and 1
 	jq	nz,.async.sync.loop		;  +13)*256-5
 	djnz	.async.sync.wait		;+13
 	jq	_Error.TIMEOUT
+
 .async.sync.cycles := 12+8+4+(4+13)*256-5+13
 .periodic:
 	bit	ti.bUsbPeriodicSchedEn,(hl)
@@ -2221,6 +2243,7 @@ assert INTERRUPT_TRANSFER and 1
 	ld	l,ti.usbCmd
 	set	ti.bUsbPeriodicSchedEn,(hl)
 	ret
+
 .periodic.sync:
 	xor	a,a				;+4
 .periodic.sync.loop:
@@ -2228,6 +2251,7 @@ assert INTERRUPT_TRANSFER and 1
 	jq	nz,.periodic.sync.loop		;  +13)*256-5
 	djnz	.periodic.sync.wait		;+13
 	jq	_Error.TIMEOUT
+
 .periodic.sync.cycles := 12+8+4+(4+13)*256-5+13
 .pack:
 	ld	a,d
@@ -2455,6 +2479,7 @@ _PowerVbusForRole:
 	res	ti.bUsbBHnp,(hl)
 	res	ti.bUsbBVbusDisc,(hl)
 	ret
+
 .unpower:
 	res	ti.bUsbASrpEn,(hl)
 	push	hl,de
@@ -2571,6 +2596,7 @@ assert IS_DISABLED = 1
 	inc	a;IS_DISABLED
 	ld	(ix.device.find+1),a
 	jq	.start
+
 .recursed:
 	pop	ix.device,bc
 	ret	nz
@@ -2613,6 +2639,7 @@ assert IS_DISABLED = 1 shl 0
 	ret	z
 .event:
 	jq	_DispatchEvent
+
 .pop2return:
 	pop	bc,ix
 	ret
@@ -2666,6 +2693,7 @@ label .enabled
 virtual
 	scf
 	ret
+
  load .disable: $-$$ from $$
 end virtual
 	add	hl,de
@@ -2912,12 +2940,14 @@ end iterate
 .nomem:
 	ld	hl,USB_ERROR_NO_MEMORY
 	ret
+
 .cleanupFailed:
 	ex	(sp),hl
 	ld	l,endpoint
 	call	_Free64Align256
 	pop	hl,bc,bc,bc
 	ret
+
 .mem:
 	ld	(iy.endpoint.overlay.next),hl
 	ld	(iy.endpoint.first),hl
@@ -2954,6 +2984,7 @@ assert endpointDescriptor.wMaxPacketSize+2 = endpointDescriptor.bInterval
 	inc	b
 	djnz	.validInterval
 	jq	.invalidParam
+
 .validInterval:
 	ex	de,hl
 	inc.s	hl
@@ -2967,6 +2998,7 @@ assert INTERRUPT_TRANSFER and 1
 .invalidParam:
 	ld	hl,USB_ERROR_INVALID_PARAM
 	ret
+
 .isoc.validInterval:
 	inc	b
 ; full-speed out isoc: 4*bytes + 39 fs sbp
@@ -2981,6 +3013,7 @@ assert USB_ERROR_INVALID_PARAM
 	ld	hl,USB_ERROR_INVALID_PARAM-1
 	inc	l
 	ret
+
 .intr:
 ;  full-speed other: 4*bytes + 54 fs sbp
 ;     low-speed  in: 32*bytes + 348 fs sbp
@@ -3009,6 +3042,7 @@ end repeat
 	ld	(iy.endpoint.offset),a
 	ld	hl,USB_ERROR_SCHEDULE_FULL
 	ret
+
 .async:
 	ld	hl,(dummyHead.next)
 	ld	(iy.endpoint.next),hl
@@ -3159,11 +3193,13 @@ end virtual
 	jq	nc,.intr.unlink
 	ld	hl,intrCleanupPending
 	jq	.cleanup
+
 .isoc:
 	cp	a,a
 	lea	hl,ix.endpoint.base
 	pop	de,ix
 	jq	_Free64Align256
+
 .async:
 	lea	hl,ix.endpoint.next
 	ld	h,(ix.endpoint.prev)
@@ -3214,6 +3250,7 @@ _ParseInterfaceDescriptors:
 	ex.s	de,hl
 	ld	c,e
 	jq	.enter
+
 .endpoint:
 	cp	a,c
 	jq	z,.next
@@ -3416,6 +3453,7 @@ assert ti.usbCxFifo shr 8 = ti.bmCxFifoFin
 	ccf
 	pop	ix
 	ret
+
 .babble:
 	ld	a,(iy.transfer.status)
 	and	a,not iy.transfer.status.active
@@ -3425,6 +3463,7 @@ assert ti.usbCxFifo shr 8 = ti.bmCxFifoFin
 	ld	(ti.mpUsbDmaLen),bc
 	ld	bc,ti.vRamEnd
 	jq	.flush
+
 .zlp:
 	ld	hl,ti.mpUsbCxFifo
 	and	a,ti.usbDmaMem2Fifo
@@ -3508,6 +3547,7 @@ assert .nop = 0
 	bitmsk	ix.endpoint.flags.freed
 	jq	z,.loop
 	jq	.dangling
+
 .halted:
 	ld	a,d
 	and	a,iy.transfer.type.cerr
@@ -3529,6 +3569,7 @@ assert USB_TRANSFER_STALLED and 1
 	ld	(ix.endpoint.overlay.altNext),c
 	ld	(ix.endpoint.overlay.status),l;0
 	jq	.loop
+
 .failed:
 virtual
 	ret	z
@@ -3585,6 +3626,7 @@ _FlushEndpoint.check:
 	bitmsk	ix.endpoint.flags.freed
 	jq	nz,_FlushEndpoint.dangling
 	jq	_FlushEndpoint
+
 _FlushEndpoint:
 	ld	iy.transfer,(ix.endpoint.first)
 	ld	a,(iy.transfer.next)
@@ -3612,6 +3654,7 @@ assert endpoint.overlay.altNext+2 = endpoint.overlay.status-2
 	sbc	hl,hl
 	adc	hl,de
 	ret
+
 .dangling:
 	bitmsk	ix.endpoint.flags.refCnt
 	ret	nz
@@ -3729,6 +3772,7 @@ _HandleCxSetupInt:
 	inc	hl
 	ex	de,hl
 	jq	.return
+
 .defaultHandler:
 	ld	iy.setup,setupPacket
 	ld	hl,(iy.setup.wValue)
@@ -3749,6 +3793,7 @@ _HandleCxSetupInt:
 	jq	nz,.unhandled
 	scf
 	jq	.sendStatus
+
 .notGetDeviceStatus:
 	djnz	.notGetInterfaceStatus
 	xor	a,a
@@ -3764,6 +3809,7 @@ assert tempEndpointStatus-1 = deviceStatus
 	dec	de
 .sendGetStatusDataStage:
 	jq	.sendDataStage
+
 .notGetInterfaceStatus:
 	djnz	.notGetEndpointStatus
 	jq	z,.sendStatus
@@ -3779,6 +3825,7 @@ end repeat
 .notSetDeviceTestModeFeature:
 .notSetEndpointFeature:
 	jq	.unhandled
+
 .notGetStatus:
 	djnz	.notClearFeature
 assert ~HOST_TO_DEVICE or STANDARD_REQUEST
@@ -3796,6 +3843,7 @@ assert ~HOST_TO_DEVICE or STANDARD_REQUEST
 	ld	hl,deviceStatus
 	resmsk	DEVICE_REMOTE_WAKEUP_STATUS,(hl)
 	jq	.handled
+
 .notClearDeviceFeature:
 	dec	b
 	djnz	.notClearEndpointFeature
@@ -3809,6 +3857,7 @@ assert ~ENDPOINT_HALT_FEATURE
 	and	a,not ti.bmUsbEpStall shr 8
 	ld	(hl),a
 	jq	.handled
+
 .notClearFeature:
 	dec	b
 	djnz	.notSetFeature
@@ -3827,6 +3876,7 @@ assert ~HOST_TO_DEVICE or STANDARD_REQUEST
 	ld	hl,deviceStatus
 	setmsk	DEVICE_REMOTE_WAKEUP_STATUS,(hl)
 	jq	.handled
+
 .notSetDeviceRemoteWakeupFeature:
 	djnz	.notSetDeviceTestModeFeature
 	jq	nz,.unhandled
@@ -3841,6 +3891,7 @@ assert ~HOST_TO_DEVICE or STANDARD_REQUEST
 	or	a,(hl)
 	ld	(hl),a
 	jq	.handled
+
 .notSetDeviceFeature:
 	dec	b
 	djnz	.notSetEndpointFeature
@@ -3865,6 +3916,7 @@ assert HOST_TO_DEVICE or STANDARD_REQUEST or RECIPIENT_ENDPOINT-1 = USB_TRANSFER
 	ex	de,hl
 	cp	a,a
 	ret
+
 .notSetFeature:
 	dec	b
 	djnz	.notSetAddress
@@ -3881,9 +3933,11 @@ assert ~HOST_TO_DEVICE or STANDARD_REQUEST or RECIPIENT_DEVICE
 	jq	nz,.unhandled
 	ld	(ti.mpUsbDevAddr),hl
 	jq	.handled
+
 .handled:
 	ld	a,ti.bmCxFifoFin
 	jq	.success
+
 .success:
 	cp	a,a
 .return:
@@ -3894,6 +3948,7 @@ assert ~HOST_TO_DEVICE or STANDARD_REQUEST or RECIPIENT_DEVICE
 	ret	z
 	ex	de,hl
 	ret
+
 .notSetAddress:
 	djnz	.notGetDescriptor
 	xor	a,DEVICE_TO_HOST or STANDARD_REQUEST or RECIPIENT_DEVICE
@@ -3911,6 +3966,7 @@ assert ~HOST_TO_DEVICE or STANDARD_REQUEST or RECIPIENT_DEVICE
 	ld	c,1
 	ld	de,selectedConfiguration
 	jq	.sendDataStage
+
 .notGetConfiguration:
 	djnz	.notSetConfiguration
 assert ~HOST_TO_DEVICE or STANDARD_REQUEST or RECIPIENT_DEVICE
@@ -3957,6 +4013,7 @@ end repeat
 	call	.handled
 	ld	a,USB_HOST_CONFIGURE_EVENT
 	jq	_DispatchEvent
+
 .notSetConfiguration:
 	djnz	.notGetInterface
 .notGetInterface:
@@ -3965,6 +4022,7 @@ end repeat
 .unhandled:
 	ld	a,ti.bmCxFifoStall
 	jq	.success
+
 .getDescriptor:
 	push	hl
 	pop	bc
@@ -3981,6 +4039,7 @@ end repeat
 	ld	c,(hl)
 	ex	de,hl
 	jq	.sendDataStage
+
 .notDevice:
 	djnz	.notConfiguration;CONFIGURATION_DESCRIPTOR
 	or	a,e
@@ -3998,6 +4057,7 @@ end repeat
 	ld	bc,(iy.configurationDescriptor.wTotalLength)
 	ld	de,(hl)
 	jq	.sendDataStage
+
 .notConfiguration:
 	djnz	.notString;STRING_DESCRIPTOR
 	ld	hl,(iy.standardDescriptors.langids)
@@ -4036,6 +4096,7 @@ end repeat
 	jq	z,.sendSingleDescriptorHL
 .notString:
 	jq	.unhandled
+
 .sendDataStage:
 	ld	hl,ti.mpUsbDmaFifo
 	ld	(hl),ti.bmUsbDmaCxFifo
@@ -4070,6 +4131,7 @@ end repeat
 	ld	l,ti.usbDmaFifo-$100
 	ld	(hl),a
 	jq	.handled
+
 ; Input:
 ;  e = endpoint address
 ; Output:
@@ -4104,6 +4166,7 @@ assert ti.usbInEp1 < ti.usbOutEp1
 _HubHandler.0:
 	xor	a,a
 	jq	_HubHandler
+
 _HubHandler.status:
 	ld	a,sizeof iy.hub.status+sizeof iy.hub.change
 _HubHandler:
@@ -4121,6 +4184,7 @@ _HubHandler:
 	ld	iy.hub,(ix+15)
 	ld	bc,(ix+6)
 	jp	(hl)
+
 .free:
 	sbc	hl,hl
 .error:
@@ -4129,6 +4193,7 @@ _HubHandler:
 	call	_FreeTransferData
 	ex	de,hl
 	ret
+
 .descriptor:
 	ld	a,sizeof iy.hub.desc
 	call	.
@@ -4178,6 +4243,7 @@ assert ~(INTERRUPT_TRANSFER+1) and INTERRUPT_TRANSFER
 .notfound:
 	djnz	.find
 	jq	.free
+
 .found:
 	ld	l,endpoint
 	ld	(iy.hub.endpoint),hl
@@ -4194,6 +4260,7 @@ assert ~(INTERRUPT_TRANSFER+1) and INTERRUPT_TRANSFER
 	ld	sp,ix
 	pop	ix
 	ret
+
 .changed:
 ;	ld	hl,12
 ;	add	hl,sp
@@ -4304,6 +4371,7 @@ assert iy.hub.setup.bmRequestType+2 = iy.hub.setup.wValue+0
 	jq	nz,.error
 	ld	iy.hub,(ix+15)
 	jq	.old.disconnected
+
 .old.16:
 	inc	(iy.hub.setup.wValue+0)
 	srl	(iy.hub.change+0)
@@ -4422,6 +4490,7 @@ assert iy.hub.setup.bmRequestType+2 = iy.hub.setup.wValue+0
 	ld	bc,(ix+6)
 	jq	z,.new.loop
 	jq	.error
+
 .new.changed:
 	inc	(iy.hub.setup.wValue+0)
 	srl	(iy.hub.change+0)
@@ -4436,6 +4505,7 @@ assert iy.hub.setup.bmRequestType+2 = iy.hub.setup.wValue+0
 	jq	nz,.new.loop
 	ld	hl,(iy.hub.endpoint)
 	jq	.change
+
 .control:
 	pop	hl
 	push	iy.hub,hl,iy.hub.status,iy.hub.setup,bc
@@ -4608,6 +4678,7 @@ _HandleFifo#fifo#InInt:
 	ld	(hl),ti.bmUsbIntFifo#fifo#In
 	cp	a,a
 	ret
+
 end repeat
 
 _HandleDevResetInt:
@@ -4704,6 +4775,7 @@ virtual at ti.mpLcdLpbase+1
 	ld	c,(hl)
 	ld	(hl),b
 	ret
+
  load .exchange $-$$ from $$
 end virtual
 	ld	iy,ti.mpLcdRange
@@ -4829,6 +4901,7 @@ label .enabled
 load .enable: byte from .enabled
 virtual
 	ret
+
  load .disable: byte from $$
 end virtual
 	push	ix
@@ -4933,6 +5006,7 @@ assert iy.device.find+2 = iy.device.child
 	call	usb_RefDevice.enter
 	setmsk	device.child,hl
 	jq	.enter
+
 .skip:
 	ld	hl,(hl)
 	setmsk	device.sibling,hl
@@ -4968,6 +5042,7 @@ assert iy.device.find+2 = iy.device.child
 assert ~USB_DEVICE_ENABLED_EVENT and IS_ENABLED
 	ld	c,a
 	jq	.enabled
+
 .nomem:
 	lea	hl,iy.device
 	call	_Free32Align32
@@ -5001,6 +5076,7 @@ _HandlePortPortEnInt:
 	ld	hl,ti.mpUsbPortStsCtrl
 	cp	a,a
 	ret
+
 .disable:
 	ld	hl,ti.mpUsbPortStsCtrl
 	ld	a,(hl)
@@ -5070,6 +5146,7 @@ _HandleAsyncAdvInt:
 	ld	bc,(hl)
 	call	_CleanupEndpoints
 	jq	.ready
+
 .scheduleCleanup.de:
 	ret	nz
 	ex	de,hl
