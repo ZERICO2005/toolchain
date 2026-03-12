@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__imuls, __imulu
+	public	__imuls
+	public	__imulu
 
 if PREFER_OS_CRT
 

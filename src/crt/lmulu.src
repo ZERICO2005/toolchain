@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lmuls, __lmulu
+	public	__lmuls
+	public	__lmulu
 
 if PREFER_OS_CRT
 

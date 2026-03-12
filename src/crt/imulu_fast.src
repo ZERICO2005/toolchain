@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__imuls_fast, __imulu_fast
+	public	__imuls_fast
+	public	__imulu_fast
 __imuls_fast:
 __imulu_fast:
 
