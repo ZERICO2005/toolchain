@@ -23,7 +23,7 @@ __lshru:
 	or	a, a
 	sbc	hl, hl
 	add	hl, sp
-.loop:
+.L.loop:
 	srl	a
 	jp	__lshrs.hijack_lshru
 

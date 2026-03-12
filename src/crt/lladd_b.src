@@ -14,7 +14,7 @@ __lladd_b:
 	ex	de, hl
 	add	hl, bc
 	ex	de, hl
-.finish:
+.L.finish:
 	pop	bc
 	ret	nc
 	inc	bc

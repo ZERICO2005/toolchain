@@ -21,7 +21,7 @@ __idvrms:
 	cpl
 	push	hl
 	pop	bc
-.neg_divisor_skip:
+.L.neg_divisor_skip:
 
 	sbc	hl, hl
 	ccf
@@ -30,7 +30,7 @@ __idvrms:
 	jp	p, .L.pos_dividend_skip
 	cpl
 	ex	de, hl
-.pos_dividend_skip:
+.L.pos_dividend_skip:
 
 	call	__idvrmu
 

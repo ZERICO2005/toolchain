@@ -19,6 +19,6 @@ __llcmps_fast:
 	ex	de, hl
 	ld	bc, (iy + 3)
 	sbc	hl, bc
-.finish:
+.L.finish:
 	sbc	a, a
 	ret

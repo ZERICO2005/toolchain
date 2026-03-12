@@ -25,7 +25,7 @@ __llmulu:
 
 	lea	hl, iy + 18
 	ld	b, 8
-.push_loop:
+.L.push_loop:
 	push	af
 	ld	a, (hl)
 	inc	hl
@@ -36,11 +36,11 @@ __llmulu:
 	ld	e, l
 	ld	d, h
 
-.byte_loop:
+.L.byte_loop:
 	scf
 	adc	a, a
 
-.bit_loop:
+.L.bit_loop:
 	push	af
 	add	ix, ix
 	adc	hl, hl
@@ -57,7 +57,7 @@ __llmulu:
 	ex	de, hl
 	adc.s	hl, sp
 	ex	de, hl
-.add_end:
+.L.add_end:
 
 	add	a, a
 	jr	nz, .L.bit_loop

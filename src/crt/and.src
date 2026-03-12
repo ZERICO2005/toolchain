@@ -39,7 +39,7 @@ __iand:
 ; CC: 24*r(PC)+11*r(SPL)+10*w(SPL)+1
 	push	af
 	.local	__iand.hijack_land
-.hijack_land:
+.L.hijack_land:
 	push	hl
 	scf
 	sbc	hl, hl

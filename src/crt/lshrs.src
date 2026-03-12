@@ -23,11 +23,11 @@ __lshrs:
 	or	a, a
 	sbc	hl, hl
 	add	hl, sp
-.loop:
+.L.loop:
 	sra	a
 	.global	__lshrs.hijack_lshru
 	.type	__lshrs.hijack_lshru, @function
-.hijack_lshru:
+.L.hijack_lshru:
 	inc	hl
 	inc	hl
 	rr	(hl)

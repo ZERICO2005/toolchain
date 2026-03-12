@@ -41,7 +41,7 @@ __lldivs:
 	ld	c, a
 	ld	b, 8
 
-.neg_divisor_loop:
+.L.neg_divisor_loop:
 	ld	a, c
 	sbc	a, (hl)
 	ld	(hl), a
@@ -50,7 +50,7 @@ __lldivs:
 
 	pop	hl
 	pop	bc
-.neg_divisor_skip:
+.L.neg_divisor_skip:
 
 	bit	7, b
 	call	nz, __llneg
@@ -65,7 +65,7 @@ __lldivs:
 	ld	de, (iy + 18)
 	ld	bc, (iy + 21)
 	bit	7, (iy + 23)
-.div_quotient_skip:
+.L.div_quotient_skip:
 
 	pop	iy
 

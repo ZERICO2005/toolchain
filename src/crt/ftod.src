@@ -23,11 +23,11 @@ __ftod:
 	jr	z, .L.subnormal
 	inc	a
 	jr	z, .L.nan
-.normal:
+.L.normal:
 	; (Float64_bias - Float32_bias) - 1 (undoing inc a)
 	; (Float64_bias - Float32_bias) = $0380
 	add	a, $80 - 1	; this can be changed to adc if needed
-.subnorm_shift:
+.L.subnorm_shift:
 	; Same as ld c, a \ ld a, 0 \ adc a, b
 	ld	c, a
 	adc	a, b
@@ -35,29 +35,29 @@ __ftod:
 ; HL = mant
 ; C = lo expon
 ; A = hi expon
-.shift_28: ; Float64_mant_bits - Float32_mant_bits
+.L.shift_28: ; Float64_mant_bits - Float32_mant_bits
 	inc	b	; ld b, 4
-.loop:
+.L.loop:
 	add	hl, hl
 	rl	c
 	rla
 	djnz	.L.loop
-.zero:	; <-- A is zero on this path
+.L.zero:	; <-- A is zero on this path
 	ld	b, a
 
 	; zero low bits
-.infinite:
+.L.infinite:
 ;	or	a, a	; not needed
 	; f64_mant_bits - f32_mant_bits = lowest 29 bits will be zero
 	ex	de, hl
 	sbc	hl, hl
-.finish:
+.L.finish:
 	pop	af
 	ret	nc	; positive
 	set	7, b
 	ret	; negative
 
-.mant_zero:
+.L.mant_zero:
 	adc	a, a
 	ld	c, l	; HL is zero here
 	jr	z, .L.zero
@@ -68,7 +68,7 @@ __ftod:
 	ld	b, e	; ld b, $7F since infinity is all ones
 	jr	.L.infinite
 
-.subnormal:
+.L.subnormal:
 	; since this is subnormal, the LSB of the exponent is already zero
 	call	__ictlz
 	ld	c, a
@@ -93,7 +93,7 @@ else
 end if
 	jr	.L.subnorm_shift
 
-.nan:
+.L.nan:
 	ld	a, $07
 	ld	c, $FF
 	jr	.L.shift_28

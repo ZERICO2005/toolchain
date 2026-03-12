@@ -12,7 +12,7 @@ __lldivu_b:
 	ld	iy, (iy + 9)
 	xor	a, a
 	ld	iyh, 64
-.loop:
+.L.loop:
 	add	hl, hl
 	ex	de, hl
 	adc	hl, hl
@@ -23,10 +23,10 @@ __lldivu_b:
 	jr	c, .L.1
 	cp	a, iyl
 	jr	c, .L.0
-.1:
+.L.1:
 	sub	a, iyl
 	inc	l
-.0:
+.L.0:
 	dec	iyh
 	jr	nz, .L.loop
 	pop	iy

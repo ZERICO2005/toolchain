@@ -16,7 +16,7 @@ __llcmpzero:
 	sbc	hl, de
 	ret	z
 	add	hl, de
-.p_nz:
+.L.p_nz:
 	inc	b
 	ld	b, 0
 	ret

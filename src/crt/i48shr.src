@@ -40,9 +40,9 @@ __i48shru:
 	jr	z, .L.loop
 	srl	c
 	jr	.L.midloop
-.loop:
+.L.loop:
 	sra	c
-.midloop:
+.L.midloop:
 	rr	d
 	rr	e
 	rra

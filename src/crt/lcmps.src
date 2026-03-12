@@ -19,7 +19,7 @@ __lcmps:
 	sbc	hl, bc
 	add	hl, bc
 	sbc	a, a
-.finish:
+.L.finish:
 	ld	a, d
 	pop	de
 	ret

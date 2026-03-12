@@ -41,9 +41,9 @@ __daddsub:
 ; .__dsubmags:
 	call	_softfloat_subMagsF64
 	jr	.L.__daddsub_ret
-.__daddmags:
+.L.__daddmags:
 	call	_softfloat_addMagsF64
-.__daddsub_ret:
+.L.__daddsub_ret:
 	pop	af
 	pop	af
 	pop	af

@@ -39,7 +39,7 @@ __ior:
 ; CC: 24*r(PC)+11*r(SPL)+10*w(SPL)+1
 	push	af
 	.local	__ior.hijack_lor
-.hijack_lor:
+.L.hijack_lor:
 	push	hl
 	scf
 	sbc	hl, hl

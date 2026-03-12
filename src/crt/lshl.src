@@ -20,7 +20,7 @@ __lshl:
 	push	bc
 	ld	b, l
 	ex	(sp), hl
-.loop:
+.L.loop:
 	add	hl, hl
 	rla
 	djnz	.L.loop

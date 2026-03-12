@@ -17,7 +17,7 @@ __bshl:
 	dec	b
 	ret	z
 	push	bc
-.loop:
+.L.loop:
 	add	a, a
 	djnz	.L.loop
 	pop	bc

@@ -39,7 +39,7 @@ __ixor:
 ; CC: 24*r(PC)+11*r(SPL)+10*w(SPL)+1
 	push	af
 	.local	__ixor.hijack_lxor
-.hijack_lxor:
+.L.hijack_lxor:
 	push	hl
 	scf
 	sbc	hl, hl

@@ -47,7 +47,7 @@ if 1
 	ld	b, 32			; b : i
 
 ;;;     do {
-.loop:
+.L.loop:
 
 ;;;         bool dividendBit = result.quot >> 31;
 ;;;         result.quot <<= 1;
@@ -69,7 +69,7 @@ if 1
 	add	hl, bc
 	adc	a, e
 ;;;         }
-.restore_skip:
+.L.restore_skip:
 
 ;;;         if (quotBit) {
 	exx
@@ -77,7 +77,7 @@ if 1
 ;;;             result.quot++;
 	inc	l
 ;;;         }
-.1_skip:
+.L.1_skip:
 
 ;;;     } while (--i != 0);
 	djnz	.L.loop
@@ -102,7 +102,7 @@ else
 
 	ld	iyl, 32
 
-.loop:
+.L.loop:
 	add	ix, ix
 	rl	e
 	adc	hl, hl
@@ -116,7 +116,7 @@ else
 	add	hl, bc
 	adc	a, iyh
 	dec	ixl
-.restore_skip:
+.L.restore_skip:
 
 	dec	iyl
 	jr	nz, .L.loop

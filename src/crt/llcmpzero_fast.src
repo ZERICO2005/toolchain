@@ -14,6 +14,6 @@ __llcmpzero_fast:
 	jr	nz, .L.p_nz
 	adc	hl, de
 	ret	z
-.p_nz:
+.L.p_nz:
 	inc	a
 	ret

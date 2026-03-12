@@ -17,7 +17,7 @@ __dcmp:
 	bit	0, b	; signbit x
 	jr	z, .L.positve_x
 	ccf
-.positve_x:
+.L.positve_x:
 	res	0, b
 	; H and B now have their signbits cleared
 	jr	c, .L.different_sign
@@ -31,11 +31,11 @@ __dcmp:
 	ld	hl, (iy + 6)	; y.lo
 	sbc	hl, bc	; y.lo - x.lo
 	jr	z, .L.equal
-.not_equal:
+.L.not_equal:
 	ld	l, a	; preserve A
 	rra	; bit 7 of A = Carry
 	cpl
-.ret_flags:
+.L.ret_flags:
 	xor	a, (iy - 2)	; bit 7 of B = sign of x
 	rla
 	sbc	a, a	; A is 0 or -1
@@ -43,14 +43,14 @@ __dcmp:
 	adc	a, e
 	sub	a, e
 	ld	a, l	; restore A
-.equal:
+.L.equal:
 .finish_zero:
 	pop	hl
 	pop	bc
 	pop	iy
 	ret
 
-.different_sign:
+.L.different_sign:
 ; test for zero
 	; x[hi-md-lo]
 	; y[hi-md-lo]
@@ -69,7 +69,7 @@ __dcmp:
 	adc	hl, bc
 	jr	nz, .L.non_zero
 	jr	nc, .L.finish_zero	; Z, NC, and P
-.non_zero:
+.L.non_zero:
 	ld	l, a	; preserve A
 	xor	a, a
 	jr	.L.ret_flags

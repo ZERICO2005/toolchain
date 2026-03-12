@@ -24,11 +24,11 @@ __llcmps:
 	ld	bc, (iy + 6)
 	sbc	hl, bc
 	add	hl, bc
-.finish_unsigned:
+.L.finish_unsigned:
 	ld	b, a
 	sbc	a, a
 	ld	a, b
-.finish:
+.L.finish:
 	pop	bc
 	pop	iy
 	ret

@@ -40,10 +40,10 @@ __llshrs:
 
 	.local	__llshr_common
 __llshr_common:
-.loop:
+.L.loop:
 	sra	b
 	.local	__llshr_common.hijack_llshru
-.hijack_llshru:
+.L.hijack_llshru:
 	rr	c
 	rr	(iy - 1)
 	rr	d
@@ -62,7 +62,7 @@ __llshr_common:
 	ld	h, d
 	pop	de
 	.local	__llshr_common.finish
-.finish:
+.L.finish:
 	pop	iy
 	pop	af
 	ret

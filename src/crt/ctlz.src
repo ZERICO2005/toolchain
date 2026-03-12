@@ -12,19 +12,19 @@ __bctlz:
 	sbc	a, a
 	inc	a
 	ret
-.low6:
+.L.low6:
 	add	a, -020h
 	sbc	a, a
 	add	a, 3
 	ret
-.low4:
+.L.low4:
 	cp	a, 4
 	jr	c, .L.low2
 	add	a, -8
 	sbc	a, a
 	add	a, 5
 	ret
-.low2:
+.L.low2:
 	add	a, -3
 	cpl
 	adc	a, 6
@@ -100,7 +100,7 @@ __i48ctlz:
 	call	__ictlz
 	ex	de, hl
 	ret
-.low:
+.L.low:
 	ex	de, hl
 	call	__ictlz
 	add	a, 24

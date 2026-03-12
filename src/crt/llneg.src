@@ -7,7 +7,7 @@ __llneg:
 	or	a, a
 	.global	__llneg.hijack_nc
 	.type	__llneg.hijack_nc, @function
-.hijack_nc:
+.L.hijack_nc:
 	ex	de, hl		; ude=UHL, uhl=UDE
 	push	hl		; *spl=UDE
 	sbc	hl, hl		; uhl=0

@@ -17,14 +17,14 @@ __llshl:
 	inc	b
 	jr	.L.begin
 
-.loop:
+.L.loop:
 	add	hl, hl
 	ex	de, hl
 	adc	hl, hl
 	ex	de, hl
 	rl	c
 	rla
-.begin:
+.L.begin:
 	djnz	.L.loop
 
 	ld	b, a

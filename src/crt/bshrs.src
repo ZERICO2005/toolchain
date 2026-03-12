@@ -10,7 +10,7 @@ __bshrs:
 	dec	b
 	ret	z
 	push	bc
-.loop:
+.L.loop:
 	sra	a
 	djnz	.L.loop
 	pop	bc

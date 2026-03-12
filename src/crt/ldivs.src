@@ -29,7 +29,7 @@ __ldivs:
 	rrca
 	jr	nz, .L.pos_dividend_skip
 	ccf
-.pos_dividend_skip:
+.L.pos_dividend_skip:
 
 	ret	c
 	jp	__lneg

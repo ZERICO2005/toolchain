@@ -27,13 +27,13 @@ __cttz_common:
 	ret	p
 	ld	a, 8
 	ret
-.high6:
+.L.high6:
 	sbc	a, -3
 	ret
-.high4:
+.L.high4:
 	sbc	a, -5
 	ret
-.high2:
+.L.high2:
 	sbc	a, -7
 	ret
 
@@ -109,7 +109,7 @@ __llcttz:
 	call	__cttz_common
 	add	a, 56
 	ret
-.low:
+.L.low:
 	call	__cttz_common
 	add	a, 48
 	ret

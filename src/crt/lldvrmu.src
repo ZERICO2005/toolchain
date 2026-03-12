@@ -10,7 +10,7 @@ __lldvrmu:
 	add	iy, sp
 	.global	__lldvrmu.hijack
 	.type	__lldvrmu.hijack, @function
-.hijack:
+.L.hijack:
 
 	ld	a, i
 	di
@@ -45,13 +45,13 @@ __lldvrmu:
 
 	ld	c, 8
 
-.byte_loop:
+.L.byte_loop:
 	dec	iy
 	ld	a, (iy - 9)
 
 	ld	b, 8
 
-.bit_loop:
+.L.bit_loop:
 	adc	a, a
 	exx
 	adc	hl, hl
@@ -77,7 +77,7 @@ __lldvrmu:
 	ex	de, hl
 	exx
 	adc	hl, de
-.add_back_skip:
+.L.add_back_skip:
 
 	djnz	.L.bit_loop
 

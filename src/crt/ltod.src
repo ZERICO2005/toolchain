@@ -55,7 +55,7 @@ __lltod_common:
 	ld	b, a
 	ld	c, a
 	xor	a, a
-.shift_loop:
+.L.shift_loop:
 	adc	a, 0
 	srl	h
 	rr	l
@@ -68,18 +68,18 @@ __lltod_common:
 	inc	a		; ld a, 1
 	and	a, l		; test guard bit
 	jr	z, .L.no_round_inexact
-.round_up:
+.L.round_up:
 	inc	b		; round up after shifting
-.no_round:
+.L.no_round:
 if __lltod_signal_FE_INEXACT
 	adc	a, a		; test sticky and round bits
 	jr	z, .L.result_is_exact
-.no_round_inexact:
+.L.no_round_inexact:
 	ld	hl, ___fe_cur_env
 	set	5, (hl)		; FE_INEXACT
-.result_is_exact:
+.L.result_is_exact:
 else
-.no_round_inexact:
+.L.no_round_inexact:
 end if
 	ld	h, b
 	ld	a, c
@@ -132,7 +132,7 @@ __int_to_f64_zero_or_one:
 	jr	nz, .L.ret_zero
 	ld	bc, $3FF0
 	dec	hl		; ld hl, 0
-.ret_zero:
+.L.ret_zero:
 	ex	de, hl
 	sbc	hl, hl
 	jr	__int_to_f64_shl.finish
@@ -214,7 +214,7 @@ __int_to_f64_shl:
 	ld	c, a
 	ld	b, h
 	pop	hl		; restore shifted HL
-.no_round:
+.L.no_round:
 .finish:
 	pop	af
 	ret	z

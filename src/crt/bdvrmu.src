@@ -10,12 +10,12 @@ __bdvrmu:
 	ld	l, b
 	.global	__bdvrmu.hijack_l_dividend
 	.type	__bdvrmu.hijack_l_dividend, @function
-.hijack_l_dividend:
+.L.hijack_l_dividend:
 	ld	h, 0
 
 	ld	b, 8
 
-.loop:
+.L.loop:
 	add	hl, hl
 
 	ld	a, h
@@ -24,7 +24,7 @@ __bdvrmu:
 	jr	c, .L.bit_skip
 	ld	h, a
 	inc	l
-.bit_skip:
+.L.bit_skip:
 
 	djnz	.L.loop
 

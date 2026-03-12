@@ -19,7 +19,7 @@ __sshru:
 	ret	z
 	push	bc
 	ld	b, c
-.loop:
+.L.loop:
 	srl	h
 	rr	l
 	djnz	.L.loop

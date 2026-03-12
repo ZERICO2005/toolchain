@@ -21,7 +21,7 @@ __i48shl:
 	ex	de, hl
 	add	hl, hl
 	ex	de, hl
-.bit0:
+.L.bit0:
 	srl	c
 	jr	nc, .L.bit1
 	; ude:uhl<<2
@@ -33,7 +33,7 @@ __i48shl:
 	add	hl, hl
 	add	hl, hl
 	ex	de, hl
-.bit1:
+.L.bit1:
 	srl	c
 	jr	nc, .L.bit2
 	; ude:uhl<<4
@@ -51,7 +51,7 @@ __i48shl:
 	add	hl, hl
 	add	hl, hl
 	ex	de, hl
-.bit2:
+.L.bit2:
 	ld	e, a
 
 	jr	z, .L.done	; Early out when no byte shift is needed
@@ -79,7 +79,7 @@ __i48shl:
 	pop	af
 	pop	af
 	pop	af
-.done:
+.L.done:
 	ld	a, b
 	pop	bc
 	ret

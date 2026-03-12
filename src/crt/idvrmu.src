@@ -20,12 +20,12 @@ __idvrmu:
 	ld	a, 24
 	.global	__idvrmu.hijack_a_iters_ude_dividend
 	.type	__idvrmu.hijack_a_iters_ude_dividend, @function
-.hijack_a_iters_ude_dividend:
+.L.hijack_a_iters_ude_dividend:
 
 	or	a, a
 	sbc	hl, hl
 
-.loop:
+.L.loop:
 	ex	de, hl
 	add	hl, hl
 	ex	de, hl
@@ -37,7 +37,7 @@ __idvrmu:
 	jr	nc, .L.restore_skip
 	add	hl, bc
 	dec	e
-.restore_skip:
+.L.restore_skip:
 
 	dec	a
 	jr	nz, .L.loop

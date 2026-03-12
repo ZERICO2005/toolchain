@@ -22,7 +22,7 @@ __sdvrms_abs:
 	ex	de, hl
 	or	a, a
 	sbc	hl, de
-.neg_dividend_skip:
+.L.neg_dividend_skip:
 
 	ld	a, b
 	rla
@@ -33,7 +33,7 @@ __sdvrms_abs:
 	sbc	a, a
 	sub	a, b
 	ld	b, a
-.neg_divisor_skip:
+.L.neg_divisor_skip:
 
 	pop	af
 	call	__sdvrmu

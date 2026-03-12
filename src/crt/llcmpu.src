@@ -23,7 +23,7 @@ __llcmpu:
 	pop	iy
 	ret
 
-.ne:
+.L.ne:
 	ccf
 	pop	hl
 	pop	iy

@@ -30,14 +30,14 @@ __ishrs:
 	jr	nz, .L.bit0
 	add	hl, hl
 	rla
-.bit0:
+.L.bit0:
 	bit	1, c
 	jr	nz, .L.bit1
 	add	hl, hl
 	rla
 	add	hl, hl
 	rla
-.bit1:
+.L.bit1:
 	bit	2, c
 	jr	nz, .L.bit2
 	add	hl, hl
@@ -48,7 +48,7 @@ __ishrs:
 	rla
 	add	hl, hl
 	rla
-.bit2:
+.L.bit2:
 	bit	3, c
 	jr	nz, .L.bit3
 	bit	4, c
@@ -61,7 +61,7 @@ __ishrs:
 	inc	sp
 	pop	af
 	ret
-.bit3:
+.L.bit3:
 	dec	sp
 	push	hl
 	sbc	hl, hl
@@ -71,7 +71,7 @@ __ishrs:
 	ld	l, a
 	pop	af
 	ret
-.bit4:
+.L.bit4:
 	sbc	hl, hl
 	ld	l, a
 	pop	af

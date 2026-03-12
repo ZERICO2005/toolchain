@@ -17,7 +17,7 @@ __bshru:
 	dec	b
 	ret	z
 	push	bc
-.loop:
+.L.loop:
 	srl	a
 	djnz	.L.loop
 	pop	bc
