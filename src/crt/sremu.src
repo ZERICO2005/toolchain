@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__sremu
 
 if PREFER_OS_CRT
@@ -20,6 +20,6 @@ __sremu:
 	pop	de
 	ret
 
-	extern	__sdvrmu
+	.extern	__sdvrmu
 
 end if

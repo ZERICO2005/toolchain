@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 
 	public	__llshru
 
@@ -18,7 +18,7 @@ __llshru:
 	srl	b
 	jr	__llshr_common.hijack_llshru
 
-	section	.text
+	.section	.text
 
 	public	__llshrs
 
@@ -34,7 +34,7 @@ __llshrs:
 	push	de
 	push	hl
 
-	section	.text
+	.section	.text
 
 	private	__llshr_common
 __llshr_common:

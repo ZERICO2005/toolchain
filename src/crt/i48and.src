@@ -5,7 +5,7 @@
 
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__i48and
 __i48and:
 ; CC: 41 bytes | 42F + 22R + 17W + 1

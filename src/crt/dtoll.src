@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 
 	public	__dtoll
 	public	__dtoull
@@ -79,6 +79,6 @@ __dtoull:
 	ex.s	de, hl
 	jr	.finish_zero_or_one
 
-	extern	__llneg
-	extern	__llshl
-	extern	__llshru
+	.extern	__llneg
+	.extern	__llshl
+	.extern	__llshru

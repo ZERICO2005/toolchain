@@ -5,7 +5,7 @@
 
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 
 	public	__i48sub_1
 __i48sub_1:

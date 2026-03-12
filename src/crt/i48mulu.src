@@ -9,7 +9,7 @@
 
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__i48mulu
 __i48mulu:
 ; CC: 202*r(PC)+51*r(SPL)+35*w(SPL)+85

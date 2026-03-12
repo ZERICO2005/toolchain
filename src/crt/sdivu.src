@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__sdivu
 
 if PREFER_OS_CRT
@@ -21,6 +21,6 @@ __sdivu:
 	pop	de
 	ret
 
-	extern	__sdvrmu
+	.extern	__sdvrmu
 
 end if

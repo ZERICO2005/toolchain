@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__llrems
 __llrems:
 
@@ -70,5 +70,5 @@ __lldivs:
 	ret	z
 	jp	__llneg
 
-	extern	__lldvrmu.hijack
-	extern	__llneg
+	.extern	__lldvrmu.hijack
+	.extern	__llneg

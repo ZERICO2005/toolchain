@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__sneg
 
 if PREFER_OS_CRT
@@ -11,6 +11,6 @@ else
 
 __sneg := __ineg
 
-	extern	__ineg
+	.extern	__ineg
 
 end if

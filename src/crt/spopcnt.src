@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__spopcnt
 __spopcnt:
 	; Set HLU=H and H=L, while saving HL on the stack
@@ -17,4 +17,4 @@ __spopcnt:
 	inc	sp
 	ret
 
-	extern	__popcnt_common_init
+	.extern	__popcnt_common_init

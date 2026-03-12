@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__llshl
 __llshl:
 ; Suboptimal for large shift amounts

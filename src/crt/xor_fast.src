@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__lxor_fast
 __lxor_fast:
 ; CC: 24*r(PC)+8*r(SPL)+7*w(SPL)+1
@@ -8,7 +8,7 @@ __lxor_fast:
 	ld	e, a
 	require	__ixor_fast
 
-	section	.text
+	.section	.text
 	public	__ixor_fast
 __ixor_fast:
 ; CC: 22*r(PC)+8*r(SPL)+7*w(SPL)+1
@@ -27,7 +27,7 @@ __ixor_fast:
 	pop	hl
 	require	__sxor_fast
 
-	section	.text
+	.section	.text
 	public	__sxor_fast
 __sxor_fast:
 ; CC: 8*r(PC)+3*r(SPL)+1

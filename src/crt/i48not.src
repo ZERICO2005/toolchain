@@ -5,7 +5,7 @@
 
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__i48not
 __i48not:
 ; CC: 15 bytes | 16F + 3R + 1

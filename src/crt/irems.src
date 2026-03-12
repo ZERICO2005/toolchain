@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__irems
 
 if PREFER_OS_CRT
@@ -22,6 +22,6 @@ __irems:
 	ret
 
 
-	extern	__idvrms
+	.extern	__idvrms
 
 end if

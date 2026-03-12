@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 
 	public	__dtof
 
@@ -213,7 +213,7 @@ __dtof:
 ; .subnormal_no_round:
 	jr	.ret_copysign
 
-	extern	__lland
-	extern	__llcmpzero
-	extern	__llshru
-	extern	__lshru
+	.extern	__lland
+	.extern	__llcmpzero
+	.extern	__llshru
+	.extern	__lshru

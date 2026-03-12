@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__llxor_fast
 __llxor_fast:
 ; CC: 55*r(PC)+19*r(SPL)+8*w(SPL)+1

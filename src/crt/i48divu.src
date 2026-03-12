@@ -5,7 +5,7 @@
 
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__i48divu
 __i48divu:
 	push	iy
@@ -17,4 +17,4 @@ __i48divu:
 	pop	iy
 	ret
 
-	extern	__i48dvrmu
+	.extern	__i48dvrmu

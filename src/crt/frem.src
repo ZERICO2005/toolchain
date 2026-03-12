@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 
 	public	__frem
 
@@ -20,4 +20,4 @@ __frem:
 	pop	bc, de, iy
 	ret
 
-	extern	_fmodf
+	.extern	_fmodf

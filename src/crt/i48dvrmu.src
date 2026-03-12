@@ -9,7 +9,7 @@
 
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__i48dvrmu
 
 __i48dvrmu:

@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__lcmps_fast
 __lcmps_fast:
 	ld	d, a

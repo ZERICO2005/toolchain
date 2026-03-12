@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__ldivu
 
 if PREFER_OS_CRT
@@ -38,6 +38,6 @@ else
 	ret
 end if
 
-	extern	__ldvrmu
+	.extern	__ldvrmu
 
 end if

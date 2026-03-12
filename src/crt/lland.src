@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__lland
 __lland:
 ; CC: 61*r(PC)+25*r(SPL)+14*w(SPL)+1

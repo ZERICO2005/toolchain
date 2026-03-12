@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 
 	public	__dmul
 
@@ -23,4 +23,4 @@ __dmul:
 	pop	iy, af	; restore
 	ret
 
-	extern	___f64_mul
+	.extern	___f64_mul

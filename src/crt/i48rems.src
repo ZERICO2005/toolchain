@@ -5,7 +5,7 @@
 
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__i48rems
 __i48rems:
 	push	iy
@@ -37,6 +37,6 @@ __i48rems:
 	; negate remainder if dividend was negative
 	jp	__i48neg
 
-	extern	__i48dvrmu
-	extern	__i48neg
-	extern	__uiyubcNeg
+	.extern	__i48dvrmu
+	.extern	__i48neg
+	.extern	__uiyubcNeg

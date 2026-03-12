@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__llpopcnt_fast
 __llpopcnt_fast:
 	; Destroys: HL, DE
@@ -13,4 +13,4 @@ __llpopcnt_fast:
 	add	a, d
 	ret
 
-	extern	__lpopcnt_fast
+	.extern	__lpopcnt_fast

@@ -9,7 +9,7 @@
 
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__i48cmpu
 __i48cmpu:
 ; CC: 15 bytes

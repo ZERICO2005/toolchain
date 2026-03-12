@@ -1,7 +1,7 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__snot_fast
 __snot_fast := __inot_fast
 
-	extern	__inot_fast
+	.extern	__inot_fast

@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 
 	public	__dadd, __dsub
 
@@ -43,4 +43,4 @@ __daddsub:
 	pop	iy, af
 	ret
 
-	extern	_softfloat_addMagsF64, _softfloat_subMagsF64
+	.extern	_softfloat_addMagsF64, _softfloat_subMagsF64

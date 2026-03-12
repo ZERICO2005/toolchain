@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__ipopcnt_fast
 __ipopcnt_fast:
 	; Inlined implementation of __ipopcnt

@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__srems
 
 if PREFER_OS_CRT
@@ -22,7 +22,7 @@ __srems:
 
 	jp	__ineg
 
-	extern	__ineg
-	extern	__sdvrms_abs
+	.extern	__ineg
+	.extern	__sdvrms_abs
 
 end if

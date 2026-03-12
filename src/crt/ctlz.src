@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__bctlz
 __bctlz:
 	cp	a, 010h
@@ -29,7 +29,7 @@ __bctlz:
 	adc	a, 6
 	ret
 
-	section	.text
+	.section	.text
 	public	__sctlz
 __sctlz:
 	ld	a, h
@@ -38,14 +38,14 @@ __sctlz:
 	ld	a, l
 	require	__sctlz.hijack
 
-	section	.text
+	.section	.text
 	private	__sctlz.hijack
 __sctlz.hijack:
 	call	__bctlz
 	add	a, 8
 	ret
 
-	section	.text
+	.section	.text
 	public	__ictlz
 __ictlz:
 	dec	sp
@@ -61,7 +61,7 @@ __ictlz:
 	add	a, 16
 	ret
 
-	section	.text
+	.section	.text
 	public	__lctlz
 __lctlz:
 	ld	a, e
@@ -71,7 +71,7 @@ __lctlz:
 	add	a, 8
 	ret
 
-	section	.text
+	.section	.text
 	public	__llctlz
 __llctlz:
 	ld	a, b
@@ -83,7 +83,7 @@ __llctlz:
 	add	a, 16
 	ret
 
-	section	.text
+	.section	.text
 	public	__i48ctlz
 __i48ctlz:
 	ex	de, hl

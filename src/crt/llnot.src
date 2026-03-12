@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__llnot
 __llnot:
 	push	hl		; *spl=UHL

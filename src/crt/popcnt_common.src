@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__popcnt_common_init_full
 __popcnt_common_init_full:
 	; Calculates a combined popcount of L and HLU.

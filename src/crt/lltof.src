@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__lltof
 __lltof:
 	push	af, iy, bc, de, hl
@@ -12,4 +12,4 @@ __lltof:
 	pop	bc, iy, af
 	ret
 
-	extern	__lltof_c
+	.extern	__lltof_c

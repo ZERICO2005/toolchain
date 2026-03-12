@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__sdvrms_abs
 __sdvrms_abs:
 ; I: HL=dividend, BC=divisor
@@ -41,4 +41,4 @@ __sdvrms_abs:
 	ret
 
 
-	extern	__sdvrmu
+	.extern	__sdvrmu

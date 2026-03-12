@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__imuls_fast, __imulu_fast
 __imuls_fast:
 __imulu_fast:

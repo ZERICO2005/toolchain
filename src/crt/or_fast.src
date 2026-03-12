@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__lor_fast
 __lor_fast:
 ; CC: 24*r(PC)+8*r(SPL)+7*w(SPL)+1
@@ -8,7 +8,7 @@ __lor_fast:
 	ld	e, a
 	require	__ior_fast
 
-	section	.text
+	.section	.text
 	public	__ior_fast
 __ior_fast:
 ; CC: 22*r(PC)+8*r(SPL)+7*w(SPL)+1
@@ -27,7 +27,7 @@ __ior_fast:
 	pop	hl
 	require	__sor_fast
 
-	section	.text
+	.section	.text
 	public	__sor_fast
 __sor_fast:
 ; CC: 8*r(PC)+3*r(SPL)+1

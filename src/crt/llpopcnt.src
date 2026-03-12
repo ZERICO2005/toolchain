@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__llpopcnt
 __llpopcnt:
 	call	__lpopcnt
@@ -16,4 +16,4 @@ __llpopcnt:
 	pop	de
 	ret
 
-	extern	__lpopcnt
+	.extern	__lpopcnt

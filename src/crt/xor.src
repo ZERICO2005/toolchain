@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__lxor
 
 if PREFER_OS_CRT
@@ -24,7 +24,7 @@ __lxor:
 
 end if
 
-	section	.text
+	.section	.text
 	public	__ixor
 
 if PREFER_OS_CRT

@@ -5,7 +5,7 @@
 
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__i48bswap
 __i48bswap:
 ; CC: 14 bytes | 15F + 12R + 12W + 1

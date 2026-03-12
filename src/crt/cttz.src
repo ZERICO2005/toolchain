@@ -1,12 +1,12 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__bcttz
 __bcttz:
 	cp	a, 1
 	require	__cttz_common
 
-	section	.text
+	.section	.text
 	private	__cttz_common
 	; Input: A=byte, CF=(A==0)
 	; Output: A=cttz(A)
@@ -36,7 +36,7 @@ __cttz_common:
 	sbc	a, -7
 	ret
 
-	section	.text
+	.section	.text
 	public	__scttz
 __scttz:
 	xor	a, a
@@ -46,20 +46,20 @@ __scttz:
 	ccf
 	require	__scttz.hijack
 
-	section	.text
+	.section	.text
 	private	__scttz.hijack
 __scttz.hijack:
 	call	__cttz_common
 	add	a, 8
 	ret
 
-	section	.text
+	.section	.text
 	public	__icttz
 __icttz:
 	xor	a, a
 	require	__icttz.hijack
 
-	section	.text
+	.section	.text
 	private	__icttz.hijack
 __icttz.hijack:
 	or	a, l
@@ -74,7 +74,7 @@ __icttz.hijack:
 	add	a, 16
 	ret
 
-	section	.text
+	.section	.text
 	public	__lcttz
 __lcttz:
 	add	hl, de
@@ -87,7 +87,7 @@ __lcttz:
 	add	a, 24
 	ret
 
-	section	.text
+	.section	.text
 	public	__llcttz
 __llcttz:
 	add	hl, de
@@ -109,7 +109,7 @@ __llcttz:
 	add	a, 48
 	ret
 
-	section	.text
+	.section	.text
 	public	__i48cttz
 __i48cttz:
 	add	hl, de
@@ -119,7 +119,7 @@ __i48cttz:
 	ex	de, hl
 	require	__i48cttz.hijack
 
-	section	.text
+	.section	.text
 	private	__i48cttz.hijack
 __i48cttz.hijack:
 	call	__icttz.hijack

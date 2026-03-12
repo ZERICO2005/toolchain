@@ -16,7 +16,7 @@
 ;-------------------------------------------------------------------------
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__frsmulu
 __frsmulu:
 	push	af

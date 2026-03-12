@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__bdivs
 __bdivs:
 ; I: B=dividend, C=divisor
@@ -22,4 +22,4 @@ __bdivs:
 	ret
 
 
-	extern	__bdvrms_abs
+	.extern	__bdvrms_abs

@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__inot_fast
 __inot_fast:
 ; UHL = ~UHL

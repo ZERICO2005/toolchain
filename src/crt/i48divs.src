@@ -5,7 +5,7 @@
 
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__i48divs
 __i48divs:
 	push	af
@@ -38,6 +38,6 @@ __i48divs:
 	pop	af
 	ret
 
-	extern	__i48dvrmu
-	extern	__i48neg
-	extern	__uiyubcNeg
+	.extern	__i48dvrmu
+	.extern	__i48neg
+	.extern	__uiyubcNeg

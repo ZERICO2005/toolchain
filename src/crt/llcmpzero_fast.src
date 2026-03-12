@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__llcmpzero_fast
 __llcmpzero_fast:
 	xor	a, a

@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__ipopcnt
 __ipopcnt:
 	push	hl
@@ -16,4 +16,4 @@ __ipopcnt:
 	pop	hl
 	ret
 
-	extern	__popcnt_common_init_full, __popcnt_common_iter
+	.extern	__popcnt_common_init_full, __popcnt_common_iter

@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__bdvrms_abs
 __bdvrms_abs:
 ; I: C=divisor, L=dividend
@@ -33,4 +33,4 @@ __bdvrms_abs:
 	ret
 
 
-	extern	__bdvrmu.hijack_l_dividend
+	.extern	__bdvrmu.hijack_l_dividend

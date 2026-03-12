@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 
 	public	__drem
 
@@ -20,4 +20,4 @@ __drem:
 	pop	iy, af	; restore
 	ret
 
-	extern	___f64_rem
+	.extern	___f64_rem

@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__lor
 
 if PREFER_OS_CRT
@@ -24,7 +24,7 @@ __lor:
 
 end if
 
-	section	.text
+	.section	.text
 	public	__ior
 
 if PREFER_OS_CRT

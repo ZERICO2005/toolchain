@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__frsmuls
 __frsmuls:
 	push	af
@@ -43,4 +43,4 @@ _L2:
 	pop	af
 	ret
 
-	extern	__frsmulu
+	.extern	__frsmulu

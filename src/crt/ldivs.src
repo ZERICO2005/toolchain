@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__ldivs
 
 if PREFER_OS_CRT
@@ -33,8 +33,8 @@ __ldivs:
 	ret	c
 	jp	__lneg
 
-	extern	__ldivs_lrems_common
-	extern	__ldivu
-	extern	__lneg
+	.extern	__ldivs_lrems_common
+	.extern	__ldivu
+	.extern	__lneg
 
 end if

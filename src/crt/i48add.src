@@ -5,7 +5,7 @@
 
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__i48add
 __i48add:
 ; CC: 11 bytes | 12F + 6R + 3W + 1

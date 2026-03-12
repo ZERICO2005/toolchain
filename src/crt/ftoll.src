@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 
 	public	__ftoll
 	public	__ftoull
@@ -15,4 +15,4 @@ __ftoull:
 	pop	af, af, iy
 	ret
 
-	extern	__ftoll_c
+	.extern	__ftoll_c

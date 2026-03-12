@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__sdvrmu
 
 __sdvrmu:
@@ -21,4 +21,4 @@ __sdvrmu:
 
 	jp	__idvrmu.hijack_a_iters_ude_dividend
 
-	extern	__idvrmu.hijack_a_iters_ude_dividend
+	.extern	__idvrmu.hijack_a_iters_ude_dividend

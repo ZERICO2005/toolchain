@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 
 	public	__dtol
 	public	__dtoul
@@ -18,4 +18,4 @@ __dtoul:
 	pop	bc
 	ret
 
-	extern	__dtoll
+	.extern	__dtoll

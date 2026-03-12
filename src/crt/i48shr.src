@@ -5,7 +5,7 @@
 
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__i48shrs
 __i48shrs:
 	inc	c
@@ -15,7 +15,7 @@ __i48shrs:
 	db	$C2	; inc c \ dec c \ ret z -> jp nz, *
 	require	__i48shru
 
-	section	.text
+	.section	.text
 	public	__i48shru
 __i48shru:
 	inc	c

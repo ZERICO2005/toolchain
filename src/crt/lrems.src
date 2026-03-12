@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__lrems
 
 ;if PREFER_OS_CRT
@@ -28,8 +28,8 @@ __lrems:
 	ret	z
 	jp	__lneg
 
-	extern	__ldivs_lrems_common
-	extern	__lneg
-	extern	__lremu
+	.extern	__ldivs_lrems_common
+	.extern	__lneg
+	.extern	__lremu
 
 ;end if

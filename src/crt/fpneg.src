@@ -18,7 +18,7 @@
 ;--------------------------------------------------------------
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__fneg
 __fneg:
 	or	a,a

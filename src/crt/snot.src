@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__snot
 
 if PREFER_OS_CRT
@@ -11,6 +11,6 @@ else
 
 __snot := __inot
 
-	extern	__inot
+	.extern	__inot
 
 end if

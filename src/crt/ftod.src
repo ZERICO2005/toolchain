@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 
 	public __ftod
 
@@ -97,5 +97,5 @@ end if
 	ld	c, $FF
 	jr	.shift_28
 
-	extern	__ictlz
-	extern	__ishl
+	.extern	__ictlz
+	.extern	__ishl

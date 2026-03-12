@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 
 	public	__ultof
 
@@ -51,4 +51,4 @@ __ultof:
 
 end if
 
-	extern	__ltof
+	.extern	__ltof

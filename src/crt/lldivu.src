@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__lldivu
 __lldivu:
 
@@ -18,4 +18,4 @@ __lldivu:
 
 	ret
 
-	extern	__lldvrmu
+	.extern	__lldvrmu

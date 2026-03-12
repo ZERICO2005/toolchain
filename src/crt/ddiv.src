@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 
 	public	__ddiv
 
@@ -23,4 +23,4 @@ __ddiv:
 	pop	iy, af	; restore
 	ret
 
-	extern	___f64_div
+	.extern	___f64_div

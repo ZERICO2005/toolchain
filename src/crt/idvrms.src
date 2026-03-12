@@ -1,6 +1,6 @@
 	.assume	adl=1
 
-	section	.text
+	.section	.text
 	public	__idvrms
 
 __idvrms:
@@ -43,5 +43,5 @@ __idvrms:
 	ret	nz
 	jp	__ineg
 
-	extern	__idvrmu
-	extern	__ineg
+	.extern	__idvrmu
+	.extern	__ineg
