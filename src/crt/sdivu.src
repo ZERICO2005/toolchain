@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__sdivu
+	.global	__sdivu
+	.type	__sdivu, @function
 
 if PREFER_OS_CRT
 

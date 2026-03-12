@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__llrems
+	.global	__llrems
+	.type	__llrems, @function
 __llrems:
 
 	scf
@@ -11,7 +12,8 @@ virtual
 end virtual
 	db	.jr_nc
 
-	public	__lldivs
+	.global	__lldivs
+	.type	__lldivs, @function
 __lldivs:
 
 	or	a, a

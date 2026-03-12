@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lsub
+	.global	__lsub
+	.type	__lsub, @function
 
 if PREFER_OS_CRT
 

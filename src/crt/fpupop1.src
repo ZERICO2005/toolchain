@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__fpupop1
+	.global	__fpupop1
+	.type	__fpupop1, @function
 __fpupop1:
 	push	ix
 	ld	ix, 0

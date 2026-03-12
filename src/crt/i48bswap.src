@@ -6,7 +6,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48bswap
+	.global	__i48bswap
+	.type	__i48bswap, @function
 __i48bswap:
 ; CC: 14 bytes | 15F + 12R + 12W + 1
 	; Line up the reversed data on the stack

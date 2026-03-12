@@ -6,7 +6,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48rems
+	.global	__i48rems
+	.type	__i48rems, @function
 __i48rems:
 	push	iy
 	push	bc

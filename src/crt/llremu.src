@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__llremu
+	.global	__llremu
+	.type	__llremu, @function
 __llremu:
 
 	push	iy

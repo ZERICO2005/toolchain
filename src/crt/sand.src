@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__sand
+	.global	__sand
+	.type	__sand, @function
 
 if PREFER_OS_CRT
 

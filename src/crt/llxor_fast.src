@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__llxor_fast
+	.global	__llxor_fast
+	.type	__llxor_fast, @function
 __llxor_fast:
 ; CC: 55*r(PC)+19*r(SPL)+8*w(SPL)+1
 	ld	iy, 0

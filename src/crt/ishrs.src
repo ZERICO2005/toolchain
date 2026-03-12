@@ -1,8 +1,10 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__ishrs
-	public	__ishru
+	.global	__ishrs
+	.type	__ishrs, @function
+	.global	__ishru
+	.type	__ishru, @function
 
 if PREFER_OS_CRT
 

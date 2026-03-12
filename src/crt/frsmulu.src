@@ -17,7 +17,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__frsmulu
+	.global	__frsmulu
+	.type	__frsmulu, @function
 __frsmulu:
 	push	af
 	push	de

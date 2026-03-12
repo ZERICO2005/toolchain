@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__ineg
+	.global	__ineg
+	.type	__ineg, @function
 
 if PREFER_OS_CRT
 

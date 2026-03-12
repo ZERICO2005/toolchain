@@ -1,8 +1,10 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__llmuls
-	public	__llmulu
+	.global	__llmuls
+	.type	__llmuls, @function
+	.global	__llmulu
+	.type	__llmulu, @function
 __llmuls:
 __llmulu:
 ; Really slow

@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__bpopcnt
+	.global	__bpopcnt
+	.type	__bpopcnt, @function
 __bpopcnt:
 	push	hl
 	ld	l, a

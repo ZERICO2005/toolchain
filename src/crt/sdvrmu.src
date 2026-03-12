@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__sdvrmu
+	.global	__sdvrmu
+	.type	__sdvrmu, @function
 
 __sdvrmu:
 ; I: HL=dividend, BC=divisor

@@ -10,7 +10,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48cmps
+	.global	__i48cmps
+	.type	__i48cmps, @function
 __i48cmps:
 ; CC: 14 bytes | 15F + 9R + 6W + 1
 	push	hl

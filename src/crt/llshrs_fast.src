@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__llshrs_fast
+	.global	__llshrs_fast
+	.type	__llshrs_fast, @function
 __llshrs_fast:
 ; Could use optimization for shifting whole bytes at a time.
 	ld	iy, 0
@@ -19,7 +20,8 @@ __llshrs_fast:
 
 .loop:
 	sra	c
-	public	__llshrs_fast.hijack_llshru
+	.global	__llshrs_fast.hijack_llshru
+	.type	__llshrs_fast.hijack_llshru, @function
 .hijack_llshru:
 	rra
 	rr	(iy - 1)

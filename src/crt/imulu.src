@@ -1,8 +1,10 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__imuls
-	public	__imulu
+	.global	__imuls
+	.type	__imuls, @function
+	.global	__imulu
+	.type	__imulu, @function
 
 if PREFER_OS_CRT
 

@@ -1,13 +1,15 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__bdvrms_abs
+	.global	__bdvrms_abs
+	.type	__bdvrms_abs, @function
 __bdvrms_abs:
 ; I: C=divisor, L=dividend
 ; O: a=?, h=abs(L)%abs(C), l=abs(L)/abs(C)
 
 	ld	a, l
-	public	__bdvrms_abs.hijack_a_l_dividend
+	.global	__bdvrms_abs.hijack_a_l_dividend
+	.type	__bdvrms_abs.hijack_a_l_dividend, @function
 .hijack_a_l_dividend:
 	rla
 	jr	nc, .neg_dividend_skip

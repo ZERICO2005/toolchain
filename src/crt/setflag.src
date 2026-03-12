@@ -2,7 +2,8 @@
 
 	.section	.text
 
-	public	__setflag
+	.global	__setflag
+	.type	__setflag, @function
 
 if PREFER_OS_CRT
 

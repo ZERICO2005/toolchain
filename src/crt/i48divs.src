@@ -6,7 +6,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48divs
+	.global	__i48divs
+	.type	__i48divs, @function
 __i48divs:
 	push	af
 	push	iy

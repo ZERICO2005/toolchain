@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lbswap
+	.global	__lbswap
+	.type	__lbswap, @function
 __lbswap:
 	push	hl			; ...[hlu]hl <- (sp)
 	inc	sp			; ...[hlu]h <- (sp)

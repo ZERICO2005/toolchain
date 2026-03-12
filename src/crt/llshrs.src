@@ -2,7 +2,8 @@
 
 	.section	.text
 
-	public	__llshru
+	.global	__llshru
+	.type	__llshru, @function
 
 __llshru:
 ; Suboptimal for large shift amounts
@@ -20,7 +21,8 @@ __llshru:
 
 	.section	.text
 
-	public	__llshrs
+	.global	__llshrs
+	.type	__llshrs, @function
 
 __llshrs:
 ; Suboptimal for large shift amounts
@@ -36,11 +38,11 @@ __llshrs:
 
 	.section	.text
 
-	private	__llshr_common
+	.local	__llshr_common
 __llshr_common:
 .loop:
 	sra	b
-	private	__llshr_common.hijack_llshru
+	.local	__llshr_common.hijack_llshru
 .hijack_llshru:
 	rr	c
 	rr	(iy - 1)
@@ -59,7 +61,7 @@ __llshr_common:
 	ld	l, e
 	ld	h, d
 	pop	de
-	private	__llshr_common.finish
+	.local	__llshr_common.finish
 .finish:
 	pop	iy
 	pop	af

@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__snot_fast
+	.global	__snot_fast
+	.type	__snot_fast, @function
 __snot_fast := __inot_fast
 
 	.extern	__inot_fast

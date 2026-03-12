@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lladd_fast
+	.global	__lladd_fast
+	.type	__lladd_fast, @function
 __lladd_fast:
 	ld	iy, 0
 	add	iy, sp

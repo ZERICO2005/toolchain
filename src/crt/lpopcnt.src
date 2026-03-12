@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lpopcnt
+	.global	__lpopcnt
+	.type	__lpopcnt, @function
 __lpopcnt:
 	push	hl
 	; Calculate 8-popcount(L)-popcount(HLU), and set HLU=H

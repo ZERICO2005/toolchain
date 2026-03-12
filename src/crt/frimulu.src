@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__frimulu
+	.global	__frimulu
+	.type	__frimulu, @function
 __frimulu:
 	push	af
 	push	de

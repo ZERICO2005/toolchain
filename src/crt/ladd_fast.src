@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__ladd_fast
+	.global	__ladd_fast
+	.type	__ladd_fast, @function
 __ladd_fast:
 	add	hl, bc
 	adc	a, e

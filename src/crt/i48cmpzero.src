@@ -6,7 +6,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48cmpzero
+	.global	__i48cmpzero
+	.type	__i48cmpzero, @function
 __i48cmpzero:
 ; CC: 13 bytes
 ; Minimum:  8F + 3R + 2

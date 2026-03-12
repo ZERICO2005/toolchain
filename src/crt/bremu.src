@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__bremu
+	.global	__bremu
+	.type	__bremu, @function
 __bremu:
 ; I: A=dividend, C=divisor
 ; O: a=A%C

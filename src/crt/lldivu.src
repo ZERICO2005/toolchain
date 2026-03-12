@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lldivu
+	.global	__lldivu
+	.type	__lldivu, @function
 __lldivu:
 
 	push	iy

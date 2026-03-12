@@ -6,7 +6,8 @@
 
 	.section	.text
 
-	public	__ulltod
+	.global	__ulltod
+	.type	__ulltod, @function
 ; (long double)unsigned long long
 __ulltod:
 	cp	a, a		; set Z flag
@@ -17,7 +18,8 @@ __ulltod:
 
 	.section	.text
 
-	public	__lltod
+	.global	__lltod
+	.type	__lltod, @function
 ; (long double)long long
 __lltod:
 	bit	7, b
@@ -30,7 +32,7 @@ __lltod:
 
 	.section	.text
 
-	private	__lltod_common
+	.local	__lltod_common
 __lltod_common:
 	call	__llctlz
 	sub	a, 63		; normalize clz_result
@@ -121,7 +123,7 @@ end if
 
 	.section	.text
 
-	private	__int_to_f64_zero_or_one
+	.local	__int_to_f64_zero_or_one
 __int_to_f64_zero_or_one:
 	; carry is cleared here
 	; UHL is either one or zero
@@ -139,7 +141,8 @@ __int_to_f64_zero_or_one:
 
 	.section	.text
 
-	public	__ultod
+	.global	__ultod
+	.type	__ultod, @function
 ; (long double)unsigned long
 __ultod:
 	cp	a, a		; set Z flag
@@ -150,7 +153,8 @@ __ultod:
 
 	.section	.text
 
-	public	__ltod
+	.global	__ltod
+	.type	__ltod, @function
 ; (long double)long
 __ltod:
 	bit	7, e
@@ -163,7 +167,7 @@ __ltod:
 
 	.section	.text
 
-	private	__ltod_common
+	.local	__ltod_common
 __ltod_common:
 	call	__lctlz
 	sub	a, 31		; normalize clz_result
@@ -180,7 +184,7 @@ __ltod_common:
 
 	.section	.text
 
-	private	__int_to_f64_shl
+	.local	__int_to_f64_shl
 __int_to_f64_shl:
 	; exponent = (1023 or $3FF or f64_bias) + base2_logarithm
 	; Minimum exponent: $400 (2^1)

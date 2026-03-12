@@ -2,7 +2,8 @@
 
 	.section	.text
 
-	public	__drem
+	.global	__drem
+	.type	__drem, @function
 
 ; float64_t f64_rem(bool, float64_t, const float64_t*)
 __drem:

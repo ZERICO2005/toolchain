@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__sneg_fast
+	.global	__sneg_fast
+	.type	__sneg_fast, @function
 __sneg_fast := __ineg_fast
 
 	.extern	__ineg_fast

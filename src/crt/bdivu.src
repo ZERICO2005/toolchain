@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__bdivu
+	.global	__bdivu
+	.type	__bdivu, @function
 __bdivu:
 ; I: B=dividend, C=divisor
 ; O: a=B/C

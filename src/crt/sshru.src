@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__sshru
+	.global	__sshru
+	.type	__sshru, @function
 
 if PREFER_OS_CRT
 

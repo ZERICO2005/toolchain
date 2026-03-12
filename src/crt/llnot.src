@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__llnot
+	.global	__llnot
+	.type	__llnot, @function
 __llnot:
 	push	hl		; *spl=UHL
 	add	hl, de		; uhl=UHL+UDE

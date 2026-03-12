@@ -2,7 +2,8 @@
 
 	.section	.text
 
-	public	__smulu_b
+	.global	__smulu_b
+	.type	__smulu_b, @function
 
 __smulu_b:
 

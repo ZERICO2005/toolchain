@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__llshru_fast
+	.global	__llshru_fast
+	.type	__llshru_fast, @function
 __llshru_fast:
 	ld	iy, 0
 	add	iy, sp

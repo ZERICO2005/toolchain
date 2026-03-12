@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lladd_b
+	.global	__lladd_b
+	.type	__lladd_b, @function
 __lladd_b:
 	push	bc
 	inc.s	bc

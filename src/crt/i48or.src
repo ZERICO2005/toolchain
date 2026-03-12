@@ -6,7 +6,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48or
+	.global	__i48or
+	.type	__i48or, @function
 __i48or:
 ; CC: 41 bytes | 42F + 22R + 17W + 1
 	push	af

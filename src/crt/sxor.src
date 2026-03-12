@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__sxor
+	.global	__sxor
+	.type	__sxor, @function
 
 if PREFER_OS_CRT
 

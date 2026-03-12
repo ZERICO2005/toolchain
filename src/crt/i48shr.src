@@ -6,7 +6,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48shrs
+	.global	__i48shrs
+	.type	__i48shrs, @function
 __i48shrs:
 	inc	c
 	dec	c
@@ -16,7 +17,8 @@ __i48shrs:
 	require	__i48shru
 
 	.section	.text
-	public	__i48shru
+	.global	__i48shru
+	.type	__i48shru, @function
 __i48shru:
 	inc	c
 	dec	c

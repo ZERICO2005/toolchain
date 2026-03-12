@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lcmps
+	.global	__lcmps
+	.type	__lcmps, @function
 
 if PREFER_OS_CRT
 

@@ -1,8 +1,10 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lmuls
-	public	__lmulu
+	.global	__lmuls
+	.type	__lmuls, @function
+	.global	__lmulu
+	.type	__lmulu, @function
 
 if PREFER_OS_CRT
 

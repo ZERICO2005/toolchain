@@ -1,8 +1,10 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__imuls_fast
-	public	__imulu_fast
+	.global	__imuls_fast
+	.type	__imuls_fast, @function
+	.global	__imulu_fast
+	.type	__imulu_fast, @function
 __imuls_fast:
 __imulu_fast:
 

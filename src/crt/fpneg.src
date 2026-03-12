@@ -19,7 +19,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__fneg
+	.global	__fneg
+	.type	__fneg, @function
 __fneg:
 	or	a,a
 	jr	nz,__noexit

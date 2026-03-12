@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__llcmpzero_fast
+	.global	__llcmpzero_fast
+	.type	__llcmpzero_fast, @function
 __llcmpzero_fast:
 	xor	a, a
 	add	a, b

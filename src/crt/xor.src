@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lxor
+	.global	__lxor
+	.type	__lxor, @function
 
 if PREFER_OS_CRT
 
@@ -25,7 +26,8 @@ __lxor:
 end if
 
 	.section	.text
-	public	__ixor
+	.global	__ixor
+	.type	__ixor, @function
 
 if PREFER_OS_CRT
 
@@ -36,7 +38,7 @@ else
 __ixor:
 ; CC: 24*r(PC)+11*r(SPL)+10*w(SPL)+1
 	push	af
-	private	__ixor.hijack_lxor
+	.local	__ixor.hijack_lxor
 .hijack_lxor:
 	push	hl
 	scf

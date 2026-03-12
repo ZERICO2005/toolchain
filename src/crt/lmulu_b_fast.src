@@ -2,7 +2,8 @@
 
 	.section	.text
 
-	public	__lmulu_b_fast
+	.global	__lmulu_b_fast
+	.type	__lmulu_b_fast, @function
 
 __lmulu_b_fast:
 

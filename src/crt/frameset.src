@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__frameset
+	.global	__frameset
+	.type	__frameset, @function
 __frameset:
 	pop	de
 	push	ix

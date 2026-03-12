@@ -6,7 +6,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48popcnt
+	.global	__i48popcnt
+	.type	__i48popcnt, @function
 __i48popcnt:
 	push	hl
 	push	de

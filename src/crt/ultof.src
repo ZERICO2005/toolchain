@@ -2,7 +2,8 @@
 
 	.section	.text
 
-	public	__ultof
+	.global	__ultof
+	.type	__ultof, @function
 
 if 0
 

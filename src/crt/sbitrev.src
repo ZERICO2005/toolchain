@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__sbitrev
+	.global	__sbitrev
+	.type	__sbitrev, @function
 __sbitrev:
 	push	af
 	ld	a, l				; a=L

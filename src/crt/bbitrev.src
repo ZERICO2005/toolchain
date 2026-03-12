@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__bbitrev
+	.global	__bbitrev
+	.type	__bbitrev, @function
 __bbitrev:
 	push	bc
 	ld	b,a		; b=ABCDEFGH

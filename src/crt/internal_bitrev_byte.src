@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__internal_bitrev_two_bytes
+	.global	__internal_bitrev_two_bytes
+	.type	__internal_bitrev_two_bytes, @function
 __internal_bitrev_two_bytes:
 	rra
 	adc	hl, hl

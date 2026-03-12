@@ -6,7 +6,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48shl
+	.global	__i48shl
+	.type	__i48shl, @function
 __i48shl:
 	push	bc
 	ld	b, a

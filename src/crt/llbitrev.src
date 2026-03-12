@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__llbitrev
+	.global	__llbitrev
+	.type	__llbitrev, @function
 __llbitrev:
 	push	af
 	ld	a, d				; a=D

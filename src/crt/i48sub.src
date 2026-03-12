@@ -6,7 +6,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48sub
+	.global	__i48sub
+	.type	__i48sub, @function
 __i48sub:
 ; CC: 13 bytes | 14F + 6R + 3W + 1
 	or	a, a

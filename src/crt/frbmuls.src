@@ -17,7 +17,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__frbmuls
+	.global	__frbmuls
+	.type	__frbmuls, @function
 __frbmuls:
 	push	hl
 	;;

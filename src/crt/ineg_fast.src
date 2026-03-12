@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__ineg_fast
+	.global	__ineg_fast
+	.type	__ineg_fast, @function
 __ineg_fast:
 ; UHL = -UHL
 ;   CC: 7*r(PC)+3*r(SPL)+1

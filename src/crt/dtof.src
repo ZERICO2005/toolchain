@@ -2,9 +2,10 @@
 
 	.section	.text
 
-	public	__dtof
+	.global	__dtof
+	.type	__dtof, @function
 
-	private	__dtof_helper
+	.local	__dtof_helper
 __dtof_helper:
 	; Moving this block of code to be behind __dtof ensures that
 	; __dtof.ret_copysign can always be reached by jr in all paths.

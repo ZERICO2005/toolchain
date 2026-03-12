@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__llcmps
+	.global	__llcmps
+	.type	__llcmps, @function
 __llcmps:
 	push	iy
 	ld	iy, 0

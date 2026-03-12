@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__brems
+	.global	__brems
+	.type	__brems, @function
 __brems:
 ; I: A=dividend, C=divisor
 ; O: a=A%C

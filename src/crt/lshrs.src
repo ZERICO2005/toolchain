@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lshrs
+	.global	__lshrs
+	.type	__lshrs, @function
 
 if PREFER_OS_CRT
 
@@ -24,7 +25,8 @@ __lshrs:
 	add	hl, sp
 .loop:
 	sra	a
-	public	__lshrs.hijack_lshru
+	.global	__lshrs.hijack_lshru
+	.type	__lshrs.hijack_lshru, @function
 .hijack_lshru:
 	inc	hl
 	inc	hl

@@ -1,8 +1,10 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lmuls_fast
-	public	__lmulu_fast
+	.global	__lmuls_fast
+	.type	__lmuls_fast, @function
+	.global	__lmulu_fast
+	.type	__lmulu_fast, @function
 __lmuls_fast:
 __lmulu_fast:
 

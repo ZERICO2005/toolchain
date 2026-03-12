@@ -10,7 +10,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48cmpu
+	.global	__i48cmpu
+	.type	__i48cmpu, @function
 __i48cmpu:
 ; CC: 15 bytes
 ; Minimum: 11F + 6R + 3W + 2

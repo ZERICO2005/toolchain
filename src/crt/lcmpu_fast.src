@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lcmpu_fast
+	.global	__lcmpu_fast
+	.type	__lcmpu_fast, @function
 __lcmpu_fast:
 	sub	a, e
 	ccf

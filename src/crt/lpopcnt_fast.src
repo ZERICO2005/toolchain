@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lpopcnt_fast
+	.global	__lpopcnt_fast
+	.type	__lpopcnt_fast, @function
 __lpopcnt_fast:
 	; Inlined implementation of __lpopcnt
 	; Destroys: HL

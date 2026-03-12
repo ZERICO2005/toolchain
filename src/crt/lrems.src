@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lrems
+	.global	__lrems
+	.type	__lrems, @function
 
 ;if PREFER_OS_CRT
 ;

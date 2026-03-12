@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__spopcnt
+	.global	__spopcnt
+	.type	__spopcnt, @function
 __spopcnt:
 	; Set HLU=H and H=L, while saving HL on the stack
 	push	hl

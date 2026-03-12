@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__idvrms
+	.global	__idvrms
+	.type	__idvrms, @function
 
 __idvrms:
 ; I: UHL=dividend, UBC=divisor

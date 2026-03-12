@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lldivu_b
+	.global	__lldivu_b
+	.type	__lldivu_b, @function
 __lldivu_b:
 ; Very slow
 	push	af

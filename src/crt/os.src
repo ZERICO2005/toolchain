@@ -2,39 +2,57 @@
 
 	.section	.text
 
-	public	__fadd
+	.global	__fadd
+	.type	__fadd, @function
 __fadd      := 000270h
-	public	__fcmp
+	.global	__fcmp
+	.type	__fcmp, @function
 __fcmp      := 000274h
-	public	__fdiv
+	.global	__fdiv
+	.type	__fdiv, @function
 __fdiv      := 000278h
-	public	__fmul
+	.global	__fmul
+	.type	__fmul, @function
 __fmul      := 000288h
-	public	__fsub
+	.global	__fsub
+	.type	__fsub, @function
 __fsub      := 000290h
-	public	__ftol
+	.global	__ftol
+	.type	__ftol, @function
 __ftol      := 00027Ch
-	public	__ftoul
+	.global	__ftoul
+	.type	__ftoul, @function
 __ftoul     := __ftol
-	public	__indcall
+	.global	__indcall
+	.type	__indcall, @function
 __indcall   := 00015Ch
-	public	__ishl_b
+	.global	__ishl_b
+	.type	__ishl_b, @function
 __ishl_b    := 000178h
-	public	__ishrs_b
+	.global	__ishrs_b
+	.type	__ishrs_b, @function
 __ishrs_b   := 000180h
-	public	__ishru_b
+	.global	__ishru_b
+	.type	__ishru_b, @function
 __ishru_b   := 000188h
-	public	__itol
+	.global	__itol
+	.type	__itol, @function
 __itol      := 000194h
-	public	__ltof
+	.global	__ltof
+	.type	__ltof, @function
 __ltof      := 000284h
-	public	__sshl_b
+	.global	__sshl_b
+	.type	__sshl_b, @function
 __sshl_b    := 000244h
-	public	__sshrs_b
+	.global	__sshrs_b
+	.type	__sshrs_b, @function
 __sshrs_b   := 00024Ch
-	public	__sshru_b
+	.global	__sshru_b
+	.type	__sshru_b, @function
 __sshru_b   := 000254h
-	public	__stoi
+	.global	__stoi
+	.type	__stoi, @function
 __stoi      := 000260h
-	public	__stoiu
+	.global	__stoiu
+	.type	__stoiu, @function
 __stoiu     := 000264h

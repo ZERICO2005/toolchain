@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lladd
+	.global	__lladd
+	.type	__lladd, @function
 __lladd:
 	push	iy
 	ld	iy, 0

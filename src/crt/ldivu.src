@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__ldivu
+	.global	__ldivu
+	.type	__ldivu, @function
 
 if PREFER_OS_CRT
 

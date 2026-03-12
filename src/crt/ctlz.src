@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__bctlz
+	.global	__bctlz
+	.type	__bctlz, @function
 __bctlz:
 	cp	a, 010h
 	jr	c, .low4
@@ -30,7 +31,8 @@ __bctlz:
 	ret
 
 	.section	.text
-	public	__sctlz
+	.global	__sctlz
+	.type	__sctlz, @function
 __sctlz:
 	ld	a, h
 	or	a, a
@@ -39,14 +41,15 @@ __sctlz:
 	require	__sctlz.hijack
 
 	.section	.text
-	private	__sctlz.hijack
+	.local	__sctlz.hijack
 __sctlz.hijack:
 	call	__bctlz
 	add	a, 8
 	ret
 
 	.section	.text
-	public	__ictlz
+	.global	__ictlz
+	.type	__ictlz, @function
 __ictlz:
 	dec	sp
 	push	hl
@@ -62,7 +65,8 @@ __ictlz:
 	ret
 
 	.section	.text
-	public	__lctlz
+	.global	__lctlz
+	.type	__lctlz, @function
 __lctlz:
 	ld	a, e
 	or	a, a
@@ -72,7 +76,8 @@ __lctlz:
 	ret
 
 	.section	.text
-	public	__llctlz
+	.global	__llctlz
+	.type	__llctlz, @function
 __llctlz:
 	ld	a, b
 	or	a, a
@@ -84,7 +89,8 @@ __llctlz:
 	ret
 
 	.section	.text
-	public	__i48ctlz
+	.global	__i48ctlz
+	.type	__i48ctlz, @function
 __i48ctlz:
 	ex	de, hl
 	add	hl, de

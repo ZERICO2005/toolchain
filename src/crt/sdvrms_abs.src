@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__sdvrms_abs
+	.global	__sdvrms_abs
+	.type	__sdvrms_abs, @function
 __sdvrms_abs:
 ; I: HL=dividend, BC=divisor
 ; O: ude=abs(HL)/abs(BC), uhl=abs(HL)%abs(BC), sf=(HL<0)^(BC<0), cf=HL<0

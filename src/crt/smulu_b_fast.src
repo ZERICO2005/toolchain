@@ -4,7 +4,8 @@
 
 	.section	.text
 
-	public	__smulu_b_fast
+	.global	__smulu_b_fast
+	.type	__smulu_b_fast, @function
 
 __smulu_b_fast:
 

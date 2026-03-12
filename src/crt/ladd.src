@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__ladd
+	.global	__ladd
+	.type	__ladd, @function
 
 if PREFER_OS_CRT
 

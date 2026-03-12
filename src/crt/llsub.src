@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__llsub
+	.global	__llsub
+	.type	__llsub, @function
 __llsub:
 	push	iy
 	ld	iy, 0

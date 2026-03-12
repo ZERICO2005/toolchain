@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__inot_fast
+	.global	__inot_fast
+	.type	__inot_fast, @function
 __inot_fast:
 ; UHL = ~UHL
 ;   CC: 7*r(PC)+3*r(SPL)+1

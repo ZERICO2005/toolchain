@@ -6,7 +6,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48neg
+	.global	__i48neg
+	.type	__i48neg, @function
 __i48neg:
 ; CC: 17 bytes
 ; HL != 0: 18F + 3R + 2
@@ -28,7 +29,8 @@ __i48neg:
 	ret
 
 ; Used by i48divs and i48rems, uiy:ubc = -uiy:ubc
-	public	__uiyubcNeg
+	.global	__uiyubcNeg
+	.type	__uiyubcNeg, @function
 __uiyubcNeg:
 ; CC: 18 bytes | 19F + 12R + 9W + 1
 	push	hl

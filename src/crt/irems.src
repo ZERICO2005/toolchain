@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__irems
+	.global	__irems
+	.type	__irems, @function
 
 if PREFER_OS_CRT
 

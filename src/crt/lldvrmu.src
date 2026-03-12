@@ -1,13 +1,15 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__lldvrmu
+	.global	__lldvrmu
+	.type	__lldvrmu, @function
 __lldvrmu:
 ; Atrociously slow.
 
 	ld	iy, 5
 	add	iy, sp
-	public	__lldvrmu.hijack
+	.global	__lldvrmu.hijack
+	.type	__lldvrmu.hijack, @function
 .hijack:
 
 	ld	a, i

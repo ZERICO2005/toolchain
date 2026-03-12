@@ -6,7 +6,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48and
+	.global	__i48and
+	.type	__i48and, @function
 __i48and:
 ; CC: 41 bytes | 42F + 22R + 17W + 1
 	push	af

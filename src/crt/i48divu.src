@@ -6,7 +6,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48divu
+	.global	__i48divu
+	.type	__i48divu, @function
 __i48divu:
 	push	iy
 	push	bc

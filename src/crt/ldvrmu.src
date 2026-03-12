@@ -6,7 +6,8 @@
 ;;;     uint32_t quot;
 ;;; };
 ;;; u32div_t _ldvrmu(uint32_t dividend, uint32_t divisor) {
-	public	__ldvrmu
+	.global	__ldvrmu
+	.type	__ldvrmu, @function
 
 if PREFER_OS_CRT
 

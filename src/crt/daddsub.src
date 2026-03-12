@@ -2,8 +2,10 @@
 
 	.section	.text
 
-	public	__dadd
-	public	__dsub
+	.global	__dadd
+	.type	__dadd, @function
+	.global	__dsub
+	.type	__dsub, @function
 
 ; float64_t softfloat_addMagsF64(float64_t x, const float64_t *y, bool sign_x)
 __dadd:

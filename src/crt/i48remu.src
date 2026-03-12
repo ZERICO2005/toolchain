@@ -6,7 +6,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__i48remu
+	.global	__i48remu
+	.type	__i48remu, @function
 __i48remu:
 	push	iy
 	push	bc

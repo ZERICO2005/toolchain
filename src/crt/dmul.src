@@ -2,7 +2,8 @@
 
 	.section	.text
 
-	public	__dmul
+	.global	__dmul
+	.type	__dmul, @function
 
 ; float64_t f64_mul(bool, float64_t, const float64_t*)
 __dmul:

@@ -2,7 +2,8 @@
 
 	.section	.text
 
-	public	__dcmp
+	.global	__dcmp
+	.type	__dcmp, @function
 
 __dcmp:
 	push	iy

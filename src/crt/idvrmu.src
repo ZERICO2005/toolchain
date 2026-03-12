@@ -1,7 +1,8 @@
 	.assume	adl=1
 
 	.section	.text
-	public	__idvrmu
+	.global	__idvrmu
+	.type	__idvrmu, @function
 
 if PREFER_OS_CRT
 
@@ -17,7 +18,8 @@ __idvrmu:
 
 	push	af
 	ld	a, 24
-	public	__idvrmu.hijack_a_iters_ude_dividend
+	.global	__idvrmu.hijack_a_iters_ude_dividend
+	.type	__idvrmu.hijack_a_iters_ude_dividend, @function
 .hijack_a_iters_ude_dividend:
 
 	or	a, a

@@ -2,8 +2,10 @@
 
 	.section	.text
 
-	public	__imul_b
-	public	__imulu_b
+	.global	__imul_b
+	.type	__imul_b, @function
+	.global	__imulu_b
+	.type	__imulu_b, @function
 
 if PREFER_OS_CRT
 
