@@ -4,11 +4,11 @@
 	.global	__sdivs
 	.type	__sdivs, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __sdivs := 000208h
 
-else
+.else
 
 __sdivs:
 ; I: HL=dividend, BC=divisor
@@ -27,4 +27,4 @@ __sdivs:
 	.extern	__ineg
 	.extern	__sdvrms_abs
 
-end if
+.endif

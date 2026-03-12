@@ -4,11 +4,11 @@
 	.global	__sshrs
 	.type	__sshrs, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __sshrs := 000248h
 
-else
+.else
 
 __sshrs:
 ; Suboptimal for large shift amounts
@@ -26,4 +26,4 @@ __sshrs:
 	pop	bc
 	ret
 
-end if
+.endif

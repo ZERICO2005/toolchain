@@ -4,11 +4,11 @@
 	.global	__lneg
 	.type	__lneg, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __lneg := 0001D0h
 
-else
+.else
 
 __lneg:
 	push	af
@@ -23,4 +23,4 @@ __lneg:
 	pop	af
 	ret
 
-end if
+.endif

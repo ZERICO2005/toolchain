@@ -4,11 +4,11 @@
 	.global	__sor
 	.type	__sor, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __sor := 000234h
 
-else
+.else
 
 __sor:
 	push	af
@@ -21,4 +21,4 @@ __sor:
 	pop	af
 	ret
 
-end if
+.endif

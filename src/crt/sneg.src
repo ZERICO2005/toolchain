@@ -4,14 +4,14 @@
 	.global	__sneg
 	.type	__sneg, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __sneg := 00022Ch
 
-else
+.else
 
 __sneg := __ineg
 
 	.extern	__ineg
 
-end if
+.endif

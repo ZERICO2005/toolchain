@@ -4,11 +4,11 @@
 	.global	__lnot
 	.type	__lnot, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __lnot := 0001D4h
 
-else
+.else
 
 __lnot:
 	push	af
@@ -27,4 +27,4 @@ __lnot:
 	pop	de
 	ret
 
-end if
+.endif

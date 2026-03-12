@@ -4,11 +4,11 @@
 	.global	__irems
 	.type	__irems, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __irems := 00016Ch
 
-else
+.else
 
 __irems:
 ; I: UHL=dividend, UBC=divisor
@@ -25,4 +25,4 @@ __irems:
 
 	.extern	__idvrms
 
-end if
+.endif

@@ -4,11 +4,11 @@
 	.global	__sxor
 	.type	__sxor, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __sxor := 000268h
 
-else
+.else
 
 __sxor:
 	push	af
@@ -21,4 +21,4 @@ __sxor:
 	pop	af
 	ret
 
-end if
+.endif

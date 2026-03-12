@@ -4,11 +4,11 @@
 	.global	__sand
 	.type	__sand, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __sand := 000200h
 
-else
+.else
 
 __sand:
 	push	af
@@ -21,4 +21,4 @@ __sand:
 	pop	af
 	ret
 
-end if
+.endif

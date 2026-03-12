@@ -4,11 +4,11 @@
 	.global	__sshru
 	.type	__sshru, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __sshru := 000250h
 
-else
+.else
 
 __sshru:
 ; Suboptimal for large shift amounts
@@ -26,4 +26,4 @@ __sshru:
 	pop	bc
 	ret
 
-end if
+.endif

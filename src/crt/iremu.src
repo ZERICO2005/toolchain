@@ -4,11 +4,11 @@
 	.global	__iremu
 	.type	__iremu, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __iremu := 000170h
 
-else
+.else
 
 __iremu:
 ; I: UHL=dividend, UBC=divisor
@@ -23,4 +23,4 @@ __iremu:
 
 	.extern	__idvrmu
 
-end if
+.endif

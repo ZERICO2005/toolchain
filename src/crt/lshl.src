@@ -4,11 +4,11 @@
 	.global	__lshl
 	.type	__lshl, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __lshl := 0001E4h
 
-else
+.else
 
 __lshl:
 ; Suboptimal for large shift amounts
@@ -28,4 +28,4 @@ __lshl:
 	pop	bc
 	ret
 
-end if
+.endif

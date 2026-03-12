@@ -4,11 +4,11 @@
 	.global	__srems
 	.type	__srems, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __srems := 000238h
 
-else
+.else
 
 __srems:
 ; I: HL=dividend, BC=divisor
@@ -26,4 +26,4 @@ __srems:
 	.extern	__ineg
 	.extern	__sdvrms_abs
 
-end if
+.endif

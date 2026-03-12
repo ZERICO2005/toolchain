@@ -78,19 +78,21 @@ __ftod:
 	; expon = (Float64_bias - Float32_bias) - clz_result
 	add	hl, hl
 	; the following three methods are equivilient
-if 1
+.if 1
 	; ($FF - a) - $7F
 	cpl
 	sub	a, $80 - 1
-else if 0
+.else
+.if 0
 	; $FF - (a + $7F)
 	add	a, $80 - 1
 	cpl
-else
+.else
 	; $80 - c (c is equal to a)
 	ld	a, $80
 	sub	a, c
-end if
+.endif
+.endif
 	jr	.L.subnorm_shift
 
 .L.nan:

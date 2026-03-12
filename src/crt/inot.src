@@ -4,11 +4,11 @@
 	.global	__inot
 	.type	__inot, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __inot := 000164h
 
-else
+.else
 
 __inot:
 ; UHL = ~UHL
@@ -30,4 +30,4 @@ __inot:
 	ex	de, hl	; ude=UDE, uhl=~UHL
 	ret
 
-end if
+.endif

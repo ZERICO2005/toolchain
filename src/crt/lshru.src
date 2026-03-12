@@ -4,11 +4,11 @@
 	.global	__lshru
 	.type	__lshru, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __lshru := 0001ECh
 
-else
+.else
 
 __lshru:
 ; Suboptimal for large shift amounts
@@ -29,4 +29,4 @@ __lshru:
 
 	.extern	__lshrs.hijack_lshru
 
-end if
+.endif

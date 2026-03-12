@@ -71,16 +71,16 @@ __lltod_common:
 .L.round_up:
 	inc	b		; round up after shifting
 .L.no_round:
-if __lltod_signal_FE_INEXACT
+.if __lltod_signal_FE_INEXACT
 	adc	a, a		; test sticky and round bits
 	jr	z, .L.result_is_exact
 .L.no_round_inexact:
 	ld	hl, ___fe_cur_env
 	set	5, (hl)		; FE_INEXACT
 .L.result_is_exact:
-else
+.else
 .L.no_round_inexact:
-end if
+.endif
 	ld	h, b
 	ld	a, c
 	ld	l, c
@@ -100,7 +100,7 @@ end if
 	pop	af		; A = rounding
 	or	a, a		; NZ = round-up, Z = no-round
 	ld	b, $43
-if 0
+.if 0
 	jr	z, __int_to_f64_shl.no_round
 	; inlined __lladd_1
 	inc	hl
@@ -114,10 +114,10 @@ if 0
 	jr	nz, __int_to_f64_shl.finish
 	inc	bc
 	jr	__int_to_f64_shl.finish
-else
+.else
 	call	nz, __lladd_1	; round up to even
 	jr	__int_to_f64_shl.finish
-end if
+.endif
 
 ;-------------------------------------------------------------------------------
 

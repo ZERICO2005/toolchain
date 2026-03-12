@@ -7,12 +7,12 @@
 	.global	__imulu_b
 	.type	__imulu_b, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __imul_b := 000150h
 __imulu_b := __imul_b
 
-else
+.else
 
 __imul_b:
 __imulu_b:
@@ -65,4 +65,4 @@ Mul_UHL_A_UHL:
 	pop	de
 	ret
 
-end if
+.endif

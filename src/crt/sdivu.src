@@ -4,11 +4,11 @@
 	.global	__sdivu
 	.type	__sdivu, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __sdivu := 00020Ch
 
-else
+.else
 
 __sdivu:
 ; I: HL=dividend, BC=divisor
@@ -24,4 +24,4 @@ __sdivu:
 
 	.extern	__sdvrmu
 
-end if
+.endif

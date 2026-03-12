@@ -4,11 +4,11 @@
 	.global	__lcmps
 	.type	__lcmps, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __lcmps := 0001A8h
 
-else
+.else
 
 __lcmps:
 	push	de
@@ -24,4 +24,4 @@ __lcmps:
 	pop	de
 	ret
 
-end if
+.endif

@@ -4,14 +4,14 @@
 	.global	__snot
 	.type	__snot, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __snot := 000230h
 
-else
+.else
 
 __snot := __inot
 
 	.extern	__inot
 
-end if
+.endif

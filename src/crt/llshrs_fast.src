@@ -50,7 +50,7 @@ __llshrs_fast:
 	ret
 
 
-if 0
+.if 0
 	push	bc
 	ld	iy, 0
 	add	iy, sp
@@ -171,4 +171,4 @@ if 0
 .L.shr0:
 	pop	bc
 	ret
-end if
+.endif

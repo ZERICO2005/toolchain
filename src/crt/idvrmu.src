@@ -4,11 +4,11 @@
 	.global	__idvrmu
 	.type	__idvrmu, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __idvrmu := 000144h
 
-else
+.else
 
 __idvrmu:
 ; I: UHL=dividend, UBC=divisor
@@ -45,4 +45,4 @@ __idvrmu:
 	pop	af
 	ret
 
-end if
+.endif

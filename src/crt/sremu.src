@@ -4,11 +4,11 @@
 	.global	__sremu
 	.type	__sremu, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __sremu := 00023Ch
 
-else
+.else
 
 __sremu:
 ; I: HL=dividend, BC=divisor
@@ -23,4 +23,4 @@ __sremu:
 
 	.extern	__sdvrmu
 
-end if
+.endif

@@ -4,11 +4,11 @@
 	.global	__ishl
 	.type	__ishl, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __ishl := 000174h
 
-else
+.else
 
 __ishl:
 ; CC: if 0<=C<8:   23*r(PC)+3*r(SPL)+4+(C&1==0)+(C&2!=0)*(1*r(PC)-1)+(C&4!=0)*(3*r(PC)-1)
@@ -48,4 +48,4 @@ __ishl_8:
 	add	hl, hl
 	ret
 
-end if
+.endif

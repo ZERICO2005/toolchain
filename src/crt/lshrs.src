@@ -4,11 +4,11 @@
 	.global	__lshrs
 	.type	__lshrs, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __lshrs := 0001E8h
 
-else
+.else
 
 __lshrs:
 ; Suboptimal for large shift amounts
@@ -40,4 +40,4 @@ __lshrs:
 	pop	hl
 	ret
 
-end if
+.endif

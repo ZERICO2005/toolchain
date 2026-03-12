@@ -4,11 +4,11 @@
 	.global	__land
 	.type	__land, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __land := 0001A4h
 
-else
+.else
 
 __land:
 ; CC: 28*r(PC)+11*r(SPL)+10*w(SPL)+1
@@ -23,17 +23,17 @@ __land:
 	db	.ld_a	; push af -> ld a,*
 	require	__iand
 
-end if
+.endif
 
 	section	.text
 	.global	__iand
 	.type	__iand, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __iand := 000134h
 
-else
+.else
 
 __iand:
 ; CC: 24*r(PC)+11*r(SPL)+10*w(SPL)+1
@@ -62,4 +62,4 @@ __iand:
 	pop	af
 	ret
 
-end if
+.endif

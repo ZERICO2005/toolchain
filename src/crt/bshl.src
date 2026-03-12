@@ -4,11 +4,11 @@
 	.global	__bshl
 	.type	__bshl, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __bshl := 000100h
 
-else
+.else
 
 __bshl:
 ; CC: if B!=0: B*(4*r(PC)+1)+6*r(PC)+(ADL?6*r(SPL)+3*w(SPL):4*r(SPS)+2*w(SPS))+1
@@ -23,4 +23,4 @@ __bshl:
 	pop	bc
 	ret
 
-end if
+.endif

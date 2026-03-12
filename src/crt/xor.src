@@ -4,11 +4,11 @@
 	.global	__lxor
 	.type	__lxor, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __lxor := 0001FCh
 
-else
+.else
 
 __lxor:
 ; CC: 28*r(PC)+11*r(SPL)+10*w(SPL)+1
@@ -23,17 +23,17 @@ __lxor:
 	db	.ld_a	; push af -> ld a,*
 	require	__ixor
 
-end if
+.endif
 
 	.section	.text
 	.global	__ixor
 	.type	__ixor, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __ixor := 000198h
 
-else
+.else
 
 __ixor:
 ; CC: 24*r(PC)+11*r(SPL)+10*w(SPL)+1
@@ -62,4 +62,4 @@ __ixor:
 	pop	af
 	ret
 
-end if
+.endif

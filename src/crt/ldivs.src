@@ -4,11 +4,11 @@
 	.global	__ldivs
 	.type	__ldivs, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __ldivs := 0001B4h
 
-else
+.else
 
 __ldivs:
 ; I: EUHL=dividend, AUBC=divisor
@@ -38,4 +38,4 @@ __ldivs:
 	.extern	__ldivu
 	.extern	__lneg
 
-end if
+.endif

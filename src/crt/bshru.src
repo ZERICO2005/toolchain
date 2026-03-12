@@ -4,11 +4,11 @@
 	.global	__bshru
 	.type	__bshru, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __bshru := 000104h
 
-else
+.else
 
 __bshru:
 ; CC: if B!=0: B*(5*r(PC)+1)+6*r(PC)+(ADL?6*r(SPL)+3*w(SPL):4*r(SPS)+2*w(SPS))+1
@@ -23,4 +23,4 @@ __bshru:
 	pop	bc
 	ret
 
-end if
+.endif

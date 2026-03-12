@@ -9,14 +9,14 @@
 	.global	__ldvrmu
 	.type	__ldvrmu, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __ldvrmu := 0001BCh
 
-else
+.else
 
 __ldvrmu:
-if 1
+.if 1
 ; I: EUHL=dividend, AUBC=divisor
 ; O: a[uhl']=EUHL%AUBC, bcu=0, b=A, c=?, euhl=EUHL/AUBC, eubc'=AUBC, zf=!IEF2
 
@@ -88,7 +88,7 @@ if 1
 	ret
 ;;; }
 
-else
+.else
 ; I: EUHL=dividend, AUBC=divisor
 ; O: auhl=EUHL%AUBC, euix=EUHL/AUBC, iyh=A, iyl=0
 
@@ -123,6 +123,6 @@ else
 
 	ret
 
-end if
+.endif
 
-end if
+.endif

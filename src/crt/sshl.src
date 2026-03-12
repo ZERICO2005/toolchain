@@ -4,14 +4,14 @@
 	.global	__sshl
 	.type	__sshl, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __sshl := 000240h
 
-else
+.else
 
 __sshl := __ishl
 
 	.extern	__ishl
 
-end if
+.endif

@@ -5,11 +5,11 @@
 	.global	__setflag
 	.type	__setflag, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __setflag := 000218h
 
-else
+.else
 
 __setflag:
 	ret	po
@@ -22,4 +22,4 @@ __setflag:
 	pop	af
 	ret
 
-end if
+.endif

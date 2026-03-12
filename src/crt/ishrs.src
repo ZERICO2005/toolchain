@@ -6,12 +6,12 @@
 	.global	__ishru
 	.type	__ishru, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __ishrs := 00017Ch
 __ishru := 000184h
 
-else
+.else
 
 __ishru:
 	push	af
@@ -77,4 +77,4 @@ __ishrs:
 	pop	af
 	ret
 
-end if
+.endif

@@ -4,11 +4,11 @@
 	.global	__lor
 	.type	__lor, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __lor := 0001D8h
 
-else
+.else
 
 __lor:
 ; CC: 28*r(PC)+11*r(SPL)+10*w(SPL)+1
@@ -23,17 +23,17 @@ __lor:
 	db	.ld_a	; push af -> ld a,*
 	require	__ior
 
-end if
+.endif
 
 	.section	.text
 	.global	__ior
 	.type	__ior, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __ior := 000168h
 
-else
+.else
 
 __ior:
 ; CC: 24*r(PC)+11*r(SPL)+10*w(SPL)+1
@@ -62,4 +62,4 @@ __ior:
 	pop	af
 	ret
 
-end if
+.endif

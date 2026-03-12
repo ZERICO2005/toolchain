@@ -4,11 +4,11 @@
 	.global	__ineg
 	.type	__ineg, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __ineg := 000160h
 
-else
+.else
 
 __ineg:
 ; UHL = -UHL
@@ -26,4 +26,4 @@ __ineg:
 	ex	de, hl	; ude=UDE, uhl=-UHL
 	ret
 
-end if
+.endif

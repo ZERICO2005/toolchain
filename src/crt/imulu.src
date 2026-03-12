@@ -6,12 +6,12 @@
 	.global	__imulu
 	.type	__imulu, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __imuls := 000154h
 __imulu := 000158h
 
-else
+.else
 
 __imuls:
 __imulu:
@@ -70,4 +70,4 @@ Mul_UHL_UBC_UHL:		;--------------+---------------+---------------+--------------
 ; (UHL*UBC)&0xFFFFFF=L*C+(H*C+L*B<<8)+(HLU*C+H*B+L*BCU<<16)+(HLU*B+H*BCU<<24)+(HLU*BCU<<32)&0xFFFFFF
 ;		    =L*C+(H*C+L*B<<8)+(HLU*C+H*B+L*BCU<<16)&0xFFFFFF
 
-end if
+.endif

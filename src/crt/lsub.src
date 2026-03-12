@@ -4,11 +4,11 @@
 	.global	__lsub
 	.type	__lsub, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __lsub := 0001F8h
 
-else
+.else
 
 __lsub:
 	push	af
@@ -21,4 +21,4 @@ __lsub:
 	pop	af
 	ret
 
-end if
+.endif

@@ -4,11 +4,11 @@
 	.global	__ladd_b
 	.type	__ladd_b, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __ladd_b := 0001A0h
 
-else
+.else
 
 __ladd_b:
 	push	bc
@@ -21,4 +21,4 @@ __ladd_b:
 	inc	e
 	ret
 
-end if
+.endif

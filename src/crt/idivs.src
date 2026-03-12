@@ -4,11 +4,11 @@
 	.global	__idivs
 	.type	__idivs, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __idivs := 00013Ch
 
-else
+.else
 
 __idivs:
 ; I: UHL=dividend, UBC=divisor
@@ -24,4 +24,4 @@ __idivs:
 
 	.extern	__idvrms
 
-end if
+.endif

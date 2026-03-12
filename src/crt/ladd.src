@@ -4,11 +4,11 @@
 	.global	__ladd
 	.type	__ladd, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __ladd := 00019Ch
 
-else
+.else
 
 __ladd:
 	push	af
@@ -18,4 +18,4 @@ __ladd:
 	pop	af
 	ret
 
-end if
+.endif

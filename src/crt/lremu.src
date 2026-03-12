@@ -4,17 +4,17 @@
 	.global	__lremu
 	.type	__lremu, @function
 
-if PREFER_OS_CRT
+.if PREFER_OS_CRT
 
 __lremu := 0001E0h
 
-else
+.else
 
 __lremu:
 ; I: EUHL=dividend, AUBC=divisor
 ; O: euhl=EUHL%AUBC
 
-if 1
+.if 1
 	call	__ldvrmu
 	ld	e, a
 	push	de
@@ -26,7 +26,7 @@ if 1
 	ei
 	ret
 
-else
+.else
 	push	ix
 	push	iy
 
@@ -37,8 +37,8 @@ else
 	pop	iy
 	pop	ix
 	ret
-end if
+.endif
 
 	.extern	__ldvrmu
 
-end if
+.endif
