@@ -58,7 +58,7 @@ if 0
 	and	a, 00111000b
 	ld	(.byteshift_smc)
 	xor	a, a
-	sub 	a, c
+	sub	a, c
 	jr	$+1
 .byteshift_smc := $-1
 .shr1_8:

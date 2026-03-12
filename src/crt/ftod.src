@@ -2,7 +2,7 @@
 
 	.section	.text
 
-	public __ftod
+	public	__ftod
 
 ; input E:UHL (float)
 ; ouput BC:UDE:UHL (long double)

@@ -29,7 +29,7 @@ __daddsub:
 	push	iy	; address of y
 	push	bc, de, hl	; pass x by value
 
-	xor a, (iy + 7)
+	xor	a, (iy + 7)
 	rla
 
 	jr	nc, .__daddmags	; same signs

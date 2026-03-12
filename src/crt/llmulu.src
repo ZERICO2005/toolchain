@@ -60,7 +60,7 @@ __llmulu:
 	jr	nz, .bit_loop
 
 	pop	af
-	jr 	nc, .byte_loop
+	jr	nc, .byte_loop
 
 	ld	b, d
 	ld	c, e
