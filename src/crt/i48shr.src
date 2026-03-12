@@ -3,7 +3,7 @@
 ; Returns:
 ; ude:uhl = ude:uhl>>c
 
-	assume	adl=1
+	.assume	adl=1
 
 	section	.text
 	public	__i48shrs

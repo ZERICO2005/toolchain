@@ -3,7 +3,7 @@
 ; Returns:
 ; a = number of set bits in ude:uhl
 
-	assume	adl=1
+	.assume	adl=1
 
 	section	.text
 	public	__i48popcnt

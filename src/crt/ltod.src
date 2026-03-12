@@ -1,4 +1,4 @@
-	assume	adl=1
+	.assume	adl=1
 
 	__lltod_signal_FE_INEXACT := 0
 

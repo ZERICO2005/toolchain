@@ -3,7 +3,7 @@
 ; Returns:
 ; ude:uhl = ude:uhl + 1
 
-	assume	adl=1
+	.assume	adl=1
 
 	section	.text
 

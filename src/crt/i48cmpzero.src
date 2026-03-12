@@ -3,7 +3,7 @@
 ; Returns:
 ; z status flag set if ude:uhl == 0, s status flag set if ude:uhl is negative
 
-	assume	adl=1
+	.assume	adl=1
 
 	section	.text
 	public	__i48cmpzero

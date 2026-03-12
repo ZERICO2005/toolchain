@@ -7,7 +7,7 @@
 ; Returns (loaded into other registers by i48divu/s and i48remu/s):
 ; ude:uhl quotient, uiy:ubc remainder
 
-	assume	adl=1
+	.assume	adl=1
 
 	section	.text
 	public	__i48dvrmu
