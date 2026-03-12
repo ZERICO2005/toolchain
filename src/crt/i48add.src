@@ -12,7 +12,7 @@ __i48add:
 	add	hl, bc
 	ex	de, hl
 	push	bc
-	lea	bc, iy
+	lea	bc, iy + 0
 	adc	hl, bc
 	pop	bc
 	ex	de, hl

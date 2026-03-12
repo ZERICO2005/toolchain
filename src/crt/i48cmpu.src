@@ -17,7 +17,7 @@ __i48cmpu:
 ; Maximum: 16F + 6R + 3W + 2
 	push	hl
 	or	a, a
-	lea	hl, iy
+	lea	hl, iy + 0
 	sbc	hl, de	; subtract IY - DE, which is the other way around
 	ccf		; complement carry
 	pop	hl

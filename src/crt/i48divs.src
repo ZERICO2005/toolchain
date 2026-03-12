@@ -14,7 +14,7 @@ __i48divs:
 
 	; divisor sign check
 	push	hl
-	lea	hl, iy
+	lea	hl, iy + 0
 	add	hl, hl
 	sbc	a, a
 	call	c, __uiyubcNeg

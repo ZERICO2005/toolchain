@@ -18,7 +18,7 @@ __i48cmps:
 	or	a, a
 	sbc	hl, bc	; compare hl to bc
 	ex	de, hl	; hl = de
-	lea	de, iy	; de = iy
+	lea	de, iy + 0	; de = iy
 	sbc	hl, de	; compare de to iy
 	pop	de
 	pop	hl

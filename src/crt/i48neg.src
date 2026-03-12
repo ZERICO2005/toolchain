@@ -37,7 +37,7 @@ __uiyubcNeg:
 	sbc	hl, bc		; hl = 0 - BC = -BC
 	push	hl
 	add	hl, bc		; hl = 0, causes the same carry
-	lea	bc, iy
+	lea	bc, iy + 0
 	sbc	hl, bc		; hl = 0 - IY - c
 	pop	bc		; bc = -BC
 	ex	(sp), hl	; hl = HL

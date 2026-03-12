@@ -13,7 +13,7 @@ __i48rems:
 
 	; divisor sign check
 	push	hl
-	lea	hl, iy
+	lea	hl, iy + 0
 	add	hl, hl
 	call	c, __uiyubcNeg
 
@@ -26,7 +26,7 @@ __i48rems:
 	pop	af
 
 	call	__i48dvrmu
-	lea	de, iy
+	lea	de, iy + 0
 	push	bc
 	pop	hl
 

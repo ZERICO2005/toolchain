@@ -66,7 +66,7 @@ __llmulu:
 	ld	b, d
 	ld	c, e
 	ex	de, hl
-	lea	hl, ix
+	lea	hl, ix + 0
 
 	pop	af
 	pop	af
