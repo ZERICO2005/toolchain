@@ -21,4 +21,3 @@ __bbitrev:
 	rrca 			; a=HGFEDCBA
 	pop	bc
 	ret
-

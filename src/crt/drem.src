@@ -10,7 +10,7 @@ __drem:
 	ld	iy, 9
 	add	iy, sp
 	push	iy, bc, de, hl
-	
+
 	rl	b
 	push	af	; Carry = signbit(x)
 

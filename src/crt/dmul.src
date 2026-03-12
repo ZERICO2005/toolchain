@@ -8,17 +8,17 @@
 __dmul:
 	push	af, iy
 	ld	iy, 9
-	add	iy, sp	
-	
+	add	iy, sp
+
 	push	iy, bc, de, hl
-	
+
 	ld	a, b	; signbit(x)
 	xor	a, (iy + 7)	; signbit(y)
 	rla
 	push	af	; Carry = (signbit(x) != signbit(y))
-	
+
 	call	___f64_mul
-	
+
 	pop	af, af, af, af, af
 	pop	iy, af	; restore
 	ret

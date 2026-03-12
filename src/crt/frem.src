@@ -9,7 +9,7 @@ __frem:
 	push	iy, de, hl
 
 	push	de, hl	; y
-	ld	e, a	
+	ld	e, a
 	push	de	; x_hi8
 	push	bc	; x_lo24
 	call	_fmodf
