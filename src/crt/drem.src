@@ -6,18 +6,27 @@
 
 ; float64_t f64_rem(bool, float64_t, const float64_t*)
 __drem:
-	push	af, iy
+	push	af
+	push	iy
 	ld	iy, 9
 	add	iy, sp
-	push	iy, bc, de, hl
+	push	iy
+	push	bc
+	push	de
+	push	hl
 
 	rl	b
 	push	af	; Carry = signbit(x)
 
 	call	___f64_rem
 
-	pop	af, af, af, af, af
-	pop	iy, af	; restore
+	pop	af
+	pop	af
+	pop	af
+	pop	af
+	pop	af
+	pop	iy
+	pop	af	; restore
 	ret
 
 	.extern	___f64_rem

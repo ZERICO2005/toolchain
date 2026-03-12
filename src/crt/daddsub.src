@@ -28,7 +28,9 @@ __daddsub:
 	rrc	b
 
 	push	iy	; address of y
-	push	bc, de, hl	; pass x by value
+	push	bc
+	push	de
+	push	hl	; pass x by value
 
 	xor	a, (iy + 7)
 	rla
@@ -40,8 +42,13 @@ __daddsub:
 .__daddmags:
 	call	_softfloat_addMagsF64
 .__daddsub_ret:
-	pop	af, af, af, af, af
-	pop	iy, af
+	pop	af
+	pop	af
+	pop	af
+	pop	af
+	pop	af
+	pop	iy
+	pop	af
 	ret
 
 	.extern	_softfloat_addMagsF64, _softfloat_subMagsF64
