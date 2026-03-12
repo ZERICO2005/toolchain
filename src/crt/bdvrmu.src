@@ -21,11 +21,11 @@ __bdvrmu:
 	ld	a, h
 	sub	a, c
 
-	jr	c, .bit_skip
+	jr	c, .L.bit_skip
 	ld	h, a
 	inc	l
 .bit_skip:
 
-	djnz	.loop
+	djnz	.L.loop
 
 	ret

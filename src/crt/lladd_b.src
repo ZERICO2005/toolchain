@@ -9,7 +9,7 @@ __lladd_b:
 	ld	c, a
 	ld	b, 0
 	add	hl, bc
-	jr	nc, .finish
+	jr	nc, .L.finish
 	ld	c, 1
 	ex	de, hl
 	add	hl, bc

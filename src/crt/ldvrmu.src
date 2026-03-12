@@ -64,7 +64,7 @@ if 1
 	sbc	a, e
 
 ;;;         if (!quotBit) {
-	jr	nc, .restore_skip
+	jr	nc, .L.restore_skip
 ;;;             result.rem += divisor;
 	add	hl, bc
 	adc	a, e
@@ -73,14 +73,14 @@ if 1
 
 ;;;         if (quotBit) {
 	exx
-	jr	c, .1_skip
+	jr	c, .L.1_skip
 ;;;             result.quot++;
 	inc	l
 ;;;         }
 .1_skip:
 
 ;;;     } while (--i != 0);
-	djnz	.loop
+	djnz	.L.loop
 
 ;;;     return result;
 	pop	bc
@@ -112,14 +112,14 @@ else
 	sbc	a, iyh
 	inc	ixl
 
-	jr	nc, .restore_skip
+	jr	nc, .L.restore_skip
 	add	hl, bc
 	adc	a, iyh
 	dec	ixl
 .restore_skip:
 
 	dec	iyl
-	jr	nz, .loop
+	jr	nz, .L.loop
 
 	ret
 

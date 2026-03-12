@@ -14,13 +14,13 @@ __bcttz:
 __cttz_common:
 	adc	a, a
 	add	a, a
-	jr	z, .high2
+	jr	z, .L.high2
 	add	a, a
 	add	a, a
-	jr	z, .high4
+	jr	z, .L.high4
 	add	a, a
 	add	a, a
-	jr	z, .high6
+	jr	z, .L.high6
 	add	a, a
 	add	a, a
 	sbc	a, -1
@@ -103,7 +103,7 @@ __llcttz:
 	sbc	hl, de
 	jr	nz, __i48cttz.hijack
 	or	a, c
-	jr	nz, .low
+	jr	nz, .L.low
 	sub	a, b
 	ccf
 	call	__cttz_common

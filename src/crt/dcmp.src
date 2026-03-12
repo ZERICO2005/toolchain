@@ -15,22 +15,22 @@ __dcmp:
 	rlc	b
 	sla	h	; Carry = signbit y
 	bit	0, b	; signbit x
-	jr	z, .positve_x
+	jr	z, .L.positve_x
 	ccf
 .positve_x:
 	res	0, b
 	; H and B now have their signbits cleared
-	jr	c, .different_sign
+	jr	c, .L.different_sign
 	; same_sign
 	sbc.s	hl, bc	; y.hi - x.hi
-	jr	nz, .not_equal
+	jr	nz, .L.not_equal
 	ld	hl, (iy + 9)	; y.md
 	sbc	hl, de	; y.md - x.md
-	jr	nz, .not_equal
+	jr	nz, .L.not_equal
 	ld	bc, (iy - 6)	; x.lo
 	ld	hl, (iy + 6)	; y.lo
 	sbc	hl, bc	; y.lo - x.lo
-	jr	z, .equal
+	jr	z, .L.equal
 .not_equal:
 	ld	l, a	; preserve A
 	rra	; bit 7 of A = Carry
@@ -56,8 +56,8 @@ __dcmp:
 	; y[hi-md-lo]
 	add.s	hl, bc
 	adc	hl, de
-	jr	nz, .non_zero	; path taken by normal, inf, and NaN
-	jr	c, .non_zero
+	jr	nz, .L.non_zero	; path taken by normal, inf, and NaN
+	jr	c, .L.non_zero
 	; both x and y are subnormal or zero
 	; x[00-00-lo]
 	; y[00-md-lo]
@@ -67,9 +67,9 @@ __dcmp:
 	add	hl, bc
 	ld	bc, (iy - 6)	; x.lo
 	adc	hl, bc
-	jr	nz, .non_zero
-	jr	nc, .finish_zero	; Z, NC, and P
+	jr	nz, .L.non_zero
+	jr	nc, .L.finish_zero	; Z, NC, and P
 .non_zero:
 	ld	l, a	; preserve A
 	xor	a, a
-	jr	.ret_flags
+	jr	.L.ret_flags

@@ -12,7 +12,7 @@
 __dtoll:
 __dtoull:
 	bit	6, b	; set if |x| >= 2.0L
-	jr	z, .zero_or_one
+	jr	z, .L.zero_or_one
 	bit	7, b
 	push	af
 ;	res	7, b	; not needed since this bit is shifted out later on
@@ -40,7 +40,7 @@ __dtoull:
 
 	ld	a, h	; expon
 	sub	a, 52 + 1 - 1	; float64 mantissa bits + CPL trick - inc HL
-	jr	c, .shift_right
+	jr	c, .L.shift_right
 	; shift_left
 	; expon >= 52 or [52, 63]
 	; A is one less than it should be here to allow for the CPL trick in shift_right
@@ -50,7 +50,7 @@ __dtoull:
 	ld	l, a
 	ex	(sp), hl
 	call	c, __llshl
-	jr	.finish
+	jr	.L.finish
 .shift_right:
 	; expon is [0, 51]
 	cpl
@@ -70,7 +70,7 @@ __dtoull:
 	ld	e, h
 	add	hl, bc	; adds one to the exponent
 	bit	6, h	; if |x| was [1, 2)
-	jr	z, .zero
+	jr	z, .L.zero
 	inc	de
 	bit	7, b	; sets NZ if the result should be -1
 .zero:
@@ -79,7 +79,7 @@ __dtoull:
 	ld	h, d
 	ld	l, d
 	ex.s	de, hl
-	jr	.finish_zero_or_one
+	jr	.L.finish_zero_or_one
 
 	.extern	__llneg
 	.extern	__llshl

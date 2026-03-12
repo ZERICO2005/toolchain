@@ -15,7 +15,7 @@ __lladd:
 	adc	hl, bc
 	ex	de, hl
 	pop	bc
-	jr	nc, .nc48
+	jr	nc, .L.nc48
 	inc	bc
 .nc48:
 	ld	iy, (iy + 12)

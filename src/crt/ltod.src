@@ -59,21 +59,21 @@ __lltod_common:
 	adc	a, 0
 	srl	h
 	rr	l
-	djnz	.shift_loop
+	djnz	.L.shift_loop
 	; round upwards to even if (round && (guard || sticky))
-	jr	nc, .no_round
+	jr	nc, .L.no_round
 	; we must ensure that FE_INEXACT is raised since rounding has occured
 	or	a, a		; test sticky bits
-	jr	nz, .round_up
+	jr	nz, .L.round_up
 	inc	a		; ld a, 1
 	and	a, l		; test guard bit
-	jr	z, .no_round_inexact
+	jr	z, .L.no_round_inexact
 .round_up:
 	inc	b		; round up after shifting
 .no_round:
 if __lltod_signal_FE_INEXACT
 	adc	a, a		; test sticky and round bits
-	jr	z, .result_is_exact
+	jr	z, .L.result_is_exact
 .no_round_inexact:
 	ld	hl, ___fe_cur_env
 	set	5, (hl)		; FE_INEXACT
@@ -129,7 +129,7 @@ __int_to_f64_zero_or_one:
 	; UHL is either one or zero
 	ld	b, h
 	ld	c, h
-	jr	nz, .ret_zero
+	jr	nz, .L.ret_zero
 	ld	bc, $3FF0
 	dec	hl		; ld hl, 0
 .ret_zero:

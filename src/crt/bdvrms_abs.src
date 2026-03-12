@@ -12,7 +12,7 @@ __bdvrms_abs:
 	.type	__bdvrms_abs.hijack_a_l_dividend, @function
 .hijack_a_l_dividend:
 	rla
-	jr	nc, .neg_dividend_skip
+	jr	nc, .L.neg_dividend_skip
 	xor	a, a
 	sub	a, l
 	ld	l, a
@@ -22,11 +22,11 @@ __bdvrms_abs:
 
 	ld	a, c
 	rla
-	jr	nc, .neg_divisor_skip
+	jr	nc, .L.neg_divisor_skip
 	xor	a, a
 	sub	a, c
 	ld	c, a
-	jr	nc, .neg_dividend_skip
+	jr	nc, .L.neg_dividend_skip
 .neg_divisor_skip:
 
 	call	__bdvrmu.hijack_l_dividend

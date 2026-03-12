@@ -55,7 +55,7 @@ __i48dvrmu:
 	exx
 	sbc	hl, de		; high r -= high d
 	exx
-	jr	nc, .greaterEqual
+	jr	nc, .L.greaterEqual
 	; restore if r<d
 	add	hl, de		; restore low
 	exx
@@ -63,13 +63,13 @@ __i48dvrmu:
 	exx
 .greaterEqual:
 	; carry contains inverted quotient bit, which is saved in the next iteration
-	djnz	.bitLoop
+	djnz	.L.bitLoop
 	rla			; ~q[b] = c
 	cpl			; uninvert quotient
 	dec	c		; decrement byte counter
 	exx
 	ld	(bc), a		; now that dividend byte isn't needed, overwrite with quotient
-	jr	nz, .byteLoop
+	jr	nz, .L.byteLoop
 
 	; finish and clean up
 
@@ -81,7 +81,7 @@ __i48dvrmu:
 	pop	de		; de = upper quotient
 
 	pop	af
-	jp	po, .skipEI
+	jp	po, .L.skipEI
 	ei
 .skipEI:
 	pop	af

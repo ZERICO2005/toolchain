@@ -52,7 +52,7 @@ __llshr_common:
 	rr	h
 	rr	l
 	dec	a
-	jr	nz, .loop
+	jr	nz, .L.loop
 
 	ld	(iy - 3), e
 	ld	(iy - 2), d

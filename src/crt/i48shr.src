@@ -37,9 +37,9 @@ __i48shru:
 	dec	hl
 	ld	a, (hl)
 	ex	(sp), hl
-	jr	z, .loop
+	jr	z, .L.loop
 	srl	c
-	jr	.midloop
+	jr	.L.midloop
 .loop:
 	sra	c
 .midloop:
@@ -48,7 +48,7 @@ __i48shru:
 	rra
 	rr	h
 	rr	l
-	djnz	.loop
+	djnz	.L.loop
 	ex	(sp), hl
 	ld	(hl), a
 	inc	hl

@@ -5,9 +5,9 @@
 	.type	__bctlz, @function
 __bctlz:
 	cp	a, 010h
-	jr	c, .low4
+	jr	c, .L.low4
 	cp	a, 040h
-	jr	c, .low6
+	jr	c, .L.low6
 	add	a, a
 	sbc	a, a
 	inc	a
@@ -19,7 +19,7 @@ __bctlz:
 	ret
 .low4:
 	cp	a, 4
-	jr	c, .low2
+	jr	c, .L.low2
 	add	a, -8
 	sbc	a, a
 	add	a, 5
@@ -96,7 +96,7 @@ __i48ctlz:
 	add	hl, de
 	or	a, a
 	sbc	hl, de
-	jr	z, .low
+	jr	z, .L.low
 	call	__ictlz
 	ex	de, hl
 	ret

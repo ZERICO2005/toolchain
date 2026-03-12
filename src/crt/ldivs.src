@@ -27,7 +27,7 @@ __ldivs:
 
 	rlca
 	rrca
-	jr	nz, .pos_dividend_skip
+	jr	nz, .L.pos_dividend_skip
 	ccf
 .pos_dividend_skip:
 

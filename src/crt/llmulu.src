@@ -30,7 +30,7 @@ __llmulu:
 	ld	a, (hl)
 	inc	hl
 	or	a, a		; cf=0
-	djnz	.push_loop
+	djnz	.L.push_loop
 
 	sbc	hl, hl
 	ld	e, l
@@ -49,7 +49,7 @@ __llmulu:
 	ex	de, hl
 	pop	af
 
-	jr	nc, .add_end
+	jr	nc, .L.add_end
 	ld	bc, (iy)
 	add	ix, bc
 	ld	bc, (iy + 3)
@@ -60,10 +60,10 @@ __llmulu:
 .add_end:
 
 	add	a, a
-	jr	nz, .bit_loop
+	jr	nz, .L.bit_loop
 
 	pop	af
-	jr	nc, .byte_loop
+	jr	nc, .L.byte_loop
 
 	ld	b, d
 	ld	c, e

@@ -15,7 +15,7 @@ __lcmps:
 	ld	d, a
 	ld	a, e
 	sub	a, d
-	jr	nz, .finish
+	jr	nz, .L.finish
 	sbc	hl, bc
 	add	hl, bc
 	sbc	a, a

@@ -69,7 +69,7 @@ __lldvrmu:
 	exx
 	sbc	hl, de
 
-	jr	nc, .add_back_skip
+	jr	nc, .L.add_back_skip
 	exx
 	add	hl, sp
 	ex	de, hl
@@ -79,14 +79,14 @@ __lldvrmu:
 	adc	hl, de
 .add_back_skip:
 
-	djnz	.bit_loop
+	djnz	.L.bit_loop
 
 	adc	a, a
 	cpl
 	ld	(iy + 15), a
 
 	dec	c
-	jr	nz, .byte_loop
+	jr	nz, .L.byte_loop
 
 	ld	sp, iy
 ; Stack frame:

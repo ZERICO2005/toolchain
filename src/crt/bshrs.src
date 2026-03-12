@@ -12,6 +12,6 @@ __bshrs:
 	push	bc
 .loop:
 	sra	a
-	djnz	.loop
+	djnz	.L.loop
 	pop	bc
 	ret

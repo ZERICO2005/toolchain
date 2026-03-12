@@ -19,7 +19,7 @@ __bshru:
 	push	bc
 .loop:
 	srl	a
-	djnz	.loop
+	djnz	.L.loop
 	pop	bc
 	ret
 

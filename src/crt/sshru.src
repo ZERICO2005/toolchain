@@ -22,7 +22,7 @@ __sshru:
 .loop:
 	srl	h
 	rr	l
-	djnz	.loop
+	djnz	.L.loop
 	pop	bc
 	ret
 

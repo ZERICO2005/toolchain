@@ -37,10 +37,10 @@ __daddsub:
 	xor	a, (iy + 7)
 	rla
 
-	jr	nc, .__daddmags	; same signs
+	jr	nc, .L.__daddmags	; same signs
 ; .__dsubmags:
 	call	_softfloat_subMagsF64
-	jr	.__daddsub_ret
+	jr	.L.__daddsub_ret
 .__daddmags:
 	call	_softfloat_addMagsF64
 .__daddsub_ret:

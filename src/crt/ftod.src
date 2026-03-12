@@ -18,11 +18,11 @@ __ftod:
 	ld	b, $03	; ld bc, $380 - 1
 
 	adc	hl, hl
-	jr	z, .mant_zero	; zero inf or normal
+	jr	z, .L.mant_zero	; zero inf or normal
 	adc	a, a
-	jr	z, .subnormal
+	jr	z, .L.subnormal
 	inc	a
-	jr	z, .nan
+	jr	z, .L.nan
 .normal:
 	; (Float64_bias - Float32_bias) - 1 (undoing inc a)
 	; (Float64_bias - Float32_bias) = $0380
@@ -41,7 +41,7 @@ __ftod:
 	add	hl, hl
 	rl	c
 	rla
-	djnz	.loop
+	djnz	.L.loop
 .zero:	; <-- A is zero on this path
 	ld	b, a
 
@@ -60,13 +60,13 @@ __ftod:
 .mant_zero:
 	adc	a, a
 	ld	c, l	; HL is zero here
-	jr	z, .zero
+	jr	z, .L.zero
 	inc	a
-	jr	nz, .normal
+	jr	nz, .L.normal
 	; infinite
 	ld	c, $F0
 	ld	b, e	; ld b, $7F since infinity is all ones
-	jr	.infinite
+	jr	.L.infinite
 
 .subnormal:
 	; since this is subnormal, the LSB of the exponent is already zero
@@ -91,12 +91,12 @@ else
 	ld	a, $80
 	sub	a, c
 end if
-	jr	.subnorm_shift
+	jr	.L.subnorm_shift
 
 .nan:
 	ld	a, $07
 	ld	c, $FF
-	jr	.shift_28
+	jr	.L.shift_28
 
 	.extern	__ictlz
 	.extern	__ishl

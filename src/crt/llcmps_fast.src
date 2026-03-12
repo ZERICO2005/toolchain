@@ -11,11 +11,11 @@ __llcmps_fast:
 	ret	nz
 	ld	a, c
 	sub	a, (iy + 9)
-	jr	nz, .finish
+	jr	nz, .L.finish
 	ex	de, hl
 	ld	bc, (iy + 6)
 	sbc	hl, bc
-	jr	nz, .finish
+	jr	nz, .L.finish
 	ex	de, hl
 	ld	bc, (iy + 3)
 	sbc	hl, bc

@@ -27,19 +27,19 @@ __ishrs:
 	add	hl, hl
 	sbc	a, a
 	bit	0, c
-	jr	nz, .bit0
+	jr	nz, .L.bit0
 	add	hl, hl
 	rla
 .bit0:
 	bit	1, c
-	jr	nz, .bit1
+	jr	nz, .L.bit1
 	add	hl, hl
 	rla
 	add	hl, hl
 	rla
 .bit1:
 	bit	2, c
-	jr	nz, .bit2
+	jr	nz, .L.bit2
 	add	hl, hl
 	rla
 	add	hl, hl
@@ -50,9 +50,9 @@ __ishrs:
 	rla
 .bit2:
 	bit	3, c
-	jr	nz, .bit3
+	jr	nz, .L.bit3
 	bit	4, c
-	jr	nz, .bit4
+	jr	nz, .L.bit4
 	push	af
 	inc	sp
 	push	hl

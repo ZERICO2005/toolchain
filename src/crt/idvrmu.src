@@ -34,13 +34,13 @@ __idvrmu:
 	sbc	hl, bc
 	inc	e
 
-	jr	nc, .restore_skip
+	jr	nc, .L.restore_skip
 	add	hl, bc
 	dec	e
 .restore_skip:
 
 	dec	a
-	jr	nz, .loop
+	jr	nz, .L.loop
 
 	pop	af
 	ret

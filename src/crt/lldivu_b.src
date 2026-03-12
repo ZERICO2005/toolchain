@@ -20,15 +20,15 @@ __lldivu_b:
 	rl	c
 	rl	b
 	rla
-	jr	c, .1
+	jr	c, .L.1
 	cp	a, iyl
-	jr	c, .0
+	jr	c, .L.0
 .1:
 	sub	a, iyl
 	inc	l
 .0:
 	dec	iyh
-	jr	nz, .loop
+	jr	nz, .L.loop
 	pop	iy
 	pop	af
 	ret

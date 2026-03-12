@@ -23,7 +23,7 @@ __lshl:
 .loop:
 	add	hl, hl
 	rla
-	djnz	.loop
+	djnz	.L.loop
 	ex	(sp), hl
 	pop	bc
 	ret

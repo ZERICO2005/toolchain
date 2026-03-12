@@ -14,13 +14,13 @@ __llcmps:
 	ld	bc, (iy + 12)
 	sbc.s	hl, bc
 	pop	hl
-	jr	nz, .finish
+	jr	nz, .L.finish
 	ld	bc, (iy + 9)
 	ex	de, hl
 	sbc	hl, bc
 	add	hl, bc
 	ex	de, hl
-	jr	nz, .finish_unsigned
+	jr	nz, .L.finish_unsigned
 	ld	bc, (iy + 6)
 	sbc	hl, bc
 	add	hl, bc

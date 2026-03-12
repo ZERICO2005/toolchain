@@ -13,7 +13,7 @@ __llshrs_fast:
 	ld	b, (iy + 3)
 	inc	b
 	dec	b
-	jr	z, .skip
+	jr	z, .L.skip
 
 	push	de
 	push	hl
@@ -30,7 +30,7 @@ __llshrs_fast:
 	rr	(iy - 4)
 	rr	h
 	rr	l
-	djnz	.loop
+	djnz	.L.loop
 
 	ld	b, e
 	ld	(iy - 2), d
@@ -83,7 +83,7 @@ if 0
 	rl	c
 	rl	b
 	dec	iyh
-	jr	nz, .shr1_8_loop
+	jr	nz, .L.shr1_8_loop
 
 .shr9_16:
 	push	de
@@ -120,12 +120,12 @@ if 0
 	ld	l, c
 	ld	h, b
 	and	a, 00000111b
-	jr	z, .shr48
+	jr	z, .L.shr48
 
 .shr49_56_loop:
 	add	a, a
 	adc	hl, hl
-	djnz	.shr49_56_loop
+	djnz	.L.shr49_56_loop
 .shr48:
 
 .shr49_56:
@@ -136,13 +136,13 @@ if 0
 	sbc	hl, hl
 	ld	l, b
 	and	a, 00000111b
-	jr	z, .shr56
+	jr	z, .L.shr56
 	ld	b, a
 	ld	a, c
 .shr49_56_loop:
 	add	a, a
 	adc	hl, hl
-	djnz	.shr49_56_loop
+	djnz	.L.shr49_56_loop
 .shr56:
 	ld	c, d
 	ld	b, c
@@ -150,7 +150,7 @@ if 0
 
 .shr57_63_0:
 	and	a, 00000111b
-	jr	z, .shr0
+	jr	z, .L.shr0
 .shr57_63:
 	rl	b
 	pop	bc
@@ -161,7 +161,7 @@ if 0
 	ld	b, a
 .shr57_63_loop:
 	add	hl, hl
-	djnz	.shr57_63_loop
+	djnz	.L.shr57_63_loop
 	ld	l, h
 	ld	h, e
 	ld	c, d

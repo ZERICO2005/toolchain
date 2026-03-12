@@ -17,7 +17,7 @@ __sdvrms_abs:
 	ld	a, e
 	push	af
 
-	jr	nc, .neg_dividend_skip
+	jr	nc, .L.neg_dividend_skip
 	add	hl, de
 	ex	de, hl
 	or	a, a
@@ -26,7 +26,7 @@ __sdvrms_abs:
 
 	ld	a, b
 	rla
-	jr	nc, .neg_divisor_skip
+	jr	nc, .L.neg_divisor_skip
 	xor	a, a
 	sub	a, c
 	ld	c, a

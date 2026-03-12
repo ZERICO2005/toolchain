@@ -19,7 +19,7 @@ __bshl:
 	push	bc
 .loop:
 	add	a, a
-	djnz	.loop
+	djnz	.L.loop
 	pop	bc
 	ret
 
