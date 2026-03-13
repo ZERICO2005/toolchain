@@ -12,7 +12,7 @@
 __dtoll:
 __dtoull:
 	bit	6, b	; set if |x| >= 2.0L
-	jr	z, .zero_or_one
+	jr	z, .L.zero_or_one
 	bit	7, b
 	push	af
 ;	res	7, b	; not needed since this bit is shifted out later on
@@ -51,8 +51,8 @@ __dtoull:
 	ex	(sp), hl
 	; shift is non-zero and [1, 11] in the non-UB case
 	call	c, __llshl
-	jr	.finish
-.shift_right:
+	jr	.L.finish
+.L.shift_right:
 	; A is [-1, -52]
 	; expon is [0, 51]
 	cpl
@@ -60,29 +60,29 @@ __dtoull:
 	ex	(sp), hl
 	; shift is [0, 51]
 	call	__llshru
-.finish:
+.L.finish:
 	pop	af	; reset SP
 	pop	af
-.finish_zero_or_one:
+.L.finish_zero_or_one:
 	jp	nz, __llneg
 	ret
 
-.zero_or_one:
+.L.zero_or_one:
 	ld	hl, 16
 	ld	d, h
 	ld	e, h
 	add	hl, bc	; adds one to the exponent
 	bit	6, h	; if |x| was [1, 2)
-	jr	z, .zero
+	jr	z, .L.zero
 	inc	de
 	bit	7, b	; sets NZ if the result should be -1
-.zero:
+.L.zero:
 	ld	c, d
 	ld	b, d
 	ld	h, d
 	ld	l, d
 	ex.s	de, hl
-	jr	.finish_zero_or_one
+	jr	.L.finish_zero_or_one
 
 	.extern	__llneg
 	.extern	__llshl

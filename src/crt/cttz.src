@@ -1,61 +1,86 @@
 	.assume	adl=1
 
-	.section	.text.__bcttz
+;-------------------------------------------------------------------------------
+
+	.section	.text
 	.global	__bcttz
 	.type	__bcttz, @function
 
 __bcttz:
 	cp	a, 1
 
+; REQUIRE	require	__cttz_common
+
+;-------------------------------------------------------------------------------
+
+; REQUIRE	.section	.text
 	.local	__cttz_common
 	; Input: A=byte, CF=(A==0)
 	; Output: A=cttz(A)
 __cttz_common:
 	adc	a, a
 	add	a, a
-	jr	z, .high2
+	jr	z, .L.high2
 	add	a, a
 	add	a, a
-	jr	z, .high4
+	jr	z, .L.high4
 	add	a, a
 	add	a, a
-	jr	z, .high6
+	jr	z, .L.high6
 	add	a, a
 	add	a, a
 	sbc	a, -1
 	ret	p
 	ld	a, 8
 	ret
-.high6:
+.L.high6:
 	sbc	a, -3
 	ret
-.high4:
+.L.high4:
 	sbc	a, -5
 	ret
-.high2:
+.L.high2:
 	sbc	a, -7
 	ret
 
-	.section	.text.__scttz
+;-------------------------------------------------------------------------------
+
+	.section	.text
 	.global	__scttz
 	.type	__scttz, @function
+
 __scttz:
 	xor	a, a
 	or	a, l
 	jr	nz, __cttz_common
 	sub	a, h
 	ccf
+
+; REQUIRE	require	__scttz.hijack
+
+;-------------------------------------------------------------------------------
+
+; REQUIRE	.section	.text
 	.local	__scttz.hijack
 __scttz.hijack:
 	call	__cttz_common
 	add	a, 8
 	ret
 
-	.section	.text.__icttz
+;-------------------------------------------------------------------------------
+
+	.section	.text
 	.global	__icttz
 	.type	__icttz, @function
+
 __icttz:
 	xor	a, a
+
+; REQUIRE	require	__icttz.hijack
+
+;-------------------------------------------------------------------------------
+
+; REQUIRE	.section	.text
 	.local	__icttz.hijack
 __icttz.hijack:
 	or	a, l
@@ -70,9 +95,12 @@ __icttz.hijack:
 	add	a, 16
 	ret
 
-	.section	.text.__lcttz
+;-------------------------------------------------------------------------------
+
+	.section	.text
 	.global	__lcttz
 	.type	__lcttz, @function
+
 __lcttz:
 	add	hl, de
 	xor	a, a
@@ -84,9 +112,12 @@ __lcttz:
 	add	a, 24
 	ret
 
-	.section	.text.__llcttz
+;-------------------------------------------------------------------------------
+
+	.section	.text
 	.global	__llcttz
 	.type	__llcttz, @function
+
 __llcttz:
 	add	hl, de
 	xor	a, a
@@ -96,26 +127,35 @@ __llcttz:
 	sbc	hl, de
 	jr	nz, __i48cttz.hijack
 	or	a, c
-	jr	nz, .low
+	jr	nz, .L.low
 	sub	a, b
 	ccf
 	call	__cttz_common
 	add	a, 56
 	ret
-.low:
+.L.low:
 	call	__cttz_common
 	add	a, 48
 	ret
 
-	.section	.text.__i48cttz
+;-------------------------------------------------------------------------------
+
+	.section	.text
 	.global	__i48cttz
 	.type	__i48cttz, @function
+
 __i48cttz:
 	add	hl, de
 	xor	a, a
 	sbc	hl, de
 	jr	nz, __icttz.hijack
 	ex	de, hl
+
+; REQUIRE	require	__i48cttz.hijack
+
+;-------------------------------------------------------------------------------
+
+; REQUIRE	.section	.text
 	.local	__i48cttz.hijack
 __i48cttz.hijack:
 	call	__icttz.hijack

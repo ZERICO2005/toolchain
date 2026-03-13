@@ -3,18 +3,24 @@
 	.section	.text
 	.global	__llrems
 	.type	__llrems, @function
-	.global	__lldivs
-	.type	__lldivs, @function
 
 __llrems:
 
 	scf
-	jr	.L.hijack
+	; jr	__lldivs.hijack
+	db	$30	; jr nc, *
+
+; REQUIRE	require	__lldivs
+
+; REQUIRE	.section	.text
+	.global	__lldivs
+	.type	__lldivs, @function
 
 __lldivs:
 
 	or	a, a
-.L.hijack:
+	.local	__lldivs.hijack
+__lldivs.hijack:
 
 	push	iy
 	push	af

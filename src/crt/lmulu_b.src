@@ -12,7 +12,7 @@ __lmulu_b:
 ;    O: euhl=EUHL*A
 ;   CC: 43*r(PC)+12*r(SPL)+9*w(SPL)+17
 ;   CC: 42 bytes | 43F + 12R + 9W + 17
-.L.Mul_EUHL_A_EUHL:
+Mul_EUHL_A_EUHL:
 	push	bc
 	push	de
 

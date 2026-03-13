@@ -3,13 +3,10 @@
 	.section	.text
 	.global	__lor
 	.type	__lor, @function
-	.global	__ior
-	.type	__ior, @function
 
 .ifdef PREFER_OS_CRT
 
 	.set	__lor, 0x0001D8
-	.set	__ior, 0x000168
 
 .else
 
@@ -18,12 +15,26 @@ __lor:
 	push	af
 	or	a, e
 	ld	e, a
-	; jr	.L.hijack_lor
+	; jr	__ior.hijack_lor
 	.db	0x3E			; ld a, *
+
+.endif
+
+; REQUIRE	.section	.text
+	.global	__ior
+	.type	__ior, @function
+
+.ifdef PREFER_OS_CRT
+
+	.set	__ior, 0x000168
+
+.else
+
 __ior:
 ; CC: 24*r(PC)+11*r(SPL)+10*w(SPL)+1
 	push	af
-.L.hijack_lor:
+	.local	__ior.hijack_lor
+__ior.hijack_lor:
 	push	hl
 	scf
 	sbc	hl, hl

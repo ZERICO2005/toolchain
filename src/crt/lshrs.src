@@ -3,8 +3,6 @@
 	.section	.text
 	.global	__lshrs
 	.type	__lshrs, @function
-	.global	__lshrs.hijack_lshru
-	.type	__lshrs.hijack_lshru, @function
 
 .ifdef PREFER_OS_CRT
 
@@ -25,8 +23,12 @@ __lshrs:
 	or	a, a
 	sbc	hl, hl
 	add	hl, sp
-.L.loop:
+	.local	__lshrs.loop
+__lshrs.loop:
 	sra	a
+
+	.global	__lshrs.hijack_lshru
+	.type	__lshrs.hijack_lshru, @function
 __lshrs.hijack_lshru:
 	inc	hl
 	inc	hl
@@ -35,7 +37,7 @@ __lshrs.hijack_lshru:
 	rr	(hl)
 	dec	hl
 	rr	(hl)
-	djnz	.L.loop
+	djnz	__lshrs.loop
 	pop	bc
 	pop	hl
 	ret

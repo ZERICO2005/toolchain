@@ -16,11 +16,11 @@ __fpupop1:
 	pop	bc		;restore modified mantissa
 	adc	a, a		;compute exponent, carry = sign
 	ld	d, 0
-	jr	nz, nzero	;skip if exponent non-zero
+	jr	nz, .L.nzero	;skip if exponent non-zero
 
 	ld	bc, 0		;clear mantissa
 	or	a, a		;clear carry
-nzero:
+.L.nzero:
 	rl	d		;set 1 if negative operand
 	or	a, a		;set Z/NZ
 	pop	hl

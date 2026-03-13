@@ -33,6 +33,4 @@ __inot:
 	ex	de, hl	; ude=UDE, uhl=~UHL
 	ret
 
-	.set	__snot, __inot
-
 .endif

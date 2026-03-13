@@ -3,8 +3,6 @@
 	.section	.text
 	.global	__lldvrmu
 	.type	__lldvrmu, @function
-	.global	__lldvrmu.hijack
-	.type	__lldvrmu.hijack, @function
 
 __lldvrmu:
 ; Atrociously slow.
@@ -12,6 +10,11 @@ __lldvrmu:
 	ld	iy, 5
 	add	iy, sp
 
+; REQUIRE	require	__lldvrmu.hijack
+
+; REQUIRE	.section	.text
+	.global	__lldvrmu.hijack
+	.type	__lldvrmu.hijack, @function
 __lldvrmu.hijack:
 
 	ld	a, i

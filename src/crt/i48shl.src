@@ -15,16 +15,16 @@ __i48shl:
 
 	ld	a, e		; Accumulate E in A to reduce register exchanges and preserve Z
 	srl	c
-	jr	nc, .bit0
+	jr	nc, .L.bit0
 	; ude:uhl<<1
 	add	hl, hl
 	rla
 	ex	de, hl
 	add	hl, hl
 	ex	de, hl
-.bit0:
+.L.bit0:
 	srl	c
-	jr	nc, .bit1
+	jr	nc, .L.bit1
 	; ude:uhl<<2
 	add	hl, hl
 	rla
@@ -34,9 +34,9 @@ __i48shl:
 	add	hl, hl
 	add	hl, hl
 	ex	de, hl
-.bit1:
+.L.bit1:
 	srl	c
-	jr	nc, .bit2
+	jr	nc, .L.bit2
 	; ude:uhl<<4
 	add	hl, hl
 	rla
@@ -52,10 +52,10 @@ __i48shl:
 	add	hl, hl
 	add	hl, hl
 	ex	de, hl
-.bit2:
+.L.bit2:
 	ld	e, a
 
-	jr	z, .done	; Early out when no byte shift is needed
+	jr	z, .L.done	; Early out when no byte shift is needed
 	; Subtract the byte shift amount from 9
 	ld	a, 9
 	sub	a, c		; Clears carry for valid shift amounts
@@ -80,7 +80,7 @@ __i48shl:
 	pop	af
 	pop	af
 	pop	af
-.done:
+.L.done:
 	ld	a, b
 	pop	bc
 	ret
