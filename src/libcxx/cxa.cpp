@@ -7,18 +7,18 @@
 typedef int64_t __guard;
 
 extern "C" {
-[[gnu::cold]] void __cxa_pure_virtual();
-[[gnu::cold]] void __cxa_deleted_virtual();
+[[noreturn, gnu::cold]] void __cxa_pure_virtual(void);
+[[noreturn, gnu::cold]] void __cxa_deleted_virtual(void);
 [[gnu::cold]] int __cxa_guard_acquire(__guard *);
 [[gnu::cold]] void __cxa_guard_release(__guard *);
 [[noreturn, gnu::cold]] void __cxa_guard_abort(__guard *);
 }
 
-void __cxa_pure_virtual() {
+void __cxa_pure_virtual(void) {
     __abort_message("__cxa_pure_virtual");
 }
 
-void __cxa_deleted_virtual() {
+void __cxa_deleted_virtual(void) {
     __abort_message("__cxa_deleted_virtual");
 }
 
