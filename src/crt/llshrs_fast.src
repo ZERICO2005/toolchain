@@ -3,8 +3,6 @@
 	.section	.text
 	.global	__llshrs_fast
 	.type	__llshrs_fast, @function
-	.global	__llshrs_fast.hijack_llshru
-	.type	__llshrs_fast.hijack_llshru, @function
 
 __llshrs_fast:
 ; Could use optimization for shifting whole bytes at a time.
@@ -23,7 +21,9 @@ __llshrs_fast:
 
 .L.loop:
 	sra	c
-__llshrs_fast.hijack_llshru:
+	.global	__llshrs_fast.hijack_llshru
+	.type	__llshrs_fast.hijack_llshru, @function
+.L.hijack_llshru:
 	rra
 	rr	(iy - 1)
 	rr	d
@@ -59,11 +59,11 @@ __llshrs_fast.hijack_llshru:
 	ld	c, a
 	dec	a
 	and	a, 00111000b
-	ld	(byteshift_smc)
+	ld	(.byteshift_smc)
 	xor	a, a
-	sub	a, c
+	sub 	a, c
 	jr	$+1
-	.equ	byteshift_smc, $-1
+	.set	.byteshift_smc, $-1
 .L.shr1_8:
 	ld	c, b
 	ld	iyh, a
@@ -123,7 +123,7 @@ __llshrs_fast.hijack_llshru:
 	and	a, 00000111b
 	jr	z, .L.shr48
 
-.shr49_56_loop:
+.L.shr49_56_loop:
 	add	a, a
 	adc	hl, hl
 	djnz	.L.shr49_56_loop
@@ -172,5 +172,4 @@ __llshrs_fast.hijack_llshru:
 .L.shr0:
 	pop	bc
 	ret
-
 .endif

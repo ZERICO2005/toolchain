@@ -16,6 +16,6 @@ _fmal:
 	xor	a, (iy + 19)
 	rlca
 	ld	(iy + 20), a	; signZ
-	jp	_softfloat_mulAddF64
+	jq	_softfloat_mulAddF64
 
 	.extern	_softfloat_mulAddF64

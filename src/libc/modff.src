@@ -45,14 +45,14 @@ _modf:
 	pop	af
 
 	ld	a, e
-	ex	de, hl
+	ex	hl, de
 	ld	hl, (ix + 12)	; float *iptr
 	ld	(hl), de
 	inc	hl
 	inc	hl
 	inc	hl
 	ld	(hl), a
-	ex	de, hl
+	ex	hl, de
 	ld	e, a
 	ld	bc, (ix + 6)
 	ld	a, (ix + 9)

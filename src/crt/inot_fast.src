@@ -3,8 +3,6 @@
 	.section	.text
 	.global	__inot_fast
 	.type	__inot_fast, @function
-	.global	__snot_fast
-	.type	__snot_fast, @function
 
 __inot_fast:
 ; UHL = ~UHL
@@ -18,5 +16,3 @@ __inot_fast:
 			;    =-UHL-1
 			;    =~UHL
 	ret
-
-	.set	__snot_fast, __inot_fast

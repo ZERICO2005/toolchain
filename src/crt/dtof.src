@@ -8,7 +8,7 @@
 	.local	__dtof_helper
 __dtof_helper:
 	; Moving this block of code to be behind __dtof ensures that
-	; .L.ret_copysign can always be reached by jr in all paths.
+	; __dtof.ret_copysign can always be reached by jr in all paths.
 .L.overflow:
 	; carry is set here
 	pop	hl
@@ -37,7 +37,7 @@ __dtof_helper:
 	pop	hl
 .L.finish_inf_nan:
 	ld	a, $7F
-	jr	.L.ret_copysign
+	jr	__dtof.ret_copysign
 .L.not_inf_nan:
 	; return infinity
 	ld	hl, $800000
@@ -66,7 +66,7 @@ __dtof:
 	ld	hl, -$47F0	; $FFB810
 	ld	a, l		; ld a, $10
 	add.s	hl, bc
-	jr	c, .L.overflow
+	jr	c, __dtof_helper.overflow
 	; result is normal or rounds to infinity
 	; calculate new exponent
 	; we only need the low 8 bits of the exponent
@@ -211,7 +211,7 @@ __dtof:
 	jr	z, .L.subnormal_no_round
 .L.subnormal_round_up:
 	inc	hl	; wont overflow, but may become FLT_MIN
-; .L.subnormal_no_round:
+; .subnormal_no_round:
 	jr	.L.ret_copysign
 
 	.extern	__lland

@@ -1,0 +1,22 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_tanf
+	.type	_tanf, @function
+	.global	_tan
+	.type	_tan, @function
+
+.ifdef PREFER_OS_LIBC
+
+	.set	_tanf, 0x022120
+	.set	_tan, _tanf
+
+.else
+
+	.set	_tanf, __tanf_c
+	.set	_tan, __tan_c
+
+	.extern	__tanf_c
+	.extern	__tan_c
+
+.endif

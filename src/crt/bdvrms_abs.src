@@ -11,7 +11,7 @@ __bdvrms_abs:
 	ld	a, l
 	.global	__bdvrms_abs.hijack_a_l_dividend
 	.type	__bdvrms_abs.hijack_a_l_dividend, @function
-__bdvrms_abs.hijack_a_l_dividend:
+.L.hijack_a_l_dividend:
 	rla
 	jr	nc, .L.neg_dividend_skip
 	xor	a, a

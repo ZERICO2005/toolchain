@@ -1,0 +1,10 @@
+	.assume	adl=1
+
+	.section	.text
+
+	.global	_getc
+	.type	_getc, @function
+
+	.set	_getc, _fgetc
+
+	.extern	_fgetc

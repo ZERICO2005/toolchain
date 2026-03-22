@@ -2,10 +2,11 @@
 
 	.section	.text
 	.global	_strlen
+	.type	_strlen, @function
 
 .ifdef PREFER_OS_LIBC
 
-	.set	_strlen, 0x0000D4
+	.set	_strlen, $0000D4
 
 .else
 

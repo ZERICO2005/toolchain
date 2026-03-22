@@ -8,8 +8,6 @@
 	.section	.text
 	.global	__i48neg
 	.type	__i48neg, @function
-	.global	__uiyubcNeg
-	.type	__uiyubcNeg, @function
 
 __i48neg:
 ; CC: 17 bytes
@@ -32,6 +30,9 @@ __i48neg:
 	ret
 
 ; Used by i48divs and i48rems, uiy:ubc = -uiy:ubc
+	.global	__uiyubcNeg
+	.type	__uiyubcNeg, @function
+
 __uiyubcNeg:
 ; CC: 18 bytes | 19F + 12R + 9W + 1
 	push	hl

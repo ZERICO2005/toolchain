@@ -1,0 +1,22 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_tanhf
+	.type	_tanhf, @function
+	.global	_tanh
+	.type	_tanh, @function
+
+.ifdef PREFER_OS_LIBC
+
+	.set	_tanhf, 0x022138
+	.set	_tanh, _tanhf
+
+.else
+
+	.set	_tanhf, __tanhf_c
+	.set	_tanh, __tanh_c
+
+	.extern	__tanhf_c
+	.extern	__tanh_c
+
+.endif

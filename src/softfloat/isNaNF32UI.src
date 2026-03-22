@@ -1,0 +1,9 @@
+	.assume	adl = 1
+
+	.section	.text
+
+	.global	_isNaNF32UI
+	.type	_isNaNF32UI, @function
+	.set	_isNaNF32UI, __isnanf
+
+	.extern	__isnanf

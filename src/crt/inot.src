@@ -3,13 +3,10 @@
 	.section	.text
 	.global	__inot
 	.type	__inot, @function
-	.global	__snot
-	.type	__snot, @function
 
 .ifdef PREFER_OS_CRT
 
 	.set	__inot, 0x000164
-	.set	__snot, 0x000230
 
 .else
 
@@ -32,7 +29,5 @@ __inot:
 	inc	hl	; uhl=UDE
 	ex	de, hl	; ude=UDE, uhl=~UHL
 	ret
-
-	.set	__snot, __inot
 
 .endif

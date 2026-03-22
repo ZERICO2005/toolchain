@@ -7,9 +7,7 @@
 
 _fabsl:
 	pop	iy
-	pop	hl
-	pop	de
-	pop	bc
+	pop	hl ,de, bc
 	push	bc
 	push	de
 	push	hl

@@ -2,6 +2,8 @@
 
 	.section	.text
 	.global	_strdup
+	.type	_strdup, @function
+
 _strdup:
 	pop	de
 	ex	(sp), hl

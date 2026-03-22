@@ -1,0 +1,30 @@
+	.assume	adl=1
+
+	.section	.text
+
+	.global	_asprintf
+	.type	_asprintf, @function
+	.global	_vasprintf
+	.type	_vasprintf, @function
+
+.if HAS_PRINTF
+
+	.set	_asprintf, __asprintf_c
+	.set	_vasprintf, __vasprintf_c
+
+	.extern	__asprintf_c
+	.extern	__vasprintf_c
+
+.else
+
+.if defined __TICE__
+
+	.set	_asprintf, _boot_asprintf
+	.set	_vasprintf, _boot_vasprintf
+
+	.extern	_boot_asprintf
+	.extern	_boot_vasprintf
+
+.endif
+
+.endif

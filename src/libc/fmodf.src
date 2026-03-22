@@ -1,0 +1,22 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_fmodf
+	.type	_fmodf, @function
+	.global	_fmod
+	.type	_fmod, @function
+
+.ifdef PREFER_OS_LIBC
+
+	.set	_fmodf, 0x0220FC
+	.set	_fmod, _fmodf
+
+.else
+
+	.set	_fmodf, __fmodf_c
+	.set	_fmod, __fmod_c
+
+	.extern	__fmodf_c
+	.extern	__fmod_c
+
+.endif

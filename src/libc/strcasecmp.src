@@ -17,17 +17,17 @@ _strcasecmp:
 	push	de
 	ld	b, 1+'z'-'a'
 	ld	c, 'a'-'A'
-	jr	.L.cmp_loop_entry
-.L.cmp_loop:
+	jr	.L.loop_entry
+.L.loop:
 	cp	a, (hl)
 	jr	z, .L.done
 .L.loop_nonnull:
 	inc	hl
 	inc	de
-.L.cmp_loop_entry:
+.L.loop_entry:
 	ld	a, (de)
 	xor	a, (hl)
-	jr	z, .L.cmp_loop
+	jr	z, .L.loop
 	cp	a, c
 	jr	nz, .L.mismatch
 	or	a, (hl)
@@ -37,6 +37,23 @@ _strcasecmp:
 
 .endif
 
+	.section	.text
+	.local	_strcasecmp.mismatch
+	.local	_strcasecmp.done
+_strcasecmp.mismatch:
+	ld	l, (hl)
+	call	_tolower.internal
+	ex	de, hl
+	ld	l, (hl)
+	call	_tolower.internal
+	ld	a, l
+	sub	a, e
+_strcasecmp.done:
+	sbc	hl, hl
+	ld	l, a
+	jp	(iy)
+
+	.section	.text
 	.global	_strncasecmp
 	.type	_strncasecmp, @function
 
@@ -55,7 +72,7 @@ _strncasecmp:
 	ex	(sp), hl
 
 	call	c, .L.loop_entry
-	jr	c, .L.mismatch
+	jr	c, _strcasecmp.mismatch
 	sbc	hl, hl
 	jp	(iy)
 
@@ -77,18 +94,5 @@ _strncasecmp:
 	jr	z, .L.checkcase
 	scf
 	ret
-
-.L.mismatch:
-	ld	l, (hl)
-	call	_tolower.internal
-	ex	de, hl
-	ld	l, (hl)
-	call	_tolower.internal
-	ld	a, l
-	sub	a, e
-.L.done:
-	sbc	hl, hl
-	ld	l, a
-	jp	(iy)
 
 	.extern	_tolower.internal

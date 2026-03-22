@@ -3,13 +3,10 @@
 	.section	.text
 	.global	__ineg
 	.type	__ineg, @function
-	.global	__sneg
-	.type	__sneg, @function
 
 .ifdef PREFER_OS_CRT
 
 	.set	__ineg, 0x000160
-	.set	__sneg, 0x00022C
 
 .else
 
@@ -28,7 +25,5 @@ __ineg:
 			;    =UDE
 	ex	de, hl	; ude=UDE, uhl=-UHL
 	ret
-
-	.set	__sneg, __ineg
 
 .endif

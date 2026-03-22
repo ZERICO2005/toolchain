@@ -1,0 +1,22 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_log10f
+	.type	_log10f, @function
+	.global	_log10
+	.type	_log10, @function
+
+.ifdef PREFER_OS_LIBC
+
+	.set	_log10f, 0x0220E8
+	.set	_log10, _log10f
+
+.else
+
+	.set	_log10f, __log10f_c
+	.set	_log10, __log10_c
+
+	.extern	__log10f_c
+	.extern	__log10_c
+
+.endif

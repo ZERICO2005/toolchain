@@ -1,0 +1,30 @@
+	.assume	adl=1
+
+	.section	.text
+
+	.global	_snprintf
+	.type	_snprintf, @function
+	.global	_vsnprintf
+	.type	_vsnprintf, @function
+
+.if HAS_PRINTF
+
+	.set	_snprintf, __snprintf_c
+	.set	_vsnprintf, __vsnprintf_c
+
+	.extern	__snprintf_c
+	.extern	__vsnprintf_c
+
+.else
+
+.if defined __TICE__
+
+	.set	_snprintf, _boot_snprintf
+	.set	_vsnprintf, _boot_vsnprintf
+
+	.extern	_boot_snprintf
+	.extern	_boot_vsnprintf
+
+.endif
+
+.endif

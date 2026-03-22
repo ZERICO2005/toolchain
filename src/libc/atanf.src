@@ -1,0 +1,22 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_atanf
+	.type	_atanf, @function
+	.global	_atan
+	.type	_atan, @function
+
+.ifdef PREFER_OS_LIBC
+
+	.set	_atanf, 0x022108
+	.set	_atan, _atanf
+
+.else
+
+	.set	_atanf, __atanf_c
+	.set	_atan, __atan_c
+
+	.extern	__atanf_c
+	.extern	__atan_c
+
+.endif

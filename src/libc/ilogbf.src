@@ -8,8 +8,8 @@
 	.type	_ilogb, @function
 
 ; int ilogbf(float)
-_ilogbf:
 _ilogb:
+_ilogbf:
 	ld	hl, 6
 	add	hl, sp
 	ld	a, (hl)

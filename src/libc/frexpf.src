@@ -14,8 +14,8 @@
 
 .else
 
-_frexpf:
 _frexp:
+_frexpf:
 	ld	iy, 0
 	lea	de, iy - 127	; bias	; $FFFF81
 	add	iy, sp

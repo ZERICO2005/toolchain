@@ -3,16 +3,15 @@
 	.section	.text
 	.global	__lldvrmu
 	.type	__lldvrmu, @function
-	.global	__lldvrmu.hijack
-	.type	__lldvrmu.hijack, @function
 
 __lldvrmu:
 ; Atrociously slow.
 
 	ld	iy, 5
 	add	iy, sp
-
-__lldvrmu.hijack:
+	.global	__lldvrmu.hijack
+	.type	__lldvrmu.hijack, @function
+.L.hijack:
 
 	ld	a, i
 	di

@@ -6,11 +6,11 @@
 
 _atoll:
 	pop	bc
-	ex	(sp), hl
+	ex	(sp),hl
 	push	bc
-	ld	bc, 10
+	ld	bc,10
 	push	bc
-	ld	c, b
+	ld	c,b
 	push	bc
 	push	hl
 	call	_strtoll

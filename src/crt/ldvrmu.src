@@ -16,7 +16,7 @@
 .else
 
 __ldvrmu:
-if 1
+.if 1
 ; I: EUHL=dividend, AUBC=divisor
 ; O: a[uhl']=EUHL%AUBC, bcu=0, b=A, c=?, euhl=EUHL/AUBC, eubc'=AUBC, zf=!IEF2
 
@@ -47,7 +47,7 @@ if 1
 	ld	b, 32			; b : i
 
 ;;;     do {
-.L.c.loop:
+.L.loop:
 
 ;;;         bool dividendBit = result.quot >> 31;
 ;;;         result.quot <<= 1;
@@ -64,23 +64,23 @@ if 1
 	sbc	a, e
 
 ;;;         if (!quotBit) {
-	jr	nc, .L.c.restore_skip
+	jr	nc, .L.restore_skip
 ;;;             result.rem += divisor;
 	add	hl, bc
 	adc	a, e
 ;;;         }
-.L.c.restore_skip:
+.L.restore_skip:
 
 ;;;         if (quotBit) {
 	exx
-	jr	c, .L.c.skip
+	jr	c, .L.1_skip
 ;;;             result.quot++;
 	inc	l
 ;;;         }
-.L.c.skip:
+.L.1_skip:
 
 ;;;     } while (--i != 0);
-	djnz	.L.c.loop
+	djnz	.L.loop
 
 ;;;     return result;
 	pop	bc

@@ -3,17 +3,17 @@
 	.section	.text
 	.global	__bdvrmu
 	.type	__bdvrmu, @function
-	.global	__bdvrmu.hijack_l_dividend
-	.type	__bdvrmu.hijack_l_dividend, @function
 
 __bdvrmu:
 ; I: B=dividend, C=divisor
 ; O: a=?, b=0, h=B%C, l=B/C
 
 	ld	l, b
-__bdvrmu.hijack_l_dividend:
-
+	.global	__bdvrmu.hijack_l_dividend
+	.type	__bdvrmu.hijack_l_dividend, @function
+.L.hijack_l_dividend:
 	ld	h, 0
+
 	ld	b, 8
 
 .L.loop:

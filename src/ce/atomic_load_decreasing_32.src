@@ -9,27 +9,27 @@
 
 _atomic_load_decreasing_32:
 	pop	hl
-	ex	(sp), iy
+	ex	(sp),iy
 	push	hl
 ; Temporarily disable interrupts.
-	ld	a, i
+	ld	a,i
 	di
 ; Read the value twice.
 ; first value read = cude, second value read = auhl
 					; Time between first and last byte read:
-	ld	de, (iy)			;      2R
-	ld	c, (iy+3)		; + 3F+1R
-	ld	hl, (iy)			; + 3F+3R
-	ld	a, (iy+3)		; + 3F+1R
+	ld	de,(iy)			;      2R
+	ld	c,(iy+3)		; + 3F+1R
+	ld	hl,(iy)			; + 3F+3R
+	ld	a,(iy+3)		; + 3F+1R
 					; = 9F+7R
 					; = 56cc (assuming F = R = 3)
 					; ~ 1.17us (assuming 48MHz clock speed)
 					; + approximate worst-case LCD + USB DMA
 					; ~ 5us
 ; Re-enable interrupts if they were previously enabled.
-	jp	po, .L.no_ei
+	jp	po,no_ei
 	ei
-.L.no_ei:
+no_ei:
 ; Compare and return the greater of the two values read.
 ;
 ; If the values differ, then the underlying value changed between reading the
@@ -71,21 +71,21 @@ _atomic_load_decreasing_32:
 ;
 ; Combining all of these cases and assumptions, the greater of the two values
 ; read will always be valid.
-	or	a, a
-	sbc	hl, de
-	sbc	a, c			; auhl = second value read
+	or	a,a
+	sbc	hl,de
+	sbc	a,c			; auhl = second value read
 					;         - first value read
-	jr	c, .L.swap
+	jr	c,swap
 ; second value read >= first value read
 ;  ==> second value read is valid
-	add	hl, de
-	adc	a, c
-	ld	e, a			; euhl = second value read
+	add	hl,de
+	adc	a,c
+	ld	e,a			; euhl = second value read
 	ret
 
-.L.swap:
+swap:
 ; second value read < first value read
 ;  ==> first value read is valid
-	ex	de, hl
-	ld	e, c			; euhl = first value read
+	ex	de,hl
+	ld	e,c			; euhl = first value read
 	ret

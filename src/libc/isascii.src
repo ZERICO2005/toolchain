@@ -6,9 +6,9 @@
 
 _isascii:
 	pop	de
-	ex	(sp), hl
+	ex	(sp),hl
 	push	de
 	sla	l
-	sbc	hl, hl
+	sbc	hl,hl
 	inc	hl
 	ret

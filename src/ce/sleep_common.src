@@ -1,25 +1,20 @@
-	.assume	adl=1
-	.section	.text
-	.global	___sleep_common
-	.type	___sleep_common, @function
-
 ___sleep_common:
 ; Timing assumes fetching from RAM (4cc) and the first timer read being valid.
 
 ; Calculate the end time.
-	section	.text
+	.section	.text
 	.global	___sleep_common.1
 	.type	___sleep_common.1, @function
-___sleep_common.1:
+.L.1:
 	scf				; cf = 1
 					;    = correction
 	.global	___sleep_common.2
 	.type	___sleep_common.2, @function
-___sleep_common.2:
+.L.2:
 	ld	a, e			; auhl = start or ticks
 	.global	___sleep_common.3
 	.type	___sleep_common.3, @function
-___sleep_common.3:
+.L.3:
 	pop	de
 	pop	bc			; eubc = ticks or start
 	adc	hl, bc
@@ -28,11 +23,15 @@ ___sleep_common.3:
 ; Prepare.
 	ld	e, a			; euhl = end
 	push	hl
-	.db	0xFE			; cp a, $C5
-.L.check:
-	.db	0xC5			; push bc
+virtual
+	cp	a, 0
+load op_cp_a: byte from $$
+end virtual
+	db	op_cp_a
 ; ^ don't care cc
+.L.check:
 ; Get the current time.
+	push	bc
 	push	de
 	call	_clock			; euhl = now, cf = 0
 ; ^ 42 + cc(_clock) cc
@@ -40,7 +39,7 @@ ___sleep_common.3:
 	ld	a, e			; auhl = now
 	pop	de
 	pop	bc			; dubc = end
-;	or	a, a
+; 	or	a, a
 	sbc	hl, bc
 	sbc	a, e			; auhl = now - end
 ; ^ 48 cc
@@ -56,4 +55,4 @@ ___sleep_common.3:
 ; 202 - 75 + 31 + 48 + 13 + 24 = 243 cc after end time captured
 
 
-	extern	_clock
+	.extern	_clock

@@ -2,10 +2,11 @@
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_ctzc
+	.section	.text
 
 	.global	___ez80_ctzc
 	.type	___ez80_ctzc, @function
+
 ___ez80_ctzc:
 	ld	hl, 3
 	add	hl, sp
@@ -14,10 +15,11 @@ ___ez80_ctzc:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_ctzi48
+	.section	.text
 
 	.global	___ez80_ctzi48
 	.type	___ez80_ctzi48, @function
+
 ___ez80_ctzi48:
 	ld	hl, 6
 	add	hl, sp
@@ -30,10 +32,11 @@ ___ez80_ctzi48:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_ffsc
+	.section	.text
 
 	.global	___ez80_ffsc
 	.type	___ez80_ffsc, @function
+
 ___ez80_ffsc:
 	ld	hl, 3
 	add	hl, sp
@@ -45,10 +48,11 @@ ___ez80_ffsc:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_ffss
+	.section	.text
 
 	.global	___ez80_ffss
 	.type	___ez80_ffss, @function
+
 ___ez80_ffss:
 	ld	hl, 3
 	add	hl, sp
@@ -61,10 +65,11 @@ ___ez80_ffss:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_ffsi48
+	.section	.text
 
 	.global	___ez80_ffsi48
 	.type	___ez80_ffsi48, @function
+
 ___ez80_ffsi48:
 	ld	hl, 6
 	add	hl, sp
@@ -82,10 +87,11 @@ ___ez80_ffsi48:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_clrsbc
+	.section	.text
 
 	.global	___ez80_clrsbc
 	.type	___ez80_clrsbc, @function
+
 ___ez80_clrsbc:
 	ld	hl, 3
 	add	hl, sp
@@ -99,10 +105,11 @@ ___ez80_clrsbc:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_clrsbs
+	.section	.text
 
 	.global	___ez80_clrsbs
 	.type	___ez80_clrsbs, @function
+
 ___ez80_clrsbs:
 	; unoptimized
 	ld	hl, 3
@@ -115,10 +122,11 @@ ___ez80_clrsbs:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_clrsbi48
+	.section	.text
 
 	.global	___ez80_clrsbi48
 	.type	___ez80_clrsbi48, @function
+
 ___ez80_clrsbi48:
 	ld	hl, 6
 	add	hl, sp
@@ -137,10 +145,11 @@ ___ez80_clrsbi48:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_parityc
+	.section	.text
 
 	.global	___ez80_parityc
 	.type	___ez80_parityc, @function
+
 ___ez80_parityc:
 	xor	a, a
 	ld	hl, 3
@@ -153,10 +162,11 @@ ___ez80_parityc:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_paritys
+	.section	.text
 
 	.global	___ez80_paritys
 	.type	___ez80_paritys, @function
+
 ___ez80_paritys:
 	ld	hl, 3
 	add	hl, sp
@@ -170,19 +180,20 @@ ___ez80_paritys:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_parityi48
+	.section	.text
 
 	.global	___ez80_parityi48
 	.type	___ez80_parityi48, @function
+
 ___ez80_parityi48:
 	ld	hl, 3
 	add	hl, sp
 	ld	a, (hl)
 	ld	b, 5
-.L___ez80_parityi48.loop:
+.L.loop:
 	inc	hl
 	xor	a, (hl)
-	djnz	.L___ez80_parityi48.loop
+	djnz	.L.loop
 	ld	a, b
 	ret	pe
 	dec	a
@@ -190,10 +201,11 @@ ___ez80_parityi48:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_popcountc
+	.section	.text
 
 	.global	___ez80_popcountc
 	.type	___ez80_popcountc, @function
+
 ___ez80_popcountc:
 	ld	hl, 3
 	add	hl, sp
@@ -202,10 +214,11 @@ ___ez80_popcountc:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_popcounts
+	.section	.text
 
 	.global	___ez80_popcounts
 	.type	___ez80_popcounts, @function
+
 ___ez80_popcounts:
 	ld	hl, 3
 	add	hl, sp
@@ -214,10 +227,11 @@ ___ez80_popcounts:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_popcounti48
+	.section	.text
 
 	.global	___ez80_popcounti48
 	.type	___ez80_popcounti48, @function
+
 ___ez80_popcounti48:
 	ld	hl, 6
 	add	hl, sp
@@ -230,10 +244,11 @@ ___ez80_popcounti48:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_bswap24
+	.section	.text
 
 	.global	___ez80_bswap24
 	.type	___ez80_bswap24, @function
+
 ___ez80_bswap24:
 	ld	hl, 1
 	add	hl, sp
@@ -249,10 +264,11 @@ ___ez80_bswap24:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_bswap48
+	.section	.text
 
 	.global	___ez80_bswap48
 	.type	___ez80_bswap48, @function
+
 ___ez80_bswap48:
 	pop	bc
 	pop	hl
@@ -264,10 +280,11 @@ ___ez80_bswap48:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_bitreverse48
+	.section	.text
 
 	.global	___ez80_bitreverse48
 	.type	___ez80_bitreverse48, @function
+
 ___ez80_bitreverse48:
 	pop	bc
 	pop	hl
@@ -279,10 +296,11 @@ ___ez80_bitreverse48:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_rotateleft24
+	.section	.text
 
 	.global	___ez80_rotateleft24
 	.type	___ez80_rotateleft24, @function
+
 ___ez80_rotateleft24:
 	; unoptimized
 	ld	iy, 0
@@ -291,24 +309,25 @@ ___ez80_rotateleft24:
 	ld	hl, (iy + 3)
 	ld	a, (iy + 6)
 	ld	c, 24
-.L___ez80_rotateleft24.mod24:
+.L.mod24:
 	sub	a, c
-	jr	nc, .L___ez80_rotateleft24.mod24
+	jr	nc, .L.mod24
 	add	a, c
 	ret	z
 	ld	b, a
-.L___ez80_rotateleft24.loop:
+.L.loop:
 	add	hl, hl
 	adc	hl, de
-	djnz	.L___ez80_rotateleft24.loop
+	djnz	.L.loop
 	ret
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_rotateleft48
+	.section	.text
 
 	.global	___ez80_rotateleft48
 	.type	___ez80_rotateleft48, @function
+
 ___ez80_rotateleft48:
 	; unoptimized
 	ld	iy, 0
@@ -318,28 +337,29 @@ ___ez80_rotateleft48:
 	ld	de, (iy + 6)
 	ld	a, (iy + 9)
 	ld	c, 48
-.L___ez80_rotateleft48.mod48:
+.L.mod48:
 	sub	a, c
-	jr	nc, .L___ez80_rotateleft48.mod48
+	jr	nc, .L.mod48
 	add	a, c
 	ret	z
 	ld	c, 0
-.L___ez80_rotateleft48.loop:
+.L.loop:
 	add	hl, hl
 	ex	de, hl
 	adc	hl, hl
 	ex	de, hl
 	adc	hl, bc
 	dec	a
-	jr	nz, .L___ez80_rotateleft48.loop
+	jr	nz, .L.loop
 	ret
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_rotateright24
+	.section	.text
 
 	.global	___ez80_rotateright24
 	.type	___ez80_rotateright24, @function
+
 ___ez80_rotateright24:
 	; unoptimized
 	ld	iy, 0
@@ -348,25 +368,26 @@ ___ez80_rotateright24:
 	ld	hl, (iy + 3)
 	ld	a, (iy + 6)
 	ld	c, 24
-.L___ez80_rotateright24.mod24:
+.L.mod24:
 	sub	a, c
-	jr	nc, .L___ez80_rotateright24.mod24
+	jr	nc, .L.mod24
 	neg
 	cp	a, c
 	ret	z
 	ld	b, a
-.L___ez80_rotateright24.loop:
+.L.loop:
 	add	hl, hl
 	adc	hl, de
-	djnz	.L___ez80_rotateright24.loop
+	djnz	.L.loop
 	ret
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___ez80_rotateright48
+	.section	.text
 
 	.global	___ez80_rotateright48
 	.type	___ez80_rotateright48, @function
+
 ___ez80_rotateright48:
 	; unoptimized
 	ld	iy, 0
@@ -376,21 +397,21 @@ ___ez80_rotateright48:
 	ld	de, (iy + 6)
 	ld	a, (iy + 9)
 	ld	c, 48
-.L___ez80_rotateright48.mod48:
+.L.mod48:
 	sub	a, c
-	jr	nc, .L___ez80_rotateright48.mod48
+	jr	nc, .L.mod48
 	neg
 	cp	a, c
 	ret	z
 	ld	c, 0
-.L___ez80_rotateright48.loop:
+.L.loop:
 	add	hl, hl
 	ex	de, hl
 	adc	hl, hl
 	ex	de, hl
 	adc	hl, bc
 	dec	a
-	jr	nz, .L___ez80_rotateright48.loop
+	jr	nz, .L.loop
 	ret
 
 ;-------------------------------------------------------------------------------

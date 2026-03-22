@@ -6,6 +6,7 @@
 	.assume	adl=1
 
 	.section	.text
+
 	.global	__i48add_1
 	.type	__i48add_1, @function
 

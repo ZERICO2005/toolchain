@@ -3,12 +3,12 @@
 	.section	.text
 	.global	__llneg
 	.type	__llneg, @function
-	.global	__llneg.hijack_nc
-	.type	__llneg.hijack_nc, @function
 
 __llneg:
 	or	a, a
-__llneg.hijack_nc:
+	.global	__llneg.hijack_nc
+	.type	__llneg.hijack_nc, @function
+.L.hijack_nc:
 	ex	de, hl		; ude=UHL, uhl=UDE
 	push	hl		; *spl=UDE
 	sbc	hl, hl		; uhl=0

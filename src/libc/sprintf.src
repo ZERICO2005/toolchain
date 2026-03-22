@@ -1,0 +1,19 @@
+	.assume	adl=1
+
+	.section	.text
+
+	.global	_sprintf
+	.type	_sprintf, @function
+
+.if HAS_PRINTF
+
+	.set	_sprintf, __sprintf_c
+
+	.extern	__sprintf_c
+
+.else
+
+; OS routine
+	.set	_sprintf, 0x0000BC
+
+.endif

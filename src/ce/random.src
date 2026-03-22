@@ -1,3 +1,6 @@
+; ---
+; uint32_t random(void)
+; ---
 	.assume	adl=1
 
 ; https://github.com/MersenneTwister-Lab/XSadd/blob/master/xsadd.h#L75
@@ -20,11 +23,10 @@
 ;	return result;
 ; }
 
-	.section	.text._random
+	.section	.text
 	.global	_random
 	.type	_random, @function
 
-; uint32_t random(void)
 _random:
 ; Read state[0] and perform state shifting.
 	ld	iy,__state		; iy = &state[0]
@@ -107,7 +109,9 @@ _random:
 ; void srandom(uint32_t seed)
 ; ---
 
-	.section	.text._srandom
+	.set	_MemClear, 0x0210E0
+
+	.section	.text
 	.global	_srandom
 	.type	_srandom, @function
 
@@ -127,13 +131,13 @@ __setstate:
 	ld	hl,__state+3
 	ld	(hl),a
 	ld	b,12
-.L.loop:
+__setstateloop:
 	inc	hl
 	ld	(hl),b
-	djnz	.L.loop
+	djnz	__setstateloop
 	ret
 
 	.section	.data
 	.local	__state
 __state:
-	.d32	0d0e0f10h,090a0b0ch,05060708h,01020304h
+	dd	0x0d0e0f10,0x090a0b0c,0x05060708,0x01020304

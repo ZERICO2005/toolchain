@@ -6,16 +6,16 @@
 
 _isalnum:
 	pop	de
-	ex	(sp), hl
+	ex	(sp),hl
 	push	de
-	ld	a, l
-	sub	a, 48
-	add	a, -10
-	sbc	hl, hl
+	ld	a,l
+	sub	a,48
+	add	a,-10
+	sbc	hl,hl
 	inc	hl
 	ret	z
-	sub	a, 65 - (48 + 10)
-	res	5, a
-	cp	a, 26
-	adc	hl, hl
+	sub	a,65-(48+10)
+	res	5,a
+	cp	a,26
+	adc	hl,hl
 	ret

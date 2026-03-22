@@ -1,0 +1,450 @@
+; ---
+; external definitions
+; ---
+	.global	_boot_GetBootMajorVer
+	.type	_boot_GetBootMajorVer, @function
+	.global	_boot_GetHardwareVer
+	.type	_boot_GetHardwareVer, @function
+	.global	_boot_GetBootMinorVer
+	.type	_boot_GetBootMinorVer, @function
+	.global	_boot_DebugPrintf
+	.type	_boot_DebugPrintf, @function
+	.global	_boot_ClearVRAM
+	.type	_boot_ClearVRAM, @function
+	.global	_boot_TurnOn
+	.type	_boot_TurnOn, @function
+	.global	_boot_TurnOff
+	.type	_boot_TurnOff, @function
+	.global	_boot_NewLine
+	.type	_boot_NewLine, @function
+	.global	_boot_Set6MHzMode
+	.type	_boot_Set6MHzMode, @function
+	.global	_boot_Set48MHzMode
+	.type	_boot_Set48MHzMode, @function
+	.global	_boot_Set6MHzModeI
+	.type	_boot_Set6MHzModeI, @function
+	.global	_boot_Set48MHzModeI
+	.type	_boot_Set48MHzModeI, @function
+	.global	_boot_GetBatteryStatus
+	.type	_boot_GetBatteryStatus, @function
+	.global	_boot_WaitShort
+	.type	_boot_WaitShort, @function
+	.global	_boot_BatteryCharging
+	.type	_boot_BatteryCharging, @function
+	.global	_boot_USBBusPowered
+	.type	_boot_USBBusPowered, @function
+	.global	_boot_USBSelfPowered
+	.type	_boot_USBSelfPowered, @function
+	.global	_boot_USBResetChip
+	.type	_boot_USBResetChip, @function
+	.global	_boot_USBResetTimers
+	.type	_boot_USBResetTimers, @function
+	.global	_boot_USBDisableTimers
+	.type	_boot_USBDisableTimers, @function
+	.global	_boot_USBEnableTimers
+	.type	_boot_USBEnableTimers, @function
+	.global	_boot_CheckOnPressed
+	.type	_boot_CheckOnPressed, @function
+	.global	_boot_SetDate
+	.type	_boot_SetDate, @function
+	.global	_boot_GetDate
+	.type	_boot_GetDate, @function
+	.global	_boot_GetTime
+	.type	_boot_GetTime, @function
+	.global	_boot_SetTime
+	.type	_boot_SetTime, @function
+	.global	_boot_IsAfterNoon
+	.type	_boot_IsAfterNoon, @function
+
+	.global	_os_NewLine
+	.type	_os_NewLine, @function
+	.global	_os_MoveDown
+	.type	_os_MoveDown, @function
+	.global	_os_MoveUp
+	.type	_os_MoveUp, @function
+	.global	_os_ClrLCDFull
+	.type	_os_ClrLCDFull, @function
+	.global	_os_ClrLCD
+	.type	_os_ClrLCD, @function
+	.global	_os_ClrTxtShd
+	.type	_os_ClrTxtShd, @function
+	.global	_os_HomeUp
+	.type	_os_HomeUp, @function
+	.global	_os_RunIndicOn
+	.type	_os_RunIndicOn, @function
+	.global	_os_RunIndicOff
+	.type	_os_RunIndicOff, @function
+	.global	_os_DelRes
+	.type	_os_DelRes, @function
+	.global	_os_DisableAPD
+	.type	_os_DisableAPD, @function
+	.global	_os_EnableAPD
+	.type	_os_EnableAPD, @function
+	.global	_os_DrawStatusBar
+	.type	_os_DrawStatusBar, @function
+	.global	_os_PushErrorHandler
+	.type	_os_PushErrorHandler, @function
+	.global	_os_PopErrorHandler
+	.type	_os_PopErrorHandler, @function
+	.global	_os_ThrowError
+	.type	_os_ThrowError, @function
+	.global	_os_RealCopy
+	.type	_os_RealCopy, @function
+	.global	_os_RealAsinRad
+	.type	_os_RealAsinRad, @function
+	.global	_os_RealAcosRad
+	.type	_os_RealAcosRad, @function
+	.global	_os_RealAtanRad
+	.type	_os_RealAtanRad, @function
+	.global	_os_RealAdd
+	.type	_os_RealAdd, @function
+	.global	_os_CplxSquare
+	.type	_os_CplxSquare, @function
+	.global	_os_RealCompare
+	.type	_os_RealCompare, @function
+	.global	_os_RealCosRad
+	.type	_os_RealCosRad, @function
+	.global	_os_RealRadToDeg
+	.type	_os_RealRadToDeg, @function
+	.global	_os_RealDiv
+	.type	_os_RealDiv, @function
+	.global	_os_RealExp
+	.type	_os_RealExp, @function
+	.global	_os_RealFloor
+	.type	_os_RealFloor, @function
+	.global	_os_RealToStr
+	.type	_os_RealToStr, @function
+	.global	_os_RealFrac
+	.type	_os_RealFrac, @function
+	.global	_os_RealGcd
+	.type	_os_RealGcd, @function
+	.global	_os_RealRoundInt
+	.type	_os_RealRoundInt, @function
+	.global	_os_RealLcm
+	.type	_os_RealLcm, @function
+	.global	_os_RealLog
+	.type	_os_RealLog, @function
+	.global	_os_RealMax
+	.type	_os_RealMax, @function
+	.global	_os_RealMin
+	.type	_os_RealMin, @function
+	.global	_os_RealMul
+	.type	_os_RealMul, @function
+	.global	_os_RealNcr
+	.type	_os_RealNcr, @function
+	.global	_os_RealNeg
+	.type	_os_RealNeg, @function
+	.global	_os_RealNpr
+	.type	_os_RealNpr, @function
+	.global	_os_RealPow
+	.type	_os_RealPow, @function
+	.global	_os_RealDegToRad
+	.type	_os_RealDegToRad, @function
+	.global	_os_RealRandInt
+	.type	_os_RealRandInt, @function
+	.global	_os_RealInv
+	.type	_os_RealInv, @function
+	.global	_os_RealMod
+	.type	_os_RealMod, @function
+	.global	_os_RealRound
+	.type	_os_RealRound, @function
+	.global	_os_RealSinRad
+	.type	_os_RealSinRad, @function
+	.global	_os_RealSqrt
+	.type	_os_RealSqrt, @function
+	.global	_os_RealSub
+	.type	_os_RealSub, @function
+	.global	_os_RealTanRad
+	.type	_os_RealTanRad, @function
+	.global	_os_StrToReal
+	.type	_os_StrToReal, @function
+	.global	_os_RealInt
+	.type	_os_RealInt, @function
+	.global	_os_SetFlagBits
+	.type	_os_SetFlagBits, @function
+	.global	_os_ResetFlagBits
+	.type	_os_ResetFlagBits, @function
+	.global	_os_TestFlagBits
+	.type	_os_TestFlagBits, @function
+	.global	_os_SetFlagByte
+	.type	_os_SetFlagByte, @function
+	.global	_os_GetFlagByte
+	.type	_os_GetFlagByte, @function
+	.global	_os_GetCursorPos
+	.type	_os_GetCursorPos, @function
+	.global	_os_PutStrFull
+	.type	_os_PutStrFull, @function
+	.global	_os_PutStrLine
+	.type	_os_PutStrLine, @function
+	.global	_os_SetCursorPos
+	.type	_os_SetCursorPos, @function
+	.global	_os_GetKey
+	.type	_os_GetKey, @function
+	.global	_os_GetCSC
+	.type	_os_GetCSC, @function
+	.global	_os_AppInit
+	.type	_os_AppInit, @function
+	.global	_os_DisableCursor
+	.type	_os_DisableCursor, @function
+	.global	_os_EnableCursor
+	.type	_os_EnableCursor, @function
+	.global	_os_FontDrawText
+	.type	_os_FontDrawText, @function
+	.global	_os_FontGetHeight
+	.type	_os_FontGetHeight, @function
+	.global	_os_FontGetWidth
+	.type	_os_FontGetWidth, @function
+	.global	_os_InitDrawing
+	.type	_os_InitDrawing, @function
+	.global	_os_SetDrawBGColor
+	.type	_os_SetDrawBGColor, @function
+	.global	_os_SetDrawFGColor
+	.type	_os_SetDrawFGColor, @function
+	.global	_os_FontSelect
+	.type	_os_FontSelect, @function
+	.global	_os_GetAnsData
+	.type	_os_GetAnsData, @function
+	.global	_os_SetTimer1
+	.type	_os_SetTimer1, @function
+	.global	_os_DisableTimer1
+	.type	_os_DisableTimer1, @function
+	.global	_os_GetSystemInfo
+	.type	_os_GetSystemInfo, @function
+	.global	_os_GetDrawBGColor
+	.type	_os_GetDrawBGColor, @function
+	.global	_os_GetDrawFGColor
+	.type	_os_GetDrawFGColor, @function
+	.global	_os_FontGetID
+	.type	_os_FontGetID, @function
+	.global	_os_RealToInt24
+	.type	_os_RealToInt24, @function
+	.global	_os_Int24ToReal
+	.type	_os_Int24ToReal, @function
+	.global	_os_ForceCmdNoChar
+	.type	_os_ForceCmdNoChar, @function
+	.global	_os_DelSymEntry
+	.type	_os_DelSymEntry, @function
+	.global	_os_GetSymTablePtr
+	.type	_os_GetSymTablePtr, @function
+	.global	_os_NextSymEntry
+	.type	_os_NextSymEntry, @function
+	.global	_os_ChkFindSym
+	.type	_os_ChkFindSym, @function
+	.global	_os_GetVarSize
+	.type	_os_GetVarSize, @function
+	.global	_os_GetMatrixDims
+	.type	_os_GetMatrixDims, @function
+	.global	_os_GetRealListElement
+	.type	_os_GetRealListElement, @function
+	.global	_os_GetMatrixElement
+	.type	_os_GetMatrixElement, @function
+	.global	_os_GetRealVar
+	.type	_os_GetRealVar, @function
+	.global	_os_SetListDim
+	.type	_os_SetListDim, @function
+	.global	_os_SetMatrixDims
+	.type	_os_SetMatrixDims, @function
+	.global	_os_SetRealListElement
+	.type	_os_SetRealListElement, @function
+	.global	_os_SetMatrixElement
+	.type	_os_SetMatrixElement, @function
+	.global	_os_SetRealVar
+	.type	_os_SetRealVar, @function
+	.global	_os_MemChk
+	.type	_os_MemChk, @function
+	.global	_os_ArcChk
+	.type	_os_ArcChk, @function
+	.global	_os_SetTimer2
+	.type	_os_SetTimer2, @function
+	.global	_os_DisableTimer2
+	.type	_os_DisableTimer2, @function
+	.global	_os_FloatToReal
+	.type	_os_FloatToReal, @function
+	.global	_os_RealToFloat
+	.type	_os_RealToFloat, @function
+	.global	_os_FontDrawTransText
+	.type	_os_FontDrawTransText, @function
+	.global	_os_DelAppVar
+	.type	_os_DelAppVar, @function
+	.global	_os_GetAppVarData
+	.type	_os_GetAppVarData, @function
+	.global	_os_CreateAppVar
+	.type	_os_CreateAppVar, @function
+	.global	_os_CreateString
+	.type	_os_CreateString, @function
+	.global	_os_GetStringData
+	.type	_os_GetStringData, @function
+	.global	_os_CreateEquation
+	.type	_os_CreateEquation, @function
+	.global	_os_GetEquationData
+	.type	_os_GetEquationData, @function
+	.global	_os_MSDGetMaxLUN
+	.type	_os_MSDGetMaxLUN, @function
+	.global	_os_MSDReset
+	.type	_os_MSDReset, @function
+	.global	_os_MSDInquiry
+	.type	_os_MSDInquiry, @function
+	.global	_os_MSDTestUnitReady
+	.type	_os_MSDTestUnitReady, @function
+	.global	_os_MSDReadCapacity
+	.type	_os_MSDReadCapacity, @function
+	.global	_os_MSDRead
+	.type	_os_MSDRead, @function
+	.global	_os_MSDWrite
+	.type	_os_MSDWrite, @function
+	.global	_os_USBGetRequestStatus
+	.type	_os_USBGetRequestStatus, @function
+	.global	_os_TestFlagBitsFast
+	.type	_os_TestFlagBitsFast, @function
+
+; ---
+; locations
+; ---
+	.set	_boot_GetBootMajorVer, 0x000080
+	.set	_boot_GetHardwareVer, 0x000084
+	.set	_boot_GetBootMinorVer, 0x00008C
+	.set	_boot_DebugPrintf, 0x0000B4
+	.set	_boot_ClearVRAM, 0x000374
+	.set	_boot_TurnOn, 0x000384
+	.set	_boot_TurnOff, 0x000388
+	.set	_boot_NewLine, 0x000390
+	.set	_boot_Set6MHzMode, 0x00039C
+	.set	_boot_Set48MHzMode, 0x0003A0
+	.set	_boot_Set6MHzModeI, 0x0003A4
+	.set	_boot_Set48MHzModeI, 0x0003A8
+	.set	_boot_GetBatteryStatus, 0x0003B0
+	.set	_boot_WaitShort, 0x0003B4
+	.set	_boot_BatteryCharging, 0x0003CC
+	.set	_boot_USBBusPowered, 0x0003E4
+	.set	_boot_USBSelfPowered, 0x0003E8
+	.set	_boot_USBResetChip, 0x0003F4
+	.set	_boot_USBResetTimers, 0x0004F0
+	.set	_boot_USBDisableTimers, 0x0004F4
+	.set	_boot_USBEnableTimers, 0x0004F8
+	.set	_boot_CheckOnPressed, 0x00057C
+	.set	_boot_SetDate, 0x000598
+	.set	_boot_GetDate, 0x0005A8
+	.set	_boot_GetTime, 0x0005B0
+	.set	_boot_SetTime, 0x0005B4
+	.set	_boot_IsAfterNoon, 0x0005C8
+
+	.set	_os_NewLine, 0x0207F0
+	.set	_os_MoveDown, 0x0207F4
+	.set	_os_MoveUp, 0x020800
+	.set	_os_ClrLCDFull, 0x020808
+	.set	_os_ClrLCD, 0x02080C
+	.set	_os_ClrTxtShd, 0x020818
+	.set	_os_HomeUp, 0x020828
+	.set	_os_RunIndicOn, 0x020844
+	.set	_os_RunIndicOff, 0x020848
+	.set	_os_DelRes, 0x020E5C
+	.set	_os_DisableAPD, 0x021134
+	.set	_os_EnableAPD, 0x021138
+	.set	_os_DrawStatusBar, 0x021A3C
+	.set	_os_PushErrorHandler, 0x021C78
+	.set	_os_PopErrorHandler, 0x021C7C
+	.set	_os_ThrowError, 0x021C80
+	.set	_os_RealCopy, 0x021C84
+	.set	_os_RealAcosRad, 0x021C88
+	.set	_os_RealAsinRad, 0x021C8C
+	.set	_os_RealAtanRad, 0x021C90
+	.set	_os_RealAdd, 0x021C94
+	.set	_os_CplxSquare, 0x021C98
+	.set	_os_RealCompare, 0x021C9C
+	.set	_os_RealCosRad, 0x021CA0
+	.set	_os_RealRadToDeg, 0x021CA4
+	.set	_os_RealDiv, 0x021CA8
+	.set	_os_RealExp, 0x021CAC
+	.set	_os_RealFloor, 0x021CB0
+	.set	_os_RealToStr, 0x021CB4
+	.set	_os_RealFrac, 0x021CB8
+	.set	_os_RealGcd, 0x021CBC
+	.set	_os_RealRoundInt, 0x021CC0
+	.set	_os_RealLcm, 0x021CC4
+	.set	_os_RealLog, 0x021CC8
+	.set	_os_RealMax, 0x021CCC
+	.set	_os_RealMin, 0x021CD0
+	.set	_os_RealMul, 0x021CD4
+	.set	_os_RealNcr, 0x021CD8
+	.set	_os_RealNeg, 0x021CDC
+	.set	_os_RealNpr, 0x021CE0
+	.set	_os_RealPow, 0x021CE4
+	.set	_os_RealDegToRad, 0x021CE8
+	.set	_os_RealRandInt, 0x021CEC
+	.set	_os_RealInv, 0x021CF0
+	.set	_os_RealMod, 0x021CF4
+	.set	_os_RealRound, 0x021CF8
+	.set	_os_RealSinRad, 0x021CFC
+	.set	_os_RealSqrt, 0x021D00
+	.set	_os_RealSub, 0x021D04
+	.set	_os_RealTanRad, 0x021D08
+	.set	_os_StrToReal, 0x021D0C
+	.set	_os_RealInt, 0x021D10
+	.set	_os_SetFlagBits, 0x021D14
+	.set	_os_ResetFlagBits, 0x021D18
+	.set	_os_TestFlagBits, 0x021D1C
+	.set	_os_SetFlagByte, 0x021D20
+	.set	_os_GetFlagByte, 0x021D24
+	.set	_os_GetCursorPos, 0x021D28
+	.set	_os_PutStrFull, 0x021D2C
+	.set	_os_PutStrLine, 0x021D30
+	.set	_os_SetCursorPos, 0x021D34
+	.set	_os_GetKey, 0x021D38
+	.set	_os_GetCSC, 0x021D3C
+	.set	_os_AppInit, 0x021D40
+	.set	_os_DisableCursor, 0x021DE4
+	.set	_os_EnableCursor, 0x021DE8
+	.set	_os_FontDrawText, 0x021E00
+	.set	_os_FontGetHeight, 0x021E14
+	.set	_os_FontGetWidth, 0x021E18
+	.set	_os_InitDrawing, 0x021E1C
+	.set	_os_SetDrawBGColor, 0x021E20
+	.set	_os_SetDrawFGColor, 0x021E24
+	.set	_os_FontSelect, 0x021E28
+	.set	_os_GetAnsData, 0x021E70
+	.set	_os_SetTimer1, 0x021EC8
+	.set	_os_DisableTimer1, 0x021ECC
+	.set	_os_GetSystemInfo, 0x021ED4
+	.set	_os_GetDrawBGColor, 0x021EE4
+	.set	_os_GetDrawFGColor, 0x021EE8
+	.set	_os_FontGetID, 0x021EEC
+	.set	_os_RealToInt24, 0x021EF4
+	.set	_os_Int24ToReal, 0x021EF8
+	.set	_os_ForceCmdNoChar, 0x021FA8
+	.set	_os_DelSymEntry, 0x021FAC
+	.set	_os_GetSymTablePtr, 0x021FB0
+	.set	_os_NextSymEntry, 0x021FB4
+	.set	_os_ChkFindSym, 0x021FB8
+	.set	_os_GetVarSize, 0x021FBC
+	.set	_os_GetMatrixDims, 0x021FC0
+	.set	_os_GetRealListElement, 0x021FC4
+	.set	_os_GetMatrixElement, 0x021FC8
+	.set	_os_GetRealVar, 0x021FCC
+	.set	_os_SetListDim, 0x021FD0
+	.set	_os_SetMatrixDims, 0x021FD4
+	.set	_os_SetRealListElement, 0x021FD8
+	.set	_os_SetMatrixElement, 0x021FDC
+	.set	_os_SetRealVar, 0x021FE0
+	.set	_os_MemChk, 0x021FF0
+	.set	_os_ArcChk, 0x022040
+	.set	_os_SetTimer2, 0x022080
+	.set	_os_DisableTimer2, 0x022084
+	.set	_os_FloatToReal, 0x022170
+	.set	_os_RealToFloat, 0x022174
+	.set	_os_FontDrawTransText, 0x022178
+	.set	_os_DelAppVar, 0x02217C
+	.set	_os_GetAppVarData, 0x022180
+	.set	_os_CreateAppVar, 0x022184
+	.set	_os_CreateString, 0x022198
+	.set	_os_GetStringData, 0x02219C
+	.set	_os_CreateEquation, 0x022240
+	.set	_os_GetEquationData, 0x022244
+	.set	_os_MSDGetMaxLUN, 0x022280
+	.set	_os_MSDReset, 0x022284
+	.set	_os_MSDInquiry, 0x022288
+	.set	_os_MSDTestUnitReady, 0x02228C
+	.set	_os_MSDReadCapacity, 0x022290
+	.set	_os_MSDRead, 0x022294
+	.set	_os_MSDWrite, 0x022298
+	.set	_os_USBGetRequestStatus, 0x0222D0
+	.set	_os_TestFlagBitsFast, 0x0222FC

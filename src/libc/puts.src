@@ -6,13 +6,13 @@
 
 _puts:
 	pop	de
-	ex	(sp), hl
+	ex	(sp),hl
 	push	de
 .L.loop:
-	ld	a, (hl)
-	or	a, a
-	jr	z, .L.newline
-	ld	e, a
+	ld	a,(hl)
+	or	a,a
+	jr	z,.L.newline
+	ld	e,a
 	push	hl
 	push	de
 	call	_outchar
@@ -21,7 +21,7 @@ _puts:
 	inc	hl
 	jr	.L.loop
 .L.newline:
-	ld	l, 10
+	ld	l,10
 	push	hl
 	call	_outchar
 	pop	hl

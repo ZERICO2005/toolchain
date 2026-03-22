@@ -29,8 +29,8 @@ _strspn:
 .L.loop:
 	ld	a, (de)		; A = *str++
 	inc	de
-	lea	hl, iy + 0	; HL = accept
-	lea	bc, ix + 0	; BC = strlen(accept)
+	lea	hl, iy		; HL = accept
+	lea	bc, ix		; BC = strlen(accept)
 	cpir			; Find A in accept
 	jr	z, .L.loop	; Loop if match
 	ex	de, hl		; Calculate number of matching characters

@@ -1,0 +1,22 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_strtof
+	.type	_strtof, @function
+	.global	_strtod
+	.type	_strtod, @function
+
+.ifdef PREFER_OS_LIBC
+
+	.set	_strtof, 0x0220E0
+	.set	_strtod, _strtof
+
+.else
+
+	.set	_strtof, __strtof_c
+	.set	_strtod, __strtod_c
+
+	.extern	__strtof_c
+	.extern	__strtod_c
+
+.endif

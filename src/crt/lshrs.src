@@ -3,8 +3,6 @@
 	.section	.text
 	.global	__lshrs
 	.type	__lshrs, @function
-	.global	__lshrs.hijack_lshru
-	.type	__lshrs.hijack_lshru, @function
 
 .ifdef PREFER_OS_CRT
 
@@ -27,7 +25,9 @@ __lshrs:
 	add	hl, sp
 .L.loop:
 	sra	a
-__lshrs.hijack_lshru:
+	.global	__lshrs.hijack_lshru
+	.type	__lshrs.hijack_lshru, @function
+.L.hijack_lshru:
 	inc	hl
 	inc	hl
 	rr	(hl)

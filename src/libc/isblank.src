@@ -6,12 +6,12 @@
 
 _isblank:
 	pop	de
-	ex	(sp), hl
+	ex	(sp),hl
 	push	de
-	ld	a, l
-	cp	a, 32
+	ld	a,l
+	cp	a,32
 	ret	z
-	xor	a, 9
+	xor	a,9
 	ret	z
-	sbc	hl, hl
+	sbc	hl,hl
 	ret

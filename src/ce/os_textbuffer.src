@@ -3,7 +3,7 @@
 ; ---
 	.assume	adl=1
 
-	.section	.text._os_DisableHomeTextBuffer
+	.section	.text
 	.global	_os_DisableHomeTextBuffer
 	.type	_os_DisableHomeTextBuffer, @function
 
@@ -14,7 +14,7 @@ _os_DisableHomeTextBuffer:
 	set	5,(iy + $4c)	; only display
 	ret
 
-	.section	.text._os_EnableHomeTextBuffer
+	.section	.text
 	.global	_os_EnableHomeTextBuffer
 	.type	_os_EnableHomeTextBuffer, @function
 

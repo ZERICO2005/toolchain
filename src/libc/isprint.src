@@ -6,11 +6,11 @@
 
 _isprint:
 	pop	de
-	ex	(sp), hl
+	ex	(sp),hl
 	push	de
-	ld	a, l
-	sub	a, 32
-	add	a, -95
-	sbc	hl, hl
+	ld	a,l
+	sub	a,32
+	add	a,-95
+	sbc	hl,hl
 	inc	hl
 	ret

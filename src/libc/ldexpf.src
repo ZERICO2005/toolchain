@@ -21,7 +21,7 @@
 .else
 
 ; (set to 0 or 1) avoid returning negative zero on underflow with Ti's floats
-	.equ	__ldexpf_avoid_negative_zero, 1
+	.set	__ldexpf_avoid_negative_zero, 1
 
 ; ldexpf behaviour:
 ; - signed zero, infinity, and NaN inputs are returned unmodified
@@ -29,6 +29,8 @@
 ; - FE_INEXACT is set if rounding occured
 ;-------------------------------------------------------------------------------
 
+	.local	__ldexpf_helper
+__ldexpf_helper:
 .L.maybe_subnormal:
 	; A = zero, carry = signbit
 	rra	; restore signbit and clear carry
@@ -37,12 +39,12 @@
 	ld	hl, (iy + 3)	; mant
 	ret	z	; return zero/inf/NaN
 	dec	bc	; BC is now -1
-; .L.subnormal_input:
+; .subnormal_input:
 	; BC is -1 here
 	bit	7, (iy + 11)	; scale sign
 	ld	de, (iy + 9)	; scale
-	jr	nz, .L.move_subnormal_down
-; .L.move_subnormal_up:
+	jr	nz, _ldexpf.move_subnormal_down
+; .move_subnormal_up:
 .L.norm_loop:
 	add	hl, hl
 	jr	c, .L.normalized
@@ -50,7 +52,7 @@
 	add	hl, bc	; --scale
 	ex	de, hl
 	jr	c, .L.norm_loop
-; .L.still_subnormal:
+; .still_subnormal:
 	; DE is -1 here
 	; saves 8F for this path at a cost of 3 bytes:
 .if 0
@@ -61,7 +63,7 @@
 	inc	de	; don't touch the Z flag
 	ex	de, hl
 	; Z is set here
-	jr	.L.scale_up_subnormal
+	jr	_ldexpf.scale_up_subnormal
 
 ;-------------------------------------------------------------------------------
 ; When the input and output are normal:
@@ -79,10 +81,10 @@ _ldexpf:
 	ld	a, (iy + 6)	; expon
 	ld	e, a		; signbit
 	adc	a, a
-	jr	z, .L.maybe_subnormal
+	jr	z, __ldexpf_helper.maybe_subnormal
 	ld	c, a
 	inc	a
-	jr	z, .L.ret_self	; inf NaN
+	jr	z, __ldexpf_helper.ret_self	; inf NaN
 	ld	a, e		; signbit
 	ld	de, (iy + 9)	; scale
 	ex	de, hl
@@ -128,7 +130,7 @@ _ldexpf:
 	ld	a, l
 	sbc	hl, bc
 	cpl
-	jr	nc, .L.shru_common
+	jr	nc, _ldexpf.shru_common
 ; .underflow:
 	inc	b	; ld b, 0 ; sets Z
 .L.overflow_to_inf:	; <-- NZ is set when infinite

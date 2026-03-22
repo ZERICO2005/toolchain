@@ -1,20 +1,20 @@
 	.assume	adl=1
 
-	.section	.text.__bctlz
+	.section	.text
 	.global	__bctlz
 	.type	__bctlz, @function
 
 __bctlz:
-	cp	a, 010h
+	cp	a, 0x10
 	jr	c, .L.low4
-	cp	a, 040h
+	cp	a, 0x40
 	jr	c, .L.low6
 	add	a, a
 	sbc	a, a
 	inc	a
 	ret
 .L.low6:
-	add	a, -020h
+	add	a, -0x20
 	sbc	a, a
 	add	a, 3
 	ret
@@ -31,7 +31,7 @@ __bctlz:
 	adc	a, 6
 	ret
 
-	.section	.text.__sctlz
+	.section	.text
 	.global	__sctlz
 	.type	__sctlz, @function
 
@@ -40,13 +40,16 @@ __sctlz:
 	or	a, a
 	jr	nz, __bctlz
 	ld	a, l
+; REQUIRE	require	__sctlz.hijack
+
+; REQUIRE	.section	.text
 	.local	__sctlz.hijack
 __sctlz.hijack:
 	call	__bctlz
 	add	a, 8
 	ret
 
-	.section	.text.__ictlz
+	.section	.text
 	.global	__ictlz
 	.type	__ictlz, @function
 
@@ -64,7 +67,7 @@ __ictlz:
 	add	a, 16
 	ret
 
-	.section	.text.__lctlz
+	.section	.text
 	.global	__lctlz
 	.type	__lctlz, @function
 
@@ -76,7 +79,7 @@ __lctlz:
 	add	a, 8
 	ret
 
-	.section	.text.__llctlz
+	.section	.text
 	.global	__llctlz
 	.type	__llctlz, @function
 
@@ -90,7 +93,7 @@ __llctlz:
 	add	a, 16
 	ret
 
-	.section	.text.__i48ctlz
+	.section	.text
 	.global	__i48ctlz
 	.type	__i48ctlz, @function
 

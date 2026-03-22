@@ -1,0 +1,22 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_logf
+	.type	_logf, @function
+	.global	_log
+	.type	_log, @function
+
+.ifdef PREFER_OS_LIBC
+
+	.set	_logf, 0x0220E4
+	.set	_log, _logf
+
+.else
+
+	.set	_logf, __logf_c
+	.set	_log, __log_c
+
+	.extern	__logf_c
+	.extern	__log_c
+
+.endif

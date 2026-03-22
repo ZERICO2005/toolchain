@@ -6,10 +6,10 @@
 
 _isupper:
 	pop	de
-	ex	(sp), hl
+	ex	(sp),hl
 	push	de
-	ld	a, l
-	sub	a, 65
-	sub	a, 26
-	sbc	hl, hl
+	ld	a,l
+	sub	a,65
+	sub	a,26
+	sbc	hl,hl
 	ret

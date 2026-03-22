@@ -7,7 +7,7 @@
 
 .ifdef PREFER_OS_LIBC
 
-	.set	_strncmp, 0x0000DC
+	.set	_strncmp, $0000DC
 
 .else
 

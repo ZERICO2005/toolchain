@@ -7,7 +7,7 @@
 
 .ifdef PREFER_OS_LIBC
 
-	.set	_strcmp, 0x0000C8
+	.set	_strcmp, $0000C8
 
 .else
 
@@ -19,15 +19,15 @@ _strcmp:
 	inc	hl
 	inc	hl
 	ld	hl, (hl)
-_strcmp.loop:
+.L.loop:
 	ld	a, (de)
 	cp	a, (hl)
-	jr	nz, _strcmp.finish
+	jr	nz, .L.finish
 	inc	hl
 	inc	de
 	or	a, a
-	jr	nz, _strcmp.loop
-_strcmp.finish:
+	jr	nz, .L.loop
+.L.finish:
 	sbc	hl, hl
 	ld	l, a
 	ret

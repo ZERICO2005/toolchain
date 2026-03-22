@@ -29,21 +29,19 @@ _acosf:
 	call	__fcmp
 	pop	bc
 	pop	hl
-	jp	m, .L1
+	jp	m,l_1
 	ld	e,a
 	ld	a,191
 	call	__fcmp
-	jp	p, .L2
+	jp	p,l_2
 
-.L1:
-	ld	hl,4
+l_1:	ld	hl,4
 	ld	(_errno),hl
 	ld	l,h
 	ld	e,h
 	ret
 
-.L2:
-	push	de
+l_2:	push	de
 	push	hl
 	call	_asin
 	pop	bc

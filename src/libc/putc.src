@@ -1,0 +1,10 @@
+	.assume	adl=1
+
+	.section	.text
+
+	.global	_putc
+	.type	_putc, @function
+
+	.set	_putc, _fputc
+
+	.extern	_fputc

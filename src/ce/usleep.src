@@ -38,18 +38,18 @@ _usleep:
 ; https://docs.google.com/spreadsheets/d/1mZwDn6rEw3-uSQPuy48Ez0UWIvnggLiJxWft4u4OtcU/edit?usp=sharing
 	xor	a, a			; a = 0
 	ld	e, a			; euhl = usec
-	.equ	.L.multiplier, 114
-	ld	bc, .L.multiplier		; aubc = multiplier
+	.set	.multiplier, 114
+	ld	bc, .multiplier		; aubc = multiplier
 	call	__lmulu			; euhl = usec * multiplier
-	.equ	.L.correction_scaled, 5796
-	ld	bc, .L.correction_scaled
+	.set	.correction_scaled, 5796
+	ld	bc, .correction_scaled
 	add	hl, bc
 	adc	a, e			; auhl = usec * multiplier +
 					;            correction_scaled
 	ld	e, a			; euhl = usec * multiplier +
 					;            correction_scaled
-	.equ	.L.divisor, 3479
-	ld	bc, .L.divisor
+	.set	.divisor, 3479
+	ld	bc, .divisor
 	xor	a, a			; aubc = divisor
 	call	__ldivu			; euhl = (usec * multiplier +
 					;             correction_scaled) /

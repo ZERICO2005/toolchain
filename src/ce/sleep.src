@@ -34,17 +34,17 @@ _sleep:
 	ex	(sp), hl		; hl = seconds
 	push	de
 ; Convert from seconds to clock ticks.
-	ld	b, 15
-.loop:
-	add	hl, hl
+	ld	b,15
+.L.loop:
+	add	hl,hl
 	rla
-	djnz	.loop
-	ld	e, a			; euhl = seconds * 32768
+	djnz	.L.loop
+	ld	e,a			; euhl = seconds * 32768
 					;      = ticks
 ; Join common code for the rest.
 	jp	___sleep_common.1
 
 
-	extern	___sleep_common.1
-	extern	__lmulu
-	extern	_clock
+	.extern	___sleep_common.1
+	.extern	__lmulu
+	.extern	_clock

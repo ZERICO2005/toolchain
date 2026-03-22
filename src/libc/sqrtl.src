@@ -13,6 +13,6 @@ _sqrtl:
 	rlca
 	inc	hl
 	ld	(hl), a
-	jp	___f64_sqrt
+	jq	___f64_sqrt
 
 	.extern	___f64_sqrt

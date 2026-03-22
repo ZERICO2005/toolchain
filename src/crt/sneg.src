@@ -1,0 +1,17 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	__sneg
+	.type	__sneg, @function
+
+.ifdef PREFER_OS_CRT
+
+	.set	__sneg, 0x00022C
+
+.else
+
+	.set	__sneg, __ineg
+
+	.extern	__ineg
+
+.endif

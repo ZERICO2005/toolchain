@@ -36,14 +36,14 @@ __i48dvrmu:
 	sbc	hl, hl		; uhl = low remainder
 	exx
 	pop	bc		; ubc' = dividend/quotient pointer
-	lea	de, iy + 0		; ude' = iy = high divisor
+	lea	de, iy		; ude' = iy = high divisor
 	sbc	hl, hl		; uhl' = high remainder
-.byteLoop:
+.L.byteLoop:
 	dec	bc
 	ld	a, (bc); a = relevant dividend byte
 	exx
 	ld	b, 8		; b = bit counter
-.bitLoop:
+.L.bitLoop:
 	; r<<1 and r[0] = n[b]
 	rla			; c = n[b], ~q[b-1] = c
 	adc	hl, hl		; low r += low r + n[b]
@@ -55,21 +55,21 @@ __i48dvrmu:
 	exx
 	sbc	hl, de		; high r -= high d
 	exx
-	jr	nc, .greaterEqual
+	jr	nc, .L.greaterEqual
 	; restore if r<d
 	add	hl, de		; restore low
 	exx
 	adc	hl, de		; restore high
 	exx
-.greaterEqual:
+.L.greaterEqual:
 	; carry contains inverted quotient bit, which is saved in the next iteration
-	djnz	.bitLoop
+	djnz	.L.bitLoop
 	rla			; ~q[b] = c
 	cpl			; uninvert quotient
 	dec	c		; decrement byte counter
 	exx
 	ld	(bc), a		; now that dividend byte isn't needed, overwrite with quotient
-	jr	nz, .byteLoop
+	jr	nz, .L.byteLoop
 
 	; finish and clean up
 
@@ -81,8 +81,8 @@ __i48dvrmu:
 	pop	de		; de = upper quotient
 
 	pop	af
-	jp	po, .skipEI
+	jp	po, .L.skipEI
 	ei
-.skipEI:
+.L.skipEI:
 	pop	af
 	ret

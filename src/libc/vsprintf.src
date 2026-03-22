@@ -1,0 +1,20 @@
+	.assume	adl=1
+
+	.section	.text
+
+	.global	_vsprintf
+	.type	_vsprintf, @function
+
+.if HAS_PRINTF
+
+	.set	_vsprintf, __vsprintf_c
+
+	.extern	__vsprintf_c
+
+.else
+
+	.set	_vsprintf, _boot_vsprintf
+
+	.extern	_boot_vsprintf
+
+.endif

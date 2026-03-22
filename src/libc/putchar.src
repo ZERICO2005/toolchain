@@ -6,7 +6,7 @@
 
 _putchar:
 	pop	de
-	ex	(sp), hl
+	ex	(sp),hl
 	push	de
 	push	hl
 	push	hl

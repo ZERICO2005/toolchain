@@ -1,0 +1,22 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_asinf
+	.type	_asinf, @function
+	.global	_asin
+	.type	_asin, @function
+
+.ifdef PREFER_OS_LIBC
+
+	.set	_asinf, 0x022104
+	.set	_asin, _asinf
+
+.else
+
+	.set	_asinf, __asinf_c
+	.set	_asin, __asin_c
+
+	.extern	__asinf_c
+	.extern	__asin_c
+
+.endif

@@ -1,0 +1,22 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_expf
+	.type	_expf, @function
+	.global	_exp
+	.type	_exp, @function
+
+.ifdef PREFER_OS_LIBC
+
+	.set	_expf, 0x022124
+	.set	_exp, _expf
+
+.else
+
+	.set	_expf, __expf_c
+	.set	_exp, __exp_c
+
+	.extern	__expf_c
+	.extern	__exp_c
+
+.endif

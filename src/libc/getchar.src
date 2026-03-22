@@ -1,0 +1,7 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_getchar
+	.type	_getchar, @function
+	.set	_getchar, _inchar
+	.extern	_inchar

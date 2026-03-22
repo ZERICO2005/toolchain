@@ -1,0 +1,22 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_sinhf
+	.type	_sinhf, @function
+	.global	_sinh
+	.type	_sinh, @function
+
+.ifdef PREFER_OS_LIBC
+
+	.set	_sinhf, 0x022130
+	.set	_sinh, _sinhf
+
+.else
+
+	.set	_sinhf, __sinhf_c
+	.set	_sinh, __sinh_c
+
+	.extern	__sinhf_c
+	.extern	__sinh_c
+
+.endif

@@ -3,18 +3,22 @@
 	.section	.text
 	.global	__llrems
 	.type	__llrems, @function
-	.global	__lldivs
-	.type	__lldivs, @function
 
 __llrems:
 
 	scf
-	jr	.L.hijack
+virtual
+	jr	nc, $ + 2
+	load .jr_nc: 1 from $$
+end virtual
+	db	.jr_nc
+
+	.global	__lldivs
+	.type	__lldivs, @function
 
 __lldivs:
 
 	or	a, a
-.L.hijack:
 
 	push	iy
 	push	af

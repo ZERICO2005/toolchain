@@ -2,8 +2,8 @@
 
 	.section	.text
 	.global	_atof
-	.global	_atoff
 	.type	_atof, @function
+	.global	_atoff
 	.type	_atoff, @function
 
 .ifdef PREFER_OS_LIBC
@@ -25,9 +25,10 @@ _atoff:
 	push	bc
 	call	_strtod
 	pop	bc
-	pop	bc
+	pop	hl
 	ret
 
+	.extern	__frameset0
 	.extern	_strtod
 
 .endif

@@ -6,15 +6,15 @@
 	.type	_memrmem, @function
 
 ; void *memrmem(const void *haystack, size_t haystack_len, const void *needle, size_t needle_len)
-	.equ	haystack, 3
-	.equ	haystack_len, 6
-	.equ	needle, 9
-	.equ	needle_len, 12
+	.set	haystack, iy + 3
+	.set	haystack_len, iy + 6
+	.set	needle, iy + 9
+	.set	needle_len, iy + 12
 _memrmem:
 	ld	iy, 0
 	add	iy, sp
-	ld	hl, (iy + haystack_len)
-	ld	bc, (iy + needle_len)
+	ld	hl, (haystack_len)
+	ld	bc, (needle_len)
 	sbc	hl, bc
 	jr	c, .L.ret_null	; (haystack_len < needle_len)
 	; (haystack_len >= needle_len)
@@ -25,17 +25,17 @@ _memrmem:
 	; DE = needle_len
 
 	; move to the end of the needle
-	ld	hl, (iy + needle)
+	ld	hl, (needle)
 	; return haystack when haystack_len is zero (implies that needle_len is also zero)
 	jr	z, .L.zero_haystack_len
 	add	hl, bc
 	dec	hl
-	ld	(iy + needle), hl
+	ld	(needle), hl
 
 	sbc	hl, hl
 	adc	hl, bc
 	pop	bc
-	ld	hl, (iy + haystack)
+	ld	hl, (haystack)
 
 	; move to the end of the haystack
 	add	hl, de
@@ -61,7 +61,7 @@ _memrmem:
 	pop	hl
 	pop	bc
 .L.begin_loop:
-	ld	de, (iy + needle)
+	ld	de, (needle)
 	ld	a, (de)
 	cpdr			; search for the start of the string
 	ret	po		; end of search_len
@@ -75,7 +75,7 @@ _memrmem:
 
 .L.zero_haystack_len:
 	pop	hl
-	ld	hl, (iy + haystack)
+	ld	hl, (haystack)
 	ret
 
 _memrcmp_fast:
@@ -87,11 +87,11 @@ _memrcmp_fast:
 	; Z = match
 	; NZ = no match
 	inc	hl
-	ld	bc, (iy + needle_len)
-.L_memrcmp_fast.loop:
+	ld	bc, (needle_len)
+.L.loop:
 	cpd
 	ret	po
 	dec	de
 	ld	a, (de)
-	jr	z, .L_memrcmp_fast.loop
+	jr	z, .L.loop
 	ret

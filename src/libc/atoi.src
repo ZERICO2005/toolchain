@@ -24,7 +24,7 @@ _atoi:
 	xor	a, '-' - 14
 	push	af
 	jr	z, .L.minus_sign
-	xor	a, ('+' - 14) ^ ('-' - 14)
+	xor	a, ('+' - 14) xor ('-' - 14)
 	jr	z, .L.plus_sign
 	dec	hl
 .L.plus_sign:

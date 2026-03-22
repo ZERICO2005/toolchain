@@ -38,4 +38,5 @@ __i48popcnt:
 	pop	hl
 	ret
 
-	.extern	__popcnt_common_init_full, __popcnt_common_iter_adjusted
+	.extern	__popcnt_common_init_full
+	.extern	__popcnt_common_iter_adjusted

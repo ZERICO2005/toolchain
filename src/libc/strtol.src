@@ -2,14 +2,14 @@
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___strtoi
+	.section	.text
 
 	.global	___strtoi
 	.type	___strtoi, @function
 
 ___strtoi:
 	; Similar to strtol, except that it will raise ERANGE and return INT_MIN/INT_MAX when out of range
-	call	.L__strtol_common
+	call	__strtol_common
 	; overflow occured if B is non-zero
 	djnz	.L.out_of_range
 	inc	e
@@ -38,36 +38,36 @@ ___strtoi:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text._strtol
+	.section	.text
 
 	.global	_strtol
 	.type	_strtol, @function
 
 _strtol:
-	call	.L__strtol_common
+	call	__strtol_common
 	; overflow occured if B is non-zero
-	djnz	.L_strtol.out_of_range
+	djnz	.L.out_of_range
 	ld	a, e
 	rla
-	jr	c, .L_strtol.maybe_out_of_range
+	jr	c, .L.maybe_out_of_range
 	ret	nz
 	jp	__lneg
 
-.L_strtol.maybe_out_of_range:
+.L.maybe_out_of_range:
 	; greater than INT_MAX
-	jr	nz, .L_strtol.overflow
+	jr	nz, .L.overflow
 	; negative
 	; check that the result is not an exact INT_MIN
 	or	a, a
 	adc	hl, hl
-	jr	nz, .L_strtol.underflow
+	jr	nz, .L.underflow
 	ld	a, e
 	adc	a, a
 	ret	z		; exact INT_MIN
-.L_strtol.underflow:
+.L.underflow:
 	xor	a, a		; set Z
-.L_strtol.out_of_range:
-.L_strtol.overflow:
+.L.out_of_range:
+.L.overflow:
 	ld	e, $80
 	ld	hl, 5		; ERANGE
 	ld	(_errno), hl
@@ -80,21 +80,29 @@ _strtol:
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.___strtoui
+	.section	.text
 
 	.global	___strtoui
 	.type	___strtoui, @function
 
 ___strtoui:
 	; Similar to strtoul, except that it will raise ERANGE and return UINT_MAX when out of range
-	call	.L__strtol_common
+	call	__strtol_common
 	; overflow occured if B is non-zero
-	djnz	.L_strtoui.out_of_range
+	djnz	_strtoul.out_of_range
 	call	z, __ineg
 	inc	e
 	dec	e
 	ret	z
-.L_strtoui.out_of_range:
+
+; REQUIRE	require	_strtoul.out_of_range
+
+;-------------------------------------------------------------------------------
+
+; REQUIRE	.section	.text
+
+	.local	_strtoul.out_of_range
+_strtoul.out_of_range:
 	ld	hl, 5		; ERANGE
 	ld	(_errno), hl
 	ld	l, h		; ld hl, 0
@@ -102,23 +110,25 @@ ___strtoui:
 	ld	e, l
 	ret
 
-	.section	.text._strtoul
+	.section	.text
 
 	.global	_strtoul
+	.type	_strtoul, @function
+
 _strtoul:
-	call	.L__strtol_common
+	call	__strtol_common
 	; overflow occured if B is non-zero
-	djnz	.L_strtoui.out_of_range
+	djnz	_strtoul.out_of_range
 	ret	nz
 	jp	__lneg
 
 ;-------------------------------------------------------------------------------
 
-	.section	.text.__strtol_common
+	.section	.text
 
-	.local	.L__strtol_common
+	.local	__strtol_common
 
-.L__strtol_common:
+__strtol_common:
 	; output: E:UHL
 	; B = 1 if no overflow
 	; Z means that A is zero = negate return value
@@ -150,7 +160,7 @@ _strtoul:
 	xor	a, '-' - 14
 	push	af
 	jr	z, .L.minus_sign
-	xor	a, ('+' - 14) ^ ('-' - 14)
+	xor	a, ('+' - 14) xor ('-' - 14)
 	jr	z, .L.plus_sign
 	dec	hl
 	xor	a, a
@@ -163,7 +173,7 @@ _strtoul:
 	jr	z, .L.auto_base
 	xor	a, 16
 	jr	z, .L.hex_base
-	xor	a, 2 ^ 16
+	xor	a, 2 xor 16
 	jr	nz, .L.other_base
 .L.auto_base:	; test for 0* 0x* 0X* 0b* 0B*
 .L.bin_base:	; test for 0x* 0X*
@@ -177,7 +187,7 @@ _strtoul:
 	res	5, a		; upper case
 	xor	a, 'X'
 	jr	z, .L.maybe_hex
-	xor	a, 'B' ^ 'X'
+	xor	a, 'B' xor 'X'
 	jr	z, .L.maybe_bin
 	dec	hl
 	djnz	.L.other_base
@@ -203,7 +213,7 @@ _strtoul:
 .L.undo_inc:
 	dec	hl
 	; dec	b
-	; jr	.L.other_base
+	; jr	.other_base
 .L.maybe_decimal:
 	; set to decimal if base is not zero
 	djnz	.L.other_base

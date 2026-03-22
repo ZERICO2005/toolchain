@@ -1,9 +1,9 @@
 	.assume	adl = 1
 
-	.section	.text._softfloat_isSigNaNF64UI
-	.global	_softfloat_isSigNaNF64UI
+	.section	.text
 
-_softfloat_isSigNaNF64UI:
-	jp	__issignalingl
+	.global	_softfloat_isSigNaNF64UI
+	.type	_softfloat_isSigNaNF64UI, @function
+	.set	_softfloat_isSigNaNF64UI, __issignalingl
 
 	.extern	__issignalingl

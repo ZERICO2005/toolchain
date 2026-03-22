@@ -1,0 +1,17 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	__sshl
+	.type	__sshl, @function
+
+.ifdef PREFER_OS_CRT
+
+	.set	__sshl, 0x000240
+
+.else
+
+	.set	__sshl, __ishl
+
+	.extern	__ishl
+
+.endif

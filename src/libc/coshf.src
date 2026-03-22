@@ -1,0 +1,22 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_coshf
+	.type	_coshf, @function
+	.global	_cosh
+	.type	_cosh, @function
+
+.ifdef PREFER_OS_LIBC
+
+	.set	_coshf, 0x022134
+	.set	_cosh, _coshf
+
+.else
+
+	.set	_coshf, __coshf_c
+	.set	_cosh, __cosh_c
+
+	.extern	__coshf_c
+	.extern	__cosh_c
+
+.endif

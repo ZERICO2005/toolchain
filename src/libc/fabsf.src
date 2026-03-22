@@ -16,8 +16,7 @@
 _fabs:
 _fabsf:
 	pop	bc
-	pop	hl
-	pop	de
+	pop	hl ,de
 	push	de
 	push	hl
 	push	bc

@@ -1,0 +1,570 @@
+	.assume	adl=1
+
+	.set	mpTmr1Counter, 0xF20000
+	.set	mpTmrCtrl, 0xF20030
+
+	.set	bTmr1Enable, 0
+	.set	bTmr1Crystal, 1
+	.set	bTmr1Overflow, 2
+	.set	bTmr1CountUp, 9
+
+	.global	_errno
+	.type	_errno, @function
+	.set	_errno, $D008DC
+
+	.section	.text
+	.global	_atexit
+	.type	_atexit, @function
+
+_atexit:
+	.global	_on_exit
+	.type	_on_exit, @function
+
+_on_exit:
+	ld	hl,3*long
+	push	hl
+	call	_malloc
+	pop	bc
+	ex	de,hl
+	scf
+	sbc	hl,hl
+	add	hl,de
+	ret	nc
+	ld	hl,(exit_functions)
+	ex	de,hl
+	ld	(exit_functions),hl
+	ld	(hl),de
+	pop	de
+repeat 2
+ repeat long
+	inc	hl
+ end repeat
+	pop	bc
+	ld	(hl),bc
+end repeat
+	push	bc
+	push	bc
+	ex	de,hl
+	jp	(hl)
+
+	.section	.bss
+	.local	exit_functions
+exit_functions rl 1
+
+	.section	.rodata
+	.local	init_functions
+init_functions:
+load functions: ___init_array_count * long from init_array: 0
+	dl	functions
+load functions: ___ctors_count * long from ctors: 0
+	dl	functions
+
+	.section	.rodata
+	.local	fini_functions
+load functions: ___dtors_count * long from dtors: 0
+	dl	functions
+load functions: ___fini_array_count * long from fini_array: 0
+	dl	functions
+fini_functions:
+
+	.section	.header
+	db	$EF, $7B
+	db	$00		; C program identifier (nop)
+
+	.section	.init.libs
+	call	0x020628		; _pushop1 to save running program name
+	jq	.L.tryfind
+.L.inram:
+	call	0x021448		; _arc_unarc
+.L.tryfind:
+	ld	hl,.libloadname-1
+	call	0x020320		; _mov9toop1
+	ld	a,0x15		; appvarobj
+	ld	(0xD005F8),a	; op1
+	call	0x02050C		; _chkfindsym
+	jq	c,.L.notfound
+	call	0x021F98		; _chkinram
+	jq	z,.L.inram	; if in ram, archive libload and search again
+	ld	hl,9+1+.libloadnamelen+2
+	add	hl,de
+	push	hl
+	call	0x0205C4		; _popop1 to restore running program name
+	pop	hl		; start of loader (required to be in hl)
+	ld	de,___libs	; start of relocation data
+	jp	(hl)		; jump to the loader -- it should take care of everything else
+.L.notfound:
+	call	0x0205C4		; _popop1 to restore running program name
+	call	0x020814		; _clrscrn
+	call	0x020828		; _homeup
+	ld	hl,.missingappvar
+	call	0x0207C0		; _puts
+	call	0x0207F0		; _newline
+	ld	hl,.webaddress
+	call	0x0207C0		; _puts
+	jq	0x020D8C		; _getkey
+
+	.section	.rodata
+	.local	.missingappvar
+.L.missingappvar:
+	db	"Need "
+	.local	.libloadname
+.L.libloadname:
+	db	"LibLoad"
+	.local	.libloadnamelen
+	.set	.libloadnamelen, $-.libloadname
+	db	0
+	.local	.webaddress
+.L.webaddress:
+	db	"http://tiny.cc/clibs",0
+
+	.section	.init.clock
+	.global	___init_clock
+	.type	___init_clock, @function
+
+___init_clock:
+; Disable timer 1 and configure it to use the 32768Hz crystal timer, not
+; generate an interurrupt on overflow, and count up.
+assert bTmr1CountUp / 8 = 1
+	ld	hl, mpTmrCtrl + 1
+	set	bTmr1CountUp - 8, (hl)
+	dec	hl
+assert bTmr1Enable / 8 = 0
+	res	bTmr1Enable, (hl)
+assert bTmr1Crystal / 8 = 0
+	set	bTmr1Crystal, (hl)
+assert bTmr1Overflow / 8 = 0
+	res	bTmr1Overflow, (hl)
+; Set the counter to zero.
+assert mpTmrCtrl shr 8 = (mpTmr1Counter + 1) shr 8
+	ld	l, (mpTmr1Counter + 1) and $FF
+	ld	de, 0
+	ld	(hl), de
+	dec	hl
+	ld	(hl), e
+; Enable the timer.
+assert bTmr1Enable / 8 = 0
+assert mpTmr1Counter shr 8 = mpTmrCtrl shr 8
+	ld	l, mpTmrCtrl and $FF
+	set	bTmr1Enable, (hl)
+
+	.section	.text
+	.local	___rerun_handler
+	.local	___rerun_handler.callback
+	.local	___rerun_handler.data
+	.local	___rerun_handler.retval
+	.local	___rerun_handler.data_size
+___rerun_handler:
+	ld	hl,(_exit.sp)
+	ld	de,0
+	.set	.data_size, $ - 3
+	add	hl,de
+	ld	(_exit.sp),hl		; move exit.sp to real ret
+	ld	hl,0
+	.set	.retval, $ - 3
+	ex	(sp),hl
+	ld	de,0
+	.set	.data, $ - 3
+	push	de
+	push	hl
+	jp	0
+	.set	.callback, $ - 3
+
+	.section	.init.reruncheck
+	.global	___prgm_run_check
+	.type	___prgm_run_check, @function
+
+___prgm_run_check:
+	ld	de,___prgm_caller
+	call	0x02032C		; ti.MovFROP1
+	pop	hl
+	ld	de,1
+	add	hl,de
+	dec	hl
+	jq	nc,.L.no_rerun
+	ld	hl,___rerun_handler
+	ld	(__start._main),hl
+	pop	hl
+	ld	(___rerun_handler.retval),hl
+	pop	hl
+	ld	(___rerun_handler.callback),hl
+	pop	hl
+	ld	(___rerun_handler.data_size),hl
+	ex	de,hl
+	add	hl,sp			; user callback data
+	dec	hl
+	ld	(___rerun_handler.data),hl
+virtual
+	ld	a,0
+ load .ld_a: byte from $$
+end virtual
+	db	.ld_a
+.L.no_rerun:
+	push	hl
+
+	.section	.init
+	weak	__start
+__start:
+	call	0x020848	; _RunInicOff, assumes iy = flags
+	call	0x0004F4	; _usb_DisableTimer
+	di			; disable interrupts
+	call	_os_DisableHomeTextBuffer
+	ld	hl,0xE00305
+	ld	a,(hl)
+	ld	(_exit.flash_wait_states),a
+	ld	(hl),h		; set flash wait states to 3; 1 was definitely
+				; too low, 2 is untested
+	ld	(_exit.sp),sp	; save sp for exiting
+.if defined ___main_argc_argv
+	.set	.argstemp, 0xD120D6		; saveSScreen+14007
+	call	0x020614	; _PushRealO1
+	ld	de,.argstemp
+	ld	a,e		; Lenter
+	ld	(de),a
+	inc	de
+	ld	hl,0xD005F8+1	; OP1+1
+	call	0x020304	; _Mov8b
+	ld	a,d		; Lspace
+	ld	(de),a
+	inc	de
+	push	de
+	call	0x020FF4	; _AnsName
+	call	0x02050C	; _FindSym
+	ex	de,hl
+	pop	de
+	xor	a,4		; StrngObj
+	jr	nz,.L.parseansdone
+	ld	c,(hl)
+	inc	hl
+	ld	b,(hl)
+	jr	.L.parseansnext
+.L.parseansloop:
+	inc	hl
+	dec	bc
+	push	hl
+	push	bc
+	push	de
+	call	0x020870	; _Get_Tok_Strng
+	pop	de
+	ld	hl,0xD0060E	; OP3
+	ldir
+	pop	bc
+	pop	hl
+	bit	2,d
+	jr	nz,.L.parseansdone
+	ld	a,(hl)
+	call	0x0204AC	; _Isa2ByteTok
+	jr	nz,.L.parseansnext
+	inc	hl
+	dec	bc
+.L.parseansnext:
+	ld	a,c
+	or	a,b
+	jr	nz,.L.parseansloop
+.L.parseansdone:
+	ld	bc,0
+	ld	hl,.argstemp
+	sbc	hl,de
+	add	hl,sp
+	ld	sp,hl
+	ld	hl,(_exit.sp)
+	push	bc
+	db	0x3E		; ld a,*
+.L.argvloop:
+	push	hl
+	inc	bc
+.L.skipspacesloop:
+	dec	de
+	ld	a,(de)
+	cp	a,0x20		; Lspace
+	jr	z,.L.skipspacesloop
+	dec	hl
+	ld	(hl),0
+.L.argcopyloop:
+	dec	hl
+	ld	(hl),a
+	dec	de
+	ld	a,(de)
+	cp	a,0x20		; Lspace
+	jr	z,.L.argvloop
+	cp	a,0xD6		; lenter
+	jr	nz,.L.argcopyloop
+	push	hl
+	sbc	hl,hl
+	add	hl,sp
+	push	hl
+	push	bc
+	call	0x0205DC	; _PopRealO1
+.endif
+.if ___len_bss > 0
+.if ___len_bss = 1
+	xor	a,a
+	ld	(___low_bss),a
+.else if ___len_bss = 2
+	ld	hl,___low_bss
+	xor	a,a
+	ld	(hl),a
+	inc	hl
+	ld	(hl),a
+.else if ___len_bss = 3
+	or	a,a
+	sbc	hl,hl
+	ld	(___low_bss),hl
+.else
+	ld	hl,___low_bss
+.if ___len_bss = 8
+	call	0x020368	; _Zero16D
+.else if ___len_bss = 11
+	call	0x020390	; _ZeroOP
+.else if ___len_bss < 256
+	ld	b,___len_bss
+	call	0x020394	; _ClrLp
+.else if ___len_bss = 256 | ___len_bss = 257
+	xor	a,a
+	ld	b,a
+.L.clearbssloop:
+	ld	(hl),a
+	inc	hl
+	djnz	.L.clearbssloop
+.if ___len_bss = 257
+	ld	(hl),a
+.endif
+.else
+	ld	bc,___len_bss
+	call	0x0210DC	; _MemClear
+.endif
+.endif
+.endif
+
+	.set	.init_count, ___init_array_count + ___ctors_count
+.if .init_count <= 21
+ repeat ___init_array_count
+  load function: long from init_array: (%-1) * long
+	call	function
+ end repeat
+ repeat ___ctors_count
+  load function: long from ctors: (%-1) * long
+	call	function
+ end repeat
+.else
+	ld	ix,init_functions
+	ld	b,((.init_count-1) shr  0 and $FF)+1
+ if .init_count > $100
+	ld	c,((.init_count-1) shr  8 and $FF)+1
+  if .init_count > $10000
+	ld	a,((.init_count-1) shr 16 and $FF)+1
+  end if
+ end if
+.L.init_loop:
+	push	bc
+ if .init_count > $10000
+	push	af
+ end if
+	ld	hl,(ix)
+	lea	ix,ix+long
+	call	__indcallhl
+ if .init_count > $10000
+	pop	af
+ end if
+	pop	bc
+	djnz	.L.init_loop
+ if .init_count > $100
+	dec	c
+	jq	nz,.L.init_loop
+  if .init_count > $10000
+	dec	a
+	jq	nz,.L.init_loop
+  end if
+ end if
+.endif
+
+
+.ifextern ___main_argc_argv
+	call	___main_argc_argv
+.else
+	call	_main
+.endif
+	.global	__start._main
+	.type	__start._main, @function
+	.set	__start._main, $ - 3
+; REQUIRE	require	___exithl
+
+	.section	.fini
+	.global	___exithl
+	.type	___exithl, @function
+
+___exithl:
+.if push_exit_code <> pop_exit_code
+	push	hl
+.endif
+push_exit_code:
+; REQUIRE	require	skip._exit
+
+	.section	.fini
+virtual
+	ld	a,0
+ load .ld_a: byte from $$
+end virtual
+	db	.ld_a
+
+	.global	_exit
+	.type	_exit, @function
+
+_exit:
+	pop	hl
+
+	.section	.fini
+	.local	skip._exit
+skip._exit:
+.if defined exit_functions
+	jq	.L.function_enter
+.L.function_loop:
+	ld	hl,(ix+1+0*long)
+	ld	(exit_functions),hl
+	pop	hl
+	ld	de,(ix+1+2*long)
+	push	hl
+	push	de
+	push	hl
+	ld	hl,(ix+1+1*long)
+	push	hl
+	pea	ix+1
+	call	_free
+	pop	bc
+	pop	hl
+	call	__indcallhl
+	pop	bc
+	pop	bc
+.L.function_enter:
+	ld	ix,(exit_functions)
+	ld	bc,-1
+	add	ix,bc
+	jq	c,.L.function_loop
+.endif
+
+	.set	.fini_count, ___dtors_count + ___fini_array_count
+.if .fini_count <= 21
+ repeat ___fini_array_count
+  load function: long from fini_array: (%%-%) * long
+	call	function
+ end repeat
+ repeat ___dtors_count
+  load function: long from dtors: (%%-%) * long
+	call	function
+ end repeat
+.else
+	ld	ix,fini_functions
+	ld	b,((.fini_count-1) shr  0 and $FF)+1
+ if .fini_count > $100
+	ld	c,((.fini_count-1) shr  8 and $FF)+1
+  if .fini_count > $10000
+	ld	a,((.fini_count-1) shr 16 and $FF)+1
+  end if
+ end if
+.L.fini_loop:
+	push	bc
+ if .fini_count > $10000
+	push	af
+ end if
+	lea	ix,ix-long
+	ld	hl,(ix)
+	call	__indcallhl
+ if .fini_count > $10000
+	pop	af
+ end if
+	pop	bc
+	djnz	.L.fini_loop
+ if .fini_count > $100
+	dec	c
+	jq	nz,.L.fini_loop
+  if .fini_count > $10000
+	dec	a
+	jq	nz,.L.fini_loop
+  end if
+ end if
+.endif
+; REQUIRE	require	skip.__Exit
+
+	.section	.fini
+virtual
+	ld	a,0
+ load .ld_a: byte from $$
+end virtual
+	db	.ld_a
+
+	.global	__Exit
+	.type	__Exit, @function
+
+__Exit:
+	pop	hl
+
+	.section	.fini
+	.local	skip.__Exit
+skip.__Exit:
+pop_exit_code:
+.if push_exit_code <> pop_exit_code
+	pop	hl
+.endif
+; REQUIRE	require	skip._abort
+
+	.section	.fini
+virtual
+	ld	iy,0
+ load _abort.iy_pre: byte from $$
+end virtual
+	db	_abort.iy_pre
+
+	.global	_abort
+	.type	_abort, @function
+
+_abort:
+	ld	hl,1 shl 23+6	; SIGABRT
+
+	.section	.fini
+	.local	skip._abort
+skip._abort:
+	ld	sp,0
+	.global	_exit.sp
+	.type	_exit.sp, @function
+	.set	_exit.sp, $-3
+	push	hl
+	ld	iy,0xD00080
+	ld	a,0
+	.local	_exit.flash_wait_states
+	.set	_exit.flash_wait_states, $-1
+	ld	(0xE00305),a
+	call	0x0004F0	; _usb_ResetTimer
+	call	_os_EnableHomeTextBuffer
+	ld	a,1
+	ld	(0xF00008),a	; clear on interrupt
+	res	4,(iy+9)	; onInterrupt,(iy+onFlags)
+	set	0,(iy+3)	; graphDraw,(iy+graphFlags)
+	call	0x020808		; _ClrLCDFull
+	call	0x020828		; _HomeUp
+	call	0x021A3C		; _DrawStatusBar
+	pop	hl		; hl = exit code
+	ret
+
+	.section	.init_array
+init_array::
+	.section	.ctors
+ctors::
+	.section	.dtors
+dtors::
+	.section	.fini_array
+fini_array::
+
+	.extern	_main
+	.extern	___main_argc_argv
+	.extern	___ctors_count
+	.extern	___dtors_count
+	.extern	___fini_array_count
+	.extern	___init_array_count
+	.extern	___len_bss
+	.extern	___libs
+	.extern	___low_bss
+	.extern	__indcallhl
+	.extern	_free
+	.extern	_malloc
+	.extern	_os_DisableHomeTextBuffer
+	.extern	_os_EnableHomeTextBuffer
+	.extern	___prgm_caller

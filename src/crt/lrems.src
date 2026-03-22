@@ -4,13 +4,13 @@
 	.global	__lrems
 	.type	__lrems, @function
 
-;.ifdef PREFER_OS_CRT
+;if PREFER_OS_CRT
 ;
 ; Bug: Does not ensure `nc` before `sbc hl, hl` to negate divisor.
 ;
-; .set	__lrems, 0x0001DC
+; __lrems := 0x0001DC
 ;
-;.else
+;else
 
 __lrems:
 ; I: EUHL=dividend, AUBC=divisor
@@ -33,4 +33,4 @@ __lrems:
 	.extern	__lneg
 	.extern	__lremu
 
-;.endif
+;end if

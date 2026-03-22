@@ -6,10 +6,10 @@
 
 _rand:
 	call	_random
-	ld	de, 8388608
-	sbc	hl, de
+	ld	de,8388608
+	sbc	hl,de
 	ret	p
-	add	hl, de
+	add	hl,de
 	ret
 
 	.extern	_random

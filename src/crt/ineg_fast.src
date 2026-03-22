@@ -3,8 +3,6 @@
 	.section	.text
 	.global	__ineg_fast
 	.type	__ineg_fast, @function
-	.global	__sneg_fast
-	.type	__sneg_fast, @function
 
 __ineg_fast:
 ; UHL = -UHL
@@ -17,5 +15,3 @@ __ineg_fast:
 			;    =UDE-UHL-UDE
 			;    =-UHL
 	ret
-
-	.set	__sneg_fast, __ineg_fast

@@ -36,15 +36,15 @@ _delay:
 	dec.s	hl
 	xor	a, a			; a = 0
 	ld	e, a			; euhl = millis - 1
-	.equ	.L.multiplier_fp, (256 * 32768 + 1000 - 1) / 1000
-;assert .multiplier_fp shr 24 = 0
-	ld	bc, .L.multiplier_fp	; aubc = ceil(256 * 32768 / 1e3)
-;assert ($FFFF * .multiplier_fp) shr 32 = 0
+	.set	.multiplier_fp, (256 * 32768 + 1000 - 1) / 1000
+assert .multiplier_fp shr 24 = 0
+	ld	bc, .multiplier_fp	; aubc = ceil(256 * 32768 / 1e3)
+assert ($FFFF * .multiplier_fp) shr 32 = 0
 	call	__lmulu			; euhl = (millis - 1) *
 					;            ceil(256 * 32768 / 1e3)
 ; https://docs.google.com/spreadsheets/d/1mZwDn6rEw3-uSQPuy48Ez0UWIvnggLiJxWft4u4OtcU/edit?usp=sharing
-	.equ	.L.correction_fp, 413
-	ld	bc, .L.multiplier_fp + .L.correction_fp
+	.set	.correction_fp, 413
+	ld	bc, .multiplier_fp + .correction_fp
 	add	hl, bc
 	adc	a, e			; auhl = millis *
 					;            ceil(256 * 32768 / 1e3) +
@@ -63,11 +63,12 @@ _delay:
 ; Join common code for the rest.
 	jp	___sleep_common.3
 
+
 	.global	_msleep
 	.type	_msleep, @function
-
 	.set	_msleep, _delay
 
-	extern	___sleep_common.3
-	extern	__lmulu
-	extern	_clock
+
+	.extern	___sleep_common.3
+	.extern	__lmulu
+	.extern	_clock

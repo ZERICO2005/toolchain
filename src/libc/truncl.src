@@ -11,10 +11,10 @@ _truncl:
 	ld	hl, (iy + 9)
 	ld	a, h
 	add.s	hl, hl
-	ld	de, 0xFF8020	; -1023 shl 5
+	ld	de, -1023 shl 5	; 0xFF8020
 	add.s	hl, de
 	jr	nc, .L.ret_zero
-;	ld	de,	0xFFF980	; -52 shl 5
+;	ld	de, -52 shl 5	; 0xFFF980
 	ld	e, d
 	ld	d, $F9
 

@@ -1,0 +1,17 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	__snot
+	.type	__snot, @function
+
+.ifdef PREFER_OS_CRT
+
+	.set	__snot, 0x000230
+
+.else
+
+	.set	__snot, __inot
+
+	.extern	__inot
+
+.endif

@@ -1,0 +1,111 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_malloc
+	.type	_malloc, @function
+	.global	_free
+	.type	_free, @function
+	.global	_realloc
+	.type	_realloc, @function
+
+	.global	_calloc
+	.type	_calloc, @function
+
+.if defined __TICE__
+
+; uses the hardware specific $E40000 memory location
+
+; void *calloc(size_t nmemb, size_t size)
+_calloc:
+	pop	de
+	pop	bc
+	ex	(sp), hl
+	push	bc
+	push	de
+	call	__imulu
+	push	hl
+	push	hl
+	call	_malloc
+	pop	bc		; reset SP
+	pop	bc		; BC = size
+	; test for NULL
+	add	hl, bc
+	; or	a, a		; assumes that ptr + size does not overflow
+	sbc	hl, bc
+	ret	z		; return NULL
+	; inlined bzero
+	push	hl
+	ex	de, hl		; DE = dest
+	; test if the size is zero
+	scf
+	sbc	hl, hl
+	add	hl, bc
+	jr	nc, .L.finish
+	; large region of all zeros on the Ti84CE
+	ld	hl, $E40000	; HL = src
+	ldir
+.L.finish:
+	pop	hl		; return value
+	ret
+
+.else
+
+; makes no hardware assumptions
+
+; void *calloc(size_t nmemb, size_t size)
+_calloc:
+	pop	de
+	pop	bc
+	ex	(sp),hl
+	push	bc
+	push	de
+	call	__imulu
+	push	hl
+	push	hl
+	call	_malloc
+	pop	de
+	add	hl,de
+	xor	a,a
+	sbc	hl,de
+	ld	e,a
+	push	de
+	push	hl
+	call	nz,_memset
+	pop	de
+	pop	de
+	pop	de
+	ret
+
+.endif
+
+.if defined ALLOCATOR_SIMPLE
+
+	.set	_malloc, __simple_malloc
+	.set	_free, __simple_free
+	.set	_realloc, __simple_realloc
+	.extern	__simple_free
+	.extern	__simple_malloc
+	.extern	__simple_realloc
+
+.else if defined ALLOCATOR_STANDARD
+
+	.set	_malloc, __standard_malloc
+	.set	_free, __standard_free
+	.set	_realloc, __standard_realloc
+	.extern	__standard_malloc
+	.extern	__standard_free
+	.extern	__standard_realloc
+
+.else ; custom functions provided by the program
+
+	.set	_malloc, __custom_malloc
+	.set	_free, __custom_free
+	.set	_realloc, __custom_realloc
+	.extern	__custom_malloc
+	.extern	__custom_free
+	.extern	__custom_realloc
+
+.endif
+
+	.extern	__imulu
+	.extern	_memset

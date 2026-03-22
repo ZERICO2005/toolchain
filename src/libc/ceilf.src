@@ -2,8 +2,8 @@
 
 	.section	.text
 	.global	_ceil
-	.global	_ceilf
 	.type	_ceil, @function
+	.global	_ceilf
 	.type	_ceilf, @function
 
 .ifdef PREFER_OS_LIBC
@@ -16,11 +16,11 @@
 _ceil:
 _ceilf:
 	call	__frameset0
-	ld	bc, (ix+6)
-	ld	a, (ix+9)
+	ld	bc,(ix+6)
+	ld	a,(ix+9)
 	call	__fneg
-	ld	l, a
-	ld	h, 0
+	ld	l,a
+	ld	h,0
 	push	hl
 	push	bc
 	call	_floor
@@ -28,9 +28,9 @@ _ceilf:
 	pop	bc
 	push	hl
 	pop	bc
-	ld	a, e
+	ld	a,e
 	call	__fneg
-	ld	e, a
+	ld	e,a
 	push	bc
 	pop	hl
 	pop	ix

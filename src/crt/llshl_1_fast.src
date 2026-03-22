@@ -1,0 +1,14 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	__llshl_1_fast
+	.type	__llshl_1_fast, @function
+
+__llshl_1_fast:
+	add	hl, hl
+	ex	de, hl
+	adc	hl, hl
+	ex	de, hl
+	rl	c
+	rl	b
+	ret

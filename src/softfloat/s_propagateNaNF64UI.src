@@ -3,6 +3,7 @@
 	.section	.text
 
 	.global	_softfloat_propagateNaNF64UI
+	.type	_softfloat_propagateNaNF64UI, @function
 
 ; at least one of the arguments is NaN
 ; returns x if it is NaN, otherwise returns y
@@ -17,17 +18,17 @@ _softfloat_propagateNaNF64UI:
 	call	__isnanl
 	ld	sp, ix
 	rrca
-	jr	c, .x_is_NaN
+	jr	c, .L.x_is_NaN
 	lea	ix, ix + 9	; y is NaN
-.x_is_NaN:
+.L.x_is_NaN:
 	ld	bc, (ix + 12)	; (ix + 21)
 	bit	3, c	; test quiet bit
-	jr	nz, .quiet
+	jr	nz, .L.quiet
 	; raise signal
 	set	3, c	; set quiet bit
 	ld	hl, ___fe_cur_env
 	set	4, (hl)	; FE_INVALID
-.quiet:
+.L.quiet:
 	ld	de, (ix + 9)	; (ix + 18)
 	ld	hl, (ix + 6)	; (ix + 15)
 	pop	ix

@@ -18,4 +18,5 @@ __ipopcnt:
 	pop	hl
 	ret
 
-	.extern	__popcnt_common_init_full, __popcnt_common_iter
+	.extern	__popcnt_common_init_full
+	.extern	__popcnt_common_iter

@@ -1,8 +1,9 @@
-	.assume	ADL=1
+	.assume	adl=1
 
 	.section	.text
 	.global	_abs
-	.type	_abs,@function
+	.type	_abs, @function
+
 _abs:
 	pop	hl
 	pop	de

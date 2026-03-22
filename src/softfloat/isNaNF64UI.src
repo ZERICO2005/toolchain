@@ -1,0 +1,9 @@
+	.assume	adl = 1
+
+	.section	.text
+
+	.global	_isNaNF64UI
+	.type	_isNaNF64UI, @function
+	.set	_isNaNF64UI, __isnanl
+
+	.extern	__isnanl
