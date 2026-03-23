@@ -1,0 +1,82 @@
+	.assume	adl=1
+
+	.section	.text.__ishru_1
+	.global	__ishru_1_fast
+	.type	__ishru_1_fast, @function
+
+	__ishru_1_fast:
+		jp	__ishru_1
+
+	.extern	__ishru_1
+
+	.section	.text.__ishrs_1
+	.global	__ishrs_1_fast
+	.type	__ishrs_1_fast, @function
+
+	__ishrs_1_fast:
+		jp	__ishrs_1
+
+	.extern	__ishrs_1
+
+	.section	.text.__lshru_1
+	.global	__lshru_1_fast
+	.type	__lshru_1_fast, @function
+
+	__lshru_1_fast:
+		jp	__lshru_1
+
+	.extern	__lshru_1
+
+	.section	.text.__lshrs_1
+	.global	__lshrs_1_fast
+	.type	__lshrs_1_fast, @function
+
+	__lshrs_1_fast:
+		jp	__lshrs_1
+
+	.extern	__lshrs_1
+
+	.section	.text.__i48shru_1
+	.global	__i48shru_1_fast
+	.type	__i48shru_1_fast, @function
+
+	__i48shru_1_fast:
+		jp	__i48shru_1
+
+	.extern	__i48shru_1
+
+	.section	.text.__i48shrs_1
+	.global	__i48shrs_1_fast
+	.type	__i48shrs_1_fast, @function
+
+	__i48shrs_1_fast:
+		jp	__i48shrs_1
+
+	.extern	__i48shrs_1
+
+	.section	.text.__llshru_1
+	.global	__llshru_1_fast
+	.type	__llshru_1_fast, @function
+
+	__llshru_1_fast:
+		jp	__llshru_1
+
+	.extern	__llshru_1
+
+	.section	.text.__llshrs_1
+	.global	__llshrs_1_fast
+	.type	__llshrs_1_fast, @function
+
+	__llshrs_1_fast:
+		jp	__llshrs_1
+
+	.extern	__llshrs_1
+
+	.section	.text.__llshl_1
+	.global	__llshl_1_fast
+	.type	__llshl_1_fast, @function
+
+	__llshl_1_fast:
+		jp	__llshl_1
+
+	.extern	__llshl_1
