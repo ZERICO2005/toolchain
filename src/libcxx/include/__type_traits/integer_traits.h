@@ -29,6 +29,10 @@ template <>
 inline const bool __is_signed_integer_v<signed int> = true;
 template <>
 inline const bool __is_signed_integer_v<signed long> = true;
+#ifdef _EZ80
+template <>
+inline const bool __is_signed_integer_v<signed __int48> = true;
+#endif // _EZ80
 template <>
 inline const bool __is_signed_integer_v<signed long long> = true;
 #if _LIBCPP_HAS_INT128
@@ -48,6 +52,10 @@ template <>
 inline const bool __is_unsigned_integer_v<unsigned int> = true;
 template <>
 inline const bool __is_unsigned_integer_v<unsigned long> = true;
+#ifdef _EZ80
+template <>
+inline const bool __is_unsigned_integer_v<unsigned __int48> = true;
+#endif // _EZ80
 template <>
 inline const bool __is_unsigned_integer_v<unsigned long long> = true;
 #if _LIBCPP_HAS_INT128
