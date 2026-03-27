@@ -3,7 +3,10 @@
 	.section	.text
 	.global	__llsub_1
 	.type	__llsub_1, @function
+	.global	__i72sub_1
+	.type	__i72sub_1, @function
 
+__i72sub_1:
 __llsub_1:
 	add	hl, de
 	or	a, a

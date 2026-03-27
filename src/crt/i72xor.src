@@ -1,0 +1,57 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	__i72xor
+	.type	__i72xor, @function
+
+__i72xor:
+	push	af
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	hl
+	push	de
+	push	bc
+	lea	hl, iy + 17
+	lea	bc, iy - 7
+	ld	a, (bc)
+	xor	a, (hl)
+	ld	(bc), a
+	dec	hl
+	pop	bc
+	ld	a, b
+	xor	a, (hl)
+	ld	b, a
+	dec	hl
+	ld	a, c
+	xor	a, (hl)
+	ld	c, a
+	dec	hl
+	lea	de, iy - 4
+	ld	a, (de)
+	xor	a, (hl)
+	ld	(de), a
+	pop	de
+	dec	hl
+	ld	a, d
+	xor	a, (hl)
+	ld	d, a
+	dec	hl
+	ld	a, e
+	xor	a, (hl)
+	ld	e, a
+	dec	hl
+	ld	a, (hl)
+	lea	hl, iy - 1
+	xor	a, (hl)
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	xor	a, (iy + 10)
+	ld	h, a
+	ld	a, l
+	xor	a, (iy + 9)
+	ld	l, a
+	pop	iy
+	pop	af
+	ret

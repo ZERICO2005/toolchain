@@ -1,0 +1,57 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	__i72and
+	.type	__i72and, @function
+
+__i72and:
+	push	af
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	hl
+	push	de
+	push	bc
+	lea	hl, iy + 17
+	lea	bc, iy - 7
+	ld	a, (bc)
+	and	a, (hl)
+	ld	(bc), a
+	dec	hl
+	pop	bc
+	ld	a, b
+	and	a, (hl)
+	ld	b, a
+	dec	hl
+	ld	a, c
+	and	a, (hl)
+	ld	c, a
+	dec	hl
+	lea	de, iy - 4
+	ld	a, (de)
+	and	a, (hl)
+	ld	(de), a
+	pop	de
+	dec	hl
+	ld	a, d
+	and	a, (hl)
+	ld	d, a
+	dec	hl
+	ld	a, e
+	and	a, (hl)
+	ld	e, a
+	dec	hl
+	ld	a, (hl)
+	lea	hl, iy - 1
+	and	a, (hl)
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	and	a, (iy + 10)
+	ld	h, a
+	ld	a, l
+	and	a, (iy + 9)
+	ld	l, a
+	pop	iy
+	pop	af
+	ret

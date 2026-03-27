@@ -1,0 +1,35 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	__i72cmps
+	.type	__i72cmps, @function
+
+__i72cmps:
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	bc
+	push	hl
+	push	hl
+	pop	bc
+	ld	bc, (iy + 12)
+	sbc	hl, bc
+	pop	hl
+	jr	nz, .L.finish
+	ld	bc, (iy + 9)
+	ex	de, hl
+	sbc	hl, bc
+	add	hl, bc
+	ex	de, hl
+	jr	nz, .L.finish_unsigned
+	ld	bc, (iy + 6)
+	sbc	hl, bc
+	add	hl, bc
+.L.finish_unsigned:
+	ld	b, a
+	sbc	a, a
+	ld	a, b
+.L.finish:
+	pop	bc
+	pop	iy
+	ret

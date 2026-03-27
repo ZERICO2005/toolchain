@@ -1,0 +1,22 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	__i72cmpzero
+	.type	__i72cmpzero, @function
+
+__i72cmpzero:
+	push	hl
+	sbc	hl, hl
+	adc	hl, bc
+	pop	hl
+	ret	nz
+	or	a, a
+	sbc	hl, bc
+	jr	nz, .L.positive_nonzero
+	sbc	hl, de
+	ret	z
+	add	hl, de
+.L.positive_nonzero:
+	inc	b
+	ld	b, c
+	ret

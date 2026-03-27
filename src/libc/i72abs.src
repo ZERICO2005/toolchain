@@ -1,0 +1,21 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	_i72abs
+	.type	_i72abs, @function
+
+_i72abs:
+	pop	iy
+	pop	hl
+	pop	de
+	pop	bc
+	push	bc
+	push	de
+	push	hl
+	sbc	hl, hl
+	adc	hl, bc
+	ex	(sp), hl
+	call	m, __i72neg
+	jp	(iy)
+
+	.extern	__i72neg

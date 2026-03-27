@@ -3,7 +3,10 @@
 	.section	.text
 	.global	__lladd_1
 	.type	__lladd_1, @function
+	.global	__i72add_1
+	.type	__i72add_1, @function
 
+__i72add_1:
 __lladd_1:
 	inc	hl
 	add	hl, de

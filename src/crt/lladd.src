@@ -3,7 +3,10 @@
 	.section	.text
 	.global	__lladd
 	.type	__lladd, @function
+	.global	__i72add
+	.type	__i72add, @function
 
+__i72add:
 __lladd:
 	push	iy
 	ld	iy, 0

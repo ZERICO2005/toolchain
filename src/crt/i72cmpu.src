@@ -1,0 +1,30 @@
+	.assume	adl=1
+
+	.section	.text
+	.global	__i72cmpu
+	.type	__i72cmpu, @function
+
+__i72cmpu:
+	push	iy
+	ld	iy, 0
+	add	iy, sp
+	push	hl
+	ld	hl, (iy + 12)
+	sbc	hl, bc
+	jr	nz, .L.not_equal
+	ld	hl, (iy + 9)
+	sbc	hl, de
+	jr	nz, .L.not_equal
+	pop	hl
+	push	bc
+	ld	bc, (iy + 6)
+	sbc	hl, bc
+	add	hl, bc
+	pop	bc
+	pop	iy
+	ret
+.L.not_equal:
+	ccf
+	pop	hl
+	pop	iy
+	ret
