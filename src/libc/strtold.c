@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <limits.h>
@@ -50,11 +51,14 @@ long double strtold(char const * const __restrict nptr, char **__restrict endptr
     bool sign = false;
     bool exp_sign = false;
     char const *__restrict str = nptr;
+    bool has_digits = false;
 
+    // first consume whitespace
     while (isspace(*str)) {
         ++str;
     }
 
+    // now test for a sign character
     if (*str == '-') {
         sign = true;
         ++str;
@@ -62,7 +66,16 @@ long double strtold(char const * const __restrict nptr, char **__restrict endptr
         ++str;
     }
 
-    bool has_digits = false;
+    // check the special INF/INFINITY strings
+    if (strncasecmp(str, "INF", sizeof("INF") - 1) == 0) {
+        str += sizeof("INF") - 1;
+        // test for "INITY" suffix for "INFINITY"
+        if (strncasecmp(str, "INITY", sizeof("INITY") - 1) == 0) {
+            str += sizeof("INITY") - 1;
+        }
+        val.bin = (sign ? UINT64_C(0xFFF0000000000000) : UINT64_C(0x7FF0000000000000));
+        goto finish;
+    }
 
     val.flt = 0.0L;
     while (c_isdigit(*str)) {
