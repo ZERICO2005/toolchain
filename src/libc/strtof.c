@@ -10,7 +10,16 @@ asm
     "\t.equ _strtod, _strtof\n"
 );
 
-#else
+#else /* PREFER_OS_LIBC */
+
+/************************************************************************/
+/*                                                                      */
+/*                      Copyright (C)1987-2008 by                       */
+/*                             Zilog, Inc.                              */
+/*                                                                      */
+/*                         San Jose, California                         */
+/*                                                                      */
+/************************************************************************/
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -152,4 +161,4 @@ finish:
 
 double strtod(const char *, char **) __attribute__((alias("strtof")));
 
-#endif
+#endif /* PREFER_OS_LIBC */
