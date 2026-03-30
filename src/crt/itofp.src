@@ -1,0 +1,76 @@
+	.assume	adl=1
+
+;-------------------------------------------------------------------------------
+
+	.section	.text
+
+	.global	__uitof
+	.type	__uitof, @function
+	.global	__uitofp
+	.type	__uitofp, @function
+
+__uitof:
+__uitofp:
+	cp	a, a		; sets P
+	push	af
+	jr	__uitofp.enter
+
+;-------------------------------------------------------------------------------
+
+	.section	.text
+
+	.global	__itof
+	.type	__itof, @function
+	.global	__itofp
+	.type	__itofp, @function
+
+; IEEE single precision from 24-bit integers
+; E:UHL = float(UHL)
+__itof:
+__itofp:
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	push	af
+	call	m, __ineg
+	; jr	__uitofp.enter
+
+	.local	__uitofp.enter
+__uitofp.enter:
+	call	__ictlz
+	cp	a, 23
+	jr	nc, .L.zero_or_one
+	push	bc
+	ld	c, a
+	call	__ishl
+	; bit 23 is set
+	ld	a, $80 + 23 - 1
+	sub	a, c
+	rra
+	jr	nc, ,L.set_bit_23
+	ld	bc, $800000
+	add	hl, bc		; clear bit 23
+.L.set_bit_23:
+	ld	e, a
+	pop	bc
+.L.finish:
+.L.ret_zero:
+	pop	af
+	ret	p
+	set	7, e
+	ret
+
+.L.zero_or_one:
+	; carry is cleared here
+	; UHL is either one or zero
+	ld	e, h		; ld e, 0
+	jr	nz, .L.ret_zero
+	ld	hl, $800000
+	ld	e, $3F
+	jr	.L.finish
+
+;-------------------------------------------------------------------------------
+
+	.extern	__llneg
+
+	.extern	__fppack2
