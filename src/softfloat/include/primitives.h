@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 | into the least-significant bit of the shifted value by setting the least-
 | significant bit to 1.  This shifted-and-jammed value is returned.
 *----------------------------------------------------------------------------*/
-#if 0 && defined INLINE_LEVEL && (2 <= INLINE_LEVEL)
+#if defined INLINE_LEVEL && (2 <= INLINE_LEVEL)
 INLINE
 uint64_t softfloat_shortShiftRightJam64( uint64_t a, uint_fast8_t dist )
     { return a>>dist | ((a & (((uint_fast64_t) 1<<dist) - 1)) != 0); }
@@ -88,7 +88,7 @@ uint32_t softfloat_shiftRightJam32( uint32_t a, uint_fast16_t dist );
 | greater than 64, the result will be either 0 or 1, depending on whether 'a'
 | is zero or nonzero.
 *----------------------------------------------------------------------------*/
-#if 0 && defined INLINE_LEVEL && (3 <= INLINE_LEVEL)
+#if defined INLINE_LEVEL && (3 <= INLINE_LEVEL)
 INLINE uint64_t softfloat_shiftRightJam64( uint64_t a, uint_fast32_t dist )
 {
     return
@@ -610,7 +610,9 @@ void
      uint64_t a64, uint64_t a0, uint64_t b64, uint64_t b0, uint64_t *zPtr );
 #endif
 
-#else
+// #else
+#endif
+#if 1
 
 /*----------------------------------------------------------------------------
 | The following functions are needed only when 'SOFTFLOAT_FAST_INT64' is not

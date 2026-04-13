@@ -1,0 +1,29 @@
+	.assume	adl=1
+
+	.section	.text
+
+	.global	__dadd
+	.type	__dadd, @function
+
+; long double __dadd_c(long double const *__restrict y, long double x)
+__dadd:
+	push	iy
+	push	af
+
+	push	bc
+	push	de
+	push	hl
+	ld	hl, 18
+	add	hl, sp
+	push	hl
+	call	___dadd_c
+	pop	af
+	pop	af
+	pop	af
+	pop	af
+
+	pop	af
+	pop	iy
+	ret
+
+	.extern	___dadd_c

@@ -63,3 +63,4 @@ uint32_t softfloat_approxRecip32_1( uint32_t a )
 }
 
 #endif
+

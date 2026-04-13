@@ -51,23 +51,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 | The values to return on conversions to 32-bit integer formats that raise an
 | invalid exception.
 *----------------------------------------------------------------------------*/
-#define ui32_fromPosOverflow UINT32_C( 0x0 )
-#define ui32_fromNegOverflow UINT32_C( 0x0 )
-#define ui32_fromNaN         UINT32_C( 0x0 )
-#define i32_fromPosOverflow  INT32_C( 0x0 )
-#define i32_fromNegOverflow  INT32_C( 0x0 )
-#define i32_fromNaN          INT32_C( 0x0 )
+#define ui32_fromPosOverflow 0xFFFFFFFF
+#define ui32_fromNegOverflow 0xFFFFFFFF
+#define ui32_fromNaN         0xFFFFFFFF
+#define i32_fromPosOverflow  (-0x7FFFFFFF - 1)
+#define i32_fromNegOverflow  (-0x7FFFFFFF - 1)
+#define i32_fromNaN          (-0x7FFFFFFF - 1)
 
 /*----------------------------------------------------------------------------
 | The values to return on conversions to 64-bit integer formats that raise an
 | invalid exception.
 *----------------------------------------------------------------------------*/
-#define ui64_fromPosOverflow UINT64_C( 0x0 )
-#define ui64_fromNegOverflow UINT64_C( 0x0 )
-#define ui64_fromNaN         UINT64_C( 0x0 )
-#define i64_fromPosOverflow  INT64_C( 0x0 )
-#define i64_fromNegOverflow  INT64_C( 0x0 )
-#define i64_fromNaN          INT64_C( 0x0 )
+#define ui64_fromPosOverflow UINT64_C( 0xFFFFFFFFFFFFFFFF )
+#define ui64_fromNegOverflow UINT64_C( 0xFFFFFFFFFFFFFFFF )
+#define ui64_fromNaN         UINT64_C( 0xFFFFFFFFFFFFFFFF )
+#define i64_fromPosOverflow  (-INT64_C( 0x7FFFFFFFFFFFFFFF ) - 1)
+#define i64_fromNegOverflow  (-INT64_C( 0x7FFFFFFFFFFFFFFF ) - 1)
+#define i64_fromNaN          (-INT64_C( 0x7FFFFFFFFFFFFFFF ) - 1)
 
 /*----------------------------------------------------------------------------
 | "Common NaN" structure, used to transfer NaN representations from one format
@@ -127,11 +127,7 @@ uint_fast16_t
 | 32-bit floating-point signaling NaN.
 | Note:  This macro evaluates its argument more than once.
 *----------------------------------------------------------------------------*/
-#if 0
 #define softfloat_isSigNaNF32UI( uiA ) ((((uiA) & 0x7FC00000) == 0x7F800000) && ((uiA) & 0x003FFFFF))
-#else
-bool softfloat_isSigNaNF32UI(uint32_t a) __attribute__((__const__, __nothrow__, __leaf__));
-#endif
 
 /*----------------------------------------------------------------------------
 | Assuming 'uiA' has the bit pattern of a 32-bit floating-point NaN, converts
@@ -166,11 +162,7 @@ uint_fast32_t
 | 64-bit floating-point signaling NaN.
 | Note:  This macro evaluates its argument more than once.
 *----------------------------------------------------------------------------*/
-#if 0
 #define softfloat_isSigNaNF64UI( uiA ) ((((uiA) & UINT64_C( 0x7FF8000000000000 )) == UINT64_C( 0x7FF0000000000000 )) && ((uiA) & UINT64_C( 0x0007FFFFFFFFFFFF )))
-#else
-bool softfloat_isSigNaNF64UI(uint64_t a) __attribute__((__const__, __nothrow__, __leaf__));
-#endif
 
 /*----------------------------------------------------------------------------
 | Assuming 'uiA' has the bit pattern of a 64-bit floating-point NaN, converts
@@ -299,7 +291,9 @@ struct uint128
      uint_fast64_t uiB0
  );
 
-#else
+// #else
+#endif
+#if 1
 
 /*----------------------------------------------------------------------------
 | The following functions are needed only when 'SOFTFLOAT_FAST_INT64' is not
@@ -341,10 +335,10 @@ void
 /*----------------------------------------------------------------------------
 | The bit pattern for a default generated 128-bit floating-point NaN.
 *----------------------------------------------------------------------------*/
-#define defaultNaNF128UI96 0xFFFF8000
-#define defaultNaNF128UI64 0
-#define defaultNaNF128UI32 0
-#define defaultNaNF128UI0  0
+#define defaultNaNF128MUI96 0xFFFF8000
+#define defaultNaNF128MUI64 0
+#define defaultNaNF128MUI32 0
+#define defaultNaNF128MUI0  0
 
 /*----------------------------------------------------------------------------
 | Assuming the 128-bit floating-point value pointed to by 'aWPtr' is a NaN,

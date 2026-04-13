@@ -70,3 +70,4 @@ uint32_t softfloat_approxRecipSqrt32_1( unsigned int oddExpA, uint32_t a )
 }
 
 #endif
+

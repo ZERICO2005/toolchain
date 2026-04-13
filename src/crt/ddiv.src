@@ -5,32 +5,25 @@
 	.global	__ddiv
 	.type	__ddiv, @function
 
-; float64_t f64_div(bool, float64_t, const float64_t*)
+; long double __ddiv_c(long double const *__restrict y, long double x)
 __ddiv:
+	push	iy
 	push	af
-	push	iy
-	ld	iy, 9
-	add	iy, sp
 
-	push	iy
 	push	bc
 	push	de
 	push	hl
+	ld	hl, 18
+	add	hl, sp
+	push	hl
+	call	___ddiv_c
+	pop	af
+	pop	af
+	pop	af
+	pop	af
 
-	ld	a, b	; signbit(x)
-	xor	a, (iy + 7)	; signbit(y)
-	rla
-	push	af	; Carry = (signbit(x) != signbit(y))
-
-	call	___f64_div
-
-	pop	af
-	pop	af
-	pop	af
-	pop	af
 	pop	af
 	pop	iy
-	pop	af	; restore
 	ret
 
-	.extern	___f64_div
+	.extern	___ddiv_c

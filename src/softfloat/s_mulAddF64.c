@@ -243,29 +243,14 @@ float64_t
 
 #else
 
-#if 0
-typedef struct input_mulAddF64 {
-    uint_fast64_t uiA;
-    uint8_t pad1;
-    uint_fast64_t uiB;
-    uint8_t pad2;
-    uint_fast64_t uiC;
-} input_mulAddF64;
-#endif
-
 float64_t
  softfloat_mulAddF64(
-#if 1
-f64_param A, f64_param B, uint_fast64_t uiC /*, uint_fast8_t op */
-#else
-    input_mulAddF64 * const input
-#endif
- ) {
-    #define op 0
-    // bool signA;
+     uint_fast64_t uiA, uint_fast64_t uiB, uint_fast64_t uiC, uint_fast8_t op )
+{
+    bool signA;
     int_fast16_t expA;
     uint64_t sigA;
-    // bool signB;
+    bool signB;
     int_fast16_t expB;
     uint64_t sigB;
     bool signC;
@@ -280,24 +265,19 @@ f64_param A, f64_param B, uint_fast64_t uiC /*, uint_fast8_t op */
     int_fast16_t shiftDist, expDiff;
     uint32_t sig128C[4];
     union ui64_f64 uZ;
-    uint_fast64_t uiA, uiB;
-    uiA = A.ui;
-    uiB = B.ui;
 
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
-    // signA = signF64UI( uiA );
+    signA = signF64UI( uiA );
     expA  = expF64UI( uiA );
     sigA  = fracF64UI( uiA );
-    // signB = signF64UI( uiB );
+    signB = signF64UI( uiB );
     expB  = expF64UI( uiB );
     sigB  = fracF64UI( uiB );
-    // signC = signF64UI( uiC ) ^ (op == softfloat_mulAdd_subC);
+    signC = signF64UI( uiC ) ^ (op == softfloat_mulAdd_subC);
     expC  = expF64UI( uiC );
     sigC  = fracF64UI( uiC );
-    // signZ = signA ^ signB ^ (op == softfloat_mulAdd_subProd);
-    signC = A.sign;
-    signZ = B.sign;
+    signZ = signA ^ signB ^ (op == softfloat_mulAdd_subProd);
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
     if ( expA == 0x7FF ) {
@@ -513,3 +493,4 @@ f64_param A, f64_param B, uint_fast64_t uiC /*, uint_fast8_t op */
 }
 
 #endif
+

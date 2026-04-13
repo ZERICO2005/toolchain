@@ -1,0 +1,29 @@
+	.assume	adl=1
+
+	.section	.text
+
+	.global	__dsub
+	.type	__dsub, @function
+
+; long double __dsub_c(long double const *__restrict y, long double x)
+__dsub:
+	push	iy
+	push	af
+
+	push	bc
+	push	de
+	push	hl
+	ld	hl, 18
+	add	hl, sp
+	push	hl
+	call	___dsub_c
+	pop	af
+	pop	af
+	pop	af
+	pop	af
+
+	pop	af
+	pop	iy
+	ret
+
+	.extern	___dsub_c

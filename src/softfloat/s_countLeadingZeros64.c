@@ -70,3 +70,4 @@ uint_fast8_t softfloat_countLeadingZeros64( uint64_t a )
 }
 
 #endif
+

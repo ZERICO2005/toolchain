@@ -16,13 +16,16 @@
 
 include $(CURDIR)/../common.mk
 
-OBJECTS =
-OBJECTS += $(patsubst %.c,build/%.c.o,$(wildcard *.c))
-OBJECTS += $(patsubst %.cpp,build/%.cpp.o,$(wildcard *.cpp))
-OBJECTS += $(patsubst %.src,build/%.o,$(wildcard *.src))
-
 EZCFLAGS += -Iinclude
+EZCFLAGS += -Werror-implicit-function-declaration
 EZCFLAGS += -Wno-implicit-int-conversion
+EZCFLAGS += -Wno-unused-label
+# EZCFLAGS += -DINLINE_LEVEL=5
+EZCFLAGS += -DSOFTFLOAT_FAST_INT64
+EZCFLAGS += -DSOFTFLOAT_FAST_DIV32TO16
+EZCFLAGS += -DSOFTFLOAT_FAST_DIV64TO32
+EZCFLAGS += -DSOFTFLOAT_ROUND_ODD
+EZCFLAGS += -Oz
 
 WILDCARD_H := $(wildcard include/*.h)
 
@@ -32,29 +35,17 @@ LIB_SOFTFLOAT := build/libsoftfloat.a
 
 all: $(LIB_SOFTFLOAT)
 
-$(LIB_SOFTFLOAT): $(OBJECTS)
+$(LIB_SOFTFLOAT): build/libsoftfloat.o
 	$(Q)$(call MKDIR,build)
 	$(Q)$(EZAR) rcs $@ $^
 
-build/%.c.src: %.c
+build/libsoftfloat.o: build/libsoftfloat.c.src
+	$(Q)$(call MKDIR,build)
+	$(Q)$(EZAS) $(EZASFLAGS) $< -o $@
+
+build/libsoftfloat.c.src: libsoftfloat.c
 	$(Q)$(call MKDIR,build)
 	$(Q)$(EZCC) $(EZCFLAGS) $< -o $@
-
-build/%.cpp.src: %.cpp
-	$(Q)$(call MKDIR,build)
-	$(Q)$(EZCC) $(EZCXXFLAGS) $< -o $@
-
-build/%.c.o: build/%.c.src
-	$(Q)$(call MKDIR,build)
-	$(Q)$(EZAS) $(EZASFLAGS) $< -o $@
-
-build/%.cpp.o: build/%.cpp.src
-	$(Q)$(call MKDIR,build)
-	$(Q)$(EZAS) $(EZASFLAGS) $< -o $@
-
-build/%.o: %.src
-	$(Q)$(call MKDIR,build)
-	$(Q)$(EZAS) $(EZASFLAGS) $< -o $@
 
 clean:
 	$(Q)$(call RMDIR,build)
