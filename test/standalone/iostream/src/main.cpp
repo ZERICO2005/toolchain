@@ -5,10 +5,7 @@
 #include <cstdio>
 #include <iostream>
 
-extern "C" void init_iostream(void);
-
 int main(void) {
-    init_iostream();
 
     os_ClrHome();
 
@@ -16,7 +13,7 @@ int main(void) {
     printf("start: %d\n", value);
 
     volatile bool* test = (volatile bool*)0xE40000;
-    if (true || *test) {
+    if (!*test) {
         std::cout << value;
     }
 

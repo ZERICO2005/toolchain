@@ -42,10 +42,7 @@ int run_tests(void) {
     return ret;
 }
 
-extern "C" void init_iostream(void);
-
 int main(void) {
-    init_iostream();
 
     os_ClrHome();
     int failed_test = run_tests();
