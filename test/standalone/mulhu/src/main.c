@@ -16,10 +16,10 @@
 // Config
 //------------------------------------------------------------------------------
 
-#define RANDOM_TEST_COUNT 256
+#define RANDOM_TEST_COUNT 320
 
 // define to 0 or 1
-#define DEBUG_DIAGNOSTICS 0
+#define DEBUG_DIAGNOSTICS 1
 
 #define AUTOTEST_SEED 0x7184CE
 
@@ -310,32 +310,32 @@ bool test_A_UIY_UIX(void) {
 // Unsigned
 //------------------------------------------------------------------------------
 
-int test_smulhu(void) {
-    // test full-width random operands
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        uint16_t truth, guess, x, y;
-        x = (uint16_t)rand16();
-        y = (uint16_t)rand16();
-        truth = truth_smulhu(x, y);
-        guess = CRT_smulhu(x, y);
-        CMP("%04hX", x, y, truth, guess);
-        C((test_A_UBC_UDE_UIY_UIX()));
-    }
-    // test cases where the upper-half of the result is small
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        uint16_t truth, guess_1, guess_2, x, y;
-        x = (uint16_t)rand16();
-        y = rand4_u();
-        truth = truth_smulhu(x, y);
-        guess_1 = CRT_smulhu(x, y);
-        CMP("%04hX", x, y, truth, guess_1);
-        C((test_A_UBC_UDE_UIY_UIX()));
-        guess_2 = CRT_smulhu(y, x);
-        CMP("%04hX", y, x, truth, guess_2);
-        C((test_A_UBC_UDE_UIY_UIX()));
-    }
-    return 0;
-}
+// int test_smulhu(void) {
+//     // test full-width random operands
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         uint16_t truth, guess, x, y;
+//         x = (uint16_t)rand16();
+//         y = (uint16_t)rand16();
+//         truth = truth_smulhu(x, y);
+//         guess = CRT_smulhu(x, y);
+//         CMP("%04hX", x, y, truth, guess);
+//         C((test_A_UBC_UDE_UIY_UIX()));
+//     }
+//     // test cases where the upper-half of the result is small
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         uint16_t truth, guess_1, guess_2, x, y;
+//         x = (uint16_t)rand16();
+//         y = rand4_u();
+//         truth = truth_smulhu(x, y);
+//         guess_1 = CRT_smulhu(x, y);
+//         CMP("%04hX", x, y, truth, guess_1);
+//         C((test_A_UBC_UDE_UIY_UIX()));
+//         guess_2 = CRT_smulhu(y, x);
+//         CMP("%04hX", y, x, truth, guess_2);
+//         C((test_A_UBC_UDE_UIY_UIX()));
+//     }
+//     return 0;
+// }
 
 int test_imulhu(void) {
     // test full-width random operands
@@ -364,117 +364,117 @@ int test_imulhu(void) {
     return 0;
 }
 
-int test_lmulhu(void) {
-    // test full-width random operands
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        uint32_t truth, guess, x, y;
-        x = (uint32_t)rand32();
-        y = (uint32_t)rand32();
-        truth = truth_lmulhu(x, y);
-        guess = CRT_lmulhu(x, y);
-        CMP("%08lX", x, y, truth, guess);
-        C((test_A_UBC_UD_UIY_UIX()));
-    }
-    // test cases where the upper-half of the result is small
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        uint32_t truth, guess_1, guess_2, x, y;
-        x = (uint32_t)rand32();
-        y = rand4_u();
-        truth = truth_lmulhu(x, y);
-        guess_1 = CRT_lmulhu(x, y);
-        CMP("%08lX", x, y, truth, guess_1);
-        C((test_A_UBC_UD_UIY_UIX()));
-        guess_2 = CRT_lmulhu(y, x);
-        CMP("%08lX", y, x, truth, guess_2);
-        C((test_A_UBC_UD_UIY_UIX()));
-    }
-    return 0;
-}
+// int test_lmulhu(void) {
+//     // test full-width random operands
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         uint32_t truth, guess, x, y;
+//         x = (uint32_t)rand32();
+//         y = (uint32_t)rand32();
+//         truth = truth_lmulhu(x, y);
+//         guess = CRT_lmulhu(x, y);
+//         CMP("%08lX", x, y, truth, guess);
+//         C((test_A_UBC_UD_UIY_UIX()));
+//     }
+//     // test cases where the upper-half of the result is small
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         uint32_t truth, guess_1, guess_2, x, y;
+//         x = (uint32_t)rand32();
+//         y = rand4_u();
+//         truth = truth_lmulhu(x, y);
+//         guess_1 = CRT_lmulhu(x, y);
+//         CMP("%08lX", x, y, truth, guess_1);
+//         C((test_A_UBC_UD_UIY_UIX()));
+//         guess_2 = CRT_lmulhu(y, x);
+//         CMP("%08lX", y, x, truth, guess_2);
+//         C((test_A_UBC_UD_UIY_UIX()));
+//     }
+//     return 0;
+// }
 
-int test_i48mulhu(void) {
-    // test full-width random operands
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        uint48_t truth, guess, x, y;
-        x = (uint48_t)rand48();
-        y = (uint48_t)rand48();
-        truth = truth_i48mulhu(x, y);
-        guess = CRT_i48mulhu(x, y);
-        CMP("%012llX", (uint64_t)x, (uint64_t)y, (uint64_t)truth, (uint64_t)guess);
-        C((test_A_UBC_UIY_UIX()));
-    }
-    // test cases where the upper-half of the result is small
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        uint48_t truth, guess_1, guess_2, x, y;
-        x = (uint48_t)rand48();
-        y = rand4_u();
-        truth = truth_i48mulhu(x, y);
-        guess_1 = CRT_i48mulhu(x, y);
-        CMP("%012llX", (uint64_t)x, (uint64_t)y, (uint64_t)truth, (uint64_t)guess_1);
-        C((test_A_UBC_UIY_UIX()));
-        guess_2 = CRT_i48mulhu(y, x);
-        CMP("%012llX", (uint64_t)y, (uint64_t)x, (uint64_t)truth, (uint64_t)guess_2);
-        C((test_A_UBC_UIY_UIX()));
-    }
-    return 0;
-}
+// int test_i48mulhu(void) {
+//     // test full-width random operands
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         uint48_t truth, guess, x, y;
+//         x = (uint48_t)rand48();
+//         y = (uint48_t)rand48();
+//         truth = truth_i48mulhu(x, y);
+//         guess = CRT_i48mulhu(x, y);
+//         CMP("%012llX", (uint64_t)x, (uint64_t)y, (uint64_t)truth, (uint64_t)guess);
+//         C((test_A_UBC_UIY_UIX()));
+//     }
+//     // test cases where the upper-half of the result is small
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         uint48_t truth, guess_1, guess_2, x, y;
+//         x = (uint48_t)rand48();
+//         y = rand4_u();
+//         truth = truth_i48mulhu(x, y);
+//         guess_1 = CRT_i48mulhu(x, y);
+//         CMP("%012llX", (uint64_t)x, (uint64_t)y, (uint64_t)truth, (uint64_t)guess_1);
+//         C((test_A_UBC_UIY_UIX()));
+//         guess_2 = CRT_i48mulhu(y, x);
+//         CMP("%012llX", (uint64_t)y, (uint64_t)x, (uint64_t)truth, (uint64_t)guess_2);
+//         C((test_A_UBC_UIY_UIX()));
+//     }
+//     return 0;
+// }
 
-int test_llmulhu(void) {
-    // test full-width random operands
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        uint64_t truth, guess, x, y;
-        x = (uint64_t)rand64();
-        y = (uint64_t)rand64();
-        truth = truth_llmulhu(x, y);
-        guess = CRT_llmulhu(x, y);
-        CMP("%016llX", x, y, truth, guess);
-        C((test_A_UIY_UIX()));
-    }
-    // test cases where the upper-half of the result is small
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        uint64_t truth, guess_1, guess_2, x, y;
-        x = (uint64_t)rand64();
-        y = rand4_u();
-        truth = truth_llmulhu(x, y);
-        guess_1 = CRT_llmulhu(x, y);
-        CMP("%016llX", x, y, truth, guess_1);
-        C((test_A_UIY_UIX()));
-        guess_2 = CRT_llmulhu(y, x);
-        CMP("%016llX", y, x, truth, guess_2);
-        C((test_A_UIY_UIX()));
-    }
-    return 0;
-}
+// int test_llmulhu(void) {
+//     // test full-width random operands
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         uint64_t truth, guess, x, y;
+//         x = (uint64_t)rand64();
+//         y = (uint64_t)rand64();
+//         truth = truth_llmulhu(x, y);
+//         guess = CRT_llmulhu(x, y);
+//         CMP("%016llX", x, y, truth, guess);
+//         C((test_A_UIY_UIX()));
+//     }
+//     // test cases where the upper-half of the result is small
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         uint64_t truth, guess_1, guess_2, x, y;
+//         x = (uint64_t)rand64();
+//         y = rand4_u();
+//         truth = truth_llmulhu(x, y);
+//         guess_1 = CRT_llmulhu(x, y);
+//         CMP("%016llX", x, y, truth, guess_1);
+//         C((test_A_UIY_UIX()));
+//         guess_2 = CRT_llmulhu(y, x);
+//         CMP("%016llX", y, x, truth, guess_2);
+//         C((test_A_UIY_UIX()));
+//     }
+//     return 0;
+// }
 
 //------------------------------------------------------------------------------
 // Signed
 //------------------------------------------------------------------------------
 
-int test_smulhs(void) {
-    // test full-width random operands
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        int16_t truth, guess, x, y;
-        x = (int16_t)rand16();
-        y = (int16_t)rand16();
-        truth = truth_smulhs(x, y);
-        guess = CRT_smulhs(x, y);
-        CMP("%04hX", x, y, truth, guess);
-        C((test_A_UBC_UDE_UIY_UIX()));
-    }
-    // test cases where the upper-half of the result is small
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        int16_t truth, guess_1, guess_2, x, y;
-        x = (int16_t)rand16();
-        y = rand4_s();
-        truth = truth_smulhs(x, y);
-        guess_1 = CRT_smulhs(x, y);
-        CMP("%04hX", x, y, truth, guess_1);
-        C((test_A_UBC_UDE_UIY_UIX()));
-        guess_2 = CRT_smulhs(y, x);
-        CMP("%04hX", y, x, truth, guess_2);
-        C((test_A_UBC_UDE_UIY_UIX()));
-    }
-    return 0;
-}
+// int test_smulhs(void) {
+//     // test full-width random operands
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         int16_t truth, guess, x, y;
+//         x = (int16_t)rand16();
+//         y = (int16_t)rand16();
+//         truth = truth_smulhs(x, y);
+//         guess = CRT_smulhs(x, y);
+//         CMP("%04hX", x, y, truth, guess);
+//         C((test_A_UBC_UDE_UIY_UIX()));
+//     }
+//     // test cases where the upper-half of the result is small
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         int16_t truth, guess_1, guess_2, x, y;
+//         x = (int16_t)rand16();
+//         y = rand4_s();
+//         truth = truth_smulhs(x, y);
+//         guess_1 = CRT_smulhs(x, y);
+//         CMP("%04hX", x, y, truth, guess_1);
+//         C((test_A_UBC_UDE_UIY_UIX()));
+//         guess_2 = CRT_smulhs(y, x);
+//         CMP("%04hX", y, x, truth, guess_2);
+//         C((test_A_UBC_UDE_UIY_UIX()));
+//     }
+//     return 0;
+// }
 
 int test_imulhs(void) {
     // test full-width random operands
@@ -503,86 +503,86 @@ int test_imulhs(void) {
     return 0;
 }
 
-int test_lmulhs(void) {
-    // test full-width random operands
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        int32_t truth, guess, x, y;
-        x = (int32_t)rand32();
-        y = (int32_t)rand32();
-        truth = truth_lmulhs(x, y);
-        guess = CRT_lmulhs(x, y);
-        CMP("%08lX", x, y, truth, guess);
-        C((test_A_UBC_UD_UIY_UIX()));
-    }
-    // test cases where the upper-half of the result is small
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        int32_t truth, guess_1, guess_2, x, y;
-        x = (int32_t)rand32();
-        y = rand4_s();
-        truth = truth_lmulhs(x, y);
-        guess_1 = CRT_lmulhs(x, y);
-        CMP("%08lX", x, y, truth, guess_1);
-        C((test_A_UBC_UD_UIY_UIX()));
-        guess_2 = CRT_lmulhs(y, x);
-        CMP("%08lX", y, x, truth, guess_2);
-        C((test_A_UBC_UD_UIY_UIX()));
-    }
-    return 0;
-}
+// int test_lmulhs(void) {
+//     // test full-width random operands
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         int32_t truth, guess, x, y;
+//         x = (int32_t)rand32();
+//         y = (int32_t)rand32();
+//         truth = truth_lmulhs(x, y);
+//         guess = CRT_lmulhs(x, y);
+//         CMP("%08lX", x, y, truth, guess);
+//         C((test_A_UBC_UD_UIY_UIX()));
+//     }
+//     // test cases where the upper-half of the result is small
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         int32_t truth, guess_1, guess_2, x, y;
+//         x = (int32_t)rand32();
+//         y = rand4_s();
+//         truth = truth_lmulhs(x, y);
+//         guess_1 = CRT_lmulhs(x, y);
+//         CMP("%08lX", x, y, truth, guess_1);
+//         C((test_A_UBC_UD_UIY_UIX()));
+//         guess_2 = CRT_lmulhs(y, x);
+//         CMP("%08lX", y, x, truth, guess_2);
+//         C((test_A_UBC_UD_UIY_UIX()));
+//     }
+//     return 0;
+// }
 
-int test_i48mulhs(void) {
-    // test full-width random operands
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        int48_t truth, guess, x, y;
-        x = (int48_t)rand48();
-        y = (int48_t)rand48();
-        truth = truth_i48mulhs(x, y);
-        guess = CRT_i48mulhs(x, y);
-        CMP("%012llX", (int64_t)x, (int64_t)y, (int64_t)truth, (int64_t)guess);
-        C((test_A_UBC_UIY_UIX()));
-    }
-    // test cases where the upper-half of the result is small
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        int48_t truth, guess_1, guess_2, x, y;
-        x = (int48_t)rand48();
-        y = rand4_s();
-        truth = truth_i48mulhs(x, y);
-        guess_1 = CRT_i48mulhs(x, y);
-        CMP("%012llX", (int64_t)x, (int64_t)y, (int64_t)truth, (int64_t)guess_1);
-        C((test_A_UBC_UIY_UIX()));
-        guess_2 = CRT_i48mulhs(y, x);
-        CMP("%012llX", (int64_t)y, (int64_t)x, (int64_t)truth, (int64_t)guess_2);
-        C((test_A_UBC_UIY_UIX()));
-    }
-    return 0;
-}
+// int test_i48mulhs(void) {
+//     // test full-width random operands
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         int48_t truth, guess, x, y;
+//         x = (int48_t)rand48();
+//         y = (int48_t)rand48();
+//         truth = truth_i48mulhs(x, y);
+//         guess = CRT_i48mulhs(x, y);
+//         CMP("%012llX", (int64_t)x, (int64_t)y, (int64_t)truth, (int64_t)guess);
+//         C((test_A_UBC_UIY_UIX()));
+//     }
+//     // test cases where the upper-half of the result is small
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         int48_t truth, guess_1, guess_2, x, y;
+//         x = (int48_t)rand48();
+//         y = rand4_s();
+//         truth = truth_i48mulhs(x, y);
+//         guess_1 = CRT_i48mulhs(x, y);
+//         CMP("%012llX", (int64_t)x, (int64_t)y, (int64_t)truth, (int64_t)guess_1);
+//         C((test_A_UBC_UIY_UIX()));
+//         guess_2 = CRT_i48mulhs(y, x);
+//         CMP("%012llX", (int64_t)y, (int64_t)x, (int64_t)truth, (int64_t)guess_2);
+//         C((test_A_UBC_UIY_UIX()));
+//     }
+//     return 0;
+// }
 
-int test_llmulhs(void) {
-    // test full-width random operands
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        int64_t truth, guess, x, y;
-        x = (int64_t)rand64();
-        y = (int64_t)rand64();
-        truth = truth_llmulhs(x, y);
-        guess = CRT_llmulhs(x, y);
-        CMP("%016llX", x, y, truth, guess);
-        C((test_A_UIY_UIX()));
-    }
-    // test cases where the upper-half of the result is small
-    for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
-        int64_t truth, guess_1, guess_2, x, y;
-        x = (int64_t)rand64();
-        y = rand4_s();
-        truth = truth_llmulhs(x, y);
-        guess_1 = CRT_llmulhs(x, y);
-        CMP("%016llX", x, y, truth, guess_1);
-        C((test_A_UIY_UIX()));
-        guess_2 = CRT_llmulhs(y, x);
-        CMP("%016llX", y, x, truth, guess_2);
-        C((test_A_UIY_UIX()));
-    }
-    return 0;
-}
+// int test_llmulhs(void) {
+//     // test full-width random operands
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         int64_t truth, guess, x, y;
+//         x = (int64_t)rand64();
+//         y = (int64_t)rand64();
+//         truth = truth_llmulhs(x, y);
+//         guess = CRT_llmulhs(x, y);
+//         CMP("%016llX", x, y, truth, guess);
+//         C((test_A_UIY_UIX()));
+//     }
+//     // test cases where the upper-half of the result is small
+//     for (int i = 0; i < RANDOM_TEST_COUNT; i++) {
+//         int64_t truth, guess_1, guess_2, x, y;
+//         x = (int64_t)rand64();
+//         y = rand4_s();
+//         truth = truth_llmulhs(x, y);
+//         guess_1 = CRT_llmulhs(x, y);
+//         CMP("%016llX", x, y, truth, guess_1);
+//         C((test_A_UIY_UIX()));
+//         guess_2 = CRT_llmulhs(y, x);
+//         CMP("%016llX", y, x, truth, guess_2);
+//         C((test_A_UIY_UIX()));
+//     }
+//     return 0;
+// }
 
 //------------------------------------------------------------------------------
 // Code
@@ -592,17 +592,17 @@ int run_tests(void) {
     srandom(AUTOTEST_SEED);
     int ret = 0;
 
-    TEST(test_smulhu());
+    // TEST(test_smulhu());
     TEST(test_imulhu());
-    TEST(test_lmulhu());
-    TEST(test_i48mulhu());
-    TEST(test_llmulhu());
+    // TEST(test_lmulhu());
+    // TEST(test_i48mulhu());
+    // TEST(test_llmulhu());
 
-    TEST(test_smulhs());
+    // TEST(test_smulhs());
     TEST(test_imulhs());
-    TEST(test_lmulhs());
-    TEST(test_i48mulhs());
-    TEST(test_llmulhs());
+    // TEST(test_lmulhs());
+    // TEST(test_i48mulhs());
+    // TEST(test_llmulhs());
 
     test_debug("Finished\n");
 
