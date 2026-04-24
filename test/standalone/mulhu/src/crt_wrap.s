@@ -239,140 +239,88 @@ __my_imulhu:
 ;
 ; CC: 118*r(PC)+39*r(SPL)+38*w(SPL)+37
 ; CC: 117 bytes | 118F + 39R + 38W + 37
-
-	; backup af
 	push	af
-	push	ix
-
-	; On stack to get upper byte when needed
-	push	de		; de will also be used to perform the actual multiplication
-	push	hl
+	push	de
 	push	iy
 	push	bc
-
-	ld	ix, 0
-	push	ix		; upper bytes of sum at (ix + 0)
-	add	ix, sp
-
-	; Stack Use:
-	; ix + 14 : deu X[5]
-	; ix + 13 : d   X[4]
-	; ix + 12 : e   X[3]
-	; ix + 11 : hlu X[2]
-	; ix + 10 : h   X[1]
-	; ix + 9  : l   X[0]
-	; ix + 8  : iyu Y[5]
-	; ix + 7  : iyh Y[4]
-	; ix + 6  : iyl Y[3]
-	; ix + 5  : bcu Y[2]
-	; ix + 4  : b   Y[1]
-	; ix + 3  : c   Y[0]
-	; ix + 2  :   sum[5]
-	; ix + 1  :   sum[4]
-	; ix + 0  :   sum[3]
-	; ix - 1  :   sum[2]
-	; ix - 2  :   sum[1]
-	; ix - 3  :   sum[0]
-
-	ld	iy, (ix + 10)	; iy = X[1], X[2]
-	; bc = Y[0], Y[1]
-	ld	a, l		; a = X[0]
-
-	; ======================================================================
-	; sum[0-1]
-
-	; X[0]*Y[0]
-	; l = X[0]
-	ld	h, c		; h = Y[0]
+	push	hl
+	ld	d,l
+	ld	e,c
+	mlt	de
+	ld	a,d
+	ld	d,h
+	ld	e,b
+	ld	b,h
+	ld	h,e
 	mlt	hl
-	push	hl		; lower bytes of sum at (ix - 3)
-
-	; ======================================================================
-	; sum[1-2]
-	ld	l, h		; hl will store current partial sum
-	ld	h, 0
-
-	; X[0]*Y[1]
-	ld	e, a		; e = X[0]
-	ld	d, b		; d = Y[1]
-	mlt	de
-	add	hl, de
-
-	; X[1]*Y[0]
-	ld	e, iyl		; e = X[1]
-	ld	d, c		; d = Y[0]
-	mlt	de
-	add	hl, de
-
-	ld	(ix - 2), hl
-
-	; ======================================================================
-	; sum[2-3]
-	ld	hl, (ix - 1)	; hl will store current partial sum
-
-	; X[2]*Y[0]
-	ld	e, iyh		; e = X[2]
-	ld	d, c		; d = Y[0]
-	mlt	de
-	add	hl, de
-
-	; X[1]*Y[1]
-	ld	e, iyl		; e = X[1]
-	ld	d, b		; d = Y[1]
-	mlt	de
-	add	hl, de
-
-	; X[0]*Y[2]
-	ld	e, a		; e = X[0]
-	ld	d, (ix + 5)	; d = Y[2]
-	ld	c, d		; c = Y[2]
-	mlt	de
-	add	hl, de
-	ld	d, c		; d = Y[2]
-
-	ld	(ix - 1), hl
-
-	; ======================================================================
-	; sum[3-4]
-	ld	hl, (ix + 0)	; hl will store current partial sum
-
-	; X[2]*Y[1]
-	ld	c, iyh		; c = X[2]
-	; b = Y[1]
 	mlt	bc
-	add	hl, bc
-
-	; X[1]*Y[2]
-	ld	e, iyl		; e = X[1]
-	; d = Y[2]
 	mlt	de
-	add	hl, de
+	add	a,c
+	ld	c,a
+	ld	a,b
+	adc	a,0h
+	ld	b,a
+	add.s	hl,bc
+	jr	nc,_L0
+	inc	d
+_L0:
+	ld	iy,0h
+	add	iy,sp
+	ld	b,(iy+2)
+	ld	c,(iy+5)
+	mlt	bc
+	ld	a,h
+	add	a,e
+	ld	e,a
+	jr	nc,_L1
+	inc	d
+	jr	nz,_L1
+	inc	bc
+_L1:
+	ld	h,(iy+2)
+	ld	l,(iy+3)
+	mlt	hl
 
-	ld	(ix + 0), hl
-
-	; ======================================================================
-	; sum[4-5]
-	ld	hl, (ix + 1)	; hl will store current partial sum
-
-	; X[2]*Y[2]
-	ld	e, iyh		; e = X[2]
-	ld	d, (ix + 5)	; d = Y[2]
+	add.s	hl,de
+	jr	nc,_L2
+	inc	bc
+_L2:
+	ld	d,(iy+0)
+	ld	e,(iy+5)
 	mlt	de
-	add	hl, de
-
-	ld	a, l		; ld (ix + 1), l
-	ld	(ix + 2), h
-
-	; clean up stack and restore registers
-	pop	hl		; reset SP
+	add.s	hl,de
+	jr	nc,_L3
+	inc	bc
+_L3:
+	ld	a,h
+	ld	d,(iy+2)
+	ld	e,(iy+4)
+	ld	h,(iy+1)
+	ld	l,(iy+5)
+	mlt	de
+	mlt	hl
+	add.s	hl,de
+	jr	nc,_L4
+	inc	b
+_L4:
+	add	a,l
+	ld	l,a
+	ld	a,h
+	adc	a,c
+	ld	h,a
+	jr	nc,_L5
+	inc	b
+_L5:
+	ex	de,hl
+	push	bc
+	dec	sp
 	pop	hl
-	ld	h, a
+	inc	sp
+	ld	h,d
+	ld	l,e
+	pop	bc
 	pop	bc
 	pop	iy
-
-	pop	de		; reset SP
-	pop	de		; restore DE
-
-	pop	ix
+	pop	de
 	pop	af
 	ret

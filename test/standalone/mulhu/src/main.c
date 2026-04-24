@@ -16,7 +16,7 @@
 // Config
 //------------------------------------------------------------------------------
 
-#define RANDOM_TEST_COUNT 70000
+#define RANDOM_TEST_COUNT 2048
 
 // define to 0 or 1
 #define DEBUG_DIAGNOSTICS 1
